@@ -1,0 +1,8 @@
+.idea
+*.iml
+
+dependency-reduced-pom.xml
+target/
+
+config-dev.yml
+/sdk/
