@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: dito-manager
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/dito_manager_db
+    username: postgres
+    password: 12345
+  liquibase:
+    enabled: true
+    change-log: classpath*:db/changelog.xml
