@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dito
+    username: postgres
+    password: postgres
+
+logging:
+  level:
+    liquibase: debug
+    com:
+      itextpdf:
+        dito:
+          manager: debug
