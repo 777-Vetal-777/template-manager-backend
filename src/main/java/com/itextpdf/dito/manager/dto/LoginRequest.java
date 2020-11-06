@@ -1,4 +1,4 @@
-package com.itext.ditomanager.dto;
+package com.itextpdf.dito.manager.dto;
 
 import lombok.Value;
 

@@ -1,7 +1,7 @@
-package com.itext.ditomanager.controller;
+package com.itextpdf.dito.manager.controller;
 
-import com.itext.ditomanager.dto.JwtResponse;
-import com.itext.ditomanager.dto.LoginRequest;
+import com.itextpdf.dito.manager.dto.JwtResponse;
+import com.itextpdf.dito.manager.dto.LoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
