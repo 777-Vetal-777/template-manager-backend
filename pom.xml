@@ -15,8 +15,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <testcontainers.version>1.14.3</testcontainers.version>
-        <swagger.version>2.9.2</swagger.version>
+        <springdoc.openapi.ui.version>1.4.8</springdoc.openapi.ui.version>
     </properties>
 
     <dependencies>
@@ -59,18 +58,13 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.openapi.ui.version}</version>
         </dependency>
 
         <!--TESTING-->
