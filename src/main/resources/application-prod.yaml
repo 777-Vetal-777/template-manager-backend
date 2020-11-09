@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DITO_MANAGER_DATABASE_URL}/{DITO_MANAGER_DATABASE_NAME}
+    username: ${DITO_MANAGER_DATABASE_USERNAME}
+    password: ${DITO_MANAGER_DATABASE_PASSWORD}
