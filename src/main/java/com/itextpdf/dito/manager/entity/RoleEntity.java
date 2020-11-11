@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.entity;
 
-import lombok.Data;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,8 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "role")
-@Data
-public class Role {
+public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "role_gen")
     @SequenceGenerator(name = "role_gen", sequenceName = "role_seq", allocationSize = 1)
@@ -22,4 +19,20 @@ public class Role {
 
     @Column(name = "name", unique = true)
     private String name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

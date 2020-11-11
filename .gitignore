@@ -6,3 +6,7 @@ target/
 
 config-dev.yml
 /sdk/
+/.classpath
+/.project
+/.settings/
+/.gitignore

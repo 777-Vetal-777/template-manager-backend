@@ -1,9 +1,11 @@
 package com.itextpdf.dito.manager.config;
 
-import com.itextpdf.dito.manager.service.security.JwtAuthorizationFilter;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.itextpdf.dito.manager.component.auth.TokenAuthorizationFilter;
+import com.itextpdf.dito.manager.component.auth.token.impl.JwtManagerImpl;
+import com.itextpdf.dito.manager.controller.login.LoginController;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,37 +16,39 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Spring security configuration.
- */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Log4j2
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    private static final Logger log = LogManager.getLogger(JwtManagerImpl.class);
+
+    private final TokenAuthorizationFilter tokenAuthorizationFilter;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+
+    public WebSecurityConfig(TokenAuthorizationFilter tokenAuthorizationFilter,
+            AuthenticationEntryPoint authenticationEntryPoint,
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        this.tokenAuthorizationFilter = tokenAuthorizationFilter;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     private static final String[] SECURITY_WHITELIST = {
-            // -- swagger ui
+            // swagger and api docs
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
             // auth endpoint
-            "/auth/login"
+            LoginController.BASE_NAME
     };
-
-    @Autowired
-    @Qualifier("userDetailsServiceImpl")
-    private UserDetailsService userDetailsServiceImpl;
-
-
-    @Bean
-    public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter();
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -54,31 +58,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .antMatchers(SECURITY_WHITELIST)
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
+                .permitAll().anyRequest().authenticated().and().exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(tokenAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
         try {
             authenticationManagerBuilder
-                    .userDetailsService(userDetailsServiceImpl)
-                    .passwordEncoder(passwordEncoder());
+                    .userDetailsService(userDetailsService)
+                    .passwordEncoder(passwordEncoder);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
 
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

@@ -1,7 +1,6 @@
-dito-manager:
-  security:
-    jwt-secret: JPLnpUx4KpRy3yU6
-    jwt-expiration-date: 86400
+security:
+  jwt:
+    private-key: JPLnpUx4KpRy3yU6
 
 spring:
   datasource:
@@ -15,11 +14,11 @@ spring:
 
 logging:
   level:
-    liquibase: INFO
+    liquibase: debug
     org:
       springframework:
-        security: DEBUG
+        security: debug
     com:
       itextpdf:
         dito:
-          manager: DEBUG
+          manager: debug

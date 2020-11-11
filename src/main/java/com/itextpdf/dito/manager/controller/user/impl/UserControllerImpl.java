@@ -1,9 +1,9 @@
-package com.itextpdf.dito.manager.controller;
+package com.itextpdf.dito.manager.controller.user.impl;
 
-import com.itextpdf.dito.manager.dto.UserCreateRequest;
-import com.itextpdf.dito.manager.service.UserService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import com.itextpdf.dito.manager.controller.user.UserController;
+import com.itextpdf.dito.manager.dto.user.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.service.user.UserService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,20 +17,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/users")
-@Log4j2
-@RequiredArgsConstructor
-public class UserController {
+public class UserControllerImpl implements UserController {
 
     private final UserService userService;
 
+    public UserControllerImpl(UserService userService) {
+        this.userService = userService;
+    }
+
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody UserCreateRequest userCreateRequest) {
+    public ResponseEntity<?> create(@RequestBody UserCreateRequestDTO userCreateRequest) {
         return new ResponseEntity<>(userService.create(userCreateRequest), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(required = false) String sortBy,
-                                  @RequestParam(required = false) Boolean desc){
+            @RequestParam(required = false) Boolean desc) {
         return ResponseEntity.ok(userService.getAll(sortBy, desc));
     }
 
