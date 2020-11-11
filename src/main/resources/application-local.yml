@@ -8,7 +8,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/dito
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: 12345
+    password: postgres
   liquibase:
     default-schema: manager
     change-log: classpath:db/changelog/db.changelog-master.xml
