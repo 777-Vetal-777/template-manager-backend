@@ -8,7 +8,6 @@ import com.itextpdf.dito.manager.repository.UserRepository;
 import liquibase.util.BooleanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import ma.glasnost.orika.MapperFacade;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,13 +26,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
-    private final MapperFacade mapperFacade;
+    private final ManagerMapper managerMapper;
 
     public User create(UserCreateRequest request) {
         if (userRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
             throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
         }
-        User user = mapperFacade.map(request, User.class);
+        User user = managerMapper.fromRequest(request);
         user.setPassword(encoder.encode(request.getPassword()));
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed

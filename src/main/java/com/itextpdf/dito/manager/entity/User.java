@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "sys_user")
+@Table(name = "user")
 @Data
 public class User implements UserDetails {
     @Id
@@ -47,7 +47,7 @@ public class User implements UserDetails {
     private Boolean active = Boolean.TRUE;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "sys_user_role",
+    @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();

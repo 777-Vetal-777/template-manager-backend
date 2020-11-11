@@ -1,6 +1,6 @@
 dito-manager:
   security:
-    jwt-secret: 'JPLnpUx4KpRy3yU6'
+    jwt-secret: JPLnpUx4KpRy3yU6
     jwt-expiration-date: 86400
 
 spring:
