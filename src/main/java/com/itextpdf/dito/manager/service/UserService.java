@@ -3,16 +3,19 @@ package com.itextpdf.dito.manager.service;
 import com.itextpdf.dito.manager.dto.UserCreateRequest;
 import com.itextpdf.dito.manager.entity.User;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
+import com.itextpdf.dito.manager.repository.RoleRepository;
 import com.itextpdf.dito.manager.repository.UserRepository;
 import liquibase.util.BooleanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.String.format;
 
@@ -22,6 +25,8 @@ import static java.lang.String.format;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
     private final MapperFacade mapperFacade;
 
     public User create(UserCreateRequest request) {
@@ -29,8 +34,10 @@ public class UserService {
             throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
         }
         User user = mapperFacade.map(request, User.class);
+        encoder.encode(request.getPassword());
         //TODO generate temporal password and email log-in link
-        //TODO add roles
+        //TODO implement adding roles when requirements are completed
+        user.setRoles(Set.of(roleRepository.findByName("ROLE_GLOBAL_ADMINISTRATOR").orElseThrow()));
         return userRepository.save(user);
     }
 

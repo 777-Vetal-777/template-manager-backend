@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/auth")
 @Log4j2
@@ -29,10 +31,6 @@ public class AuthController {
     @Autowired
     private JwtProvider jwtProvider;
 
-    @Autowired
-    private PasswordEncoder encoder;
-
-
     /**
      * Check user credentials, generate JWT token and return to client.
      *
@@ -40,7 +38,7 @@ public class AuthController {
      * @return jwt response
      */
     @PostMapping(value = "/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getLogin(), loginRequest.getPassword()));
 

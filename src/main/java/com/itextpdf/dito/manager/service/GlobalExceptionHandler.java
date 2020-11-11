@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(
-                new ErrorResponse("Invalid request parameter",ex.getMessage()), HttpStatus.NOT_FOUND);
+                new ErrorResponse("Invalid request parameter", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
