@@ -1,7 +1,7 @@
 dito-manager:
   security:
-    jwt-secret: ${DITO_MANAGER_JWT_SECRETNAME}
-    jwt-expiration-date: ${DITO_MANAGER_JWT_EXPIRATION}
+    jwt-secret: ${DITO_MANAGER_JWT_PRIVATE_KEY}
+    jwt-expiration-date: ${DITO_MANAGER_JWT_EXPIRATION_TIME}
 
 spring:
   datasource:

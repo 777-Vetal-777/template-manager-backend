@@ -1,4 +1,8 @@
 spring:
+  jpa:
+    properties:
+      hibernate:
+        default_schema: manager
   application:
     name: template-manager
   datasource:

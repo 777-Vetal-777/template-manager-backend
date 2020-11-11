@@ -34,7 +34,7 @@ public class UserService {
             throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
         }
         User user = mapperFacade.map(request, User.class);
-        encoder.encode(request.getPassword());
+        user.setPassword(encoder.encode(request.getPassword()));
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed
         user.setRoles(Set.of(roleRepository.findByName("ROLE_GLOBAL_ADMINISTRATOR").orElseThrow()));

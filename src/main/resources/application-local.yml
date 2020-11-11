@@ -1,6 +1,6 @@
 dito-manager:
   security:
-    jwt-secret: 'secret'
+    jwt-secret: 'JPLnpUx4KpRy3yU6'
     jwt-expiration-date: 86400
 
 spring:
@@ -10,6 +10,7 @@ spring:
     username: postgres
     password: 12345
   liquibase:
+    default-schema: manager
     change-log: classpath:db/changelog/db.changelog-master.xml
 
 logging:
@@ -21,4 +22,4 @@ logging:
     com:
       itextpdf:
         dito:
-          manager: debug
+          manager: DEBUG
