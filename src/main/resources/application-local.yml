@@ -1,12 +1,23 @@
+dito-manager:
+  security:
+    jwt-secret: 'secret'
+    jwt-expiration-date: 86400
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dito
+    driver-class-name: org.postgresql.Driver
     username: postgres
-    password: postgres
+    password: 12345
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
 logging:
   level:
-    liquibase: debug
+    liquibase: INFO
+    org:
+      springframework:
+        security: DEBUG
     com:
       itextpdf:
         dito:

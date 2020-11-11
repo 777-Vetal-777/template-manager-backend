@@ -1,3 +1,8 @@
+dito-manager:
+  security:
+    jwt-secret: ${DITO_MANAGER_JWT_SECRETNAME}
+    jwt-expiration-date: ${DITO_MANAGER_JWT_EXPIRATION}
+
 spring:
   datasource:
     url: jdbc:postgresql://${DITO_MANAGER_DATABASE_URL}/{DITO_MANAGER_DATABASE_NAME}
