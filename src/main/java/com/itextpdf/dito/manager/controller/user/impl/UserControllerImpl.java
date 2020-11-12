@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/users")
 public class UserControllerImpl implements UserController {
 
     private final UserService userService;
@@ -25,20 +24,20 @@ public class UserControllerImpl implements UserController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody UserCreateRequestDTO userCreateRequest) {
+    @Override
+    public ResponseEntity<?> create(final @RequestBody UserCreateRequestDTO userCreateRequest) {
         return new ResponseEntity<>(userService.create(userCreateRequest), HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<?> list(@RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) Boolean desc) {
-        return ResponseEntity.ok(userService.getAll(sortBy, desc));
+    @Override
+    public ResponseEntity<?> list(final @RequestParam(required = false) String sortBy,
+                                  @RequestParam(required = false) Boolean desc) {
+        return new ResponseEntity<>(userService.getAll(sortBy, desc), HttpStatus.OK);
     }
 
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+    @Override
+    public ResponseEntity<?> delete(final @PathVariable("id") Long id) {
         userService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }

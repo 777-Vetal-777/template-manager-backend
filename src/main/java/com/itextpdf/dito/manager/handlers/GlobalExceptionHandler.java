@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> userNotFoundErrorHandler(
-            IllegalArgumentException ex) {
+            final IllegalArgumentException ex) {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> emptyParamsValidationErrorHandler(
-            MethodArgumentNotValidException ex) {
+            final MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
         String errorMsg =
                 ex.getBindingResult().getFieldErrors().stream()

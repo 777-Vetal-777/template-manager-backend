@@ -27,7 +27,7 @@ public class JwtManagerImpl implements TokenManager {
     private int timeToLive;
 
     @Override
-    public String generate(Authentication authentication) {
+    public String generate(final Authentication authentication) {
         UserEntity principal = (UserEntity) authentication.getPrincipal();
 
         return Jwts.builder()
@@ -39,7 +39,7 @@ public class JwtManagerImpl implements TokenManager {
     }
 
     @Override
-    public boolean validate(String authToken) {
+    public boolean validate(final String authToken) {
         boolean result = false;
 
         try {
@@ -61,7 +61,7 @@ public class JwtManagerImpl implements TokenManager {
     }
 
     @Override
-    public String getSubject(String token) {
+    public String getSubject(final String token) {
         return Jwts.parser()
                 .setSigningKey(privateKey)
                 .parseClaimsJws(token)

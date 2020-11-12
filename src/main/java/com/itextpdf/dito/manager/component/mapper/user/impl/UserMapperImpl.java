@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public UserEntity map(UserCreateRequestDTO request) {
+    public UserEntity map(final UserCreateRequestDTO request) {
     	final UserEntity result = new UserEntity();
     	
     	result.setEmail(request.getEmail());

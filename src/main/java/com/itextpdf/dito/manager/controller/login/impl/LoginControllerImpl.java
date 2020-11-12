@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.login.LoginRequestDTO;
 import com.itextpdf.dito.manager.dto.login.LoginResponseDTO;
 
 import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,19 +22,19 @@ public class LoginControllerImpl implements LoginController {
     private final JwtManagerImpl jwtProvider;
 
     public LoginControllerImpl(AuthenticationManager authenticationManager,
-            JwtManagerImpl jwtProvider) {
+                               JwtManagerImpl jwtProvider) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
     }
 
-    public ResponseEntity<LoginResponseDTO> login(@Valid LoginRequestDTO loginRequest) {
+    public ResponseEntity<LoginResponseDTO> login(final @Valid LoginRequestDTO loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getLogin(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtProvider.generate(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        final String jwt = jwtProvider.generate(authentication);
+        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         return new ResponseEntity<>(new LoginResponseDTO(jwt, userDetails.getUsername(), userDetails.getAuthorities()),
                 HttpStatus.OK);

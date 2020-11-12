@@ -84,7 +84,7 @@
         <insert
                 tableName="role">
             <column name="id" value="1"/>
-            <column name="name" value="ROLE_GLOBAL_ADMINISTRATOR"/>
+            <column name="name" value="GLOBAL_ADMINISTRATOR"/>
         </insert>
         <insert
                 tableName="user">
@@ -92,7 +92,7 @@
             <column name="email" value="admin@email.com"/>
             <column name="first_name" value="admin"/>
             <column name="last_name" value="admin"/>
-            <column name="password" value="$2a$10$5vRIMV8mGQzGMGWY9dLtCu/Vpv1jUF.7jH4KTYoa6xn8i0axufT/G"/>
+            <column name="password" value="$2a$10$cR5JkFPGtqvCgQZHGRnWAOVA0sY8F8igTiDAV27DEQ.avWpWiNNti"/>
             <column name="active" value="true"/>
         </insert>
         <insert

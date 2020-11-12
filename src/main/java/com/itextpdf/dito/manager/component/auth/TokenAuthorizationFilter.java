@@ -33,16 +33,16 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(final HttpServletRequest request,
+                                    final HttpServletResponse response,
+                                    final FilterChain filterChain) throws ServletException, IOException {
         try {
-            String token = retrieveToken(request);
+            final String token = retrieveToken(request);
             if (!StringUtils.isEmpty(token) && tokenManager.validate(token)) {
-                String username = tokenManager.getSubject(token);
+                final String username = tokenManager.getSubject(token);
 
-                if (username != null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (!StringUtils.isEmpty(username)) {
+                    final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -55,10 +55,10 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String retrieveToken(HttpServletRequest request) {
+    private String retrieveToken(final HttpServletRequest request) {
         String result = null;
 
-        String authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
         if (!StringUtils.isEmpty(authHeader) && authHeader.startsWith("Bearer ")) {
             result = authHeader.replace("Bearer ", "");
         } else {
