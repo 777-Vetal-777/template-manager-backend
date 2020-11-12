@@ -26,16 +26,16 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
     private final TokenManager tokenManager;
     private final UserDetailsService userDetailsService;
 
-    public TokenAuthorizationFilter(TokenManager tokenManager,
-            UserDetailsService userDetailsService) {
+    public TokenAuthorizationFilter(final TokenManager tokenManager,
+            final UserDetailsService userDetailsService) {
         this.tokenManager = tokenManager;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request,
-                                    final HttpServletResponse response,
-                                    final FilterChain filterChain) throws ServletException, IOException {
+            final HttpServletResponse response,
+            final FilterChain filterChain) throws ServletException, IOException {
         try {
             final String token = retrieveToken(request);
             if (!StringUtils.isEmpty(token) && tokenManager.validate(token)) {
@@ -43,7 +43,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
 
                 if (!StringUtils.isEmpty(username)) {
                     final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    final UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);

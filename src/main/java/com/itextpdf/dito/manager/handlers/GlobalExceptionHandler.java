@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> emptyParamsValidationErrorHandler(
             final MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
-        String errorMsg =
+        final String errorMsg =
                 ex.getBindingResult().getFieldErrors().stream()
                         .map(DefaultMessageSourceResolvable::getDefaultMessage)
                         .findFirst()

@@ -10,13 +10,11 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.Set;
-
 import liquibase.util.BooleanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 import static java.lang.String.format;
 
 @Service
@@ -26,9 +24,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder encoder;
     private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository,
-                           RoleRepository roleRepository, PasswordEncoder encoder,
-                           UserMapper userMapper) {
+    public UserServiceImpl(final UserRepository userRepository,
+            final RoleRepository roleRepository, final PasswordEncoder encoder,
+            final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
@@ -49,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
     public List<UserEntity> getAll(final String sortBy, final Boolean desc) {
         List<UserEntity> result;
-        Sort.Direction direction = BooleanUtils.isTrue(desc)
+        final Sort.Direction direction = BooleanUtils.isTrue(desc)
                 ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
         if (!StringUtils.isEmpty(sortBy)) {

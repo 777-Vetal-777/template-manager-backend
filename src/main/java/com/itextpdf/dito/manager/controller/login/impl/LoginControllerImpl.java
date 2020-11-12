@@ -21,14 +21,14 @@ public class LoginControllerImpl implements LoginController {
     private final AuthenticationManager authenticationManager;
     private final JwtManagerImpl jwtProvider;
 
-    public LoginControllerImpl(AuthenticationManager authenticationManager,
-                               JwtManagerImpl jwtProvider) {
+    public LoginControllerImpl(final AuthenticationManager authenticationManager,
+            final JwtManagerImpl jwtProvider) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
     }
 
     public ResponseEntity<LoginResponseDTO> login(final @Valid LoginRequestDTO loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
+        final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getLogin(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

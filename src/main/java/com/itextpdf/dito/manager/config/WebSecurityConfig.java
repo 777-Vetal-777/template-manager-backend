@@ -31,10 +31,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-    public WebSecurityConfig(TokenAuthorizationFilter tokenAuthorizationFilter,
-            AuthenticationEntryPoint authenticationEntryPoint,
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
+    public WebSecurityConfig(final TokenAuthorizationFilter tokenAuthorizationFilter,
+            final AuthenticationEntryPoint authenticationEntryPoint,
+            final UserDetailsService userDetailsService,
+            final PasswordEncoder passwordEncoder) {
         this.tokenAuthorizationFilter = tokenAuthorizationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.userDetailsService = userDetailsService;
@@ -51,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
         http.cors()
                 .and()
                 .csrf()
@@ -65,7 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
+    protected void configure(final AuthenticationManagerBuilder authenticationManagerBuilder) {
         try {
             authenticationManagerBuilder
                     .userDetailsService(userDetailsService)

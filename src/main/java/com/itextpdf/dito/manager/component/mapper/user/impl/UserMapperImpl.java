@@ -11,13 +11,13 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public UserEntity map(final UserCreateRequestDTO request) {
-    	final UserEntity result = new UserEntity();
-    	
-    	result.setEmail(request.getEmail());
-    	result.setPassword(request.getPassword());
-    	result.setFirstName(request.getFirstName());
-    	result.setLastName(request.getLastName());
-    	
+        final UserEntity result = new UserEntity();
+
+        result.setEmail(request.getEmail());
+        result.setPassword(request.getPassword());
+        result.setFirstName(request.getFirstName());
+        result.setLastName(request.getLastName());
+
         return result;
     }
 }

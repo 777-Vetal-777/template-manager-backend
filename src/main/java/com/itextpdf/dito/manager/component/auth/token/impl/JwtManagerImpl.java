@@ -28,7 +28,7 @@ public class JwtManagerImpl implements TokenManager {
 
     @Override
     public String generate(final Authentication authentication) {
-        UserEntity principal = (UserEntity) authentication.getPrincipal();
+        final UserEntity principal = (UserEntity) authentication.getPrincipal();
 
         return Jwts.builder()
                 .setSubject((principal.getEmail()))
