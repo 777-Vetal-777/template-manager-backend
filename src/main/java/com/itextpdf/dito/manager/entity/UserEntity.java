@@ -27,23 +27,14 @@ public class UserEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "user_gen")
     @SequenceGenerator(name = "user_gen", sequenceName = "user_seq", allocationSize = 1)
-    @Column(name = "id", unique = true)
     private Long id;
-
-    @Column(name = "email", unique = true)
     private String email;
-
-    @Column(name = "password")
     private String password;
-
     @Column(name = "first_name")
     private String firstName;
-
     @Column(name = "last_name")
     private String lastName;
-
-    @Column(name = "active")
-    private Boolean active = Boolean.TRUE;
+    private Boolean active;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -83,6 +74,11 @@ public class UserEntity implements UserDetails {
         return active;
     }
 
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
     public Long getId() {
         return id;
     }
@@ -97,11 +93,6 @@ public class UserEntity implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
     }
 
     public void setPassword(String password) {
