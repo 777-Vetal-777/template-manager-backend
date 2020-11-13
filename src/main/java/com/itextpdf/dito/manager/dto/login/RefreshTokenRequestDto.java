@@ -1,14 +1,13 @@
 package com.itextpdf.dito.manager.dto.login;
 
-public class LoginResponseDTO extends AccessTokenResponseDTO {
+public class RefreshTokenRequestDto {
     private String refreshToken;
 
-    public LoginResponseDTO(String accessToken, String refreshToken) {
-        super(accessToken);
+    public RefreshTokenRequestDto(String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
-    public LoginResponseDTO() {
+    public RefreshTokenRequestDto() {
     }
 
     public String getRefreshToken() {

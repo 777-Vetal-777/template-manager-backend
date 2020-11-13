@@ -32,9 +32,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final PasswordEncoder passwordEncoder;
 
     public WebSecurityConfig(final TokenAuthorizationFilter tokenAuthorizationFilter,
-            final AuthenticationEntryPoint authenticationEntryPoint,
-            final UserDetailsService userDetailsService,
-            final PasswordEncoder passwordEncoder) {
+                             final AuthenticationEntryPoint authenticationEntryPoint,
+                             final UserDetailsService userDetailsService,
+                             final PasswordEncoder passwordEncoder) {
         this.tokenAuthorizationFilter = tokenAuthorizationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.userDetailsService = userDetailsService;
@@ -47,7 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/swagger-ui/**",
             "/swagger-ui.html",
             // auth endpoint
-            LoginController.BASE_NAME
+            LoginController.BASE_NAME + "/**"
     };
 
     @Override
@@ -58,7 +58,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .antMatchers(SECURITY_WHITELIST)
-                .permitAll().anyRequest().authenticated().and().exceptionHandling()
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(tokenAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);

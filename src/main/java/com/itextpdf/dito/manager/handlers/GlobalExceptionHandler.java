@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +24,12 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> invalidRefreshToken(final InvalidRefreshTokenException ex) {
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Invalid refresh token", ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -16,4 +16,5 @@ server:
 
 security:
   jwt:
-    time-to-live: 86400
+    access-token.time-to-live: 1800
+    refresh-token.time-to-live: 86400
