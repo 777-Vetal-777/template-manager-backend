@@ -12,7 +12,7 @@ import javax.persistence.Table;
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "role_gen")
-    @SequenceGenerator(name = "role_gen", sequenceName = "role_seq", allocationSize = 1)
+    @SequenceGenerator(name = "role_gen", sequenceName = "role_sequence", allocationSize = 1)
     private Long id;
     private String name;
 

@@ -112,9 +112,9 @@ public class JwtManagerImpl implements TokenManager {
         claims.put("authorities", commaSeparatedListOfAuthorities);
 
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject((principal.getEmail()))
                 .setIssuedAt(new Date())
-                .setClaims(claims)
                 .setExpiration(new Date((new Date()).getTime() + accessTokenTime * 1000))
                 .signWith(SignatureAlgorithm.HS512, privateKey)
                 .compact();

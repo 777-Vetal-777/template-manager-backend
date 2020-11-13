@@ -26,7 +26,7 @@ public class UserEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "user_gen")
-    @SequenceGenerator(name = "user_gen", sequenceName = "user_seq", allocationSize = 1)
+    @SequenceGenerator(name = "user_gen", sequenceName = "user_sequence", allocationSize = 1)
     private Long id;
     private String email;
     private String password;
@@ -34,7 +34,7 @@ public class UserEntity implements UserDetails {
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
-    private Boolean active;
+    private Boolean active = Boolean.TRUE;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",

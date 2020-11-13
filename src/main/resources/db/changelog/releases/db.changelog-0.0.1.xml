@@ -45,7 +45,7 @@
     </changeSet>
 
     <changeSet id="004-create-user-id-sequence" author="Ivan_Semenov">
-        <createSequence sequenceName="user_sequence"/>
+        <createSequence sequenceName="user_sequence" startValue="2"/>
     </changeSet>
 
     <changeSet id="005-create-role-id-sequence" author="Ivan_Semenov">
