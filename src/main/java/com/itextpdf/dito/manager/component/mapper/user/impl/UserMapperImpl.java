@@ -1,7 +1,8 @@
 package com.itextpdf.dito.manager.component.mapper.user.impl;
 
+
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
-import com.itextpdf.dito.manager.dto.user.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import org.springframework.stereotype.Component;

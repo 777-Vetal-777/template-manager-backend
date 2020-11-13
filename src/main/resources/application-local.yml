@@ -1,16 +1,14 @@
 security:
   jwt:
-    private-key: JPLnpUx4KpRy3yU6
+    private-key: pEBNLmtEX657LTgwgTR624GLy5qES3bH
+    access-token.time-to-live: 1800
+    refresh-token.time-to-live: 86400
 
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dito
-    driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
-  liquibase:
-    default-schema: manager
-    change-log: classpath:db/changelog/db.changelog-master.xml
 
 logging:
   level:

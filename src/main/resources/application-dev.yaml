@@ -1,0 +1,18 @@
+security:
+  jwt:
+    private-key: Yhp7KtfZQ4Lp3LN25bFq7dH3LK6EhbN8
+    access-token.time-to-live: 1800
+    refresh-token.time-to-live: 86400
+
+spring:
+  datasource:
+    url: jdbc:postgresql://<host>:<port>/dito
+    username: <username>
+    password: <password>
+
+logging:
+  level:
+    com:
+      itextpdf:
+        dito:
+          manager: debug

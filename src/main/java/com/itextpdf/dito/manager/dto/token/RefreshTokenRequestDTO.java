@@ -1,13 +1,16 @@
-package com.itextpdf.dito.manager.dto.login;
+package com.itextpdf.dito.manager.dto.token;
 
-public class RefreshTokenRequestDto {
+import javax.validation.constraints.NotBlank;
+
+public class RefreshTokenRequestDTO {
+    @NotBlank
     private String refreshToken;
 
-    public RefreshTokenRequestDto(String refreshToken) {
+    public RefreshTokenRequestDTO(String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
-    public RefreshTokenRequestDto() {
+    public RefreshTokenRequestDTO() {
     }
 
     public String getRefreshToken() {

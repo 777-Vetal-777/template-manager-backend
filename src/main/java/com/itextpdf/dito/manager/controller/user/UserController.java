@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.user;
 
-import com.itextpdf.dito.manager.dto.user.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,12 +18,12 @@ public interface UserController {
     String BASE_NAME = MAJOR_VERSION + "/users";
 
     @PostMapping
-    public ResponseEntity<?> create(final @RequestBody UserCreateRequestDTO userCreateRequest);
+    ResponseEntity<UserCreateResponseDTO> create(final @RequestBody UserCreateRequestDTO userCreateRequest);
 
     @GetMapping
-    public ResponseEntity<?> list(final @RequestParam(required = false) String sortBy,
+    ResponseEntity<?> list(final @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) Boolean desc);
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(final @PathVariable("id") Long id);
+    @DeleteMapping("/{id}")
+    ResponseEntity<?> delete(final @PathVariable("id") Long id);
 }

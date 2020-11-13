@@ -8,13 +8,9 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
   liquibase:
+    default-schema: manager
     change-log: classpath:db/changelog/db.changelog-master.xml
 
 server:
   servlet:
     context-path: /api
-
-security:
-  jwt:
-    access-token.time-to-live: 1800
-    refresh-token.time-to-live: 86400

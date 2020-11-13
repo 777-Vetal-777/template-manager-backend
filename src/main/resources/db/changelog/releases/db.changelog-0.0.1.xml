@@ -45,6 +45,7 @@
     </changeSet>
 
     <changeSet id="004-create-user-id-sequence" author="Ivan_Semenov">
+        <!-- It starts from 2 because the first id is reserved for global administrator. -->
         <createSequence sequenceName="user_sequence" startValue="2"/>
     </changeSet>
 

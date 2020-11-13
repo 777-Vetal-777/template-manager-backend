@@ -10,6 +10,7 @@ class TemplateManagerApplicationTest {
 
     @Test
     void contextLoads() {
+
     }
 
 }

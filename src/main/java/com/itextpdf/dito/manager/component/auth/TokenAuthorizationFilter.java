@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.component.auth;
 
-import com.itextpdf.dito.manager.component.auth.token.TokenManager;
-import com.itextpdf.dito.manager.component.auth.token.impl.JwtManagerImpl;
+import com.itextpdf.dito.manager.component.auth.token.extractor.TokenExtractor;
+import com.itextpdf.dito.manager.component.auth.token.helper.TokenHelper;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -21,50 +21,40 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class TokenAuthorizationFilter extends OncePerRequestFilter {
-    private static final Logger log = LogManager.getLogger(JwtManagerImpl.class);
+    private static final Logger log = LogManager.getLogger(TokenAuthorizationFilter.class);
 
-    private final TokenManager tokenManager;
+    private final TokenExtractor tokenExtractor;
+    private final TokenHelper tokenManager;
     private final UserDetailsService userDetailsService;
 
-    public TokenAuthorizationFilter(final TokenManager tokenManager,
+    public TokenAuthorizationFilter(final TokenExtractor tokenExtractor,
+            final TokenHelper tokenManager,
             final UserDetailsService userDetailsService) {
+        this.tokenExtractor = tokenExtractor;
         this.tokenManager = tokenManager;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
-    protected void doFilterInternal(final HttpServletRequest request,
-            final HttpServletResponse response,
+    protected void doFilterInternal(final HttpServletRequest httpServletRequest,
+            final HttpServletResponse httpServletResponse,
             final FilterChain filterChain) throws ServletException, IOException {
         try {
-            final String token = retrieveToken(request);
-            if (!StringUtils.isEmpty(token) && tokenManager.validate(token)) {
+            final String token = tokenExtractor.extract(httpServletRequest);
+            if (!StringUtils.isEmpty(token) && tokenManager.isValid(token)) {
                 final String username = tokenManager.getSubject(token);
 
                 if (!StringUtils.isEmpty(username)) {
                     final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     final UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
             }
         } catch (Exception ex) {
             log.error("Unable to set user authentication -> ", ex);
         }
-        filterChain.doFilter(request, response);
-    }
-
-    private String retrieveToken(final HttpServletRequest request) {
-        String result = null;
-
-        final String authHeader = request.getHeader("Authorization");
-        if (!StringUtils.isEmpty(authHeader) && authHeader.startsWith("Bearer ")) {
-            result = authHeader.replace("Bearer ", "");
-        } else {
-            log.error("Incorrect token format: token must not be NULL and should start with 'Bearer '");
-        }
-
-        return result;
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 }

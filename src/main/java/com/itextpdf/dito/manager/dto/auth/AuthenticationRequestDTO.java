@@ -1,14 +1,14 @@
-package com.itextpdf.dito.manager.dto.login;
+package com.itextpdf.dito.manager.dto.auth;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
-public class LoginRequestDTO {
-    @NotNull
+public class AuthenticationRequestDTO {
+    @NotBlank
     private String login;
-    @NotNull
+    @NotBlank
     private String password;
 
-    public LoginRequestDTO(@NotNull String login, @NotNull String password) {
+    public AuthenticationRequestDTO(String login, String password) {
         this.login = login;
         this.password = password;
     }

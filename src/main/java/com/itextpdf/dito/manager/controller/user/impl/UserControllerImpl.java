@@ -1,9 +1,13 @@
 package com.itextpdf.dito.manager.controller.user.impl;
 
 import com.itextpdf.dito.manager.controller.user.UserController;
-import com.itextpdf.dito.manager.dto.user.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
+import com.itextpdf.dito.manager.dto.user.list.UserListResponseDTO;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.service.user.UserService;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,19 +22,21 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<?> create(final UserCreateRequestDTO userCreateRequest) {
-        return new ResponseEntity<>(userService.create(userCreateRequest), HttpStatus.CREATED);
+    public ResponseEntity<UserCreateResponseDTO> create(final UserCreateRequestDTO userCreateRequest) {
+        final UserEntity userEntity = userService.create(userCreateRequest);
+        return new ResponseEntity<>(new UserCreateResponseDTO(userEntity), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<?> list(final String sortBy,
+    public ResponseEntity<UserListResponseDTO> list(final String sortBy,
             Boolean desc) {
-        return new ResponseEntity<>(userService.getAll(sortBy, desc), HttpStatus.OK);
+        final List<UserEntity> userEntities = userService.getAll(sortBy, desc);
+        return new ResponseEntity<>(new UserListResponseDTO(userEntities), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<?> delete(final Long id) {
+    public ResponseEntity<Long> delete(final Long id) {
         userService.delete(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(id, HttpStatus.OK);
     }
 }

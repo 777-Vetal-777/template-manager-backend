@@ -1,23 +1,18 @@
-package com.itextpdf.dito.manager.dto.user;
+package com.itextpdf.dito.manager.dto.user.create;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 
 public class UserCreateRequestDTO {
-    @NotNull
-    @NotEmpty
+    @NotBlank
     @Pattern(regexp = "[A-Za-z0-9._%-+]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}")
     String email;
-    @NotNull
-    @NotEmpty
+    @NotBlank
     String password;
-    @NotNull
-    @NotEmpty
+    @NotBlank
     String firstName;
-    @NotNull
-    @NotEmpty
+    @NotBlank
     String lastName;
 
     public String getEmail() {

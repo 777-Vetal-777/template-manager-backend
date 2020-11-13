@@ -1,8 +1,9 @@
 package com.itextpdf.dito.manager.config;
 
 import com.itextpdf.dito.manager.component.auth.TokenAuthorizationFilter;
-import com.itextpdf.dito.manager.component.auth.token.impl.JwtManagerImpl;
-import com.itextpdf.dito.manager.controller.login.LoginController;
+import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtHelper;
+import com.itextpdf.dito.manager.controller.login.AuthenticationController;
+import com.itextpdf.dito.manager.controller.token.TokenController;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final Logger log = LogManager.getLogger(JwtManagerImpl.class);
+    private static final Logger log = LogManager.getLogger(JwtHelper.class);
 
     private final TokenAuthorizationFilter tokenAuthorizationFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
@@ -47,7 +48,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/swagger-ui/**",
             "/swagger-ui.html",
             // auth endpoint
-            LoginController.BASE_NAME + "/**"
+            AuthenticationController.BASE_NAME,
+            TokenController.BASE_NAME + TokenController.REFRESH_ENDPOINT
     };
 
     @Override
