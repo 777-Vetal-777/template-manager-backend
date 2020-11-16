@@ -10,20 +10,24 @@ import org.springframework.stereotype.Component;
 public class WorkspaceMapperImpl implements WorkspaceMapper {
     @Override
     public WorkspaceEntity map(final WorkspaceCreateRequestDTO dto) {
-        final WorkspaceEntity entity = new WorkspaceEntity();
-        entity.setLanguage(dto.getLanguage());
-        entity.setName(dto.getName());
-        entity.setTimezone(dto.getTimezone());
-        return entity;
+        final WorkspaceEntity result = new WorkspaceEntity();
+
+        result.setLanguage(dto.getLanguage());
+        result.setName(dto.getName());
+        result.setTimezone(dto.getTimezone());
+
+        return result;
     }
 
     @Override
     public WorkspaceCreateResponseDTO map(final WorkspaceEntity entity) {
-        final WorkspaceCreateResponseDTO response = new WorkspaceCreateResponseDTO();
-        response.setId(entity.getId());
-        response.setLanguage(entity.getLanguage());
-        response.setTimezone(entity.getTimezone());
-        response.setName(entity.getName());
-        return response;
+        final WorkspaceCreateResponseDTO result = new WorkspaceCreateResponseDTO();
+
+        result.setId(entity.getId());
+        result.setLanguage(entity.getLanguage());
+        result.setTimezone(entity.getTimezone());
+        result.setName(entity.getName());
+
+        return result;
     }
 }

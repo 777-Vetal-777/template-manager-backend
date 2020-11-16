@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(TokenController.BASE_NAME)
 public interface TokenController {
     String MAJOR_VERSION = "/v1";
-    String BASE_NAME = MAJOR_VERSION + "/token";
+    String BASE_NAME = MAJOR_VERSION + "/tokens";
     String REFRESH_ENDPOINT = "/refresh";
 
     @PostMapping(REFRESH_ENDPOINT)

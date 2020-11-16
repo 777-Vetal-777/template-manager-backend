@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(WorkspaceController.BASE_NAME)
 public interface WorkspaceController {
     String MAJOR_VERSION = "/v1";
-    String BASE_NAME = MAJOR_VERSION + "/workspace";
+    String BASE_NAME = MAJOR_VERSION + "/workspaces";
 
     @PostMapping
     ResponseEntity<WorkspaceCreateResponseDTO> create(final @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);

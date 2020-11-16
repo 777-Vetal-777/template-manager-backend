@@ -4,5 +4,5 @@ import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 public interface UserMapper {
-    UserEntity map(UserCreateRequestDTO request);
+    UserEntity map(UserCreateRequestDTO dto);
 }
