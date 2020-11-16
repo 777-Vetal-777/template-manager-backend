@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
-public class JwtExtractor implements TokenExtractor {
-    private static final Logger log = LogManager.getLogger(JwtExtractor.class);
+public class HttpJwtExtractor implements TokenExtractor {
+    private static final Logger log = LogManager.getLogger(HttpJwtExtractor.class);
 
     @Override
     public String extract(final HttpServletRequest httpServletRequest) {

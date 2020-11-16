@@ -1,3 +1,14 @@
+security:
+  jwt:
+    id-alias: type
+    private-key: pEBNLmtEX657LTgwgTR624GLy5qES3bH
+    access-token:
+      id: access
+      time-to-live: 1800
+    refresh-token:
+      id: refresh
+      time-to-live: 86400
+
 spring:
   jpa:
     properties:

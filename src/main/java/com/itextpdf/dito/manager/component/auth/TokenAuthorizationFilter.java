@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.component.auth;
 
 import com.itextpdf.dito.manager.component.auth.token.extractor.TokenExtractor;
 import com.itextpdf.dito.manager.component.auth.token.helper.TokenHelper;
+import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtAccessTokenHelper;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +30,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     public TokenAuthorizationFilter(final TokenExtractor tokenExtractor,
-            final TokenHelper tokenManager,
+            final @Qualifier(JwtAccessTokenHelper.BEAN_ID) TokenHelper tokenManager,
             final UserDetailsService userDetailsService) {
         this.tokenExtractor = tokenExtractor;
         this.tokenManager = tokenManager;

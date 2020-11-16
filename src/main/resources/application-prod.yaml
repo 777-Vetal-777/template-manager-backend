@@ -1,8 +1,10 @@
 security:
   jwt:
     private-key: ${DITO_MANAGER_JWT_PRIVATE_KEY}
-    access-token.time-to-live: ${DITO_MANAGER_JWT_ACCESS_TOKEN_EXPIRATION_TIME}
-    refresh-token.time-to-live: ${DITO_MANAGER_JWT_REFRESH_TOKEN_EXPIRATION_TIME}
+    access-token:
+      time-to-live: ${DITO_MANAGER_ACCESS_TOKEN_TIME_TO_LIVE}
+    refresh-token:
+      time-to-live: ${DITO_MANAGER_REFRESH_TOKEN_TIME_TO_LIVE}
 
 spring:
   datasource:

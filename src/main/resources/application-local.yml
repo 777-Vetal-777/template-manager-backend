@@ -1,9 +1,3 @@
-security:
-  jwt:
-    private-key: pEBNLmtEX657LTgwgTR624GLy5qES3bH
-    access-token.time-to-live: 1800
-    refresh-token.time-to-live: 86400
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dito
