@@ -81,8 +81,10 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="language" type="varchar(3)"/>
-            <column name="timezone" type="varchar(50)"/>
+            <column name="language" type="varchar(3)" defaultValue="ENG"/>
+            <column name="timezone" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
