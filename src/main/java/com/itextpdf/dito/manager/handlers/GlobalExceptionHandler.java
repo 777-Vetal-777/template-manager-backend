@@ -13,6 +13,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.TimeZone;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
@@ -21,6 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> userNotFoundErrorHandler(
             final IllegalArgumentException ex) {
         log.error(ex.getMessage());
+
 
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.NOT_FOUND);
