@@ -60,7 +60,9 @@ public class UserServiceImpl implements UserService {
         } else {
             result = userRepository.findAllByActiveTrue();
         }
-        return new UserListResponseDTO(result.stream().map(e->userMapper.map(e)).collect(Collectors.toList()));
+        return new UserListResponseDTO(result.stream()
+                .map(userMapper::map)
+                .collect(Collectors.toList()));
     }
 
     public void delete(final Long id) {

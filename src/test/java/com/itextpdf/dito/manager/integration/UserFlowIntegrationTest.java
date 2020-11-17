@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration;
 
+import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -32,7 +33,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testCreateUser() throws Exception {
         UserCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-create-request.json"), UserCreateRequestDTO.class);
-        mockMvc.perform(post("/v1/users")
+        mockMvc.perform(post(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -47,7 +48,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testGetAll() throws Exception {
-        mockMvc.perform(get("/v1/users")
+        mockMvc.perform(get(UserController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -63,7 +64,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userEntity.setActive(Boolean.TRUE);
 
         userRepository.save(userEntity);
-        mockMvc.perform(delete("/v1/users/2"))
+        mockMvc.perform(delete(UserController.BASE_NAME + "/2"))
                 .andExpect(status().isOk());
         UserEntity user = userRepository.findByEmail("test@email.com").orElseThrow();
         assertFalse(user.getActive());

@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration;
 
+import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testCreateWorkspace() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"), WorkspaceCreateRequestDTO.class);
-        mockMvc.perform(post("/v1/workspaces")
+        mockMvc.perform(post(WorkspaceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
