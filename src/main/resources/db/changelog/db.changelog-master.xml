@@ -5,7 +5,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <property name="schema" value="manager"/>
+    <!-- The properties below are used in order to prevent default mapping BLOB to OID in case of PostgreSQL. -->
+    <property name="blob" value="bytea" dbms="postgresql"/>
+    <property name="blob" value="blob" dbms="all"/>
 
     <include file="releases/db.changelog-0.0.1.xml" relativeToChangelogFile="true"/>
 

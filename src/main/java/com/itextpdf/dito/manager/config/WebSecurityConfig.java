@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.config;
 
 import com.itextpdf.dito.manager.component.auth.TokenAuthorizationFilter;
-import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtAccessTokenHelper;
 import com.itextpdf.dito.manager.controller.login.AuthenticationController;
 import com.itextpdf.dito.manager.controller.token.TokenController;
 
@@ -25,7 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final Logger log = LogManager.getLogger(JwtAccessTokenHelper.class);
+    private static final Logger log = LogManager.getLogger(WebSecurityConfig.class);
 
     private final TokenAuthorizationFilter tokenAuthorizationFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
