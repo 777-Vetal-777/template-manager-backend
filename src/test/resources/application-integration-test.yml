@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    platform: h2
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:dito;init=create schema if not exists MANAGER
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+  liquibase:
+    default-schema: manager
+    change-log: classpath:db/changelog/db.changelog-master.xml

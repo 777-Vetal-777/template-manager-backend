@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,15 +24,13 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public ResponseEntity<UserCreateResponseDTO> create(final UserCreateRequestDTO userCreateRequest) {
-        final UserEntity userEntity = userService.create(userCreateRequest);
-        return new ResponseEntity<>(new UserCreateResponseDTO(userEntity), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.create(userCreateRequest), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<UserListResponseDTO> list(final String sortBy,
-            Boolean desc) {
-        final List<UserEntity> userEntities = userService.getAll(sortBy, desc);
-        return new ResponseEntity<>(new UserListResponseDTO(userEntities), HttpStatus.OK);
+                                                    Boolean desc) {
+        return new ResponseEntity<>(userService.getAll(sortBy, desc), HttpStatus.OK);
     }
 
     @Override

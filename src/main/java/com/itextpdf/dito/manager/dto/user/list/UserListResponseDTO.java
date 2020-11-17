@@ -1,25 +1,25 @@
 package com.itextpdf.dito.manager.dto.user.list;
 
+import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.List;
 
 public class UserListResponseDTO {
-    private List<UserEntity> userEntities;
+    private List<UserCreateResponseDTO> users;
 
     public UserListResponseDTO() {
-
     }
 
-    public UserListResponseDTO(List<UserEntity> userEntities) {
-        this.userEntities = userEntities;
+    public UserListResponseDTO(List<UserCreateResponseDTO> users) {
+        this.users = users;
     }
 
-    public List<UserEntity> getUserEntities() {
-        return userEntities;
+    public List<UserCreateResponseDTO> getUsers() {
+        return users;
     }
 
-    public void setUserEntities(List<UserEntity> userEntities) {
-        this.userEntities = userEntities;
+    public void setUsers(List<UserCreateResponseDTO> users) {
+        this.users = users;
     }
 }

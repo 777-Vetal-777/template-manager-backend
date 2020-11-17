@@ -2,6 +2,8 @@ package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
+import com.itextpdf.dito.manager.dto.user.list.UserListResponseDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
@@ -10,11 +12,14 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import liquibase.util.BooleanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 import static java.lang.String.format;
 
 @Service
@@ -25,15 +30,15 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     public UserServiceImpl(final UserRepository userRepository,
-            final RoleRepository roleRepository, final PasswordEncoder encoder,
-            final UserMapper userMapper) {
+                           final RoleRepository roleRepository, final PasswordEncoder encoder,
+                           final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.userMapper = userMapper;
     }
 
-    public UserEntity create(final UserCreateRequestDTO request) {
+    public UserCreateResponseDTO create(final UserCreateRequestDTO request) {
         if (userRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
             throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
         }
@@ -42,10 +47,10 @@ public class UserServiceImpl implements UserService {
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed
         user.setRoles(Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow()));
-        return userRepository.save(user);
+        return userMapper.map(userRepository.save(user));
     }
 
-    public List<UserEntity> getAll(final String sortBy, final Boolean desc) {
+    public UserListResponseDTO getAll(final String sortBy, final Boolean desc) {
         List<UserEntity> result;
         final Sort.Direction direction = BooleanUtils.isTrue(desc)
                 ? Sort.Direction.DESC
@@ -55,7 +60,7 @@ public class UserServiceImpl implements UserService {
         } else {
             result = userRepository.findAllByActiveTrue();
         }
-        return result;
+        return new UserListResponseDTO(result.stream().map(e->userMapper.map(e)).collect(Collectors.toList()));
     }
 
     public void delete(final Long id) {
