@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.dto.token;
+package com.itextpdf.dito.manager.dto.token.refresh;
 
 import javax.validation.constraints.NotBlank;
 

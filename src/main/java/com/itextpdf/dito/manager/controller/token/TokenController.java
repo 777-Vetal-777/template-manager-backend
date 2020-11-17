@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.controller.token;
 
-import com.itextpdf.dito.manager.dto.token.RefreshTokenRequestDTO;
-import com.itextpdf.dito.manager.dto.token.RefreshTokenResponseDTO;
+import com.itextpdf.dito.manager.dto.token.refresh.RefreshTokenRequestDTO;
+import com.itextpdf.dito.manager.dto.token.refresh.RefreshTokenResponseDTO;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 
 import org.springframework.http.ResponseEntity;

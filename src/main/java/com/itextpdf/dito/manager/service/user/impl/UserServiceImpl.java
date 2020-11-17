@@ -33,6 +33,12 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
     }
 
+    @Override
+    public UserEntity findByEmail(final String email) {
+        return userRepository.findByEmailAndActiveTrue(email).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
     public UserEntity create(final UserCreateRequestDTO request) {
         if (userRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
             throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
@@ -45,6 +51,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @Override
     public List<UserEntity> getAll(final String sortBy, final Boolean desc) {
         List<UserEntity> result;
         final Sort.Direction direction = BooleanUtils.isTrue(desc)
@@ -58,6 +65,7 @@ public class UserServiceImpl implements UserService {
         return result;
     }
 
+    @Override
     public void delete(final Long id) {
         final UserEntity user = userRepository.findByIdAndActiveTrue(id).orElseThrow(() ->
                 new UserNotFoundException(format("User with id=%s doesn't exists or inactive", id)));

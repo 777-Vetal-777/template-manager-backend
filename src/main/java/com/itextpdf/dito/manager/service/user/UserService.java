@@ -8,6 +8,8 @@ import java.util.List;
 public interface UserService {
     UserEntity create(UserCreateRequestDTO request);
 
+    UserEntity findByEmail(String email);
+
     List<UserEntity> getAll(String sortBy, Boolean desc);
 
     void delete(Long id);

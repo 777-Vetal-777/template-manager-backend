@@ -18,7 +18,6 @@ public class WorkspaceEntity {
     private String language;
     private String timezone;
 
-
     public WorkspaceEntity() {
     }
 
