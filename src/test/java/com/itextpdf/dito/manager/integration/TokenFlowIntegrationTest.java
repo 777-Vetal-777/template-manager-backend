@@ -4,7 +4,6 @@ import com.itextpdf.dito.manager.controller.login.AuthenticationController;
 import com.itextpdf.dito.manager.controller.token.TokenController;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationRequestDTO;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationResponseDTO;
-import com.itextpdf.dito.manager.dto.token.RefreshTokenRequestDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

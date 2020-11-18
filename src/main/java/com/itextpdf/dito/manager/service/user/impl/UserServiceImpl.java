@@ -2,8 +2,6 @@ package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.list.UserListResponseDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
@@ -48,7 +46,7 @@ public class UserServiceImpl implements UserService {
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed
         user.setRoles(Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow()));
-        return userMapper.map(userRepository.save(user));
+        return userRepository.save(user);
     }
 
     @Override
