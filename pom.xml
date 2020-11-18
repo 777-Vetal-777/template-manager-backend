@@ -20,6 +20,10 @@
         <jacoco.plugin.version>0.8.6</jacoco.plugin.version>
         <h2.version>1.4.200</h2.version>
         <owasp.dependency.check.version>6.0.3</owasp.dependency.check.version>
+        <mojo.license.plugin.version>2.0.0</mojo.license.plugin.version>
+        <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
+
+        <license.report.path>${project.basedir}/license/generated-report.xml</license.report.path>
     </properties>
 
     <dependencies>
@@ -151,6 +155,43 @@
                         <configuration>
                             <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
                             <format>ALL</format>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>license</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven.antrun.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>delete-old-license-report</id>
+                                <phase>initialize</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${mojo.license.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>download-licenses</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>download-licenses</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <excludedScopes>test,provided</excludedScopes>
+                            <excludedGroups>com.itextpdf.dito</excludedGroups>
+                            <sortByGroupIdAndArtifactId>true</sortByGroupIdAndArtifactId>
+                            <licensesOutputFile>${license.report.path}</licensesOutputFile>
                         </configuration>
                     </plugin>
                 </plugins>
