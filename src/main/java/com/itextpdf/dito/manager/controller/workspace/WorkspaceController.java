@@ -13,5 +13,5 @@ public interface WorkspaceController {
     String BASE_NAME = MAJOR_VERSION + "/workspaces";
 
     @PostMapping
-    ResponseEntity<WorkspaceCreateResponseDTO> create(final @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
+    ResponseEntity<WorkspaceCreateResponseDTO> create(@RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
 }

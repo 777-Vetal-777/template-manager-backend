@@ -2,6 +2,8 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
+import com.itextpdf.dito.manager.exception.TemplateNameAlreadeIsRegisteredException;
+import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 
 import org.apache.logging.log4j.LogManager;
@@ -44,5 +46,20 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Validation error", errorMsg), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnsupportedTemplateTypeException.class)
+    public ResponseEntity<ErrorResponseDTO> unsupportedTemplateType(final UnsupportedTemplateTypeException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Unknown template's type",
+                new StringBuilder("Unknown type: ").append(ex.getType()).toString()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TemplateNameAlreadeIsRegisteredException.class)
+    public ResponseEntity<ErrorResponseDTO> templateNameAlreadyIsRegistered(
+            final TemplateNameAlreadeIsRegisteredException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Template's name is already registered",
+                new StringBuilder("Template's name: ").append(ex.getTemplateName()).toString()),
+                HttpStatus.BAD_REQUEST);
     }
 }

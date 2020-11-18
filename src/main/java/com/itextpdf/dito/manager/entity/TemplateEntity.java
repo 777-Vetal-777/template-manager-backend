@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -7,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -21,6 +25,14 @@ public class TemplateEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     private TemplateTypeEntity type;
+
+    @OneToMany(
+            mappedBy = "template",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @OrderBy("version DESC")
+    private List<TemplateFileEntity> files;
 
     public Long getId() {
         return id;
@@ -44,5 +56,13 @@ public class TemplateEntity {
 
     public void setType(TemplateTypeEntity type) {
         this.type = type;
+    }
+
+    public List<TemplateFileEntity> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<TemplateFileEntity> files) {
+        this.files = files;
     }
 }

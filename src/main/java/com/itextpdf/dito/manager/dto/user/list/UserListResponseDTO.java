@@ -1,25 +1,26 @@
 package com.itextpdf.dito.manager.dto.user.list;
 
-import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.dto.user.UserDTO;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public class UserListResponseDTO {
-    private List<UserEntity> userEntities;
+    private Page<UserDTO> users;
 
     public UserListResponseDTO() {
 
     }
 
-    public UserListResponseDTO(List<UserEntity> userEntities) {
-        this.userEntities = userEntities;
+    public UserListResponseDTO(Page<UserDTO> users) {
+
     }
 
-    public List<UserEntity> getUserEntities() {
-        return userEntities;
+    public Page<UserDTO> getUsers() {
+        return users;
     }
 
-    public void setUserEntities(List<UserEntity> userEntities) {
-        this.userEntities = userEntities;
+    public void setUsers(Page<UserDTO> users) {
+        this.users = users;
     }
+
 }

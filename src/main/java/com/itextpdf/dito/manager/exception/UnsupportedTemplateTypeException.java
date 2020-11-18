@@ -1,13 +1,17 @@
 package com.itextpdf.dito.manager.exception;
 
 public class UnsupportedTemplateTypeException extends RuntimeException {
-    private String unsupportedTemplateType;
+    private String type;
 
-    public String getUnsupportedTemplateType() {
-        return unsupportedTemplateType;
+    public UnsupportedTemplateTypeException(final String type) {
+        this.type = type;
     }
 
-    public void setUnsupportedTemplateType(String unsupportedTemplateType) {
-        this.unsupportedTemplateType = unsupportedTemplateType;
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

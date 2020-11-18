@@ -18,7 +18,7 @@ public class WorkspaceControllerImpl implements WorkspaceController {
     }
 
     @Override
-    public ResponseEntity<WorkspaceCreateResponseDTO> create(WorkspaceCreateRequestDTO workspaceCreateRequest) {
+    public ResponseEntity<WorkspaceCreateResponseDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequest) {
         return new ResponseEntity<>(workspaceService.create(workspaceCreateRequest), HttpStatus.CREATED);
     }
 }

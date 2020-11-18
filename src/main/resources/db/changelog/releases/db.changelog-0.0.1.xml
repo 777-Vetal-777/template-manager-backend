@@ -128,7 +128,7 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="template_pk"/>
             </column>
             <column name="name" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="type_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_type" references="template_type(id)"/>
@@ -149,7 +149,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="comment" type="varchar(1024)"/>
-            <column name="version" type="timestamp" defaultValueComputed="current_timestamp"/>
+            <column name="version" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
             <column name="author_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_author" references="user(id)"/>
             </column>

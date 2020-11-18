@@ -1,22 +1,22 @@
 package com.itextpdf.dito.manager.dto.user.create;
 
-import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.dto.user.UserDTO;
 
 public class UserCreateResponseDTO {
-    private UserEntity userEntity;
-
-    public UserEntity getUserEntity() {
-        return userEntity;
-    }
+    private UserDTO createdUser;
 
     public UserCreateResponseDTO() {
-
-    }
-    public UserCreateResponseDTO(UserEntity userEntity) {
-        this.userEntity = userEntity;
     }
 
-    public void setUserEntity(UserEntity userEntity) {
-        this.userEntity = userEntity;
+    public UserCreateResponseDTO(final UserDTO userDTO) {
+        this.createdUser = userDTO;
+    }
+
+    public UserDTO getCreatedUser() {
+        return createdUser;
+    }
+
+    public void setCreatedUser(UserDTO createdUser) {
+        this.createdUser = createdUser;
     }
 }

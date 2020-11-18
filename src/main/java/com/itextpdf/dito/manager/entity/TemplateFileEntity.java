@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
 import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,7 @@ public class TemplateFileEntity {
     private Long id;
     private byte[] data;
     private String comment;
+    @Column(insertable = false)
     private Date version;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " author_id")
