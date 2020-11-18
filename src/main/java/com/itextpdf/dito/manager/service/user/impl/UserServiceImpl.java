@@ -10,16 +10,11 @@ import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.user.UserService;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import liquibase.util.BooleanUtils;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import static java.lang.String.format;
 
 @Service
@@ -38,7 +33,13 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
     }
 
-    public UserCreateResponseDTO create(final UserCreateRequestDTO request) {
+    @Override
+    public UserEntity findByEmail(final String email) {
+        return userRepository.findByEmailAndActiveTrue(email).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public UserEntity create(final UserCreateRequestDTO request) {
         if (userRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
             throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
         }
@@ -50,24 +51,15 @@ public class UserServiceImpl implements UserService {
         return userMapper.map(userRepository.save(user));
     }
 
-    public UserListResponseDTO getAll(final String sortBy, final Boolean desc) {
-        List<UserEntity> result;
-        final Sort.Direction direction = BooleanUtils.isTrue(desc)
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-        if (!StringUtils.isEmpty(sortBy)) {
-            result = userRepository.findAllByActiveTrue(Sort.by(direction, sortBy));
-        } else {
-            result = userRepository.findAllByActiveTrue();
-        }
-        return new UserListResponseDTO(result.stream()
-                .map(userMapper::map)
-                .collect(Collectors.toList()));
+    @Override
+    public Page<UserEntity> getAll(Pageable pageable) {
+        return userRepository.findAllByActiveTrue(pageable);
     }
 
-    public void delete(final Long id) {
-        final UserEntity user = userRepository.findByIdAndActiveTrue(id).orElseThrow(() ->
-                new UserNotFoundException(format("User with id=%s doesn't exists or inactive", id)));
+    @Override
+    public void delete(final String email) {
+        final UserEntity user = userRepository.findByEmailAndActiveTrue(email).orElseThrow(() ->
+                new UserNotFoundException(format("User with id=%s doesn't exists or inactive", email)));
         user.setActive(Boolean.FALSE);
         userRepository.save(user);
     }

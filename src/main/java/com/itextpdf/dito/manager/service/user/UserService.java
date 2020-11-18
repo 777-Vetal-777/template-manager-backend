@@ -6,11 +6,15 @@ import com.itextpdf.dito.manager.dto.user.list.UserListResponseDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     UserCreateResponseDTO create(UserCreateRequestDTO request);
 
-    UserListResponseDTO getAll(String sortBy, Boolean desc);
+    UserEntity findByEmail(String email);
 
-    void delete(Long id);
+    Page<UserEntity> getAll(Pageable pageable);
+
+    void delete(String email);
 }
