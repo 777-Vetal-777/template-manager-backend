@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://<socket>/dito
+    username: <username>
+    password: <password>

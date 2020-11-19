@@ -10,6 +10,8 @@ security:
       time-to-live: 86400
 
 spring:
+  profiles:
+    active: local
   jpa:
     properties:
       hibernate:
