@@ -44,6 +44,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdUser.active").value("true"));
 
         assertTrue(userRepository.findByEmailAndActiveTrue("user@email.com").isPresent());
+
+        mockMvc.perform(post(UserController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -68,5 +74,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
         UserEntity user = userRepository.findByEmail("test@email.com").orElseThrow();
         assertFalse(user.getActive());
+    }
+
+    @Test
+    public void testDeactivateNotFoundUser() throws Exception {
+        mockMvc.perform(delete(UserController.BASE_NAME + "/" + "unknown@email.com"))
+                .andExpect(status().isNotFound());
+
     }
 }

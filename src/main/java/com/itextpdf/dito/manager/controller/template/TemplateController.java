@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 
 import java.security.Principal;
 import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public interface TemplateController {
     String BASE_NAME = MAJOR_VERSION + "/templates";
 
     @PostMapping
-    void create(@RequestBody @Valid TemplateCreateRequestDTO templateCreateRequestDTO, Principal principal);
+    ResponseEntity<?> create(@RequestBody @Valid TemplateCreateRequestDTO templateCreateRequestDTO, Principal principal);
 
     @GetMapping
     ResponseEntity<Page<TemplateDTO>> list(Pageable pageable);

@@ -15,7 +15,7 @@ public class TemplateTypeControllerImpl implements TemplateTypeController {
     private final TemplateTypeMapper templateTypeMapper;
 
     public TemplateTypeControllerImpl(final TemplateTypeService templateTypeService,
-            final TemplateTypeMapper templateTypeMapper) {
+                                      final TemplateTypeMapper templateTypeMapper) {
         this.templateTypeService = templateTypeService;
         this.templateTypeMapper = templateTypeMapper;
     }
@@ -24,6 +24,6 @@ public class TemplateTypeControllerImpl implements TemplateTypeController {
     public ResponseEntity<TemplateTypeListResponseDTO> list() {
         final TemplateTypeListResponseDTO templateTypeListResponseDTO = templateTypeMapper
                 .map(templateTypeService.getAll());
-        return new ResponseEntity(templateTypeListResponseDTO, HttpStatus.OK);
+        return new ResponseEntity<>(templateTypeListResponseDTO, HttpStatus.OK);
     }
 }
