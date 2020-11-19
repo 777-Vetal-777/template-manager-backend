@@ -2,6 +2,8 @@ package com.itextpdf.dito.manager.controller.workspace;
 
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,5 +15,6 @@ public interface WorkspaceController {
     String BASE_NAME = MAJOR_VERSION + "/workspaces";
 
     @PostMapping
-    ResponseEntity<WorkspaceCreateResponseDTO> create(@RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
+    @Operation(summary = "Create workspace", security = @SecurityRequirement(name = "bearerAuth"))
+    ResponseEntity<WorkspaceCreateResponseDTO> create(final @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
 }

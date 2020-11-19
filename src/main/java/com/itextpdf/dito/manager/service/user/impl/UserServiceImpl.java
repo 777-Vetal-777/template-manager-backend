@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.user.impl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity create(final UserCreateRequestDTO request) {
         if (userRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
-            throw new UserNotFoundException(format("User with email %s already exists", request.getEmail()));
+            throw new UserAlreadyExistsException(format("User with email %s already exists", request.getEmail()));
         }
         final UserEntity user = userMapper.map(request);
         user.setPassword(encoder.encode(request.getPassword()));

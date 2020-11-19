@@ -38,10 +38,10 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("firstName").value("Harry"))
-                .andExpect(jsonPath("email").value("user@email.com"))
-                .andExpect(jsonPath("lastName").value("Kane"))
-                .andExpect(jsonPath("active").value("true"));
+                .andExpect(jsonPath("createdUser.firstName").value("Harry"))
+                .andExpect(jsonPath("createdUser.email").value("user@email.com"))
+                .andExpect(jsonPath("createdUser.lastName").value("Kane"))
+                .andExpect(jsonPath("createdUser.active").value("true"));
 
         assertTrue(userRepository.findByEmailAndActiveTrue("user@email.com").isPresent());
     }
@@ -64,7 +64,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userEntity.setActive(Boolean.TRUE);
 
         userRepository.save(userEntity);
-        mockMvc.perform(delete(UserController.BASE_NAME + "/2"))
+        mockMvc.perform(delete(UserController.BASE_NAME + "/" + userEntity.getEmail()))
                 .andExpect(status().isOk());
         UserEntity user = userRepository.findByEmail("test@email.com").orElseThrow();
         assertFalse(user.getActive());

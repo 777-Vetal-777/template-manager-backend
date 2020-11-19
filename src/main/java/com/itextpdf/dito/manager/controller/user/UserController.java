@@ -4,6 +4,8 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +24,14 @@ public interface UserController {
     String USER_DELETE_ENDPOINT = "/{" + USER_DELETE_PATH_VARIABLE + "}";
 
     @PostMapping
+    @Operation(summary = "Create user", security = @SecurityRequirement(name = "bearerAuth"))
     ResponseEntity<UserCreateResponseDTO> create(@RequestBody UserCreateRequestDTO userCreateRequest);
 
     @GetMapping
+    @Operation(summary = "Get user list", security = @SecurityRequirement(name = "bearerAuth"))
     ResponseEntity<Page<UserDTO>> list(Pageable pageable);
 
     @DeleteMapping(USER_DELETE_ENDPOINT)
+    @Operation(summary = "Deactivate user", security = @SecurityRequirement(name = "bearerAuth"))
     ResponseEntity<String> delete(@PathVariable(USER_DELETE_PATH_VARIABLE) String email);
 }
