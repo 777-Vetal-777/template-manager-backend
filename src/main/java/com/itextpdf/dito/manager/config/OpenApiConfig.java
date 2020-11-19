@@ -9,10 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "Template manager", version = "v1"))
 @SecurityScheme(
-        name = "bearerAuth",
+        name = OpenApiConfig.SECURITY_SCHEME_NAME,
         type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",
         scheme = "bearer"
 )
 public class OpenApiConfig {
+    public static final String SECURITY_SCHEME_NAME = "bearerAuth";
 }

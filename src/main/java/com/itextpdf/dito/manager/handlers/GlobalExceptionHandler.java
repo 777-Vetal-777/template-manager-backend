@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
-import com.itextpdf.dito.manager.exception.TemplateNameAlreadeIsRegisteredException;
+import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
 import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
@@ -65,9 +65,9 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(TemplateNameAlreadeIsRegisteredException.class)
+    @ExceptionHandler(TemplateNameAlreadyRegisteredException.class)
     public ResponseEntity<ErrorResponseDTO> templateNameAlreadyIsRegistered(
-            final TemplateNameAlreadeIsRegisteredException ex) {
+            final TemplateNameAlreadyRegisteredException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO("Template's name is already registered",
                 new StringBuilder("Template's name: ").append(ex.getTemplateName()).toString()),
                 HttpStatus.BAD_REQUEST);

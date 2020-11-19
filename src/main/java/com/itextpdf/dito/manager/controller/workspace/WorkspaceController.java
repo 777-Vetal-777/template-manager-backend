@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.workspace;
 
+import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,6 @@ public interface WorkspaceController {
     String BASE_NAME = MAJOR_VERSION + "/workspaces";
 
     @PostMapping
-    @Operation(summary = "Create workspace", security = @SecurityRequirement(name = "bearerAuth"))
-    ResponseEntity<WorkspaceCreateResponseDTO> create(final @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
+    @Operation(summary = "Create workspace", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
+    ResponseEntity<WorkspaceCreateResponseDTO> create(@RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
 }

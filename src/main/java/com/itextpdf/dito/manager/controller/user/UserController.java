@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.user;
 
+import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
@@ -24,14 +25,14 @@ public interface UserController {
     String USER_DELETE_ENDPOINT = "/{" + USER_DELETE_PATH_VARIABLE + "}";
 
     @PostMapping
-    @Operation(summary = "Create user", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Create user", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
     ResponseEntity<UserCreateResponseDTO> create(@RequestBody UserCreateRequestDTO userCreateRequest);
 
     @GetMapping
-    @Operation(summary = "Get user list", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get user list", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
     ResponseEntity<Page<UserDTO>> list(Pageable pageable);
 
     @DeleteMapping(USER_DELETE_ENDPOINT)
-    @Operation(summary = "Deactivate user", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Deactivate user", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
     ResponseEntity<String> delete(@PathVariable(USER_DELETE_PATH_VARIABLE) String email);
 }

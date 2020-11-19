@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.service.template.impl;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
-import com.itextpdf.dito.manager.exception.TemplateNameAlreadeIsRegisteredException;
+import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
@@ -63,7 +63,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
-            throw new TemplateNameAlreadeIsRegisteredException(templateName);
+            throw new TemplateNameAlreadyRegisteredException(templateName);
         }
     }
 }

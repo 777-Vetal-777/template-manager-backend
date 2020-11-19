@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.create.TemplateCreateResponseDTO;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
 import java.security.Principal;
@@ -25,9 +26,9 @@ public class TemplateControllerImpl implements TemplateController {
     }
 
     @Override
-    public ResponseEntity<?> create(final TemplateCreateRequestDTO templateCreateRequestDTO, final Principal principal) {
+    public ResponseEntity<TemplateCreateResponseDTO> create(final TemplateCreateRequestDTO templateCreateRequestDTO, final Principal principal) {
         templateService.create(templateCreateRequestDTO, principal.getName());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<TemplateCreateResponseDTO>(HttpStatus.CREATED);
     }
 
     @Override

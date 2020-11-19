@@ -40,7 +40,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity create(final UserCreateRequestDTO request) {
         if (userRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException(format("User with email %s already exists", request.getEmail()));
+            throw new UserAlreadyExistsException(new StringBuilder("User with email ")
+                    .append(request.getEmail())
+                    .append(" already exists")
+                    .toString());
         }
         final UserEntity user = userMapper.map(request);
         user.setPassword(encoder.encode(request.getPassword()));

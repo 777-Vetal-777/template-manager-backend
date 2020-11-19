@@ -1,9 +1,9 @@
 package com.itextpdf.dito.manager.exception;
 
-public class TemplateNameAlreadeIsRegisteredException extends RuntimeException {
+public class TemplateNameAlreadyRegisteredException extends RuntimeException {
     private String templateName;
 
-    public TemplateNameAlreadeIsRegisteredException(final String templateName) {
+    public TemplateNameAlreadyRegisteredException(final String templateName) {
         this.templateName = templateName;
     }
 
