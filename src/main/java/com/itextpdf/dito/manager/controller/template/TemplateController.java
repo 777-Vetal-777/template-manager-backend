@@ -30,5 +30,5 @@ public interface TemplateController {
 
     @GetMapping
     @Operation(summary = "Get template list", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<TemplateDTO>> list(Pageable pageable, @RequestParam(required = false) String search);
+    ResponseEntity<Page<TemplateDTO>> list(Pageable pageable, @RequestParam(name = "search", required = false) String searchParam);
 }
