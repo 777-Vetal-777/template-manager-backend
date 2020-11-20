@@ -16,14 +16,15 @@ import org.springframework.stereotype.Repository;
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
     Optional<TemplateEntity> findByName(String name);
 
-    @Query(value = "select * from manager.template t "
-            + "join manager.template_file tf on tf.template_id=t.id "
-            + "join manager.template_type tt on t.type_id=tt.id "
-            + "join manager.user u on tf.author_id=u.id "
+    @Query(value = "select t from TemplateEntity t "
+            + "join t.files file "
             + "where t.name like '%'||:value||'%' "
-            + "or t.name like '%'||:value||'%' "
-            + "or tt.name like '%'||:value||'%' "
-            + "or u.email like '%'||:value||'%'",
-    nativeQuery = true)
+            + "or t.type.name like '%'||:value||'%' "
+            + "or file.author.email like '%'||:value||'%' ")
     Page<TemplateEntity> search(Pageable pageable, @Param("value") String searchParam);
+
+    @Override
+    @Query(value = "select t from TemplateEntity t "
+            + "join t.files file")
+    Page<TemplateEntity> findAll(Pageable pageable);
 }
