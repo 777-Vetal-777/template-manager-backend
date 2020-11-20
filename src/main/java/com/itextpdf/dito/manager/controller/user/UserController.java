@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.validation.Valid;
+
 @RequestMapping(UserController.BASE_NAME)
 public interface UserController {
     String MAJOR_VERSION = "/v1";
@@ -26,7 +28,7 @@ public interface UserController {
 
     @PostMapping
     @Operation(summary = "Create user", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
-    ResponseEntity<UserCreateResponseDTO> create(@RequestBody UserCreateRequestDTO userCreateRequest);
+    ResponseEntity<UserCreateResponseDTO> create(@RequestBody @Valid UserCreateRequestDTO userCreateRequest);
 
     @GetMapping
     @Operation(summary = "Get user list", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))

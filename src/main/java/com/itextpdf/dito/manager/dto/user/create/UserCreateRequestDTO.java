@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.dto.user.create;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 
 public class UserCreateRequestDTO {
@@ -9,6 +10,7 @@ public class UserCreateRequestDTO {
     @Pattern(regexp = "[A-Za-z0-9._%-+]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}")
     String email;
     @NotBlank
+    @Size(min = 12, max = 64)
     String password;
     @NotBlank
     String firstName;

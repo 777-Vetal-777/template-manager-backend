@@ -102,7 +102,7 @@
             </column>
         </createTable>
     </changeSet>
-    
+
     <changeSet id="010-insert-default-template-types" author="Vadim_Sorokin">
         <insert tableName="template_type">
             <column name="id" value="1"/>
@@ -163,6 +163,14 @@
 
     <changeSet id="015-create-template-file-sequence" author="Vadim_Sorokin">
         <createSequence sequenceName="template_file_sequence"/>
+    </changeSet>
+
+    <changeSet id="016-add-password-limitations" author="Ivan_Semenov">
+        <modifyDataType tableName="user" columnName="password" newDataType="VARCHAR(64)"/>
+        <update tableName="user">
+            <column name="password" value="$2a$10$oq4SHDJ.H6bP2yn0hnkfDO6tb1vM2y9ZZmoXFnXNmSYjBB6J21bG."/>
+            <where>email = 'admin@email.com'</where>
+        </update>
     </changeSet>
 
 </databaseChangeLog>
