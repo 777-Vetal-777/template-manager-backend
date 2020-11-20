@@ -65,7 +65,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !getLocked();
+        return getLocked() == null ? Boolean.FALSE : !getLocked();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return getActive();
+        return getActive() == null ? Boolean.TRUE : getActive();
     }
 
     @Override
