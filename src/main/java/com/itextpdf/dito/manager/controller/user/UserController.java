@@ -27,14 +27,14 @@ public interface UserController {
     String USER_DELETE_ENDPOINT = "/{" + USER_DELETE_PATH_VARIABLE + "}";
 
     @PostMapping
-    @Operation(summary = "Create user", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
+    @Operation(summary = "Create user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<UserCreateResponseDTO> create(@RequestBody @Valid UserCreateRequestDTO userCreateRequest);
 
     @GetMapping
-    @Operation(summary = "Get user list", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
+    @Operation(summary = "Get user list", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<UserDTO>> list(Pageable pageable);
 
     @DeleteMapping(USER_DELETE_ENDPOINT)
-    @Operation(summary = "Deactivate user", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
+    @Operation(summary = "Deactivate user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<String> delete(@PathVariable(USER_DELETE_PATH_VARIABLE) String email);
 }

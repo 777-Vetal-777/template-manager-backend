@@ -16,6 +16,6 @@ public interface WorkspaceController {
     String BASE_NAME = MAJOR_VERSION + "/workspaces";
 
     @PostMapping
-    @Operation(summary = "Create workspace", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
+    @Operation(summary = "Create workspace", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<WorkspaceCreateResponseDTO> create(@RequestBody WorkspaceCreateRequestDTO workspaceCreateRequest);
 }

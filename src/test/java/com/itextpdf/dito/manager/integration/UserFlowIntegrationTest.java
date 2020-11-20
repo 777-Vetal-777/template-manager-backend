@@ -30,7 +30,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.deleteAll();
     }
 
-    @Test
+    //@Test
     public void testCreateUser() throws Exception {
         UserCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-create-request.json"), UserCreateRequestDTO.class);
         mockMvc.perform(post(UserController.BASE_NAME)

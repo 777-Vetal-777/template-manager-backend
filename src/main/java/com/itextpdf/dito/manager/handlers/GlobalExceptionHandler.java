@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -71,5 +72,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponseDTO("Template's name is already registered",
                 new StringBuilder("Template's name: ").append(ex.getTemplateName()).toString()),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ErrorResponseDTO> userAccountIsLocked(final LockedException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Account is locked.", "Please contact an administrator."),
+                HttpStatus.LOCKED);
     }
 }

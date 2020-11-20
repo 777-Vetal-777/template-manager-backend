@@ -34,7 +34,11 @@ public class UserEntity implements UserDetails {
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
-    private Boolean active = Boolean.TRUE;
+    @Column(insertable = false)
+    private Boolean active;
+
+    @Column(insertable = false)
+    private Boolean locked;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -61,7 +65,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return active;
+        return !getLocked();
     }
 
     @Override
@@ -71,7 +75,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return active;
+        return getActive();
     }
 
     @Override
@@ -129,6 +133,14 @@ public class UserEntity implements UserDetails {
 
     public void setRoles(Set<RoleEntity> roles) {
         this.roles = roles;
+    }
+
+    public Boolean getLocked() {
+        return locked;
+    }
+
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
     }
 }
 

@@ -8,6 +8,9 @@ security:
     refresh-token:
       id: refresh
       time-to-live: 86400
+  login:
+    failure:
+      max-attempts: ${DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS:3}
 
 spring:
   profiles:

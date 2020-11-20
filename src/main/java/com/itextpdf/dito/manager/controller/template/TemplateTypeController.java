@@ -15,6 +15,6 @@ public interface TemplateTypeController {
     String BASE_NAME = MAJOR_VERSION + "/template-types";
 
     @GetMapping
-    @Operation(summary = "Get template type list", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
+    @Operation(summary = "Get template type list", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateTypeListResponseDTO> list();
 }

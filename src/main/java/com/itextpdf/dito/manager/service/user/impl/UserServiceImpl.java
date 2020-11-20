@@ -24,8 +24,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     public UserServiceImpl(final UserRepository userRepository,
-                           final RoleRepository roleRepository, final PasswordEncoder encoder,
-                           final UserMapper userMapper) {
+            final RoleRepository roleRepository, final PasswordEncoder encoder,
+            final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
@@ -63,6 +63,12 @@ public class UserServiceImpl implements UserService {
         final UserEntity user = userRepository.findByEmailAndActiveTrue(email).orElseThrow(() ->
                 new UserNotFoundException(format("User with id=%s doesn't exists or inactive", email)));
         user.setActive(Boolean.FALSE);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void lock(UserEntity user) {
+        user.setLocked(true);
         userRepository.save(user);
     }
 }

@@ -19,6 +19,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="active" type="boolean" defaultValueBoolean="true"/>
+            <column name="locked" type="boolean" defaultValueBoolean="false"/>
         </createTable>
     </changeSet>
 
@@ -36,10 +37,10 @@
     <changeSet id="003-create-user-role-table" author="Ivan_Semenov">
         <createTable tableName="user_role">
             <column name="user_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_user" references="user(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_user_role_to_user" references="user(id)"/>
             </column>
             <column name="role_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_role" references="role(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_user_role_to_role" references="role(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -131,7 +132,7 @@
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="type_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_type" references="template_type(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_template_to_type" references="template_type(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -153,16 +154,34 @@
                 <constraints nullable="false"/>
             </column>
             <column name="author_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_author" references="user(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_template_file_to_author" references="user(id)"/>
             </column>
             <column name="template_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_template" references="template(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_template_file_to_template" references="template(id)"/>
             </column>
         </createTable>
     </changeSet>
 
     <changeSet id="015-create-template-file-sequence" author="Vadim_Sorokin">
         <createSequence sequenceName="template_file_sequence"/>
+    </changeSet>
+
+    <changeSet id="016-create-failed-login-attempt-table" author="Vadim_Sorokin">
+        <createTable tableName="failed_login_attempt">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="login_attempt_pk"/>
+            </column>
+            <column name="version" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_failed_login_attempt_to_user" references="user(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="017-create-failed-login-attempt-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="failed_login_attempt_sequence"/>
     </changeSet>
 
 </databaseChangeLog>
