@@ -30,8 +30,8 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Page<UserDTO>> list(final Pageable pageable) {
-        return new ResponseEntity<>(userMapper.map(userService.getAll(pageable)), HttpStatus.OK);
+    public ResponseEntity<Page<UserDTO>> list(final Pageable pageable, final String searchParam) {
+        return new ResponseEntity<>(userMapper.map(userService.getAll(pageable, searchParam)), HttpStatus.OK);
     }
 
     @Override

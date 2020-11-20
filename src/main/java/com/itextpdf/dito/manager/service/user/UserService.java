@@ -12,7 +12,7 @@ public interface UserService {
 
     UserEntity findByEmail(String email);
 
-    Page<UserEntity> getAll(Pageable pageable);
+    Page<UserEntity> getAll(Pageable pageable, String searchParam);
 
     void delete(String email);
 }

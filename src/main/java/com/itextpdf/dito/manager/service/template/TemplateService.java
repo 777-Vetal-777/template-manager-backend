@@ -10,5 +10,5 @@ import org.springframework.data.domain.Pageable;
 public interface TemplateService {
     TemplateFileEntity create(TemplateCreateRequestDTO templateCreateRequestDTO, String email);
 
-    Page<TemplateEntity> getAll(Pageable pageable);
+    Page<TemplateEntity> getAll(Pageable pageable, String search);
 }

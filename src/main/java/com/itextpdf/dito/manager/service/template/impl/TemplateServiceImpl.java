@@ -13,9 +13,11 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class TemplateServiceImpl implements TemplateService {
@@ -26,10 +28,10 @@ public class TemplateServiceImpl implements TemplateService {
     private final TemplateLoader templateLoader;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
-            final TemplateRepository templateRepository,
-            final TemplateTypeService templateTypeService,
-            final UserService userService,
-            final TemplateLoader templateLoader) {
+                               final TemplateRepository templateRepository,
+                               final TemplateTypeService templateTypeService,
+                               final UserService userService,
+                               final TemplateLoader templateLoader) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.templateTypeService = templateTypeService;
@@ -57,8 +59,10 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public Page<TemplateEntity> getAll(Pageable pageable) {
-        return templateRepository.findAll(pageable);
+    public Page<TemplateEntity> getAll(Pageable pageable, String searchParam) {
+        return StringUtils.isEmpty(searchParam)
+                ? templateRepository.findAll(pageable)
+                : templateRepository.search(pageable, searchParam);
     }
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {

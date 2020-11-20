@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping(TemplateController.BASE_NAME)
 public interface TemplateController {
@@ -29,5 +30,5 @@ public interface TemplateController {
 
     @GetMapping
     @Operation(summary = "Get template list", security = @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<TemplateDTO>> list(Pageable pageable);
+    ResponseEntity<Page<TemplateDTO>> list(Pageable pageable, @RequestParam(required = false) String search);
 }

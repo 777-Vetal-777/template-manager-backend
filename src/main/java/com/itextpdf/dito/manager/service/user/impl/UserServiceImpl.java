@@ -10,10 +10,13 @@ import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import static java.lang.String.format;
 
 @Service
@@ -54,8 +57,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserEntity> getAll(Pageable pageable) {
-        return userRepository.findAllByActiveTrue(pageable);
+    public Page<UserEntity> getAll(Pageable pageable, String searchParam) {
+        return StringUtils.isEmpty(searchParam)
+                ? userRepository.findAllByActiveTrue(pageable)
+                : userRepository.search(pageable, searchParam);
     }
 
     @Override
