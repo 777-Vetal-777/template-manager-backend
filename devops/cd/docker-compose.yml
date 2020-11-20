@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  #=========== BACKEND ===============      
+  backend:
+    container_name: backend
+    image: backend
+    build: ./template-manager-backend/
+    ports:
+      - "8080:8080"
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+    depends_on:
+      - db
+  #=========== DATABASE ===============
+  db:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1111
+      - POSTGRES_DB=dito
+  #=========== FRONTEND ===============
+  frontend:
+    container_name: frontend
+    image: frontend
+    build: ./template-manager-frontend/
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_BASE_URL=backend:8080
+
