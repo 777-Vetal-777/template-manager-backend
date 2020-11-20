@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("integration-test")
-@WithMockUser(username = "admin@email.com", password = "admin12345678")
+@WithMockUser(username = "admin@email.com", password = "admin@email.com")
 public abstract class AbstractIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;

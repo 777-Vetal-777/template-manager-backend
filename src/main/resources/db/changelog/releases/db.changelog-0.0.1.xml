@@ -64,7 +64,7 @@
             <column name="first_name" value="admin"/>
             <column name="last_name" value="admin"/>
             <!-- Bcrypt Hash (12 rounds) -->
-            <column name="password" value="$2y$12$xr.yJBrG7R5bRYZ6S6b5CuJrzZQeveSGD.aCJo5M6pPv/0ncL9q7u"/>
+            <column name="password" value="$2a$10$aVTFNGndLP4/83DYP.7Gwu/oAGL2u5nGjWPfxv8WInttX0VRhDGLK"/>
             <column name="active" value="true"/>
         </insert>
         <insert tableName="user_role">
@@ -163,14 +163,6 @@
 
     <changeSet id="015-create-template-file-sequence" author="Vadim_Sorokin">
         <createSequence sequenceName="template_file_sequence"/>
-    </changeSet>
-
-    <changeSet id="016-add-password-limitations" author="Ivan_Semenov">
-        <modifyDataType tableName="user" columnName="password" newDataType="VARCHAR(64)"/>
-        <update tableName="user">
-            <column name="password" value="$2a$10$oq4SHDJ.H6bP2yn0hnkfDO6tb1vM2y9ZZmoXFnXNmSYjBB6J21bG."/>
-            <where>email = 'admin@email.com'</where>
-        </update>
     </changeSet>
 
 </databaseChangeLog>
