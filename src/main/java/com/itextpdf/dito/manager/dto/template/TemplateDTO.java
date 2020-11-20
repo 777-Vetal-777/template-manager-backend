@@ -1,11 +1,15 @@
 package com.itextpdf.dito.manager.dto.template;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 public class TemplateDTO {
     private String name;
     private String type;
+    @JsonProperty("file.author")
     private String author;
+    @JsonProperty("file.version")
     private Date lastUpdate;
 
     public String getName() {

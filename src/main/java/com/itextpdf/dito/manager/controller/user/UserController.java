@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping(UserController.BASE_NAME)
 public interface UserController {
@@ -32,7 +33,7 @@ public interface UserController {
 
     @GetMapping
     @Operation(summary = "Get user list", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<UserDTO>> list(Pageable pageable);
+    ResponseEntity<Page<UserDTO>> list(Pageable pageable, @RequestParam(name = "search", required = false) String searchParam);
 
     @DeleteMapping(USER_DELETE_ENDPOINT)
     @Operation(summary = "Deactivate user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

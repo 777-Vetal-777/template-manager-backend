@@ -32,7 +32,7 @@ public class TemplateControllerImpl implements TemplateController {
     }
 
     @Override
-    public ResponseEntity<Page<TemplateDTO>> list(final Pageable pageable) {
-        return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable)), HttpStatus.OK);
+    public ResponseEntity<Page<TemplateDTO>> list(final Pageable pageable, final String searchParam) {
+        return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable, searchParam)), HttpStatus.OK);
     }
 }
