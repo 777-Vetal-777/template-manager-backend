@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.controller.token.TokenController;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,11 +20,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
     private static final Logger log = LogManager.getLogger(WebSecurityConfig.class);
 
     private final TokenAuthorizationFilter tokenAuthorizationFilter;
@@ -31,10 +34,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${security.cors.paths}")
+    private String corsPaths;
+    @Value("${security.cors.origins}")
+    private String corsOrigins;
+    @Value("${security.cors.methods}")
+    private String corsMethods;
+
     public WebSecurityConfig(final TokenAuthorizationFilter tokenAuthorizationFilter,
-                             final AuthenticationEntryPoint authenticationEntryPoint,
-                             final UserDetailsService userDetailsService,
-                             final PasswordEncoder passwordEncoder) {
+            final AuthenticationEntryPoint authenticationEntryPoint,
+            final UserDetailsService userDetailsService,
+            final PasswordEncoder passwordEncoder) {
         this.tokenAuthorizationFilter = tokenAuthorizationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.userDetailsService = userDetailsService;
@@ -85,5 +95,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping(corsPaths)
+                .allowedOrigins(corsOrigins)
+                .allowedMethods(corsMethods);
     }
 }
