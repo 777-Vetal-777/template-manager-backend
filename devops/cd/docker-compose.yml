@@ -2,7 +2,7 @@ version: '3'
 services:
   #=========== BACKEND ===============      
   backend:
-    container_name: nexus-docker.andersenlab.dev/dtm-backend:develop
+    container_name: nexus-docker.andersenlab.dev/dtm-backend:dev
     image: dtm-backend:dev
     ports:
       - "8080:8080"
