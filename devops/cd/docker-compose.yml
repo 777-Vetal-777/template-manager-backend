@@ -3,7 +3,7 @@ services:
   #=========== BACKEND ===============      
   backend:
     container_name: backend_itext
-    image: ${registryHost}/${projectName}:${WORKING_ENV}
+    image: nexus-docker.andersenlab.dev/${projectName}:${WORKING_ENV}
     ports:
       - "8080:8080"
     environment:
