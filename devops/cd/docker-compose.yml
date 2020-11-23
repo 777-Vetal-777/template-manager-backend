@@ -3,7 +3,7 @@ services:
   #=========== BACKEND ===============      
   backend:
     container_name: backend_itext
-    image: nexus-docker.andersenlab.dev/dtm-backend:stage
+    image: dtm-backend:dev
     ports:
       - "8080:8080"
     environment:
