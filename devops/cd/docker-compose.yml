@@ -2,7 +2,7 @@ version: '3'
 services:
   #=========== BACKEND ===============      
   backend:
-    container_name: backend
+    container_name: backend_itext
     image: nexus-docker.andersenlab.dev/dtm-backend:stage
     ports:
       - "8080:8080"
@@ -12,6 +12,7 @@ services:
       - db
   #=========== DATABASE ===============
   db:
+    container_name: db_itext
     image: postgres:13
     ports:
       - "5432:5432"
