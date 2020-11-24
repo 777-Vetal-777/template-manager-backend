@@ -1,13 +1,17 @@
 package com.itextpdf.dito.manager.dto.template.create;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.validation.constraints.NotBlank;
 
 public class TemplateCreateRequestDTO {
     @NotBlank
+    @Schema(example = "My-template")
     private String name;
     @NotBlank
+    @Schema(example = "standard")
     private String type;
-
+    @Schema(example = "some-data-collection")
     private String dataCollection;
 
     public String getName() {

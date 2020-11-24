@@ -1,13 +1,18 @@
 package com.itextpdf.dito.manager.dto.workspace.create;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.validation.constraints.NotBlank;
 
 public class WorkspaceCreateRequestDTO {
     @NotBlank
+    @Schema(example = "My-workspace")
     String name;
     @NotBlank
+    @Schema(example = "America/Sao_Paulo")
     String timezone;
     @NotBlank
+    @Schema(example = "ENG")
     String language;
 
     public String getName() {
