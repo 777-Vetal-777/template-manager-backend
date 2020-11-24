@@ -1,0 +1,64 @@
+currentBuild.description = "${params.BRANCH}"
+pipeline {
+    options {
+        buildDiscarder(
+            logRotator(
+                artifactDaysToKeepStr: "",
+                artifactNumToKeepStr: "",
+                daysToKeepStr: "",
+                numToKeepStr: "5"
+            )
+        )
+        disableConcurrentBuilds()
+    }
+    environment{
+        projectName = "dtm-backend"
+        registryHost = "https://nexus-docker.andersenlab.dev"
+        registryCredentials = "nexus_andersen"
+        hostIP="10.10.15.110"
+        WORKING_ENV = "dev"
+        dockerCredentials="docker-dev-itext"
+        SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
+    }
+    agent{
+        label "master"
+    }
+    stages {
+        stage("Build docker image"){
+            steps{
+                script {
+                  dockerImage = docker.build("${projectName}:${WORKING_ENV}", "-f ./devops/ci/Dockerfile ./" )   
+                }
+            }
+        }
+        stage("Deploy image to nexus"){
+            steps{
+                script{
+                    docker.withRegistry(registryHost, registryCredentials){
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+        stage("Remove unused docker image"){
+            steps{
+                sh '''docker rmi -f $(docker images --filter=reference=${projectName} -q) >/dev/null 2>&1''' 
+            }
+        }
+        stage("Deploy docker image to host"){
+            steps{
+                script{
+                    docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
+                        docker.withRegistry(registryHost,registryCredentials){
+                            sh """
+                            echo 'docker image ${registryHost}/${projectName}:${WORKING_ENV}'
+                            docker image pull nexus-docker.andersenlab.dev/${projectName}:${WORKING_ENV}
+                            docker-compose --file ${WORKSPACE}/devops/cd/docker-compose.yml up --force-recreate -d
+                            """
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
