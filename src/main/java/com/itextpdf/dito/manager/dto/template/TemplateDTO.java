@@ -7,6 +7,8 @@ import java.util.Date;
 public class TemplateDTO {
     private String name;
     private String type;
+    @JsonProperty("dataCollection")
+    private String dataCollection;
     @JsonProperty("file.author")
     private String author;
     @JsonProperty("file.version")
@@ -42,5 +44,13 @@ public class TemplateDTO {
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public String getDataCollection() {
+        return dataCollection;
+    }
+
+    public void setDataCollection(String dataCollection) {
+        this.dataCollection = dataCollection;
     }
 }

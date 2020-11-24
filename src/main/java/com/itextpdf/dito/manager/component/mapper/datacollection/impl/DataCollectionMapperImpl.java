@@ -1,0 +1,43 @@
+package com.itextpdf.dito.manager.component.mapper.datacollection.impl;
+
+import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
+import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class DataCollectionMapperImpl implements DataCollectionMapper {
+    @Override
+    public DataCollectionEntity map(final DataCollectionCreateRequestDTO dto) {
+        final DataCollectionEntity entity = new DataCollectionEntity();
+        entity.setName(dto.getName());
+        entity.setType(dto.getType());
+        return entity;
+    }
+
+    @Override
+    public DataCollectionDTO map(final DataCollectionEntity entity) {
+        final DataCollectionDTO dto = new DataCollectionDTO();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setType(entity.getType());
+        dto.setAuthor(entity.getAuthor().getEmail());
+        dto.setModifiedOn(entity.getModifiedOn());
+        return dto;
+    }
+
+    @Override
+    public List<DataCollectionDTO> map(final List<DataCollectionEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<DataCollectionDTO> map(final Page<DataCollectionEntity> entities) {
+        return entities.map(this::map);
+    }
+}

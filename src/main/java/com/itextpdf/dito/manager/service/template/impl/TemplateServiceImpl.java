@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
@@ -26,17 +27,19 @@ public class TemplateServiceImpl implements TemplateService {
     private final TemplateTypeService templateTypeService;
     private final UserService userService;
     private final TemplateLoader templateLoader;
+    private final DataCollectionRepository dataCollectionRepository;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
                                final TemplateTypeService templateTypeService,
                                final UserService userService,
-                               final TemplateLoader templateLoader) {
+                               final TemplateLoader templateLoader, DataCollectionRepository dataCollectionRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.templateTypeService = templateTypeService;
         this.userService = userService;
         this.templateLoader = templateLoader;
+        this.dataCollectionRepository = dataCollectionRepository;
     }
 
 
@@ -48,6 +51,9 @@ public class TemplateServiceImpl implements TemplateService {
         TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateCreateRequestDTO.getName());
         templateEntity.setType(templateTypeService.findTemplateType(templateCreateRequestDTO.getType()));
+        if (!StringUtils.isEmpty(templateCreateRequestDTO.getDataCollection())) {
+            templateEntity.setDataCollection(dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()).orElseThrow());
+        }
         templateRepository.save(templateEntity);
 
         TemplateFileEntity templateFileEntity = new TemplateFileEntity();

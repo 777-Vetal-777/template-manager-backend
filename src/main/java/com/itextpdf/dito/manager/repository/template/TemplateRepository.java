@@ -20,7 +20,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "join t.files file "
             + "where t.name like '%'||:value||'%' "
             + "or t.type.name like '%'||:value||'%' "
-            + "or file.author.email like '%'||:value||'%' ")
+            + "or file.author.email like '%'||:value||'%'")
     Page<TemplateEntity> search(Pageable pageable, @Param("value") String searchParam);
 
     @Override

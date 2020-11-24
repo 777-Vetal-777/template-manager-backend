@@ -8,6 +8,8 @@ public class TemplateCreateRequestDTO {
     @NotBlank
     private String type;
 
+    private String dataCollection;
+
     public String getName() {
         return name;
     }
@@ -22,5 +24,13 @@ public class TemplateCreateRequestDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getDataCollection() {
+        return dataCollection;
+    }
+
+    public void setDataCollection(String dataCollection) {
+        this.dataCollection = dataCollection;
     }
 }

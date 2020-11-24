@@ -1,4 +1,5 @@
 {
   "name": "some-template",
-  "type": "standard"
+  "type": "standard",
+  "dataCollection": null
 }

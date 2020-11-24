@@ -7,6 +7,8 @@ import com.itextpdf.dito.manager.entity.TemplateFileEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,9 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateFileEntity file = entity.getFiles().get(0);
         result.setAuthor(file.getAuthor().getEmail());
         result.setLastUpdate(file.getVersion());
+        result.setDataCollection(Objects.nonNull(entity.getDataCollection())
+                ? entity.getDataCollection().getName()
+                : null);
         return result;
     }
 
