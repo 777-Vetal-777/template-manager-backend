@@ -37,20 +37,9 @@ public class DataCollectionEntity {
     @JoinColumn(name = " author_id")
     private UserEntity author;
 
-    public TemplateEntity getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(TemplateEntity template) {
-        this.template = template;
-    }
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", referencedColumnName = "id")
     private TemplateEntity template;
-
-    public DataCollectionEntity() {
-    }
 
     public Long getId() {
         return id;
@@ -91,4 +80,13 @@ public class DataCollectionEntity {
     public void setAuthor(UserEntity author) {
         this.author = author;
     }
+
+    public TemplateEntity getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(TemplateEntity template) {
+        this.template = template;
+    }
+
 }
