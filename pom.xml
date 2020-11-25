@@ -79,6 +79,11 @@
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
         </dependency>
+        <dependency>
+            <!-- Spring boot starter for mailing is not used in order to make this feature optional. -->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
 
         <!--TESTING-->
         <dependency>

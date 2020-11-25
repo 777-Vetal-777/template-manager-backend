@@ -3,3 +3,14 @@ spring:
     url: jdbc:postgresql://<socket>/dito
     username: <username>
     password: <password>
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: vadzim.sarokin.tech.acc@gmail.com
+    password: 65[qXN?vq6k:fB$y
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

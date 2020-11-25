@@ -1,14 +1,19 @@
-security:
-  cors:
-    paths: '/**'
-    origins: '*'
-    methods: '*'
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dito
     username: postgres
     password: postgres
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vadzim.sarokin.tech.acc@gmail.com
+    password: 65[qXN?vq6k:fB$y
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:

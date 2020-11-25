@@ -10,7 +10,11 @@ security:
       time-to-live: 86400
   login:
     failure:
-      max-attempts: ${DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS:3}
+      max-attempts: 3
+  cors:
+    paths: '/**'
+    origins: '*'
+    methods: '*'
 
 spring:
   profiles:
