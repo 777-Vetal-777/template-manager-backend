@@ -21,8 +21,8 @@ import java.util.Date;
 @Table(name = "data_collection")
 public class DataCollectionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "datacollection_gen")
-    @SequenceGenerator(name = "datacollection_gen", sequenceName = "datacollection_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "data_collection_gen")
+    @SequenceGenerator(name = "data_collection_gen", sequenceName = "data_collection_sequence", allocationSize = 1)
     private Long id;
 
     private String name;
