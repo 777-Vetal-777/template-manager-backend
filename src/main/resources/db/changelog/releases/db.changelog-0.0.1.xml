@@ -208,6 +208,6 @@
     </changeSet>
 
     <changeSet id="019-create-data-collection-sequence" author="Ivan_Semenov">
-        <createSequence sequenceName="datacollection_sequence"/>
+        <createSequence sequenceName="data_collection_sequence"/>
     </changeSet>
 </databaseChangeLog>
