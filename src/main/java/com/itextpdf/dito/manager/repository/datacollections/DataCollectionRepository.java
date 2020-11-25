@@ -7,11 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
 
 public interface DataCollectionRepository extends JpaRepository<DataCollectionEntity, Long> {
-    Optional<DataCollectionEntity> findByName(String name);
+    DataCollectionEntity findByName(String name);
 
     @Query(value = "select dc from DataCollectionEntity dc "
             + "where dc.name like '%'||:value||'%' "

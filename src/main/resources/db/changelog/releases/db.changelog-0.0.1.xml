@@ -184,11 +184,7 @@
         <createSequence sequenceName="failed_login_attempt_sequence"/>
     </changeSet>
 
-    <changeSet id="018-create-data-collection-sequence" author="Ivan_Semenov">
-        <createSequence sequenceName="datacollection_sequence"/>
-    </changeSet>
-
-    <changeSet id="019-create-data-collection-table" author="Ivan_Semenov">
+    <changeSet id="018-create-data-collection-table" author="Ivan_Semenov">
         <createTable tableName="data_collection">
             <column name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="data_collection_pk"/>
@@ -206,6 +202,10 @@
                 <constraints nullable="false" foreignKeyName="fk_data_collection_to_user" references="user(id)"/>
             </column>
         </createTable>
+    </changeSet>
+
+    <changeSet id="019-create-data-collection-sequence" author="Ivan_Semenov">
+        <createSequence sequenceName="datacollection_sequence"/>
     </changeSet>
 
     <changeSet id="020-add-template-data-collection-link" author="Ivan_Semenov">

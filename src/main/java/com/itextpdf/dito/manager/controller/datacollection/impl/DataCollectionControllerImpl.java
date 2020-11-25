@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.controller.datacollection.impl;
 
+import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
+import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.service.datacollections.DataCollectionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,18 +18,23 @@ import java.security.Principal;
 public class DataCollectionControllerImpl implements DataCollectionController {
 
     private final DataCollectionService dataCollectionService;
+    private final DataCollectionMapper dataCollectionMapper;
 
-    public DataCollectionControllerImpl(final DataCollectionService dataCollectionService) {
+    public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
+                                        final DataCollectionMapper dataCollectionMapper) {
         this.dataCollectionService = dataCollectionService;
+        this.dataCollectionMapper = dataCollectionMapper;
     }
 
     @Override
     public ResponseEntity<DataCollectionDTO> create(final DataCollectionCreateRequestDTO requestDTO, final Principal principal) {
-        return new ResponseEntity<>(dataCollectionService.create(requestDTO, principal), HttpStatus.CREATED);
+        final DataCollectionEntity entity = dataCollectionService.create(dataCollectionMapper.map(requestDTO), principal.getName());
+        return new ResponseEntity<>(dataCollectionMapper.map(entity), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Page<DataCollectionDTO>> list(final Pageable pageable, final String searchParam) {
-        return new ResponseEntity<>(dataCollectionService.list(pageable, searchParam), HttpStatus.OK);
+        final Page<DataCollectionEntity> result = dataCollectionService.list(pageable, searchParam);
+        return new ResponseEntity<>(dataCollectionMapper.map(result), HttpStatus.OK);
     }
 }

@@ -12,9 +12,6 @@ public class DataCollectionDTO {
     private String author;
     private Date modifiedOn;
 
-    public DataCollectionDTO() {
-    }
-
     public Long getId() {
         return id;
     }

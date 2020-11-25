@@ -7,9 +7,6 @@ import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
     @Override
@@ -29,11 +26,6 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setAuthor(entity.getAuthor().getEmail());
         dto.setModifiedOn(entity.getModifiedOn());
         return dto;
-    }
-
-    @Override
-    public List<DataCollectionDTO> map(final List<DataCollectionEntity> entities) {
-        return entities.stream().map(this::map).collect(Collectors.toList());
     }
 
     @Override

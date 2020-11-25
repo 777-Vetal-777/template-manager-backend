@@ -4,9 +4,6 @@ public class DataCollectionCreateRequestDTO {
     private String name;
     private DataCollectionType type;
 
-    public DataCollectionCreateRequestDTO() {
-    }
-
     public String getName() {
         return name;
     }

@@ -12,7 +12,6 @@ import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateTypeService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
-import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
@@ -33,7 +32,8 @@ public class TemplateServiceImpl implements TemplateService {
                                final TemplateRepository templateRepository,
                                final TemplateTypeService templateTypeService,
                                final UserService userService,
-                               final TemplateLoader templateLoader, DataCollectionRepository dataCollectionRepository) {
+                               final TemplateLoader templateLoader,
+                               final DataCollectionRepository dataCollectionRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.templateTypeService = templateTypeService;
@@ -52,7 +52,7 @@ public class TemplateServiceImpl implements TemplateService {
         templateEntity.setName(templateCreateRequestDTO.getName());
         templateEntity.setType(templateTypeService.findTemplateType(templateCreateRequestDTO.getType()));
         if (!StringUtils.isEmpty(templateCreateRequestDTO.getDataCollection())) {
-            templateEntity.setDataCollection(dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()).orElseThrow());
+            templateEntity.setDataCollection(dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()));
         }
         templateRepository.save(templateEntity);
 

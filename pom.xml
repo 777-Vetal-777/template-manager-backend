@@ -15,7 +15,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <springdoc.openapi.ui.version>1.4.8</springdoc.openapi.ui.version>
+        <springdoc.openapi.version>1.4.8</springdoc.openapi.version>
         <jjwt.version>0.9.1</jjwt.version>
         <jacoco.plugin.version>0.8.6</jacoco.plugin.version>
         <h2.version>1.4.200</h2.version>
@@ -67,12 +67,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>${springdoc.openapi.ui.version}</version>
+            <version>${springdoc.openapi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-data-rest</artifactId>
-            <version>${springdoc.openapi.ui.version}</version>
+            <version>${springdoc.openapi.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,7 +38,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty());
 
-        assertTrue(dataCollectionRepository.findByName("test-data-collection").isPresent());
+        assertNotNull(dataCollectionRepository.findByName("test-data-collection"));
     }
 
     @Test
