@@ -27,8 +27,7 @@ public class TemplateEntity {
     @JoinColumn(name = "type_id")
     private TemplateTypeEntity type;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "data_collection_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "template")
     private DataCollectionEntity dataCollection;
 
     @OneToMany(

@@ -201,24 +201,13 @@
             <column name="author_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_data_collection_to_user" references="user(id)"/>
             </column>
+            <column name="template_id" type="bigint">
+                <constraints foreignKeyName="fk_data_collection_to_template" references="template(id)"/>
+            </column>
         </createTable>
     </changeSet>
 
     <changeSet id="019-create-data-collection-sequence" author="Ivan_Semenov">
         <createSequence sequenceName="datacollection_sequence"/>
-    </changeSet>
-
-    <changeSet id="020-add-template-data-collection-link" author="Ivan_Semenov">
-        <addColumn tableName="template">
-            <column name="data_collection_id"
-                    type="bigint">
-                <constraints nullable="true"/>
-            </column>
-        </addColumn>
-        <addForeignKeyConstraint baseColumnNames="data_collection_id"
-                                 baseTableName="template"
-                                 constraintName="fk_template_to_data_collection_fk"
-                                 referencedColumnNames="id"
-                                 referencedTableName="data_collection"/>
     </changeSet>
 </databaseChangeLog>

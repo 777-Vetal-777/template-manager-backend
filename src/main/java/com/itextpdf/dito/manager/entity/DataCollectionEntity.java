@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Date;
@@ -35,6 +36,18 @@ public class DataCollectionEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " author_id")
     private UserEntity author;
+
+    public TemplateEntity getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(TemplateEntity template) {
+        this.template = template;
+    }
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id", referencedColumnName = "id")
+    private TemplateEntity template;
 
     public DataCollectionEntity() {
     }
