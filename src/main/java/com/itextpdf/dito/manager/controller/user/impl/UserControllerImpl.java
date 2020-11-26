@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
 
 @RestController
 public class UserControllerImpl implements UserController {
@@ -38,5 +41,17 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<String> delete(final String email) {
         userService.delete(email);
         return new ResponseEntity<>(email, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UserDTO> currentUser(Principal principal) {
+        UserDTO user = userMapper.map(userService.findByEmail(principal.getName()));
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UserDTO> updateCurrentUser(UserUpdateRequest updateRequest, Principal principal) {
+        UserDTO user = userMapper.map(userService.updateUser(updateRequest, principal.getName()));
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }

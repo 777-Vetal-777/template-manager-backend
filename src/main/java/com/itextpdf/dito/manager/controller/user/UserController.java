@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RequestMapping(UserController.BASE_NAME)
 @Tag(name = "user", description = "user API")
@@ -26,6 +28,7 @@ public interface UserController {
     String BASE_NAME = MAJOR_VERSION + "/users";
     String USER_DELETE_PATH_VARIABLE = "email";
     String USER_DELETE_ENDPOINT = "/{" + USER_DELETE_PATH_VARIABLE + "}";
+    String USER_CURRENT = "/me";
 
     @PostMapping
     @Operation(summary = "Create user", description = "Create new user",
@@ -50,4 +53,18 @@ public interface UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
     ResponseEntity<String> delete(@Parameter(description = "user email", required = true) @PathVariable(USER_DELETE_PATH_VARIABLE) String email);
+
+    @GetMapping(USER_CURRENT)
+    @Operation(summary = "Get info about current user", description = "Get info about the user making request",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved user data", content = {
+            @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
+    ResponseEntity<UserDTO> currentUser(Principal principal);
+
+    @PutMapping(USER_CURRENT)
+    @Operation(summary = "Update current user", description = "Update first and last name of the user making request",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Successfully updated user data", content = {
+            @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
+    ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserUpdateRequest updateRequest, Principal principal);
 }

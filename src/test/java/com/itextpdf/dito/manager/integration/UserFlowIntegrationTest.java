@@ -1,22 +1,20 @@
 package com.itextpdf.dito.manager.integration;
 
 import com.itextpdf.dito.manager.controller.user.UserController;
+import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,5 +74,32 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(delete(UserController.BASE_NAME + "/" + "unknown@email.com"))
                 .andExpect(status().isNotFound());
 
+    }
+
+    @Test
+    void currentUser() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(UserController.BASE_NAME + "/" + UserController.USER_CURRENT)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        UserDTO result = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserDTO.class);
+        assertNotNull(result);
+    }
+
+    @Test
+    void updateCurrentUser() throws Exception {
+        UserUpdateRequest request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-request.json"), UserUpdateRequest.class);
+        MvcResult mvcResult = mockMvc.perform(put(UserController.BASE_NAME + "/" + UserController.USER_CURRENT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        UserDTO response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserDTO.class);
+
+        assertEquals(request.getFirstName(), response.getFirstName());
+        assertEquals(request.getLastName(), response.getLastName());
     }
 }
