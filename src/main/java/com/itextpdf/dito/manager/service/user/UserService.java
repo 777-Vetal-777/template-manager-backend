@@ -19,4 +19,6 @@ public interface UserService {
     void delete(String email);
 
     void lock(UserEntity user);
+
+    UserEntity unblock(String email);
 }
