@@ -38,9 +38,6 @@ public interface TemplateController {
     @GetMapping
     @Operation(summary = "Get template list", description = "Get templates",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation",
-                    content = @Content(schema = @Schema(implementation = TemplateDTO.class)))})
     ResponseEntity<Page<TemplateDTO>> list(Pageable pageable,
                                            @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam);
 }

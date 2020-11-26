@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encoder.encode(request.getPassword()));
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed
-        user.setRoles(Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow()));
+        user.setRoles(Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR")));
         return userRepository.save(user);
     }
 

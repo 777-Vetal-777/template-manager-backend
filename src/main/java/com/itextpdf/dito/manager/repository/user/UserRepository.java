@@ -22,6 +22,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             + "and u.active=true")
     Page<UserEntity> search(Pageable pageable, @Param("value") String searchParam);
 
+    @Query(value = "select count(r) from UserEntity u "
+            + "join u.roles r "
+            + "where r.name like :roleName "
+            + "and count(r)<2 ")
+    Integer countOfUserWithOnlyOneRole(String roleName);
+
     Optional<UserEntity> findByEmailAndActiveTrue(String email);
 
     Optional<UserEntity> findByEmail(String email);
