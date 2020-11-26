@@ -4,7 +4,10 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.unblock.UserUnblockRequestDTO;
+import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -22,6 +26,9 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FailedLoginRepository failedLoginRepository;
 
     @Test
     public void testCreateUser() throws Exception {
@@ -78,7 +85,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void currentUser() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get(UserController.BASE_NAME + "/" + UserController.USER_CURRENT)
+        MvcResult mvcResult = mockMvc.perform(get(UserController.BASE_NAME + "/" + UserController.CURRENT_USER_ENDPOINT)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -90,7 +97,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void updateCurrentUser() throws Exception {
         UserUpdateRequest request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-request.json"), UserUpdateRequest.class);
-        MvcResult mvcResult = mockMvc.perform(put(UserController.BASE_NAME + "/" + UserController.USER_CURRENT)
+        MvcResult mvcResult = mockMvc.perform(put(UserController.BASE_NAME + "/" + UserController.CURRENT_USER_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -113,10 +120,21 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userEntity.setActive(Boolean.TRUE);
         userEntity.setLocked(Boolean.TRUE);
 
+        FailedLoginAttemptEntity failedLoginAttemptEntity = new FailedLoginAttemptEntity();
+        failedLoginAttemptEntity.setUser(userEntity);
+        failedLoginAttemptEntity.setVersion(new Date());
+
         userRepository.save(userEntity);
-        mockMvc.perform(get(UserController.BASE_NAME + "/unblock/" + userEntity.getEmail()))
+        failedLoginRepository.save(failedLoginAttemptEntity);
+
+        UserUnblockRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-unblock-request.json"), UserUnblockRequestDTO.class);
+        mockMvc.perform(post(UserController.BASE_NAME + UserController.USER_UNBLOCK_ENDPOINT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         UserEntity user = userRepository.findByEmail("blockeduser@email.com").orElseThrow();
+        assertTrue(failedLoginRepository.findByUser(userEntity).isEmpty());
         assertFalse(user.getLocked());
     }
 }

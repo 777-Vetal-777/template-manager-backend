@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.unblock.UserUnblockRequestDTO;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class UserControllerImpl implements UserController {
@@ -56,7 +59,11 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserDTO> unblock(final String email) {
-        return new ResponseEntity<>(userMapper.map(userService.unblock(email)), HttpStatus.OK);
+    public ResponseEntity<List<UserDTO>> unblock(final UserUnblockRequestDTO userUnblockRequestDTO) {
+        final List<UserDTO> unblockedUsers = userUnblockRequestDTO.getUserEmails()
+                .stream()
+                .map(email -> userMapper.map(userService.unblock(email)))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(unblockedUsers, HttpStatus.OK);
     }
 }

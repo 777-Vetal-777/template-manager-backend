@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
+import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -23,14 +25,18 @@ import static java.lang.String.format;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final FailedLoginRepository failedLoginRepository;
     private final PasswordEncoder encoder;
     private final UserMapper userMapper;
 
     public UserServiceImpl(final UserRepository userRepository,
-                           final RoleRepository roleRepository, final PasswordEncoder encoder,
+                           final RoleRepository roleRepository,
+                           final FailedLoginRepository failedLoginRepository,
+                           final PasswordEncoder encoder,
                            final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.failedLoginRepository = failedLoginRepository;
         this.encoder = encoder;
         this.userMapper = userMapper;
     }
@@ -87,10 +93,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserEntity unblock(final String email) {
         final UserEntity user = userRepository.findByEmailAndActiveTrue(email).orElseThrow(() ->
                 new UserNotFoundException(format("User with id=%s doesn't exists or inactive", email)));
         user.setLocked(Boolean.FALSE);
-        return userRepository.save(user);
+        failedLoginRepository.deleteByUser(user);
+        userRepository.save(user);
+        return user;
     }
 }
