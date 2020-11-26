@@ -22,6 +22,7 @@
         <owasp.dependency.check.version>6.0.3</owasp.dependency.check.version>
         <mojo.license.plugin.version>2.0.0</mojo.license.plugin.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
+        <javax.mail.version>1.4.7</javax.mail.version>
 
         <license.report.path>${project.basedir}/license/generated-report.xml</license.report.path>
     </properties>
@@ -83,6 +84,11 @@
             <!-- Spring boot starter for mailing is not used in order to make this feature optional. -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>${javax.mail.version}</version>
         </dependency>
 
         <!--TESTING-->
