@@ -26,8 +26,9 @@ import java.security.Principal;
 public interface UserController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/users";
-    String USER_DELETE_PATH_VARIABLE = "email";
-    String USER_DELETE_ENDPOINT = "/{" + USER_DELETE_PATH_VARIABLE + "}";
+    String USER_PATH_VARIABLE_NAME = "email";
+    String USER_DELETE_ENDPOINT = "/{" + USER_PATH_VARIABLE_NAME + "}";
+    String USER_UNBLOCK_ENDPOINT = "/unblock/{" + USER_PATH_VARIABLE_NAME + "}";
     String USER_CURRENT = "/me";
 
     @PostMapping
@@ -52,7 +53,7 @@ public interface UserController {
                     @Content(schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    ResponseEntity<String> delete(@Parameter(description = "user email", required = true) @PathVariable(USER_DELETE_PATH_VARIABLE) String email);
+    ResponseEntity<String> delete(@Parameter(description = "user email", required = true) @PathVariable(USER_PATH_VARIABLE_NAME) String email);
 
     @GetMapping(USER_CURRENT)
     @Operation(summary = "Get info about current user", description = "Get info about the user making request",
@@ -60,6 +61,16 @@ public interface UserController {
     @ApiResponse(responseCode = "200", description = "Successfully retrieved user data", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
     ResponseEntity<UserDTO> currentUser(Principal principal);
+
+    @GetMapping(USER_UNBLOCK_ENDPOINT)
+    @Operation(summary = "Unblock user", description = "Unblock user",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = {
+                    @Content(schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+    })
+    ResponseEntity<UserDTO> unblock(@Parameter(description = "user email", required = true) @PathVariable(USER_PATH_VARIABLE_NAME) String email);
 
     @PutMapping(USER_CURRENT)
     @Operation(summary = "Update current user", description = "Update first and last name of the user making request",

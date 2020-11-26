@@ -54,4 +54,9 @@ public class UserControllerImpl implements UserController {
         UserDTO user = userMapper.map(userService.updateUser(updateRequest, principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<UserDTO> unblock(String email) {
+        return new ResponseEntity<>(userMapper.map(userService.unlock(email)), HttpStatus.OK);
+    }
 }
