@@ -85,13 +85,4 @@ public class UserServiceImpl implements UserService {
         user.setLocked(true);
         userRepository.save(user);
     }
-
-    @Override
-    public UserEntity unlock(String email) {
-        final UserEntity user = userRepository.findByEmailAndActiveTrue(email).orElseThrow(() ->
-                new UserNotFoundException(format("User with id=%s doesn't exists or inactive", email)));
-        user.setLocked(Boolean.FALSE);
-        userRepository.save(user);
-        return user;
-    }
 }

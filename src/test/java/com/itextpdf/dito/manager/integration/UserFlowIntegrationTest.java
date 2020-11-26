@@ -102,21 +102,4 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(request.getFirstName(), response.getFirstName());
         assertEquals(request.getLastName(), response.getLastName());
     }
-
-    @Test
-    public void testUnblockUser() throws Exception {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("blockeduser@email.com");
-        userEntity.setFirstName("Harry");
-        userEntity.setLastName("Kane");
-        userEntity.setPassword("123");
-        userEntity.setActive(Boolean.TRUE);
-        userEntity.setLocked(Boolean.TRUE);
-
-        userRepository.save(userEntity);
-        mockMvc.perform(get(UserController.BASE_NAME + "/unblock/" + userEntity.getEmail()))
-                .andExpect(status().isOk());
-        UserEntity user = userRepository.findByEmail("blockeduser@email.com").orElseThrow();
-        assertFalse(user.getLocked());
-    }
 }
