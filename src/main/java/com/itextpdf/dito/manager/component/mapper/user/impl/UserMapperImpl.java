@@ -4,13 +4,14 @@ package com.itextpdf.dito.manager.component.mapper.user.impl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,9 +38,8 @@ public class UserMapperImpl implements UserMapper {
         result.setLastName(entity.getLastName());
         result.setActive(entity.isEnabled());
         result.setBlocked(!entity.isAccountNonLocked());
-        result.setRoles(entity.getRoles().stream()
-                .map(RoleEntity::getName)
-                .collect(Collectors.toList()));
+        result.setRoles(entity.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()));
+        result.setAuthorities(entity.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).collect(Collectors.toList()));
 
         return result;
     }

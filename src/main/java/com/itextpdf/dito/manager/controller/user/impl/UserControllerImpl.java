@@ -49,7 +49,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserDTO> currentUser(final Principal principal) {
+    public ResponseEntity<UserDTO> currentUser(Principal principal) {
         UserDTO user = userMapper.map(userService.findByEmail(principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

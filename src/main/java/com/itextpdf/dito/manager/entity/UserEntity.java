@@ -3,7 +3,6 @@ package com.itextpdf.dito.manager.entity;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,7 +14,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -47,10 +45,17 @@ public class UserEntity implements UserDetails {
     private Set<RoleEntity> roles = new HashSet<>();
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.getRoles().stream().map(role ->
-                new SimpleGrantedAuthority(role.getName())
-        ).collect(Collectors.toList());
+    public Collection<SimpleGrantedAuthority> getAuthorities() {
+        final Set<SimpleGrantedAuthority> result = new HashSet<>();
+
+        for (final RoleEntity roleEntity : roles) {
+            final Set<PermissionEntity> permissions = roleEntity.getPermissions();
+            for (final PermissionEntity permissionEntity : permissions) {
+                result.add(new SimpleGrantedAuthority(permissionEntity.getName()));
+            }
+        }
+
+        return result;
     }
 
     @Override
