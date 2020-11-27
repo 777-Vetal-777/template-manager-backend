@@ -31,7 +31,8 @@ public interface UserController {
     String USER_PATH_VARIABLE_NAME = "email";
     String USER_DELETE_ENDPOINT = "/{" + USER_PATH_VARIABLE_NAME + "}";
     String USER_UNBLOCK_ENDPOINT = "/unblock";
-    String CURRENT_USER_ENDPOINT = "/me/info";
+    String CURRENT_USER_ENDPOINT = "/me";
+    String USER_INFO_ENDPOINT = "/info";
 
     @PostMapping
     @Operation(summary = "Create user", description = "Create new user",
@@ -57,7 +58,7 @@ public interface UserController {
     })
     ResponseEntity<String> delete(@Parameter(description = "user email", required = true) @PathVariable(USER_PATH_VARIABLE_NAME) String email);
 
-    @GetMapping(CURRENT_USER_ENDPOINT)
+    @GetMapping(CURRENT_USER_ENDPOINT + USER_INFO_ENDPOINT)
     @Operation(summary = "Get info about current user", description = "Get info about the user making request",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Successfully retrieved user data", content = {
@@ -65,16 +66,16 @@ public interface UserController {
     ResponseEntity<UserDTO> currentUser(Principal principal);
 
     @PostMapping(USER_UNBLOCK_ENDPOINT)
-    @Operation(summary = "Unblock user", description = "Unblock user",
+    @Operation(summary = "Unblock users", description = "Unblock users",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
                     @Content(schema = @Schema(implementation = UserDTO.class))}),
-            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "User(s) not found", content = @Content)
     })
     ResponseEntity<List<UserDTO>> unblock(@RequestBody UserUnblockRequestDTO userUnblockRequestDTO);
 
-    @PutMapping(CURRENT_USER_ENDPOINT)
+    @PutMapping(CURRENT_USER_ENDPOINT + USER_INFO_ENDPOINT)
     @Operation(summary = "Update current user", description = "Update first and last name of the user making request",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Successfully updated user data", content = {
