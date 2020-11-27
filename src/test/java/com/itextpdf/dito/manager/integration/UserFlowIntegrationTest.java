@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACTIVATION_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -88,7 +89,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         UsersActivateRequestDTO activateRequestDTO = new UsersActivateRequestDTO();
         activateRequestDTO.setActivate(false);
         activateRequestDTO.setEmails(List.of(user1.getEmail(), user2.getEmail()));
-        mockMvc.perform(patch(UserController.BASE_NAME)
+        mockMvc.perform(patch(UserController.BASE_NAME + USERS_ACTIVATION_ENDPOINT)
                 .content(objectMapper.writeValueAsString(activateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -125,7 +126,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         UsersActivateRequestDTO activateRequestDTO = new UsersActivateRequestDTO();
         activateRequestDTO.setEmails(List.of(user1.getEmail(), user2.getEmail()));
         activateRequestDTO.setActivate(true);
-        mockMvc.perform(patch(UserController.BASE_NAME)
+        mockMvc.perform(patch(UserController.BASE_NAME + USERS_ACTIVATION_ENDPOINT)
                 .content(objectMapper.writeValueAsString(activateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -144,7 +145,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     public void deactivateUsersWhenUserNotFound() throws Exception {
         UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
         deleteRequest.setEmails(List.of("unknown@email.com"));
-        mockMvc.perform(patch(UserController.BASE_NAME)
+        mockMvc.perform(patch(UserController.BASE_NAME + USERS_ACTIVATION_ENDPOINT)
                 .content(objectMapper.writeValueAsString(deleteRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

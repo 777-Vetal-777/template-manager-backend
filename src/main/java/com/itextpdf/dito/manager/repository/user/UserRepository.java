@@ -37,7 +37,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Modifying
     @Query("update UserEntity u set u.active = :value where u.email in :emails")
-    void activateUsers(@Param("emails") List<String> emails, @Param("value") boolean active);
+    void updateActivationStatus(@Param("emails") List<String> emails, @Param("value") boolean active);
 
     Integer countDistinctByEmailIn(List<String> emails);
 }

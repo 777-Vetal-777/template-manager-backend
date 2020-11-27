@@ -34,6 +34,7 @@ public interface UserController {
 
     // Endpoints
     String USERS_UNBLOCK_ENDPOINT = "/unblock";
+    String USERS_ACTIVATION_ENDPOINT = "/update-activity";
     String CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
 
@@ -53,14 +54,14 @@ public interface UserController {
     ResponseEntity<Page<UserDTO>> list(Pageable pageable,
                                        @Parameter(description = "user name or email search string") @RequestParam(name = "search", required = false) String searchParam);
 
-    @PatchMapping
+    @PatchMapping(USERS_ACTIVATION_ENDPOINT)
     @Operation(summary = "Activate(deactivate) users in batch", description = "Activate(deactivate) users in batch",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    ResponseEntity<Void> activate(@RequestBody @Valid UsersActivateRequestDTO deleteRequest);
+    ResponseEntity<Void> updateActivationStatus(@RequestBody @Valid UsersActivateRequestDTO activateRequest);
 
     @GetMapping(CURRENT_USER_INFO_ENDPOINT)
     @Operation(summary = "Get info about current user", description = "Get info about the user making request",

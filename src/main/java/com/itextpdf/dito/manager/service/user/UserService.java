@@ -18,7 +18,7 @@ public interface UserService {
 
     Page<UserEntity> getAll(Pageable pageable, String searchParam);
 
-    void activate(List<String> emails, boolean activateAction);
+    void updateActivationStatus(List<String> emails, boolean activateAction);
 
     void lock(UserEntity user);
 

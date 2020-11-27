@@ -43,8 +43,8 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Void> activate(final @Valid UsersActivateRequestDTO deleteRequest) {
-        userService.activate(deleteRequest.getEmails(), deleteRequest.isActivate());
+    public ResponseEntity<Void> updateActivationStatus(final @Valid UsersActivateRequestDTO activateRequestDTO) {
+        userService.updateActivationStatus(activateRequestDTO.getEmails(), activateRequestDTO.isActivate());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
