@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.repository.user;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -31,4 +32,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByEmailAndActiveTrue(String email);
 
     Optional<UserEntity> findByEmail(String email);
+
+    List<UserEntity> findAllByLockedIsTrue();
 }

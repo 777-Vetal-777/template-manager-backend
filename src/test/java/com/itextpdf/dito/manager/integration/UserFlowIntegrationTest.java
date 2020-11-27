@@ -87,7 +87,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void currentUser() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get(UserController.BASE_NAME + CURRENT_USER + CURRENT_USER_INFO_ENDPOINT)
+        MvcResult mvcResult = mockMvc.perform(get(UserController.BASE_NAME + CURRENT_USER_INFO_ENDPOINT)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -99,7 +99,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void updateCurrentUser() throws Exception {
         UserUpdateRequest request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-request.json"), UserUpdateRequest.class);
-        MvcResult mvcResult = mockMvc.perform(put(UserController.BASE_NAME + CURRENT_USER + CURRENT_USER_INFO_ENDPOINT)
+        MvcResult mvcResult = mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

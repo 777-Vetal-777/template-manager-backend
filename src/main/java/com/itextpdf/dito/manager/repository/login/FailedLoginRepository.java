@@ -13,4 +13,6 @@ public interface FailedLoginRepository extends JpaRepository<FailedLoginAttemptE
     void deleteByUser(UserEntity user);
 
     int countByUser(UserEntity user);
+
+    Optional<FailedLoginAttemptEntity> findFirstByUserIdOrderByVersionDesc(Long id);
 }
