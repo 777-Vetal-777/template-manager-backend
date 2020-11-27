@@ -67,7 +67,7 @@ public interface UserController {
             @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
     ResponseEntity<UserDTO> currentUser(Principal principal);
 
-    @PostMapping(USERS_UNBLOCK_ENDPOINT)
+    @PatchMapping(USERS_UNBLOCK_ENDPOINT)
     @Operation(summary = "Unblock users", description = "Unblock users",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

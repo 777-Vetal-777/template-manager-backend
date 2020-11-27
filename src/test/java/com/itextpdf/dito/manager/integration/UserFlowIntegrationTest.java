@@ -158,11 +158,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         failedLoginRepository.save(failedLoginAttemptEntity);
 
         UsersUnblockRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-unblock-request.json"), UsersUnblockRequestDTO.class);
-        mockMvc.perform(post(UserController.BASE_NAME + UserController.USERS_UNBLOCK_ENDPOINT)
+        mockMvc.perform(patch(UserController.BASE_NAME + UserController.USERS_UNBLOCK_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].blocked").value("false"));
         UserEntity user = userRepository.findByEmail("blockeduser@email.com").orElseThrow();
         assertTrue(failedLoginRepository.findByUser(userEntity).isEmpty());
         assertFalse(user.getLocked());

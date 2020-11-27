@@ -7,6 +7,7 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private Boolean active;
+    private Boolean blocked;
     private List<String> roles;
 
     public String getEmail() {
@@ -47,5 +48,13 @@ public class UserDTO {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
     }
 }

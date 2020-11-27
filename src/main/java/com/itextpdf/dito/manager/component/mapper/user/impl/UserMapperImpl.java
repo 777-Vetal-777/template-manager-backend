@@ -35,6 +35,7 @@ public class UserMapperImpl implements UserMapper {
         result.setFirstName(entity.getFirstName());
         result.setLastName(entity.getLastName());
         result.setActive(entity.isEnabled());
+        result.setBlocked(entity.getLocked());
         result.setRoles(entity.getRoles().stream().map(e -> e.getName()).collect(Collectors.toList()));
 
         return result;
