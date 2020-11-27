@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.dto.user.unblock;
 
 import java.util.List;
 
-public class UserUnblockRequestDTO {
+public class UsersUnblockRequestDTO {
     private List<String> userEmails;
 
     public List<String> getUserEmails() {
