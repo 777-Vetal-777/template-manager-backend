@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.dto.user.delete;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-public class UserDeleteRequest {
+public class UserDeleteRequestDTO {
     @NotEmpty
     private List<String> emails;
 

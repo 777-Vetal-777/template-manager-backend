@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -41,7 +41,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Void> delete(final UserDeleteRequest deleteRequest) {
+    public ResponseEntity<Void> delete(final UserDeleteRequestDTO deleteRequest) {
         userService.delete(deleteRequest.getEmails());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

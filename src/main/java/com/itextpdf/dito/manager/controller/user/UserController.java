@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +58,7 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    ResponseEntity<Void> delete(@RequestBody @Valid UserDeleteRequest deleteRequest);
+    ResponseEntity<Void> delete(@RequestBody @Valid UserDeleteRequestDTO deleteRequest);
 
     @GetMapping(CURRENT_USER_INFO_ENDPOINT)
     @Operation(summary = "Get info about current user", description = "Get info about the user making request",

@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
@@ -85,7 +85,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(user1);
         userRepository.save(user2);
 
-        UserDeleteRequest deleteRequest = new UserDeleteRequest();
+        UserDeleteRequestDTO deleteRequest = new UserDeleteRequestDTO();
         deleteRequest.setEmails(List.of(user1.getEmail(), user2.getEmail()));
         mockMvc.perform(delete(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(deleteRequest))
@@ -104,7 +104,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void deactivateUsersWhenUserNotFound() throws Exception {
-        UserDeleteRequest deleteRequest = new UserDeleteRequest();
+        UserDeleteRequestDTO deleteRequest = new UserDeleteRequestDTO();
         deleteRequest.setEmails(List.of("unknown@email.com"));
         mockMvc.perform(delete(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(deleteRequest))
