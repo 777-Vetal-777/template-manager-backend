@@ -82,12 +82,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void delete(final List<String> emails) {
+    public void activate(final List<String> emails, final boolean activateAction) {
         Integer activeUsers = userRepository.countDistinctByEmailIn(emails);
         if (activeUsers != emails.size()) {
             throw new UserNotFoundException("Some of the specified users do not exist");
         }
-        userRepository.deactivateUsers(emails);
+        userRepository.activateUsers(emails, activateAction);
     }
 
     @Override

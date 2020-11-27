@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
+import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.password.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,8 +43,14 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Void> delete(final UserDeleteRequestDTO deleteRequest) {
-        userService.delete(deleteRequest.getEmails());
+    public ResponseEntity<Void> deactivate(final  @Valid UsersActivateRequestDTO deleteRequest) {
+        userService.activate(deleteRequest.getEmails(), false);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    public ResponseEntity<Void> activate(final @Valid UsersActivateRequestDTO deleteRequest) {
+        userService.activate(deleteRequest.getEmails(), true);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

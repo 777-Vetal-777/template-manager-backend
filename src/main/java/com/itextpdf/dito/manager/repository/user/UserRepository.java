@@ -36,8 +36,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findAllByLockedIsTrue();
 
     @Modifying
-    @Query("update UserEntity u set u.active = false where u.email in ?1")
-    void deactivateUsers(List<String> emails);
+    @Query("update UserEntity u set u.active = :value where u.email in :emails")
+    void activateUsers(@Param("emails") List<String> emails, @Param("value") boolean active);
 
     Integer countDistinctByEmailIn(List<String> emails);
 }

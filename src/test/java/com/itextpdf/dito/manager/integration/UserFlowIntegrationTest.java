@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
+import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
@@ -85,7 +85,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(user1);
         userRepository.save(user2);
 
-        UserDeleteRequestDTO deleteRequest = new UserDeleteRequestDTO();
+        UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
         deleteRequest.setEmails(List.of(user1.getEmail(), user2.getEmail()));
         mockMvc.perform(delete(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(deleteRequest))
@@ -103,8 +103,44 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void activateUsers() throws Exception {
+        UserEntity user1 = new UserEntity();
+        user1.setEmail("user11@email.com");
+        user1.setFirstName("user1");
+        user1.setLastName("user1");
+        user1.setPassword("password1");
+        user1.setActive(Boolean.FALSE);
+
+        UserEntity user2 = new UserEntity();
+        user2.setEmail("user21@email.com");
+        user2.setFirstName("user2");
+        user2.setLastName("user2");
+        user2.setPassword("password2");
+        user2.setActive(Boolean.FALSE);
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
+        deleteRequest.setEmails(List.of(user1.getEmail(), user2.getEmail()));
+        mockMvc.perform(patch(UserController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(deleteRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        Optional<UserEntity> persisted1 = userRepository.findByEmail(user1.getEmail());
+        Optional<UserEntity> persisted2 = userRepository.findByEmail(user2.getEmail());
+
+        assertTrue(persisted1.isPresent());
+        assertTrue(persisted2.isPresent());
+        assertTrue(persisted1.get().getActive());
+        assertTrue(persisted2.get().getActive());
+    }
+
+    @Test
     public void deactivateUsersWhenUserNotFound() throws Exception {
-        UserDeleteRequestDTO deleteRequest = new UserDeleteRequestDTO();
+        UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
         deleteRequest.setEmails(List.of("unknown@email.com"));
         mockMvc.perform(delete(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(deleteRequest))

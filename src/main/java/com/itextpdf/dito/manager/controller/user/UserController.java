@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
+import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.password.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -60,7 +60,16 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    ResponseEntity<Void> delete(@RequestBody @Valid UserDeleteRequestDTO deleteRequest);
+    ResponseEntity<Void> deactivate(@RequestBody @Valid UsersActivateRequestDTO deleteRequest);
+
+    @PatchMapping
+    @Operation(summary = "Activate users in batch", description = "Activate users in batch",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+    })
+    ResponseEntity<Void> activate(@RequestBody @Valid UsersActivateRequestDTO deleteRequest);
 
     @GetMapping(CURRENT_USER_INFO_ENDPOINT)
     @Operation(summary = "Get info about current user", description = "Get info about the user making request",
