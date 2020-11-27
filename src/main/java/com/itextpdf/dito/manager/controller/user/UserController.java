@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -53,17 +53,8 @@ public interface UserController {
     ResponseEntity<Page<UserDTO>> list(Pageable pageable,
                                        @Parameter(description = "user name or email search string") @RequestParam(name = "search", required = false) String searchParam);
 
-    @DeleteMapping
-    @Operation(summary = "Deactivate users in batch", description = "Deactivate users in batch",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),
-            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
-    })
-    ResponseEntity<Void> deactivate(@RequestBody @Valid UsersActivateRequestDTO deleteRequest);
-
     @PatchMapping
-    @Operation(summary = "Activate users in batch", description = "Activate users in batch",
+    @Operation(summary = "Activate(deactivate) users in batch", description = "Activate(deactivate) users in batch",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),

@@ -1,9 +1,12 @@
-package com.itextpdf.dito.manager.dto.user.delete;
+package com.itextpdf.dito.manager.dto.user.update;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class UsersActivateRequestDTO {
+    @NotNull
+    private boolean activate;
     @NotEmpty
     private List<String> emails;
 
@@ -13,5 +16,13 @@ public class UsersActivateRequestDTO {
 
     public void setEmails(List<String> emails) {
         this.emails = emails;
+    }
+
+    public boolean isActivate() {
+        return activate;
+    }
+
+    public void setActivate(boolean activate) {
+        this.activate = activate;
     }
 }

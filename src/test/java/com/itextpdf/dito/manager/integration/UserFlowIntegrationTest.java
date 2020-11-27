@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
@@ -85,10 +85,11 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(user1);
         userRepository.save(user2);
 
-        UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
-        deleteRequest.setEmails(List.of(user1.getEmail(), user2.getEmail()));
-        mockMvc.perform(delete(UserController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(deleteRequest))
+        UsersActivateRequestDTO activateRequestDTO = new UsersActivateRequestDTO();
+        activateRequestDTO.setActivate(false);
+        activateRequestDTO.setEmails(List.of(user1.getEmail(), user2.getEmail()));
+        mockMvc.perform(patch(UserController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(activateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
@@ -121,10 +122,11 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(user1);
         userRepository.save(user2);
 
-        UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
-        deleteRequest.setEmails(List.of(user1.getEmail(), user2.getEmail()));
+        UsersActivateRequestDTO activateRequestDTO = new UsersActivateRequestDTO();
+        activateRequestDTO.setEmails(List.of(user1.getEmail(), user2.getEmail()));
+        activateRequestDTO.setActivate(true);
         mockMvc.perform(patch(UserController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(deleteRequest))
+                .content(objectMapper.writeValueAsString(activateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
@@ -142,7 +144,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     public void deactivateUsersWhenUserNotFound() throws Exception {
         UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
         deleteRequest.setEmails(List.of("unknown@email.com"));
-        mockMvc.perform(delete(UserController.BASE_NAME)
+        mockMvc.perform(patch(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(deleteRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

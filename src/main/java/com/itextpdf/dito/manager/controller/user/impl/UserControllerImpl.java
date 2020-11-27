@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
-import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -43,25 +43,19 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Void> deactivate(final  @Valid UsersActivateRequestDTO deleteRequest) {
-        userService.activate(deleteRequest.getEmails(), false);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @Override
     public ResponseEntity<Void> activate(final @Valid UsersActivateRequestDTO deleteRequest) {
-        userService.activate(deleteRequest.getEmails(), true);
+        userService.activate(deleteRequest.getEmails(), deleteRequest.isActivate());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
-    public ResponseEntity<UserDTO> currentUser(Principal principal) {
+    public ResponseEntity<UserDTO> currentUser(final Principal principal) {
         UserDTO user = userMapper.map(userService.findByEmail(principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<UserDTO> updateCurrentUser(UserUpdateRequestDTO updateRequest, Principal principal) {
+    public ResponseEntity<UserDTO> updateCurrentUser(final UserUpdateRequestDTO updateRequest, Principal principal) {
         UserDTO user = userMapper.map(userService.updateUser(updateRequest, principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
