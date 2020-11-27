@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.ChangePasswordException;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
 import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
@@ -37,6 +38,15 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ChangePasswordException.class)
+    public ResponseEntity<ErrorResponseDTO> changePasswordExceptionHandler(
+            final ChangePasswordException ex) {
+        log.error(ex.getMessage());
+
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)

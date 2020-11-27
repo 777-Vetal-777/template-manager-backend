@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.dto.user.create;
 
 import javax.validation.constraints.NotBlank;
 
-public class UserUpdateRequest {
+public class UserUpdateRequestDTO {
     @NotBlank
     String firstName;
     @NotBlank

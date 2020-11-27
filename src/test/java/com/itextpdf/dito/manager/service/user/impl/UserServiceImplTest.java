@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
@@ -78,7 +78,7 @@ class UserServiceImplTest {
     void updateUser_WhenCorrectRequestsIsSent_ThenUserFieldsAreUpdated() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
-        UserUpdateRequest updateRequest = new UserUpdateRequest();
+        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO();
         String newFirstName = "myNewFirstName";
         String newLastName = "myNewLastName";
         updateRequest.setFirstName(newFirstName);
@@ -93,7 +93,7 @@ class UserServiceImplTest {
     @Test
     void updateUser_WhenUserDoesNotExists_ThenExceptionIsThrown() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.empty());
-        UserUpdateRequest updateRequest = new UserUpdateRequest();
+        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO();
         updateRequest.setFirstName("");
         updateRequest.setLastName("");
 

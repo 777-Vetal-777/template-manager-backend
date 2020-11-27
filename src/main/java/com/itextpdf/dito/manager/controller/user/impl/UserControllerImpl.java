@@ -6,7 +6,8 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.password.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserDTO> updateCurrentUser(UserUpdateRequest updateRequest, Principal principal) {
+    public ResponseEntity<UserDTO> updateCurrentUser(UserUpdateRequestDTO updateRequest, Principal principal) {
         UserDTO user = userMapper.map(userService.updateUser(updateRequest, principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -65,5 +66,14 @@ public class UserControllerImpl implements UserController {
                 .map(email -> userMapper.map(userService.unblock(email)))
                 .collect(Collectors.toList());
         return new ResponseEntity<>(unblockedUsers, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> updatePassword(final UpdatePasswordRequestDTO updatePasswordRequestDTO,
+                                               final Principal principal) {
+        userService.updatePassword(updatePasswordRequestDTO.getOldPassword(),
+                updatePasswordRequestDTO.getNewPassword(),
+                principal.getName());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -2,8 +2,9 @@ package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.exception.ChangePasswordException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity updateUser(UserUpdateRequest updateRequest, String email) {
+    public UserEntity updateUser(UserUpdateRequestDTO updateRequest, String email) {
         UserEntity user = findByEmail(email);
         user.setFirstName(updateRequest.getFirstName());
         user.setLastName(updateRequest.getLastName());
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserEntity> getAll(Pageable pageable, String searchParam) {
         return StringUtils.isEmpty(searchParam)
-                ? userRepository.findAllByActiveTrue(pageable)
+                ? userRepository.findAll(pageable)
                 : userRepository.search(pageable, searchParam);
     }
 
@@ -104,5 +105,17 @@ public class UserServiceImpl implements UserService {
         failedLoginRepository.deleteByUser(user);
         userRepository.save(user);
         return user;
+    }
+
+    @Override
+    public void updatePassword(final String oldPassword,
+                               final String newPassword,
+                               final String userEmail) {
+        final UserEntity user = findByEmail(userEmail);
+        if (encoder.matches(newPassword, user.getPassword())) {
+            throw new ChangePasswordException("New password should not be equal to old password");
+        }
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

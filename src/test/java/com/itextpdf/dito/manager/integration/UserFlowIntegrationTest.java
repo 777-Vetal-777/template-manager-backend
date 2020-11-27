@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -126,7 +126,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void updateCurrentUser() throws Exception {
-        UserUpdateRequest request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-request.json"), UserUpdateRequest.class);
+        UserUpdateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-request.json"), UserUpdateRequestDTO.class);
         MvcResult mvcResult = mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)

@@ -5,7 +5,8 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
+import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.password.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +34,7 @@ public interface UserController {
 
     // Endpoints
     String USERS_UNBLOCK_ENDPOINT = "/unblock";
+    String CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
 
     @PostMapping
@@ -82,5 +84,16 @@ public interface UserController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Successfully updated user data", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
-    ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserUpdateRequest updateRequest, Principal principal);
+    ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserUpdateRequestDTO updateRequest, Principal principal);
+
+    @PatchMapping(CHANGE_PASSWORD_ENDPOINT)
+    @Operation(summary = "Change current user password", description = "Change current user password",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully updated password", content = {
+                    @Content(mediaType = "application/json", schema = @Schema)}),
+            @ApiResponse(responseCode = "400", description = "Old password is same as old password", content = @Content),
+    })
+    ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
+
 }

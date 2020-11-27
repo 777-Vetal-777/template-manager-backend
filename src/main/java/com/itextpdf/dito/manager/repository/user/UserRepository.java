@@ -15,13 +15,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    Page<UserEntity> findAllByActiveTrue(Pageable pageable);
+    Page<UserEntity> findAll(Pageable pageable);
 
     @Query(value = "select u from UserEntity u "
-            + "where (u.email like '%'||:value||'%' "
+            + "where u.email like '%'||:value||'%' "
             + "or u.firstName like '%'||:value||'%' "
-            + "or u.lastName like '%'||:value||'%') "
-            + "and u.active=true")
+            + "or u.lastName like '%'||:value||'%'")
     Page<UserEntity> search(Pageable pageable, @Param("value") String searchParam);
 
     @Query(value = "select count(r) from UserEntity u "
