@@ -5,10 +5,10 @@ import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.service.user.UserService;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -41,9 +41,9 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<String> delete(final String email) {
-        userService.delete(email);
-        return new ResponseEntity<>(email, HttpStatus.OK);
+    public ResponseEntity<Void> delete(final UserDeleteRequest deleteRequest) {
+        userService.delete(deleteRequest.getEmails());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override

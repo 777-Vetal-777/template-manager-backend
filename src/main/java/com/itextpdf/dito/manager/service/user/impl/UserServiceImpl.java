@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
@@ -14,9 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -79,11 +81,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(final String email) {
-        final UserEntity user = userRepository.findByEmailAndActiveTrue(email).orElseThrow(() ->
-                new UserNotFoundException(format("User with id=%s doesn't exists or inactive", email)));
-        user.setActive(Boolean.FALSE);
-        userRepository.save(user);
+    @Transactional
+    public void delete(final List<String> emails) {
+        Integer activeUsers = userRepository.countDistinctByEmailIn(emails);
+        if (activeUsers != emails.size()) {
+            throw new UserNotFoundException("Some of the specified users do not exist");
+        }
+        userRepository.deactivateUsers(emails);
     }
 
     @Override

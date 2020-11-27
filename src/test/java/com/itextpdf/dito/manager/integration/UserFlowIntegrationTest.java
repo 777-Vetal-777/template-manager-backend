@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
@@ -16,11 +17,14 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,26 +67,50 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testDeactivateUser() throws Exception {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("test@email.com");
-        userEntity.setFirstName("Harry");
-        userEntity.setLastName("Kane");
-        userEntity.setPassword("123");
-        userEntity.setActive(Boolean.TRUE);
+    public void deactivateUsers() throws Exception {
+        UserEntity user1 = new UserEntity();
+        user1.setEmail("user1@email.com");
+        user1.setFirstName("user1");
+        user1.setLastName("user1");
+        user1.setPassword("password1");
+        user1.setActive(Boolean.TRUE);
 
-        userRepository.save(userEntity);
-        mockMvc.perform(delete(UserController.BASE_NAME + "/" + userEntity.getEmail()))
-                .andExpect(status().isOk());
-        UserEntity user = userRepository.findByEmail("test@email.com").orElseThrow();
-        assertFalse(user.getActive());
+        UserEntity user2 = new UserEntity();
+        user2.setEmail("user2@email.com");
+        user2.setFirstName("user2");
+        user2.setLastName("user2");
+        user2.setPassword("password2");
+        user2.setActive(Boolean.TRUE);
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        UserDeleteRequest deleteRequest = new UserDeleteRequest();
+        deleteRequest.setEmails(List.of(user1.getEmail(), user2.getEmail()));
+        mockMvc.perform(delete(UserController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(deleteRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        Optional<UserEntity> persisted1 = userRepository.findByEmail(user1.getEmail());
+        Optional<UserEntity> persisted2 = userRepository.findByEmail(user2.getEmail());
+
+        assertTrue(persisted1.isPresent());
+        assertTrue(persisted2.isPresent());
+        assertFalse(persisted1.get().getActive());
+        assertFalse(persisted2.get().getActive());
     }
 
     @Test
-    public void testDeactivateNotFoundUser() throws Exception {
-        mockMvc.perform(delete(UserController.BASE_NAME + "/" + "unknown@email.com"))
+    public void deactivateUsersWhenUserNotFound() throws Exception {
+        UserDeleteRequest deleteRequest = new UserDeleteRequest();
+        deleteRequest.setEmails(List.of("unknown@email.com"));
+        mockMvc.perform(delete(UserController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(deleteRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
-
     }
 
     @Test

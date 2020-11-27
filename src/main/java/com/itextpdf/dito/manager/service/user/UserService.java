@@ -1,11 +1,14 @@
 package com.itextpdf.dito.manager.service.user;
 
+import com.itextpdf.dito.manager.dto.user.delete.UserDeleteRequest;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequest;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface UserService {
     UserEntity create(UserCreateRequestDTO request);
@@ -16,7 +19,7 @@ public interface UserService {
 
     Page<UserEntity> getAll(Pageable pageable, String searchParam);
 
-    void delete(String email);
+    void delete(List<String> emails);
 
     void lock(UserEntity user);
 
