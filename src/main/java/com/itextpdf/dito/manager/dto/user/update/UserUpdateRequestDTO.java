@@ -1,11 +1,7 @@
-package com.itextpdf.dito.manager.dto.user.create;
-
-import javax.validation.constraints.NotBlank;
+package com.itextpdf.dito.manager.dto.user.update;
 
 public class UserUpdateRequestDTO {
-    @NotBlank
     String firstName;
-    @NotBlank
     String lastName;
 
     public String getFirstName() {

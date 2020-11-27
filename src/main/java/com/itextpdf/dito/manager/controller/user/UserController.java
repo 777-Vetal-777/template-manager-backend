@@ -5,8 +5,8 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.delete.UsersActivateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.password.UpdatePasswordRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -99,9 +99,9 @@ public interface UserController {
     @Operation(summary = "Change current user password", description = "Change current user password",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully updated password", content = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated password", content = {
                     @Content(mediaType = "application/json", schema = @Schema)}),
-            @ApiResponse(responseCode = "400", description = "Old password is same as old password", content = @Content),
+            @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
     ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
 

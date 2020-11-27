@@ -1,8 +1,7 @@
 package com.itextpdf.dito.manager.integration;
 
 import com.itextpdf.dito.manager.controller.user.UserController;
-import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.password.UpdatePasswordRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;

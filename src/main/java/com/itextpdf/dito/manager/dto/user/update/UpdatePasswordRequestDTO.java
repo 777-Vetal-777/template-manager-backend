@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.dto.user.password;
+package com.itextpdf.dito.manager.dto.user.update;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;

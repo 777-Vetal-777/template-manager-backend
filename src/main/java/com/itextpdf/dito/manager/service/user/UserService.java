@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.service.user;
 
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import org.springframework.data.domain.Page;
