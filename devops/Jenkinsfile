@@ -61,7 +61,7 @@ pipeline {
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
                             sh """
-                            echo 'docker image ${registryHost}/${projectName}-${WORKING_ENV}-${BUILD_NUMBER}'
+                            echo 'docker image ${registryHost}/${projectName}-${WORKING_ENV}:${BUILD_NUMBER}'
                             docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d
                             docker image prune -f
                             """
