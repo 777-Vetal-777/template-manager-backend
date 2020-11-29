@@ -52,7 +52,7 @@ pipeline {
         }
         stage("Remove unused docker image"){
             steps{
-                sh '''docker rmi -f $(docker images --filter=reference=${projectName} -q) >/dev/null 2>&1''' 
+                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1''' 
             }
         }
         stage("Deploy docker image to host"){
