@@ -23,11 +23,21 @@ pipeline {
     agent{
         label "master"
     }
-    stages {
+    stages { 
         stage("Build docker image"){
             steps{
                 script {
-                  dockerImage = docker.build("${projectName}:${WORKING_ENV}", "-f ./devops/ci/Dockerfile ./" )   
+                  dockerImage = docker.build("${projectName}-${WORKING_ENV}:${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
+                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp $${projectName}-${WORKING_ENV}:${BUILD_NUMBER} template-manager.jar /opt/mount/"   
+                }
+            }
+        }
+        stage('Sonarqube analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('SonarQube_8.3') {                        
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=${projectName}-${WORKING_ENV} -Dsonar.projectName=${projectName}-${WORKING_ENV} -Dsonar.projectVersion=1.0 -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                    }
                 }
             }
         }
@@ -51,14 +61,19 @@ pipeline {
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
                             sh """
-                            echo 'docker image ${registryHost}/${projectName}:${WORKING_ENV}'
-                            docker image pull nexus-docker.andersenlab.dev/${projectName}:${WORKING_ENV}
-                            docker-compose --file ${WORKSPACE}/devops/cd/docker-compose.yml up --force-recreate -d
+                            echo 'docker image ${registryHost}/${projectName}-${WORKING_ENV}-${BUILD_NUMBER}'
+                            docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d
+                            docker image prune -f
                             """
                         }
                     }
                 }
             }
+        }
+    }
+            post {
+        always {
+            cleanWs()
         }
     }
 }

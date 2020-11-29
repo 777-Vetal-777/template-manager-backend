@@ -2,8 +2,8 @@ version: '3'
 services:
   #=========== BACKEND ===============      
   backend:
-    container_name: backend_itext
-    image: nexus-docker.andersenlab.dev/${projectName}:${WORKING_ENV}
+    container_name: backend
+    image: nexus-docker.andersenlab.dev/${projectName}-${WORKING_ENV}:${BUILD_NUMBER}
     ports:
       - "8080:8080"
     environment:
@@ -13,7 +13,7 @@ services:
       - db
   #=========== DATABASE ===============
   db:
-    container_name: db_itext
+    container_name: db
     image: postgres:13
     ports:
       - "5432:5432"
