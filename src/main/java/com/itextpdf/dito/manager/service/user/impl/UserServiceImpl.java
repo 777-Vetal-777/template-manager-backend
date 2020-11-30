@@ -67,6 +67,7 @@ public class UserServiceImpl implements UserService {
         }
         final UserEntity user = userMapper.map(request);
         user.setPassword(encoder.encode(request.getPassword()));
+        user.setLocked(Boolean.FALSE);
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed
         user.setRoles(Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR")));

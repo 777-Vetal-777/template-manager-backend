@@ -48,6 +48,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdUser.firstName").value("Harry"))
                 .andExpect(jsonPath("createdUser.email").value("user@email.com"))
                 .andExpect(jsonPath("createdUser.lastName").value("Kane"))
+                .andExpect(jsonPath("createdUser.blocked").value("false"))
                 .andExpect(jsonPath("createdUser.active").value("true"));
 
         assertTrue(userRepository.findByEmailAndActiveTrue("user@email.com").isPresent());

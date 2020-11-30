@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.dto.error.RequestParamErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
@@ -16,9 +17,15 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -58,17 +65,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDTO> emptyParamsValidationErrorHandler(
+    public ResponseEntity<RequestParamErrorResponseDTO> requestParamsValidationErrorHandler(
             final MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
-        final String errorMsg =
-                ex.getBindingResult().getFieldErrors().stream()
-                        .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                        .findFirst()
-                        .orElse(ex.getMessage());
-
+        List<String> fieldErrors = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(toList());
         return new ResponseEntity<>(
-                new ErrorResponseDTO("Validation error", errorMsg), HttpStatus.BAD_REQUEST);
+                new RequestParamErrorResponseDTO("Validation error", "Some request params are invalid", fieldErrors), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UnsupportedTemplateTypeException.class)
