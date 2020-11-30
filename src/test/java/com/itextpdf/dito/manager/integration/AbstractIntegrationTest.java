@@ -4,9 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+
+import java.net.URI;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 /**
  * Base class for integration tests.
@@ -22,4 +29,12 @@ public abstract class AbstractIntegrationTest {
     protected ObjectMapper objectMapper;
     @Autowired
     protected MockMvc mockMvc;
+
+    protected ResultActions performPostFilesInteraction(URI uri, MockMultipartFile... files) throws Exception {
+        MockMultipartHttpServletRequestBuilder multipartRequestBuilder = multipart(uri);
+        for (int i = 0; i < files.length; i++) {
+            multipartRequestBuilder = multipartRequestBuilder.file(files[i]);
+        }
+        return this.mockMvc.perform(multipartRequestBuilder);
+    }
 }

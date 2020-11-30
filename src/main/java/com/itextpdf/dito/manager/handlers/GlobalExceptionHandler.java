@@ -2,12 +2,14 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
+import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
+import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
 import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -88,5 +90,26 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> userAccountIsLocked(final LockedException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO("Account is locked.", "Please contact an administrator."),
                 HttpStatus.LOCKED);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponseDTO> collectionAlreadyExists(final CollectionAlreadyExistsException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Collections with name already exist.",
+                new StringBuilder("Collection's name: ").append(ex.getCollectionName()).toString()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponseDTO> fileTypeNotSupported(final FileTypeNotSupportedException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("File type is not supported",
+                new StringBuilder("File type: ").append(ex.getFileType()).toString()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponseDTO> fileCannotBeRead(final FileCannotBeReadException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("File cannot be read",
+                new StringBuilder("File name: ").append(ex.getFileName()).toString()),
+                HttpStatus.BAD_REQUEST);
     }
 }

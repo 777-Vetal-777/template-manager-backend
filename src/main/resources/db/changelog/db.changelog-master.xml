@@ -10,5 +10,6 @@
     <property name="blob" value="blob" dbms="all"/>
 
     <include file="releases/db.changelog-0.0.1.xml" relativeToChangelogFile="true"/>
+    <include file="releases/db.changelog-0.0.2.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

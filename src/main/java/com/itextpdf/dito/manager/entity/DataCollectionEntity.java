@@ -27,6 +27,8 @@ public class DataCollectionEntity {
 
     private String name;
 
+    private byte[] data;
+
     @Enumerated(EnumType.STRING)
     private DataCollectionType type;
 
@@ -87,6 +89,14 @@ public class DataCollectionEntity {
 
     public void setTemplate(TemplateEntity template) {
         this.template = template;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] file) {
+        this.data = file;
     }
 
 }

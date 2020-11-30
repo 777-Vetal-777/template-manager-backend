@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface DataCollectionRepository extends JpaRepository<DataCollectionEntity, Long> {
     DataCollectionEntity findByName(String name);
 
+    Boolean existsByName(String name);
+
     @Query(value = "select dc from DataCollectionEntity dc "
             + "where dc.name like '%'||:value||'%' "
             + "or dc.type like '%'||:value||'%' "

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -27,9 +28,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     }
 
     @Override
-    public ResponseEntity<DataCollectionDTO> create(final DataCollectionCreateRequestDTO requestDTO, final Principal principal) {
-        final DataCollectionEntity entity = dataCollectionService.create(dataCollectionMapper.map(requestDTO), principal.getName());
-        return new ResponseEntity<>(dataCollectionMapper.map(entity), HttpStatus.CREATED);
+    public ResponseEntity<DataCollectionDTO> create(final DataCollectionCreateRequestDTO requestDTO, final MultipartFile attachment, final Principal principal) {
+        return new ResponseEntity<>(dataCollectionService.create(requestDTO, attachment, principal), HttpStatus.CREATED);
     }
 
     @Override
