@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.service.datacollections.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
@@ -18,7 +17,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Date;
 
 @Service
@@ -37,23 +35,22 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollectionDTO create(final DataCollectionCreateRequestDTO requestDTO, final MultipartFile attachment, final Principal principal) {
-        if (dataCollectionRepository.existsByName(requestDTO.getName())) {
-            throw new CollectionAlreadyExistsException(requestDTO.getName());
+    public DataCollectionEntity create(final DataCollectionEntity collectionEntity, final MultipartFile attachment, final String email) {
+        if (dataCollectionRepository.existsByName(collectionEntity.getName())) {
+            throw new CollectionAlreadyExistsException(collectionEntity.getName());
         }
-        final DataCollectionEntity entity = dataCollectionMapper.map(requestDTO);
         final String fileExtension = FilenameUtils.getExtension(attachment.getOriginalFilename()).toLowerCase();
-        if (org.apache.commons.lang3.StringUtils.isEmpty(fileExtension) || !fileExtension.equals("json")) {
+        if (StringUtils.isEmpty(fileExtension) || !fileExtension.equals("json")) {
             throw new FileTypeNotSupportedException(fileExtension);
         }
         try {
-            entity.setData(attachment.getBytes());
+            collectionEntity.setData(attachment.getBytes());
         } catch (IOException e) {
             throw new FileCannotBeReadException(attachment.getOriginalFilename());
         }
-        entity.setModifiedOn(new Date());
-        entity.setAuthor(userService.findByEmail(principal.getName()));
-        return dataCollectionMapper.map(dataCollectionRepository.save(entity));
+        collectionEntity.setModifiedOn(new Date());
+        collectionEntity.setAuthor(userService.findByEmail(email));
+        return dataCollectionRepository.save(collectionEntity);
     }
 
     @Override

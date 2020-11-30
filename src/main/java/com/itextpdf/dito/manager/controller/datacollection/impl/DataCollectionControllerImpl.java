@@ -29,7 +29,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     @Override
     public ResponseEntity<DataCollectionDTO> create(final DataCollectionCreateRequestDTO requestDTO, final MultipartFile attachment, final Principal principal) {
-        return new ResponseEntity<>(dataCollectionService.create(requestDTO, attachment, principal), HttpStatus.CREATED);
+        final DataCollectionEntity collectionEntity = dataCollectionMapper.map(requestDTO);
+        final DataCollectionDTO dataCollectionDTO = dataCollectionMapper.map(dataCollectionService.create(collectionEntity, attachment, principal.getName()));
+        return new ResponseEntity<>(dataCollectionDTO, HttpStatus.CREATED);
     }
 
     @Override

@@ -4,10 +4,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet id="021-add-file-to-collection" author="Ivan_Semenov">
+    <changeSet id="001-update-data-collection-table" author="Ivan_Semenov">
         <addColumn tableName="data_collection">
-            <column name="data"
-                    type="bytea">
+            <column name="data" type="${blob}">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
