@@ -8,6 +8,7 @@
         <insert tableName="permission">
             <column name="id" value="1"/>
             <column name="name" value="E1_US1_LOG_IN_TO_THE_SYSTEM"/>
+            <column name="available_for_custom_role" value="true"/>
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="1"/>
@@ -27,6 +28,7 @@
         <insert tableName="permission">
             <column name="id" value="2"/>
             <column name="name" value="E1_US2_LOG_OUT_FROM_THE_SYSTEM"/>
+            <column name="available_for_custom_role" value="true"/>
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="1"/>
