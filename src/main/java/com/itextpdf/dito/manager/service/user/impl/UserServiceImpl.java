@@ -3,8 +3,10 @@ package com.itextpdf.dito.manager.service.user.impl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
+import com.itextpdf.dito.manager.exception.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
@@ -69,7 +71,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setPassword(encoder.encode(request.getPassword()));
         //TODO generate temporal password and email log-in link
         //TODO implement adding roles when requirements are completed
-        user.setRoles(Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR")));
+        user.setRoles(
+                Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow(RoleNotFoundException::new)));
         return userRepository.save(user);
     }
 
@@ -118,6 +121,23 @@ public class UserServiceImpl extends AbstractService implements UserService {
         }
         user.setPassword(encoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserEntity update(final String email, final UserEntity user) {
+        final UserEntity persisted = userRepository.findByEmail(email).orElseThrow(() ->
+                new UserNotFoundException(email));
+
+        final Set<RoleEntity> roles = user.getRoles();
+        if (roles != null) {
+            for (final RoleEntity role : roles) {
+                final RoleEntity roleEntity = roleRepository.findByName(role.getName()).orElseThrow(
+                        RoleNotFoundException::new);
+                persisted.getRoles().add(roleEntity);
+            }
+        }
+
+        return userRepository.save(persisted);
     }
 
     @Override

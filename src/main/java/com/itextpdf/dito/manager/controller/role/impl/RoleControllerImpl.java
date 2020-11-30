@@ -4,14 +4,15 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.service.role.RoleService;
+
+import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
 
 @RestController
 public class RoleControllerImpl implements RoleController {
@@ -20,14 +21,16 @@ public class RoleControllerImpl implements RoleController {
     private final RoleMapper roleMapper;
 
     public RoleControllerImpl(final RoleService roleService,
-                              final RoleMapper roleMapper) {
+            final RoleMapper roleMapper) {
         this.roleService = roleService;
         this.roleMapper = roleMapper;
     }
 
     @Override
     public ResponseEntity<RoleDTO> create(final @Valid RoleCreateRequestDTO roleCreateRequestDTO) {
-        return new ResponseEntity<>(new RoleDTO(), HttpStatus.CREATED);
+        final RoleEntity result = roleService
+                .create(roleMapper.map(roleCreateRequestDTO), roleCreateRequestDTO.getPermissions());
+        return new ResponseEntity<>(roleMapper.map(result), HttpStatus.CREATED);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.service.datacollections;
+package com.itextpdf.dito.manager.service.datacollection;
 
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import org.springframework.data.domain.Page;

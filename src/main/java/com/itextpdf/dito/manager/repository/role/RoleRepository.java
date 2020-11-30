@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
-    RoleEntity findByName(String name);
+    Optional<RoleEntity> findByName(String name);
 
     @Query(value = "select r from RoleEntity r "
             + "where r.name like '%'||:value||'%'")

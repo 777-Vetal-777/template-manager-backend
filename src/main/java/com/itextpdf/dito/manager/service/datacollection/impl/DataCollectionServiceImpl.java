@@ -1,13 +1,12 @@
-package com.itextpdf.dito.manager.service.datacollections.impl;
+package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
-import com.itextpdf.dito.manager.service.datacollections.DataCollectionService;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.data.domain.Page;

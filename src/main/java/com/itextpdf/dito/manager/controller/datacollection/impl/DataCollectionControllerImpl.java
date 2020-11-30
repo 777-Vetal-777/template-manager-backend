@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.controller.datacollection.DataCollectionControl
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
-import com.itextpdf.dito.manager.service.datacollections.DataCollectionService;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

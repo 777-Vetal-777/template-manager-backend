@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +20,8 @@ public class RoleMapperImpl implements RoleMapper {
     @Override
     public RoleDTO map(final RoleEntity entity) {
         final RoleDTO dto = new RoleDTO();
-        dto.setId(entity.getId());
         dto.setName(entity.getName());
+        dto.setType(entity.getType().getName().toString());
         return dto;
     }
 

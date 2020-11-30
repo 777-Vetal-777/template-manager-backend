@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -10,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -24,7 +26,7 @@ public class RoleEntity {
     @ManyToMany(mappedBy = "roles")
     private Set<UserEntity> users;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "role_permission",
             joinColumns = @JoinColumn(
@@ -32,6 +34,10 @@ public class RoleEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "permission_id"))
     private Set<PermissionEntity> permissions = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    private RoleTypeEntity type;
 
     public Long getId() {
         return id;
@@ -63,5 +69,13 @@ public class RoleEntity {
 
     public void setPermissions(Set<PermissionEntity> permissions) {
         this.permissions = permissions;
+    }
+
+    public RoleTypeEntity getType() {
+        return type;
+    }
+
+    public void setType(RoleTypeEntity type) {
+        this.type = type;
     }
 }

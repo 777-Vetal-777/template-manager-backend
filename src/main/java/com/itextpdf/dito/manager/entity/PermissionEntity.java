@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
 import java.util.Set;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,6 +18,8 @@ public class PermissionEntity {
     @SequenceGenerator(name = "permission_gen", sequenceName = "permission_sequence", allocationSize = 1)
     private Long id;
     private String name;
+    @Column(name = "available_for_custom_role")
+    private Boolean availableForCustomRole;
 
     @ManyToMany(mappedBy = "permissions")
     private Set<RoleEntity> roles;
@@ -43,5 +46,13 @@ public class PermissionEntity {
 
     public void setRoles(Set<RoleEntity> roles) {
         this.roles = roles;
+    }
+
+    public Boolean getAvailableForCustomRole() {
+        return availableForCustomRole == null ? Boolean.FALSE : availableForCustomRole;
+    }
+
+    public void setAvailableForCustomRole(Boolean availableForCustomRole) {
+        this.availableForCustomRole = availableForCustomRole;
     }
 }

@@ -4,7 +4,6 @@ package com.itextpdf.dito.manager.component.mapper.user.impl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
@@ -39,7 +38,8 @@ public class UserMapperImpl implements UserMapper {
         result.setActive(entity.isEnabled());
         result.setBlocked(!entity.isAccountNonLocked());
         result.setRoles(entity.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()));
-        result.setAuthorities(entity.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).collect(Collectors.toList()));
+        result.setAuthorities(entity.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
 
         return result;
     }
@@ -52,5 +52,20 @@ public class UserMapperImpl implements UserMapper {
     @Override
     public Page<UserDTO> map(final Page<UserEntity> entities) {
         return entities.map(this::map);
+    }
+
+    @Override
+    public UserEntity map(UserDTO dto) {
+        final UserEntity result = new UserEntity();
+
+        if (dto.getRoles() != null) {
+            for (final String role : dto.getRoles()) {
+                final RoleEntity roleEntity = new RoleEntity();
+                roleEntity.setName(role);
+                result.getRoles().add(roleEntity);
+            }
+        }
+
+        return result;
     }
 }

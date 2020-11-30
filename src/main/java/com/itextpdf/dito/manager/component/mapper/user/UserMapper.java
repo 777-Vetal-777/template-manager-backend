@@ -10,9 +10,11 @@ import org.springframework.data.domain.Page;
 public interface UserMapper {
     UserEntity map(UserCreateRequestDTO dto);
 
-    UserDTO map(UserEntity dto);
+    UserDTO map(UserEntity entity);
 
     List<UserDTO> map(List<UserEntity> entities);
 
     Page<UserDTO> map(Page<UserEntity> entities);
+
+    UserEntity map(UserDTO dto);
 }
