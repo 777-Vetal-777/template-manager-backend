@@ -70,7 +70,7 @@
 
     <changeSet id="009-update-role-table" author="Vadim_Sorokin">
         <addColumn tableName="role">
-            <column name="template_type_id" type="bigint">
+            <column name="role_type_id" type="bigint">
                 <constraints foreignKeyName="fk_role_to_role_type" references="role_type(id)"/>
             </column>
         </addColumn>
@@ -78,20 +78,20 @@
 
     <changeSet id="010-add-role-type-to-roles" author="Vadim_Sorokin">
         <update tableName="role">
-            <column name="template_type_id" value="1"/>
+            <column name="role_type_id" value="1"/>
             <where>name='GLOBAL_ADMINISTRATOR'</where>
         </update>
     </changeSet>
 
     <changeSet id="011-update-role-table" author="Vadim_Sorokin">
-        <addNotNullConstraint tableName="role" columnName="template_type_id"/>
+        <addNotNullConstraint tableName="role" columnName="role_type_id"/>
     </changeSet>
 
     <changeSet id="012-add-administrator-default-role" author="Vadim_Sorokin">
         <insert tableName="role">
             <column name="id" value="2"/>
             <column name="name" value="ADMINISTRATOR"/>
-            <column name="template_type_id" value="1"/>
+            <column name="role_type_id" value="1"/>
         </insert>
     </changeSet>
 
@@ -99,7 +99,7 @@
         <insert tableName="role">
             <column name="id" value="3"/>
             <column name="name" value="TEMPLATE_DESIGNER"/>
-            <column name="template_type_id" value="1"/>
+            <column name="role_type_id" value="1"/>
         </insert>
     </changeSet>
 
