@@ -188,7 +188,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userEntity.setLastName("Kane");
         userEntity.setPassword("123");
         userEntity.setActive(Boolean.TRUE);
-        userEntity.setLocked(Boolean.TRUE);
+        userEntity.setLocked(Boolean.FALSE);
 
         FailedLoginAttemptEntity failedLoginAttemptEntity = new FailedLoginAttemptEntity();
         failedLoginAttemptEntity.setUser(userEntity);
