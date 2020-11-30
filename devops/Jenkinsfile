@@ -36,9 +36,14 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('SonarQube_8.3') {                        
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=${projectName}-${WORKING_ENV} -Dsonar.projectName=${projectName}-${WORKING_ENV} -Dsonar.projectVersion=1.0 -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=iText-DTM -Dsonar.projectName=iText-DTM -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
                     }
                 }
+            }
+        }
+        stage('Quality Gate'){
+            steps{
+                waitForQualityGate abortPipeline: true
             }
         }
         stage("Deploy image to nexus"){
