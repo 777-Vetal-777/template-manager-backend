@@ -8,8 +8,10 @@ public class DataCollectionDTO {
     private Long id;
     private String name;
     private DataCollectionType type;
-    @JsonProperty("author.email")
-    private String author;
+    @JsonProperty("author.firstName")
+    private String authorFirstName;
+    @JsonProperty("author.lastName")
+    private String authorLastName;
     private Date modifiedOn;
 
     public Long getId() {
@@ -36,12 +38,20 @@ public class DataCollectionDTO {
         this.type = type;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getAuthorLastName() {
+        return authorLastName;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setAuthorLastName(String authorLastName) {
+        this.authorLastName = authorLastName;
+    }
+
+    public String getAuthorFirstName() {
+        return authorFirstName;
+    }
+
+    public void setAuthorFirstName(String authorFirstName) {
+        this.authorFirstName = authorFirstName;
     }
 
     public Date getModifiedOn() {

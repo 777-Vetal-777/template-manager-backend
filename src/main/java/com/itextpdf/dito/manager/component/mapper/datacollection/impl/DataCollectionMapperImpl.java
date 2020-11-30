@@ -23,7 +23,8 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setType(entity.getType());
-        dto.setAuthor(entity.getAuthor().getEmail());
+        dto.setAuthorFirstName(entity.getAuthor().getFirstName());
+        dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setModifiedOn(entity.getModifiedOn());
         return dto;
     }
