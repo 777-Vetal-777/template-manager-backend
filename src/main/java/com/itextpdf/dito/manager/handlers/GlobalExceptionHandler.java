@@ -68,9 +68,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<RequestParamErrorResponseDTO> requestParamsValidationErrorHandler(
             final MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
-        List<String> fieldErrors = ex.getBindingResult().getFieldErrors()
+        final List<String> fieldErrors = ex.getBindingResult().getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(error -> new StringBuilder().append(error.getField()).append(": ").append(error.getDefaultMessage()).toString())
                 .collect(toList());
         return new ResponseEntity<>(
                 new RequestParamErrorResponseDTO("Validation error", "Some request params are invalid", fieldErrors), HttpStatus.BAD_REQUEST);
