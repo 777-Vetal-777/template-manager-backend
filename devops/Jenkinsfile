@@ -37,7 +37,7 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('SonarQube_8.3') {                        
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=iText-DTM -Dsonar.projectName=iText-DTM -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
                     }
                 }
             }
