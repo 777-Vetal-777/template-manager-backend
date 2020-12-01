@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.template.impl;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
+import com.itextpdf.dito.manager.exception.EntityNotFoundException;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -15,6 +16,7 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final DataCollectionRepository dataCollectionRepository;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
-            final TemplateRepository templateRepository,
-            final TemplateTypeService templateTypeService,
-            final UserService userService,
-            final TemplateLoader templateLoader,
-            final DataCollectionRepository dataCollectionRepository) {
+                               final TemplateRepository templateRepository,
+                               final TemplateTypeService templateTypeService,
+                               final UserService userService,
+                               final TemplateLoader templateLoader,
+                               final DataCollectionRepository dataCollectionRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.templateTypeService = templateTypeService;
@@ -54,7 +56,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateEntity.setType(templateTypeService.findTemplateType(templateCreateRequestDTO.getType()));
         if (!StringUtils.isEmpty(templateCreateRequestDTO.getDataCollection())) {
             templateEntity.setDataCollection(
-                    dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()));
+                    dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()).orElseThrow(EntityNotFoundException::new));
         }
         templateRepository.save(templateEntity);
 

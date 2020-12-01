@@ -17,9 +17,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +61,7 @@ public interface UserController {
     @Operation(summary = "Get users list", description = "Get available users",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<UserDTO>> list(Pageable pageable,
-            @Parameter(description = "user name or email search string") @RequestParam(name = "search", required = false) String searchParam);
+                                       @Parameter(description = "user name or email search string") @RequestParam(name = "search", required = false) String searchParam);
 
     @PatchMapping(USERS_ACTIVATION_ENDPOINT)
     @Operation(summary = "Activate(deactivate) users in batch", description = "Activate(deactivate) users in batch",
@@ -98,12 +100,11 @@ public interface UserController {
     @Operation(summary = "Change current user password", description = "Change current user password",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated password", content = {
-                    @Content(mediaType = "application/json", schema = @Schema)}),
+            @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
     ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
-            Principal principal);
+                                        Principal principal);
 
     @PatchMapping(UPDATE_USER_ENDPOINT)
     @Operation(summary = "Update some user", description = "Update user's related data",

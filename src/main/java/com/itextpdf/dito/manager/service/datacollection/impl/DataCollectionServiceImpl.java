@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.EntityNotFoundException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -57,5 +58,38 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return StringUtils.isEmpty(searchParam)
                 ? dataCollectionRepository.findAll(pageable)
                 : dataCollectionRepository.search(pageable, searchParam);
+    }
+
+    @Override
+    public DataCollectionEntity get(final String name) {
+        return findByName(name);
+    }
+
+    @Override
+    public void delete(final String name) {
+        dataCollectionRepository.delete(findByName(name));
+    }
+
+    @Override
+    public DataCollectionEntity update(final String name,
+                                       final DataCollectionEntity entity,
+                                       final String userEmail) {
+        final DataCollectionEntity existingEntity = findByName(name);
+        existingEntity.setType(entity.getType());
+        if (entity.getData() != null) {
+            existingEntity.setData(entity.getData());
+        }
+        existingEntity.setTemplate(entity.getTemplate());
+        existingEntity.setName(entity.getName());
+        existingEntity.setAuthor(userService.findByEmail(userEmail));
+        return dataCollectionRepository.save(existingEntity);
+    }
+
+    private DataCollectionEntity findByName(final String name) {
+        return dataCollectionRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException(new StringBuilder()
+                .append("Data collection with name ")
+                .append(name)
+                .append(" not found")
+                .toString()));
     }
 }

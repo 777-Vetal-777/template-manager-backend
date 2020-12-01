@@ -5,8 +5,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 public interface DataCollectionService {
     DataCollectionEntity create(DataCollectionEntity collectionEntity, MultipartFile attachment, String email);
 
     Page<DataCollectionEntity> list(Pageable pageable, String searchParam);
+
+    DataCollectionEntity get(String name);
+
+    void delete(String name);
+
+    DataCollectionEntity update(String name, DataCollectionEntity entity, String userEmail);
 }

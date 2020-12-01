@@ -7,9 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 
 public interface DataCollectionRepository extends JpaRepository<DataCollectionEntity, Long> {
-    DataCollectionEntity findByName(String name);
+    Optional<DataCollectionEntity> findByName(String name);
 
     Boolean existsByName(String name);
 

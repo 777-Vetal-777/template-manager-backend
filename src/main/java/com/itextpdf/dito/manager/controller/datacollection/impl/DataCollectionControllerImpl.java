@@ -39,4 +39,23 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         final Page<DataCollectionEntity> result = dataCollectionService.list(pageable, searchParam);
         return new ResponseEntity<>(dataCollectionMapper.map(result), HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<DataCollectionDTO> get(final String name) {
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.get(name)), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<DataCollectionDTO> update(final String name,
+                                                    final DataCollectionCreateRequestDTO requestDTO,
+                                                    final Principal principal) {
+        final DataCollectionEntity entity = dataCollectionMapper.map(requestDTO);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.update(name, entity, principal.getName())), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> delete(final String name) {
+        dataCollectionService.delete(name);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
