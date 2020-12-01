@@ -25,11 +25,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             + "or u.lastName like '%'||:value||'%'")
     Page<UserEntity> search(Pageable pageable, @Param("value") String searchParam);
 
-    @Query(value = "select count(r) from UserEntity u "
+    @Query(value = "select u from UserEntity u "
             + "join u.roles r "
             + "where r.name like :roleName "
-            + "and count(r)<2 ")
-    Integer countOfUserWithOnlyOneRole(String roleName);
+            + "group by u.id "
+            + "having count(r)<2 ")
+    List<UserEntity> countOfUserWithOnlyOneRole(String roleName);
 
     Optional<UserEntity> findByEmailAndActiveTrue(String email);
 

@@ -19,3 +19,8 @@ spring:
   liquibase:
     default-schema: manager
     change-log: classpath:db/changelog/db.changelog-master.xml
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

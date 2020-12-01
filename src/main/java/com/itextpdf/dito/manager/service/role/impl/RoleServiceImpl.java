@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.entity.RoleType;
 import com.itextpdf.dito.manager.exception.PermissionCantBeAttachedToCustomRole;
 import com.itextpdf.dito.manager.exception.PermissionNotFound;
 import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
+import com.itextpdf.dito.manager.exception.RoleNotFoundException;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
@@ -13,9 +14,11 @@ import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Component
@@ -27,9 +30,9 @@ public class RoleServiceImpl implements RoleService {
     private final RoleTypeRepository roleTypeRepository;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-            final UserRepository userRepository,
-            final PermissionRepository permissionRepository,
-            final RoleTypeRepository roleTypeRepository) {
+                           final UserRepository userRepository,
+                           final PermissionRepository permissionRepository,
+                           final RoleTypeRepository roleTypeRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
@@ -66,13 +69,13 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void delete(final String name) {
-        if (userRepository.countOfUserWithOnlyOneRole(name) > 0) {
+        final RoleEntity role = roleRepository.findByName(name).orElseThrow(RoleNotFoundException::new);
+        if (!CollectionUtils.isEmpty(userRepository.countOfUserWithOnlyOneRole(name))) {
             throw new RoleCannotBeRemovedException(
                     new StringBuilder("Role cannot be removed. There are users with only one role: ")
                             .append(name)
                             .toString());
         }
-        // TODO uncomment when DTM-150 is implemented
-        // roleRepository.delete(roleRepository.findByName(name));
+        roleRepository.delete(role);
     }
 }

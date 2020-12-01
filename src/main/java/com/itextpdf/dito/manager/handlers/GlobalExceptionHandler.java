@@ -4,9 +4,11 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.error.RequestParamErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.EntityNotFoundException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
+import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
 import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
 import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
@@ -32,9 +34,9 @@ import static java.util.stream.Collectors.toList;
 public class GlobalExceptionHandler {
     private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> userNotFoundErrorHandler(
-            final UserNotFoundException ex) {
+            final EntityNotFoundException ex) {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(
@@ -121,6 +123,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnsupportedSortFieldException.class)
     public ResponseEntity<ErrorResponseDTO> unsupportedSortFieldHandler(final UnsupportedSortFieldException ex) {
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Invalid sort parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RoleCannotBeRemovedException.class)
+    public ResponseEntity<ErrorResponseDTO> roleCannotBeRemovedExceptionHandler(final RoleCannotBeRemovedException ex) {
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Invalid sort parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
