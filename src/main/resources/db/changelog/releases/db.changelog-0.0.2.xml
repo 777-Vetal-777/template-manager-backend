@@ -106,13 +106,12 @@
         </insert>
     </changeSet>
 
+    <include file="db.changelog-0.0.2-default-permissions.xml" relativeToChangelogFile="true"/>
+
     <changeSet id="014-change-role-sequence-start-value" author="Ivan_Semenov">
         <dropSequence sequenceName="role_sequence"/>
         <!-- It starts from 4 because we have 3 built in SYSTEM roles. -->
         <createSequence sequenceName="role_sequence"
                         startValue="4"/>
     </changeSet>
-
-    <include file="db.changelog-0.0.2-default-permissions.xml" relativeToChangelogFile="true"/>
-
 </databaseChangeLog>
