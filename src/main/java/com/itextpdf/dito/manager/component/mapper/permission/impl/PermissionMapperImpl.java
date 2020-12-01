@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PermissionMapperImpl implements PermissionMapper {
     @Override
-    public PermissionDTO map(PermissionEntity entity) {
+    public PermissionDTO map(final PermissionEntity entity) {
         final PermissionDTO result = new PermissionDTO();
 
         result.setName(entity.getName());
@@ -20,7 +20,7 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     @Override
-    public PermissionEntity map(PermissionDTO dto) {
+    public PermissionEntity map(final PermissionDTO dto) {
         final PermissionEntity result = new PermissionEntity();
 
         result.setName(dto.getName());
@@ -30,7 +30,7 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     @Override
-    public Page<PermissionDTO> map(Page<PermissionEntity> entities) {
+    public Page<PermissionDTO> map(final Page<PermissionEntity> entities) {
         return entities.map(this::map);
     }
 }

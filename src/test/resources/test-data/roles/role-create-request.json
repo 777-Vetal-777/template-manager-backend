@@ -1,3 +1,4 @@
 {
-  "name": "my-custom-role"
+  "name": "my-custom-role",
+  "permissions": ["E1_US1_LOG_IN_TO_THE_SYSTEM"]
 }

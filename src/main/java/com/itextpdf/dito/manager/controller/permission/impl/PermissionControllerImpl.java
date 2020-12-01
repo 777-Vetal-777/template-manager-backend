@@ -23,7 +23,7 @@ public class PermissionControllerImpl implements PermissionController {
     }
 
     @Override
-    public ResponseEntity<Page<PermissionDTO>> list(Pageable pageable, String searchParam) {
+    public ResponseEntity<Page<PermissionDTO>> list(final Pageable pageable, final String searchParam) {
         final Page<PermissionDTO> result = permissionMapper.map(permissionService.list(pageable, searchParam));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
