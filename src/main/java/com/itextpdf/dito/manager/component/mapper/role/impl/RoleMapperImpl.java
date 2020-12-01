@@ -1,6 +1,8 @@
 package com.itextpdf.dito.manager.component.mapper.role.impl;
 
+import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
+import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -10,6 +12,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RoleMapperImpl implements RoleMapper {
+    private final UserMapper userMapper;
+    private final PermissionMapper permissionMapper;
+
+    public RoleMapperImpl(final UserMapper userMapper, final PermissionMapper permissionMapper) {
+        this.userMapper = userMapper;
+        this.permissionMapper = permissionMapper;
+    }
+
     @Override
     public RoleEntity map(final RoleCreateRequestDTO dto) {
         final RoleEntity entity = new RoleEntity();
@@ -22,6 +32,8 @@ public class RoleMapperImpl implements RoleMapper {
         final RoleDTO dto = new RoleDTO();
         dto.setName(entity.getName());
         dto.setType(entity.getType().getName().toString());
+        dto.setUsers(userMapper.map(entity.getUsers()));
+        dto.setPermissions(permissionMapper.map(entity.getPermissions()));
         return dto;
     }
 

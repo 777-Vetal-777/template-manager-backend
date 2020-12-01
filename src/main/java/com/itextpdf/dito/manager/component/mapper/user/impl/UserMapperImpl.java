@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
@@ -45,7 +46,7 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public List<UserDTO> map(final List<UserEntity> entities) {
+    public List<UserDTO> map(final Collection<UserEntity> entities) {
         return entities.stream().map(this::map).collect(Collectors.toList());
     }
 

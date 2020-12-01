@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.dto.role;
 
+import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 
 import java.util.List;
@@ -9,6 +10,7 @@ public class RoleDTO {
     private String name;
     private String type;
     private List<UserDTO> users;
+    private List<PermissionDTO> permissions;
 
     public Long getId() {
         return id;
@@ -40,5 +42,13 @@ public class RoleDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<PermissionDTO> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<PermissionDTO> permissions) {
+        this.permissions = permissions;
     }
 }

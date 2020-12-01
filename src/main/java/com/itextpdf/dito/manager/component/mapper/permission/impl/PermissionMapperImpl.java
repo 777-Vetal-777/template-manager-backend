@@ -4,6 +4,9 @@ import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,11 @@ public class PermissionMapperImpl implements PermissionMapper {
         result.setAvailableForCustomRole(dto.getAvailableForCustomRole());
 
         return result;
+    }
+
+    @Override
+    public List<PermissionDTO> map(Collection<PermissionEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
     }
 
     @Override

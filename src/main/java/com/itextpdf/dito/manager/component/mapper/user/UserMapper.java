@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
@@ -12,7 +13,7 @@ public interface UserMapper {
 
     UserDTO map(UserEntity entity);
 
-    List<UserDTO> map(List<UserEntity> entities);
+    List<UserDTO> map(Collection<UserEntity> entities);
 
     Page<UserDTO> map(Page<UserEntity> entities);
 
