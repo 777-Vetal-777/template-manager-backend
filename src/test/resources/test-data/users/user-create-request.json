@@ -2,5 +2,8 @@
   "email": "user@email.com",
   "firstName": "Harry",
   "lastName": "Kane",
-  "password": "admin1234578"
+  "password": "admin1234578",
+  "roles": [
+    "GLOBAL_ADMINISTRATOR"
+  ]
 }

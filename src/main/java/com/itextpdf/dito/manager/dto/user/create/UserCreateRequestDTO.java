@@ -3,8 +3,10 @@ package com.itextpdf.dito.manager.dto.user.create;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 
 public class UserCreateRequestDTO {
@@ -22,6 +24,8 @@ public class UserCreateRequestDTO {
     @NotBlank
     @Schema(example = "Kane")
     String lastName;
+    @NotEmpty
+    List<String> roles;
 
     public String getEmail() {
         return email;
@@ -53,5 +57,13 @@ public class UserCreateRequestDTO {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

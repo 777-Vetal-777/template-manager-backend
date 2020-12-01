@@ -17,12 +17,15 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
 import static java.lang.String.format;
 
 @Service
@@ -34,10 +37,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final UserMapper userMapper;
 
     public UserServiceImpl(final UserRepository userRepository,
-            final RoleRepository roleRepository,
-            final FailedLoginRepository failedLoginRepository,
-            final PasswordEncoder encoder,
-            final UserMapper userMapper) {
+                           final RoleRepository roleRepository,
+                           final FailedLoginRepository failedLoginRepository,
+                           final PasswordEncoder encoder,
+                           final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
@@ -69,10 +72,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
         }
         final UserEntity user = userMapper.map(request);
         user.setPassword(encoder.encode(request.getPassword()));
-        //TODO generate temporal password and email log-in link
-        //TODO implement adding roles when requirements are completed
-        user.setRoles(
-                Set.of(roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow(RoleNotFoundException::new)));
+        Set<RoleEntity> roles = request.getRoles().stream()
+                .map(role -> roleRepository.findByName(role).orElseThrow(RoleNotFoundException::new))
+                .collect(Collectors.toSet());
+        user.setRoles(roles);
         return userRepository.save(user);
     }
 
@@ -113,8 +116,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public void updatePassword(final String oldPassword,
-            final String newPassword,
-            final String userEmail) {
+                               final String newPassword,
+                               final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
         if (encoder.matches(newPassword, user.getPassword())) {
             throw new ChangePasswordException("New password should not be equal to old password");
