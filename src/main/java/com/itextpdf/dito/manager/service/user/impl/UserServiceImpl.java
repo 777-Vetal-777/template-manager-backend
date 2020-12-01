@@ -119,6 +119,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
                                final String newPassword,
                                final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
+        if (!encoder.matches(oldPassword, user.getPassword())) {
+            throw new ChangePasswordException("Incorrect password");
+        }
         if (encoder.matches(newPassword, user.getPassword())) {
             throw new ChangePasswordException("New password should not be equal to old password");
         }

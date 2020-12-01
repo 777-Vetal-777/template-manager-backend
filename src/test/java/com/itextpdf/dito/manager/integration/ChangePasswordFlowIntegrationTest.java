@@ -38,8 +38,20 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void failed_InvalidPassword() throws Exception {
+    public void failed_newPasswordSameAsOld() throws Exception {
         UpdatePasswordRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-password-request.json"), UpdatePasswordRequestDTO.class);
+        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void failed_InvalidPassword() throws Exception {
+        UpdatePasswordRequestDTO request = new UpdatePasswordRequestDTO();
+        request.setOldPassword("adminincorrect@email.com");
+        request.setOldPassword("adminnew@email.com");
         mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
