@@ -3,7 +3,7 @@ services:
   #=========== BACKEND ===============      
   backend:
     container_name: backend
-    image: nexus-docker.andersenlab.dev/${projectName}-${WORKING_ENV}:${BUILD_NUMBER}
+    image: nexus-docker.andersenlab.dev/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     ports:
       - "8080:8080"
     environment:

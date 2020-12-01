@@ -27,8 +27,9 @@ pipeline {
         stage("Build docker image"){
             steps{
                 script {
+                  env.RELEASE_VER = sh(script: "cat package.json | jq .version", returnStdout: true).trim()
                   dockerImage = docker.build("${projectName}-${WORKING_ENV}:${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
-                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${BUILD_NUMBER} template-manager.jar /opt/mount/"   
+                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"   
                 }
             }
         }
@@ -66,7 +67,7 @@ pipeline {
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
                             sh """
-                            echo 'docker image ${registryHost}/${projectName}-${WORKING_ENV}:${BUILD_NUMBER}'
+                            echo 'docker image ${registryHost}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}'
                             docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d
                             docker image prune -f
                             """
