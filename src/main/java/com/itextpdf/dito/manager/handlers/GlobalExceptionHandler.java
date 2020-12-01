@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
+import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
 import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(
-                new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.CONFLICT);
+                new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ChangePasswordException.class)
@@ -116,5 +117,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponseDTO("File cannot be read",
                 new StringBuilder("File name: ").append(ex.getFileName()).toString()),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnsupportedSortFieldException.class)
+    public ResponseEntity<ErrorResponseDTO> unsupportedSortFieldHandler(final UnsupportedSortFieldException ex) {
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Invalid sort parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }

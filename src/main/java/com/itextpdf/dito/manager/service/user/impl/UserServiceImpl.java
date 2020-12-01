@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
+import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
@@ -75,6 +76,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserEntity> getAll(Pageable pageable, String searchParam) {
+        pageable.getSort().forEach(o -> throwExceptionIfUnsupportedSortField(o.getProperty()));
         return StringUtils.isEmpty(searchParam)
                 ? userRepository.findAll(pageable)
                 : userRepository.search(pageable, searchParam);
@@ -117,5 +119,11 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(encoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    private void throwExceptionIfUnsupportedSortField(String field) {
+        if (!UserRepository.SUPPORTED_SORT_FIELDS.contains(field)) {
+            throw new UnsupportedSortFieldException("sorting by field " + field + " is not supported");
+        }
     }
 }

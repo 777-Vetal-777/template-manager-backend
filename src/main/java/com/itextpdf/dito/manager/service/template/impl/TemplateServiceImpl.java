@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
+import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import static com.itextpdf.dito.manager.repository.template.TemplateRepository.SUPPORTED_SORT_FIELDS;
 
 @Service
 public class TemplateServiceImpl implements TemplateService {
@@ -66,6 +69,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<TemplateEntity> getAll(Pageable pageable, String searchParam) {
+        pageable.getSort().forEach(o -> throwExceptionIfUnsupportedSortField(o.getProperty()));
         return StringUtils.isEmpty(searchParam)
                 ? templateRepository.findAll(pageable)
                 : templateRepository.search(pageable, searchParam);
@@ -74,6 +78,12 @@ public class TemplateServiceImpl implements TemplateService {
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
             throw new TemplateNameAlreadyRegisteredException(templateName);
+        }
+    }
+
+    private void throwExceptionIfUnsupportedSortField(String field) {
+        if (!SUPPORTED_SORT_FIELDS.contains(field)) {
+            throw new UnsupportedSortFieldException("sorting by field " + field + " is not supported");
         }
     }
 }

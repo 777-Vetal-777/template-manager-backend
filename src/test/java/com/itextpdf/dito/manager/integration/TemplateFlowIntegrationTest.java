@@ -50,6 +50,15 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
+        mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("sort", "unknownField")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testGetAllTemplateTypes() throws Exception {
         mockMvc.perform(get(TemplateTypeController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)

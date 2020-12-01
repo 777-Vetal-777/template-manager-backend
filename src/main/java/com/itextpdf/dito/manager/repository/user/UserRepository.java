@@ -15,6 +15,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked");
+
     Page<UserEntity> findAll(Pageable pageable);
 
     @Query(value = "select u from UserEntity u "

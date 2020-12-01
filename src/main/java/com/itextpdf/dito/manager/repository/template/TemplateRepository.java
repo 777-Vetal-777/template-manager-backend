@@ -14,13 +14,16 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type.name", "file.author.email", "file.version");
+
     Optional<TemplateEntity> findByName(String name);
 
     @Query(value = "select t from TemplateEntity t "
             + "join t.files file "
             + "where t.name like '%'||:value||'%' "
             + "or t.type.name like '%'||:value||'%' "
-            + "or file.author.email like '%'||:value||'%'")
+            + "or file.author.email like '%'||:value||'%'"
+            + "or cast(file.version as text) like '%'||:value||'%'")
     Page<TemplateEntity> search(Pageable pageable, @Param("value") String searchParam);
 
     @Override
