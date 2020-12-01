@@ -5,27 +5,26 @@ import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
-import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.user.UserService;
+
+import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-import java.util.Set;
-
 import static java.lang.String.format;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends AbstractService implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final FailedLoginRepository failedLoginRepository;
@@ -33,10 +32,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     public UserServiceImpl(final UserRepository userRepository,
-                           final RoleRepository roleRepository,
-                           final FailedLoginRepository failedLoginRepository,
-                           final PasswordEncoder encoder,
-                           final UserMapper userMapper) {
+            final RoleRepository roleRepository,
+            final FailedLoginRepository failedLoginRepository,
+            final PasswordEncoder encoder,
+            final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
@@ -76,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserEntity> getAll(Pageable pageable, String searchParam) {
-        pageable.getSort().forEach(o -> throwExceptionIfUnsupportedSortField(o.getProperty()));
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         return StringUtils.isEmpty(searchParam)
                 ? userRepository.findAll(pageable)
                 : userRepository.search(pageable, searchParam);
@@ -111,8 +110,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updatePassword(final String oldPassword,
-                               final String newPassword,
-                               final String userEmail) {
+            final String newPassword,
+            final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
         if (encoder.matches(newPassword, user.getPassword())) {
             throw new ChangePasswordException("New password should not be equal to old password");
@@ -121,9 +120,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    private void throwExceptionIfUnsupportedSortField(String field) {
-        if (!UserRepository.SUPPORTED_SORT_FIELDS.contains(field)) {
-            throw new UnsupportedSortFieldException("sorting by field " + field + " is not supported");
-        }
+    @Override
+    protected List<String> getSupportedSortFields() {
+        return UserRepository.SUPPORTED_SORT_FIELDS;
     }
 }
