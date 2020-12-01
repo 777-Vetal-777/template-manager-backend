@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 
@@ -27,7 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +45,7 @@ public interface UserController {
     String USERS_ACTIVATION_ENDPOINT = "/update-activity";
     String CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
-    String UPDATE_USER_ENDPOINT = "/{email}"; // in base64 format
+    String UPDATE_USERS_ROLES_ENDPOINT = "/roles";
 
     @PostMapping
     @Operation(summary = "Create user", description = "Create new user",
@@ -106,8 +106,9 @@ public interface UserController {
     ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO,
                                         Principal principal);
 
-    @PatchMapping(UPDATE_USER_ENDPOINT)
-    @Operation(summary = "Update some user", description = "Update user's related data",
+    @PatchMapping(UPDATE_USERS_ROLES_ENDPOINT)
+    @Operation(summary = "Update users' roles", description = "Update users' roles",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<UserDTO> update(@PathVariable("email") final String email, @RequestBody UserDTO userDTO);
+    ResponseEntity<Void> updateUsersRoles(
+            @RequestBody final UpdateUsersRolesRequestDTO updateUsersRolesRequestDTO);
 }

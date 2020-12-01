@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.dto.user.unblock;
 
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
 
 public class UsersUnblockRequestDTO {
+    @NotEmpty
     private List<String> userEmails;
 
     public List<String> getUserEmails() {

@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -15,17 +16,16 @@ import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
 import static java.lang.String.format;
 
 @Service
@@ -37,10 +37,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final UserMapper userMapper;
 
     public UserServiceImpl(final UserRepository userRepository,
-                           final RoleRepository roleRepository,
-                           final FailedLoginRepository failedLoginRepository,
-                           final PasswordEncoder encoder,
-                           final UserMapper userMapper) {
+            final RoleRepository roleRepository,
+            final FailedLoginRepository failedLoginRepository,
+            final PasswordEncoder encoder,
+            final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
@@ -116,8 +116,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public void updatePassword(final String oldPassword,
-                               final String newPassword,
-                               final String userEmail) {
+            final String newPassword,
+            final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
             throw new ChangePasswordException("Incorrect password");
@@ -130,21 +130,51 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity update(final String email, final UserEntity user) {
-        final UserEntity persisted = userRepository.findByEmail(email).orElseThrow(() ->
-                new UserNotFoundException(email));
+    public void updateUsersRoles(final List<String> emails, final List<String> roles,
+            final UpdateUsersRolesActionEnum actionEnum) {
+        final List<UserEntity> userEntities = retrieveUsers(emails);
+        final List<RoleEntity> roleEntities = retrieveRoles(roles);
 
-        final Set<RoleEntity> roles = user.getRoles();
-        if (roles != null) {
-            for (final RoleEntity role : roles) {
-                final RoleEntity roleEntity = roleRepository.findByName(role.getName()).orElseThrow(
-                        RoleNotFoundException::new);
-                persisted.getRoles().add(roleEntity);
-            }
+        switch (actionEnum) {
+            case ADD:
+                for (final UserEntity userEntity : userEntities) {
+                    userEntity.getRoles().addAll(roleEntities);
+                }
+                break;
+            case REMOVE:
+                for (final UserEntity userEntity : userEntities) {
+                    userEntity.getRoles().removeAll(roleEntities);
+                }
+                break;
+            default:
+                break;
         }
 
-        return userRepository.save(persisted);
+        userRepository.saveAll(userEntities);
     }
+
+    private List<UserEntity> retrieveUsers(final List<String> emails) {
+        final List<UserEntity> result = new ArrayList<>();
+
+        for (final String email : emails) {
+            final UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+            result.add(userEntity);
+        }
+
+        return result;
+    }
+
+    private List<RoleEntity> retrieveRoles(final List<String> roles) {
+        final List<RoleEntity> result = new ArrayList<>();
+
+        for (final String role : roles) {
+            final RoleEntity roleEntity = roleRepository.findByName(role).orElseThrow(RoleNotFoundException::new);
+            result.add(roleEntity);
+        }
+
+        return result;
+    }
+
 
     @Override
     protected List<String> getSupportedSortFields() {

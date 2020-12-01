@@ -7,13 +7,12 @@ import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
-import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.security.Principal;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -81,9 +81,10 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserDTO> update(String email, UserDTO userDTO) {
-        final UserEntity result = userService
-                .update(new String(Base64.getDecoder().decode(email)), userMapper.map(userDTO));
-        return new ResponseEntity<UserDTO>(userMapper.map(result), HttpStatus.OK);
+    public ResponseEntity<Void> updateUsersRoles(@Valid final UpdateUsersRolesRequestDTO updateUsersRolesRequestDTO) {
+        userService.updateUsersRoles(updateUsersRolesRequestDTO.getEmails(), updateUsersRolesRequestDTO.getRoles(),
+                updateUsersRolesRequestDTO.getUpdateUsersRolesActionEnum());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }
