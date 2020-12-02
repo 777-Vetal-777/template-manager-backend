@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
@@ -13,10 +14,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type");
 
     Optional<RoleEntity> findByName(String name);
 
     @Query(value = "select r from RoleEntity r "
-            + "where r.name like '%'||:value||'%'")
+            + "join r.users user "
+            + "where user.email like '%'||:value||'%' "
+            + "or r.name like '%'||:value||'%'")
     Page<RoleEntity> search(Pageable pageable, @Param("value") String searchParam);
 }

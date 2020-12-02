@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
@@ -22,7 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Component
-public class RoleServiceImpl implements RoleService {
+public class RoleServiceImpl extends AbstractService implements RoleService {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -77,5 +78,11 @@ public class RoleServiceImpl implements RoleService {
                             .toString());
         }
         roleRepository.delete(role);
+    }
+
+
+    @Override
+    protected List<String> getSupportedSortFields() {
+        return roleRepository.SUPPORTED_SORT_FIELDS;
     }
 }
