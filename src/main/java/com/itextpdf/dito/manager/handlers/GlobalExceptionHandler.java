@@ -99,7 +99,7 @@ public class GlobalExceptionHandler {
             final TemplateNameAlreadyRegisteredException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO("Template's name is already registered",
                 new StringBuilder("Template's name: ").append(ex.getTemplateName()).toString()),
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(WorkspaceNameAlreadyExistsException.class)
