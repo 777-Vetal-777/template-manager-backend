@@ -16,8 +16,8 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
     Boolean existsByName(String name);
 
     @Query(value = "select dc from DataCollectionEntity dc "
-            + "where dc.name like '%'||:value||'%' "
-            + "or dc.type like '%'||:value||'%' "
-            + "or dc.author.email like '%'||:value||'%'")
+            + "where LOWER(dc.name) like  LOWER(CONCAT('%',:value,'%')) "
+            + "or LOWER(dc.type) like  LOWER(CONCAT('%',:value,'%')) "
+            + "or LOWER(dc.author.email) like  LOWER(CONCAT('%',:value,'%'))")
     Page<DataCollectionEntity> search(Pageable pageable, @Param("value") String search);
 }

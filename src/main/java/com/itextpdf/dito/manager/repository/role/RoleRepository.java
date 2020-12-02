@@ -20,7 +20,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     @Query(value = "select r from RoleEntity r "
             + "join r.users user "
-            + "where user.email like '%'||:value||'%' "
-            + "or r.name like '%'||:value||'%'")
+            + "where  LOWER(user.email) like  LOWER(CONCAT('%',:value,'%')) "
+            + "or  LOWER(r.name) like  LOWER(CONCAT('%',:value,'%'))")
     Page<RoleEntity> search(Pageable pageable, @Param("value") String searchParam);
 }

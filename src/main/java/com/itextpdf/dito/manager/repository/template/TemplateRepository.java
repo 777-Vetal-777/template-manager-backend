@@ -14,20 +14,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type.name", "file.author.email", "file.version");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type.name", "file.author.email", "file.version", "type.name");
 
     Optional<TemplateEntity> findByName(String name);
 
-    @Query(value = "select t from TemplateEntity t "
-            + "join t.files file "
-            + "where t.name like '%'||:value||'%' "
-            + "or t.type.name like '%'||:value||'%' "
-            + "or file.author.email like '%'||:value||'%'"
+    @Query(value = "select template from TemplateEntity template "
+            + "join template.files file "
+            + "join template.type type "
+            + "where LOWER(template.name) like LOWER(CONCAT('%',:value,'%'))  "
+            + "or  LOWER(type.name) like LOWER(CONCAT('%',:value,'%'))  "
+            + "or  LOWER(file.author.email) like LOWER(CONCAT('%',:value,'%')) "
             + "or cast(file.version as text) like '%'||:value||'%'")
     Page<TemplateEntity> search(Pageable pageable, @Param("value") String searchParam);
 
     @Override
-    @Query(value = "select t from TemplateEntity t "
-            + "join t.files file")
+    @Query(value = "select template from TemplateEntity template "
+            + "join template.files file ")
     Page<TemplateEntity> findAll(Pageable pageable);
 }

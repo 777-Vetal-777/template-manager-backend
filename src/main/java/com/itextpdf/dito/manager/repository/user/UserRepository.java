@@ -17,12 +17,16 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked");
 
+    @Query(value = "select u from UserEntity u "
+            + "join u.roles r")
     Page<UserEntity> findAll(Pageable pageable);
 
     @Query(value = "select u from UserEntity u "
-            + "where u.email like '%'||:value||'%' "
-            + "or u.firstName like '%'||:value||'%' "
-            + "or u.lastName like '%'||:value||'%'")
+            + "join u.roles role  "
+            + "where LOWER(u.email) like LOWER(CONCAT('%',:value,'%')) "
+            + "or LOWER(role.name) like LOWER(CONCAT('%',:value,'%')) "
+            + "or LOWER(u.firstName) like LOWER(CONCAT('%',:value,'%')) "
+            + "or LOWER(u.lastName) like LOWER(CONCAT('%',:value,'%'))")
     Page<UserEntity> search(Pageable pageable, @Param("value") String searchParam);
 
     @Query(value = "select u from UserEntity u "

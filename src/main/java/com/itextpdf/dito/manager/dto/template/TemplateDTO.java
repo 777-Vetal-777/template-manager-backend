@@ -6,6 +6,7 @@ import java.util.Date;
 
 public class TemplateDTO {
     private String name;
+    @JsonProperty("type.name")
     private String type;
     @JsonProperty("dataCollection")
     private String dataCollection;

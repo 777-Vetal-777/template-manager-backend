@@ -14,7 +14,7 @@ public interface PermissionRepository extends JpaRepository<PermissionEntity, Lo
     PermissionEntity findByName(String name);
 
     @Query(value = "select p from PermissionEntity p "
-            + "where p.name like '%'||:value||'%'")
+            + "where LOWER(p.name) like  LOWER(CONCAT('%',:value,'%'))")
     Page<PermissionEntity> search(Pageable pageable, @Param("value") String searchParam);
 
 }
