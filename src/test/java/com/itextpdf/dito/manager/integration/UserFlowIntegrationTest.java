@@ -3,6 +3,8 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
+import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -10,19 +12,21 @@ import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
-import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACTIVATION_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -36,6 +40,38 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private FailedLoginRepository failedLoginRepository;
+
+    private UserEntity user1;
+    private UserEntity user2;
+
+    @BeforeEach
+    public void setup() {
+        user1 = new UserEntity();
+        user1.setEmail("user1@email.com");
+        user1.setFirstName("Harry");
+        user1.setLastName("Kane");
+        user1.setPassword("password1");
+        user1.setActive(Boolean.TRUE);
+
+        user2 = new UserEntity();
+        user2.setEmail("user2@email.com");
+        user2.setFirstName("Geoffrey");
+        user2.setLastName("Grant");
+        user2.setPassword("password2");
+        user2.setActive(Boolean.TRUE);
+
+        user1 = userRepository.save(user1);
+        user2 = userRepository.save(user2);
+    }
+
+    @AfterEach
+    public void teardown() {
+        failedLoginRepository.deleteAll();
+        user1.setRoles(Collections.emptySet());
+        user2.setRoles(Collections.emptySet());
+        userRepository.delete(user1);
+        userRepository.delete(user2);
+    }
 
     @Test
     public void testCreateUser() throws Exception {
@@ -80,23 +116,6 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void deactivateUsers() throws Exception {
-        UserEntity user1 = new UserEntity();
-        user1.setEmail("user1@email.com");
-        user1.setFirstName("user1");
-        user1.setLastName("user1");
-        user1.setPassword("password1");
-        user1.setActive(Boolean.TRUE);
-
-        UserEntity user2 = new UserEntity();
-        user2.setEmail("user2@email.com");
-        user2.setFirstName("user2");
-        user2.setLastName("user2");
-        user2.setPassword("password2");
-        user2.setActive(Boolean.TRUE);
-
-        userRepository.save(user1);
-        userRepository.save(user2);
-
         UsersActivateRequestDTO activateRequestDTO = new UsersActivateRequestDTO();
         activateRequestDTO.setActivate(false);
         activateRequestDTO.setEmails(List.of(user1.getEmail(), user2.getEmail()));
@@ -117,22 +136,11 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void activateUsers() throws Exception {
-        UserEntity user1 = new UserEntity();
-        user1.setEmail("user11@email.com");
-        user1.setFirstName("user1");
-        user1.setLastName("user1");
-        user1.setPassword("password1");
         user1.setActive(Boolean.FALSE);
-
-        UserEntity user2 = new UserEntity();
-        user2.setEmail("user21@email.com");
-        user2.setFirstName("user2");
-        user2.setLastName("user2");
-        user2.setPassword("password2");
         user2.setActive(Boolean.FALSE);
 
-        userRepository.save(user1);
-        userRepository.save(user2);
+        user1 = userRepository.save(user1);
+        user2 = userRepository.save(user2);
 
         UsersActivateRequestDTO activateRequestDTO = new UsersActivateRequestDTO();
         activateRequestDTO.setEmails(List.of(user1.getEmail(), user2.getEmail()));
@@ -192,19 +200,13 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testUnblockUser() throws Exception {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("blockeduser@email.com");
-        userEntity.setFirstName("Harry");
-        userEntity.setLastName("Kane");
-        userEntity.setPassword("123");
-        userEntity.setActive(Boolean.TRUE);
-        userEntity.setLocked(Boolean.TRUE);
+        user1.setLocked(Boolean.TRUE);
 
         FailedLoginAttemptEntity failedLoginAttemptEntity = new FailedLoginAttemptEntity();
-        failedLoginAttemptEntity.setUser(userEntity);
+        failedLoginAttemptEntity.setUser(user1);
         failedLoginAttemptEntity.setVersion(new Date());
 
-        userRepository.save(userEntity);
+        userRepository.save(user1);
         failedLoginRepository.save(failedLoginAttemptEntity);
 
         UsersUnblockRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-unblock-request.json"), UsersUnblockRequestDTO.class);
@@ -214,8 +216,37 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].blocked").value("false"));
-        UserEntity user = userRepository.findByEmail("blockeduser@email.com").orElseThrow();
-        assertTrue(failedLoginRepository.findByUser(userEntity).isEmpty());
+        UserEntity user = userRepository.findByEmail(user1.getEmail()).orElseThrow();
+        assertTrue(failedLoginRepository.findByUser(user1).isEmpty());
         assertFalse(user.getLocked());
     }
+
+    @Test
+    public void updateUserRoles_AddAndRemoveRole() throws Exception {
+        UpdateUsersRolesRequestDTO request = new UpdateUsersRolesRequestDTO();
+        request.setEmails(List.of(user1.getEmail()));
+        request.setRoles(List.of("GLOBAL_ADMINISTRATOR"));
+        request.setUpdateUsersRolesActionEnum(UpdateUsersRolesActionEnum.ADD);
+
+        mockMvc.perform(patch(UserController.BASE_NAME + UPDATE_USERS_ROLES_ENDPOINT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        UserEntity updated = userRepository.findByEmailAndActiveTrue(user1.getEmail()).orElseThrow();
+        assertEquals(1, updated.getRoles().size());
+        assertEquals("GLOBAL_ADMINISTRATOR", updated.getRoles().iterator().next().getName());
+
+        request.setUpdateUsersRolesActionEnum(UpdateUsersRolesActionEnum.REMOVE);
+        mockMvc.perform(patch(UserController.BASE_NAME + UPDATE_USERS_ROLES_ENDPOINT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        updated = userRepository.findByEmailAndActiveTrue(user1.getEmail()).orElseThrow();
+        assertEquals(0, updated.getRoles().size());
+    }
+
 }

@@ -1,0 +1,4 @@
+{
+  "name": "my-custom-role",
+  "permissions": ["E3_US10_CREATE_NEW_USER"]
+}

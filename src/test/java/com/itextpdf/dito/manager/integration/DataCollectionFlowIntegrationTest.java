@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,9 +15,7 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,7 +23,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataCollectionRepository dataCollectionRepository;
 
-    @BeforeEach
+    @AfterEach
     public void clearDb() {
         dataCollectionRepository.deleteAll();
     }
@@ -72,6 +70,19 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(delete(DataCollectionController.BASE_NAME + "/" + newCollectionName))
                 .andExpect(status().isOk());
         assertFalse(dataCollectionRepository.existsByName(requestDto.getName()));
+    }
+
+    @Test
+    public void create_WhenCollectionsWithSameNameAlreadyExists_ThenResponseIsBadRequest() throws Exception {
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "file data".getBytes());
+        final DataCollectionCreateRequestDTO requestDto = objectMapper.readValue(new File("src/test/resources/test-data/datacollections/data-collection-create-request.json"), DataCollectionCreateRequestDTO.class);
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
+                .queryParam("name", requestDto.getName())
+                .queryParam("type", requestDto.getType())
+                .build().encode().toUri();
+
+        performPostFilesInteraction(uri, file).andExpect(status().isCreated());
+        performPostFilesInteraction(uri, file).andExpect(status().isBadRequest());
     }
 
     @Test

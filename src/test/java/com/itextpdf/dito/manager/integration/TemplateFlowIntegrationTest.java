@@ -48,6 +48,35 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void createTemplate_WhenTemplateWithSameNameExists_ThenResponseIsBadRequest() throws Exception {
+        TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void createTemplate_WhenInvalidTemplateType_ThenResponseIsBadRequest() throws Exception {
+        TemplateCreateRequestDTO request = new TemplateCreateRequestDTO();
+        request.setName("template1");
+        request.setType("invalidType");
+
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testGetAll() throws Exception {
         mockMvc.perform(get(TemplateController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)

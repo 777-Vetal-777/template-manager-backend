@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.controller.login.AuthenticationController;
 import com.itextpdf.dito.manager.controller.token.TokenController;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationRequestDTO;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationResponseDTO;
+import com.itextpdf.dito.manager.dto.token.refresh.RefreshTokenRequestDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,5 +30,16 @@ public class TokenFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("refreshedAccessToken").isNotEmpty());
+    }
+
+    @Test
+    public void refreshSuccess_WhenRefreshTokenIsNotValid_ThenResponseIsUnauthorized() throws Exception {
+        RefreshTokenRequestDTO refreshTokenRequest = new RefreshTokenRequestDTO();
+        refreshTokenRequest.setRefreshToken("InvalidToken");
+        mockMvc.perform(post(TokenController.BASE_NAME + TokenController.REFRESH_ENDPOINT)
+                .content(objectMapper.writeValueAsString(refreshTokenRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 }

@@ -1,0 +1,4 @@
+{
+  "name": "my-custom-role",
+  "permissions": ["does_no_exist"]
+}

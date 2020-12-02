@@ -2,20 +2,7 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.error.RequestParamErrorResponseDTO;
-import com.itextpdf.dito.manager.exception.ChangePasswordException;
-import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.EntityNotFoundException;
-import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
-import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
-import com.itextpdf.dito.manager.exception.InvalidPasswordException;
-import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
-import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
-import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
-import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
-import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
-import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.WorkspaceNameAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.WorkspaceNotFoundException;
+import com.itextpdf.dito.manager.exception.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -151,5 +138,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> roleCannotBeRemovedExceptionHandler(final RoleCannotBeRemovedException ex) {
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Invalid sort parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PermissionCantBeAttachedToCustomRole.class)
+    public ResponseEntity<ErrorResponseDTO> permissionCantBeAttachedToRole(final PermissionCantBeAttachedToCustomRole ex) {
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Can't attach permission to the specified role", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }
