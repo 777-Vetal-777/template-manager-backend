@@ -13,6 +13,7 @@ public class DataCollectionDTO {
     @JsonProperty("author.lastName")
     private String authorLastName;
     private Date modifiedOn;
+    private String attachment;
 
     public Long getId() {
         return id;
@@ -60,5 +61,13 @@ public class DataCollectionDTO {
 
     public void setModifiedOn(Date modifiedOn) {
         this.modifiedOn = modifiedOn;
+    }
+
+    public String getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(String attachment) {
+        this.attachment = attachment;
     }
 }
