@@ -7,8 +7,12 @@ import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 
+import com.itextpdf.dito.manager.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Component
 public class RoleMapperImpl implements RoleMapper {
@@ -32,8 +36,9 @@ public class RoleMapperImpl implements RoleMapper {
         final RoleDTO dto = new RoleDTO();
         dto.setName(entity.getName());
         dto.setType(entity.getType().getName().toString());
-        dto.setUsers(userMapper.map(entity.getUsers()));
-        dto.setPermissions(permissionMapper.map(entity.getPermissions()));
+        dto.setUsersEmails(entity.getUsers() != null
+                ? entity.getUsers().stream().map(UserEntity::getEmail).collect(Collectors.toList())
+                : Collections.emptyList());
         return dto;
     }
 
