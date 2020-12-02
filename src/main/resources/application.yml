@@ -10,7 +10,7 @@ security:
       time-to-live: 86400
   login:
     failure:
-      max-attempts: 3
+      max-attempts: 5
   cors:
     paths: '/**'
     origins: '*'
