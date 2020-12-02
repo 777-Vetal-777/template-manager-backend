@@ -2,13 +2,13 @@ package com.itextpdf.dito.manager.integration;
 
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
@@ -35,8 +35,13 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         //CREATE
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "file data".getBytes());
         final DataCollectionCreateRequestDTO requestDto = objectMapper.readValue(new File("src/test/resources/test-data/datacollections/data-collection-create-request.json"), DataCollectionCreateRequestDTO.class);
-        final MockMultipartFile multipartRequestDto = new MockMultipartFile("requestDTO", "", "application/json", objectMapper.writeValueAsString(requestDto).getBytes());
-        performPostFilesInteraction(URI.create(DataCollectionController.BASE_NAME), file, multipartRequestDto).andExpect(status().isCreated())
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
+                .queryParam("name", requestDto.getName())
+                .queryParam("type", requestDto.getType())
+                .build().encode().toUri();
+
+
+        performPostFilesInteraction(uri, file).andExpect(status().isCreated())
                 .andExpect(jsonPath("id").value("1"))
                 .andExpect(jsonPath("name").value(requestDto.getName()))
                 .andExpect(jsonPath("type").value("JSON"))
@@ -71,10 +76,15 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void shouldDropFileTypeNotSupportedException() throws Exception {
-        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.pdf", "text/plain", "file data".getBytes());
         final DataCollectionCreateRequestDTO requestDto = objectMapper.readValue(new File("src/test/resources/test-data/datacollections/data-collection-create-request.json"), DataCollectionCreateRequestDTO.class);
-        final MockMultipartFile multipartRequestDto = new MockMultipartFile("requestDTO", "", "application/json", objectMapper.writeValueAsString(requestDto).getBytes());
-        performPostFilesInteraction(URI.create(DataCollectionController.BASE_NAME), file, multipartRequestDto).andExpect(status().isBadRequest())
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.pdf", "text/plain", "file data".getBytes());
+
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
+                .queryParam("name", requestDto.getName())
+                .queryParam("type", requestDto.getType())
+                .build().encode().toUri();
+
+        performPostFilesInteraction(uri, file).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message").value("File type is not supported"))
                 .andExpect(jsonPath("details").value("File type: pdf"));
     }

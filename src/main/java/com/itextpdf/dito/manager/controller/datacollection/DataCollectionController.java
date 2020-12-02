@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.controller.datacollection;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
-import com.itextpdf.dito.manager.dto.user.UserDTO;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,7 +34,7 @@ public interface DataCollectionController {
 
     @PostMapping
     @Operation(summary = "Create data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<DataCollectionDTO> create(@RequestPart DataCollectionCreateRequestDTO requestDTO, @RequestPart MultipartFile attachment, Principal principal);
+    ResponseEntity<DataCollectionDTO> create(@RequestParam String name, @RequestParam DataCollectionType type, @RequestPart MultipartFile attachment, Principal principal);
 
     @GetMapping
     @Operation(summary = "Get list of data collections", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

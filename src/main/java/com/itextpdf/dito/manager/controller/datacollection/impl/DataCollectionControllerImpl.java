@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionM
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.springframework.data.domain.Page;
@@ -28,8 +29,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     }
 
     @Override
-    public ResponseEntity<DataCollectionDTO> create(final DataCollectionCreateRequestDTO requestDTO, final MultipartFile attachment, final Principal principal) {
-        final DataCollectionEntity collectionEntity = dataCollectionMapper.map(requestDTO);
+    public ResponseEntity<DataCollectionDTO> create(final String name, DataCollectionType type, final MultipartFile attachment, final Principal principal) {
+        final DataCollectionEntity collectionEntity = new DataCollectionEntity();
+        collectionEntity.setName(name);
+        collectionEntity.setType(type);
         final DataCollectionDTO dataCollectionDTO = dataCollectionMapper.map(dataCollectionService.create(collectionEntity, attachment, principal.getName()));
         return new ResponseEntity<>(dataCollectionDTO, HttpStatus.CREATED);
     }
