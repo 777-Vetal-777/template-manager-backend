@@ -1,9 +1,12 @@
 package com.itextpdf.dito.manager.service.workspace;
 
-import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateResponseDTO;
+import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 
 
 public interface WorkspaceService {
-    WorkspaceCreateResponseDTO create(WorkspaceCreateRequestDTO workspaceCreateRequest);
+    WorkspaceEntity get();
+
+    WorkspaceEntity create(WorkspaceEntity workspace);
+
+    WorkspaceEntity update(WorkspaceEntity workspace);
 }

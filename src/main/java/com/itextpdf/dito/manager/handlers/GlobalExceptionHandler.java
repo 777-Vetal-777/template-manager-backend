@@ -14,15 +14,13 @@ import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredExceptio
 import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
 import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.UserNotFoundException;
+import com.itextpdf.dito.manager.exception.WorkspaceNameAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.WorkspaceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -102,6 +100,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponseDTO("Template's name is already registered",
                 new StringBuilder("Template's name: ").append(ex.getTemplateName()).toString()),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(WorkspaceNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> workspaceNameAlreadyExists(final WorkspaceNameAlreadyExistsException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Workspace with that name already exists", ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(WorkspaceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> workspaceNotFound(final WorkspaceNotFoundException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Workspace does not exists", ex.getMessage()),
+                HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(LockedException.class)

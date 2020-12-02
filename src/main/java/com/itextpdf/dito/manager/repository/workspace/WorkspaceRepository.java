@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface WorkspaceRepository extends JpaRepository<WorkspaceEntity, Long> {
+    boolean existsByName(String name);
 }
