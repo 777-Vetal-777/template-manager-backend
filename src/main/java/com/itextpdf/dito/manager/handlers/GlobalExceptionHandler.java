@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.EntityNotFoundException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
+import com.itextpdf.dito.manager.exception.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
 import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
@@ -55,6 +56,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ChangePasswordException.class)
     public ResponseEntity<ErrorResponseDTO> changePasswordExceptionHandler(
             final ChangePasswordException ex) {
+        log.error(ex.getMessage());
+
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponseDTO> invalidPasswordExceptionHandler(
+            final InvalidPasswordException ex) {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(

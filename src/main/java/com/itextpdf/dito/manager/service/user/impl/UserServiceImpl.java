@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
+import com.itextpdf.dito.manager.exception.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.UserNotFoundException;
@@ -120,7 +121,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
             final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
-            throw new ChangePasswordException("Incorrect password");
+            throw new InvalidPasswordException("Incorrect password");
         }
         if (encoder.matches(newPassword, user.getPassword())) {
             throw new ChangePasswordException("New password should not be equal to old password");

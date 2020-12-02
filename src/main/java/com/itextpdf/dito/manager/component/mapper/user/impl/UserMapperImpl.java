@@ -8,8 +8,10 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -47,7 +49,9 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public List<UserDTO> map(final Collection<UserEntity> entities) {
-        return entities.stream().map(this::map).collect(Collectors.toList());
+        return entities != null
+                ? entities.stream().map(this::map).collect(Collectors.toList())
+                : Collections.emptyList();
     }
 
     @Override
