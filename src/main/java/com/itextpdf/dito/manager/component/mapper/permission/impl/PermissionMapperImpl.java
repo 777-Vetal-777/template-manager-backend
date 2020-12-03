@@ -5,8 +5,10 @@ import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +36,9 @@ public class PermissionMapperImpl implements PermissionMapper {
 
     @Override
     public List<PermissionDTO> map(Collection<PermissionEntity> entities) {
-        return entities.stream().map(this::map).collect(Collectors.toList());
+        return entities != null
+                ? entities.stream().map(this::map).collect(Collectors.toList())
+                : Collections.emptyList();
     }
 
     @Override

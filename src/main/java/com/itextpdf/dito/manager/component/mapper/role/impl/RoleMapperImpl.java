@@ -39,6 +39,7 @@ public class RoleMapperImpl implements RoleMapper {
         dto.setUsersEmails(entity.getUsers() != null
                 ? entity.getUsers().stream().map(UserEntity::getEmail).collect(Collectors.toList())
                 : Collections.emptyList());
+        dto.setPermissions(permissionMapper.map(entity.getPermissions()));
         return dto;
     }
 

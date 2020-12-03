@@ -16,6 +16,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -72,8 +73,8 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Void> updatePassword(final UpdatePasswordRequestDTO updatePasswordRequestDTO,
-            final Principal principal) {
+    public ResponseEntity<Void> updatePassword(final @Valid UpdatePasswordRequestDTO updatePasswordRequestDTO,
+                                               final Principal principal) {
         userService.updatePassword(updatePasswordRequestDTO.getOldPassword(),
                 updatePasswordRequestDTO.getNewPassword(),
                 principal.getName());

@@ -12,6 +12,7 @@ public class RoleDTO {
     private String type;
     @JsonProperty("users")
     private List<String> usersEmails;
+    private List<PermissionDTO> permissions;
 
     public Long getId() {
         return id;
@@ -35,6 +36,14 @@ public class RoleDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<PermissionDTO> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<PermissionDTO> permissions) {
+        this.permissions = permissions;
     }
 
     public List<String> getUsersEmails() {
