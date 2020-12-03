@@ -2,9 +2,9 @@ package com.itextpdf.dito.manager.controller.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.springframework.data.domain.Page;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.Base64;
 
 @RestController
 public class DataCollectionControllerImpl implements DataCollectionController {
@@ -50,10 +51,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     @Override
     public ResponseEntity<DataCollectionDTO> update(final String name,
-                                                    final DataCollectionCreateRequestDTO requestDTO,
+                                                    final DataCollectionUpdateRequestDTO requestDTO,
                                                     final Principal principal) {
+        final String decodedCollectionName = new String(Base64.getDecoder().decode(name));
         final DataCollectionEntity entity = dataCollectionMapper.map(requestDTO);
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.update(name, entity, principal.getName())), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.update(decodedCollectionName, entity, principal.getName())), HttpStatus.OK);
     }
 
     @Override

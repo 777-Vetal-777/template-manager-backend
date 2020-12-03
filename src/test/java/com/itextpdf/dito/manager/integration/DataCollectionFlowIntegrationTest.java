@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration;
 
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,23 +60,28 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         //UPDATE by name
-        final String collectionName = requestDto.getName();
-        final String newCollectionName = "new-collection-name";
-        requestDto.setName(newCollectionName);
-        mockMvc.perform(patch(DataCollectionController.BASE_NAME + "/" + collectionName)
-                .content(objectMapper.writeValueAsString(requestDto))
+        final String newCollectionName = "new collectionName";
+
+        final String encodedCollectionName = Base64.getEncoder().encodeToString(requestDto.getName().getBytes());
+        final DataCollectionUpdateRequestDTO collectionUpdateRequestDTO = new DataCollectionUpdateRequestDTO();
+        collectionUpdateRequestDTO.setType(requestDto.getType());
+        collectionUpdateRequestDTO.setName(newCollectionName);
+        collectionUpdateRequestDTO.setDescription("new description");
+
+        mockMvc.perform(patch(DataCollectionController.BASE_NAME + "/" + encodedCollectionName)
+                .content(objectMapper.writeValueAsString(collectionUpdateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("description").value(requestDto.getDescription()))
+                .andExpect(jsonPath("description").value(collectionUpdateRequestDTO.getDescription()))
+                .andExpect(jsonPath("name").value(collectionUpdateRequestDTO.getName()))
                 .andExpect(jsonPath("id").value("1"))
-                .andExpect(jsonPath("name").value(newCollectionName))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty());
 
         //DELETE by name
-        mockMvc.perform(delete(DataCollectionController.BASE_NAME + "/" + newCollectionName))
+        mockMvc.perform(delete(DataCollectionController.BASE_NAME + "/" + collectionUpdateRequestDTO.getName()))
                 .andExpect(status().isOk());
         assertFalse(dataCollectionRepository.existsByName(requestDto.getName()));
     }

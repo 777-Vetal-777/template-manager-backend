@@ -3,14 +3,25 @@ package com.itextpdf.dito.manager.component.mapper.datacollection.impl;
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
+
+
     @Override
     public DataCollectionEntity map(final DataCollectionCreateRequestDTO dto) {
+        final DataCollectionEntity entity = new DataCollectionEntity();
+        entity.setName(dto.getName());
+        entity.setType(dto.getType());
+        return entity;
+    }
+
+    @Override
+    public DataCollectionEntity map(DataCollectionUpdateRequestDTO dto) {
         final DataCollectionEntity entity = new DataCollectionEntity();
         entity.setName(dto.getName());
         entity.setType(dto.getType());

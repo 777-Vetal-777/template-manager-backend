@@ -77,7 +77,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (entity.getData() != null) {
             existingEntity.setData(entity.getData());
         }
-        existingEntity.setTemplate(entity.getTemplate());
         existingEntity.setName(entity.getName());
         existingEntity.setAuthor(userService.findByEmail(userEmail));
         existingEntity.setDescription(entity.getDescription());

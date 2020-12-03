@@ -1,8 +1,17 @@
 package com.itextpdf.dito.manager.dto.datacollection;
 
-public class DataCollectionCreateRequestDTO {
+public class DataCollectionUpdateRequestDTO {
     private String name;
     private DataCollectionType type;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getName() {
         return name;

@@ -1,9 +1,9 @@
 package com.itextpdf.dito.manager.controller.datacollection;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionUpdateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -49,7 +49,7 @@ public interface DataCollectionController {
     @Operation(summary = "Update data collection", description = "Update data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> update(@PathVariable("name") String name,
-                                             @RequestBody DataCollectionCreateRequestDTO requestDTO,
+                                             @RequestBody DataCollectionUpdateRequestDTO requestDTO,
                                              Principal principal);
 
     @DeleteMapping(DATA_COLLECTION_ENDPOINT)
