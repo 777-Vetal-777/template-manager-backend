@@ -337,7 +337,7 @@
     <changeSet id="20-add-e4-us20-subscription-plan-default-permission" author="Vadim_Sorokin">
         <insert tableName="permission">
             <column name="id" value="20"/>
-            <column name="name" value="E4-US20-SUBSCRIPTION_PLAN"/>
+            <column name="name" value="E4_US20_SUBSCRIPTION_PLAN"/>
             <column name="available_for_custom_role" value="false"/>
         </insert>
         <insert tableName="role_permission">
@@ -353,7 +353,7 @@
     <changeSet id="21-add-e4-us21-cleanup-default-permission" author="Vadim_Sorokin">
         <insert tableName="permission">
             <column name="id" value="21"/>
-            <column name="name" value="E4-US21-CLEANUP"/>
+            <column name="name" value="E4_US21_CLEANUP"/>
             <column name="available_for_custom_role" value="false"/>
         </insert>
         <insert tableName="role_permission">

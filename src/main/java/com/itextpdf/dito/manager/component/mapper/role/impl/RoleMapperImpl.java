@@ -34,6 +34,7 @@ public class RoleMapperImpl implements RoleMapper {
     @Override
     public RoleDTO map(final RoleEntity entity) {
         final RoleDTO dto = new RoleDTO();
+        dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setType(entity.getType().getName().toString());
         dto.setUsersEmails(entity.getUsers() != null
