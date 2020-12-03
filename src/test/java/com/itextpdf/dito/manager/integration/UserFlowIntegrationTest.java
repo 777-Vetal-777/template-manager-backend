@@ -3,14 +3,16 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesRequestDTO;
-import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
+import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,16 +22,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.itextpdf.dito.manager.controller.user.UserController.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,16 +40,21 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private FailedLoginRepository failedLoginRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     private UserEntity user1;
     private UserEntity user2;
 
     @BeforeEach
     public void setup() {
+        RoleEntity role = roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow();
         user1 = new UserEntity();
         user1.setEmail("user1@email.com");
         user1.setFirstName("Harry");
         user1.setLastName("Kane");
         user1.setPassword("password1");
+        user1.setRoles(Set.of(role));
         user1.setActive(Boolean.TRUE);
 
         user2 = new UserEntity();
@@ -58,6 +62,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         user2.setFirstName("Geoffrey");
         user2.setLastName("Grant");
         user2.setPassword("password2");
+        user2.setRoles(Set.of(role));
         user2.setActive(Boolean.TRUE);
 
         user1 = userRepository.save(user1);
@@ -104,6 +109,40 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    public void getAll_WhenUsingSearchString_ThenResponseIsRelatedToSearch() throws Exception {
+        mockMvc.perform(get(UserController.BASE_NAME)
+                .param("search", user1.getEmail())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
+
+    }
+
+    @Test
+    public void getAll_WhenSearchStringDoesntMatchAnything_ThenResponseIsEmpty() throws Exception {
+        mockMvc.perform(get(UserController.BASE_NAME)
+                .param("search", "StringThatDoesntMatchAnything")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)));
+    }
+
+    @Test
+    public void getAll_WhenSortedBySupportedFields_ThenResponseIsOk() throws Exception {
+        for (String field : UserRepository.SUPPORTED_SORT_FIELDS) {
+            mockMvc.perform(get(UserController.BASE_NAME)
+                    .param("sort", field)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+        }
+    }
+
 
     @Test
     public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
