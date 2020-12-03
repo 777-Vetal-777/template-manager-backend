@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
-import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.EntityNotFoundException;
@@ -23,14 +22,11 @@ import java.util.Date;
 public class DataCollectionServiceImpl implements DataCollectionService {
 
     private final DataCollectionRepository dataCollectionRepository;
-    private final DataCollectionMapper dataCollectionMapper;
     private final UserService userService;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
-                                     final DataCollectionMapper dataCollectionMapper,
                                      final UserService userService) {
         this.dataCollectionRepository = dataCollectionRepository;
-        this.dataCollectionMapper = dataCollectionMapper;
         this.userService = userService;
     }
 
@@ -39,7 +35,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (dataCollectionRepository.existsByName(collectionEntity.getName())) {
             throw new CollectionAlreadyExistsException(collectionEntity.getName());
         }
-        final String fileExtension = FilenameUtils.getExtension(attachment.getOriginalFilename()).toLowerCase();
+        final String fileName = attachment.getOriginalFilename();
+        final String fileExtension = FilenameUtils.getExtension(fileName).toLowerCase();
         if (StringUtils.isEmpty(fileExtension) || !fileExtension.equals("json")) {
             throw new FileTypeNotSupportedException(fileExtension);
         }
@@ -49,6 +46,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             throw new FileCannotBeReadException(attachment.getOriginalFilename());
         }
         collectionEntity.setModifiedOn(new Date());
+        collectionEntity.setFileName(fileName);
         collectionEntity.setAuthor(userService.findByEmail(email));
         return dataCollectionRepository.save(collectionEntity);
     }

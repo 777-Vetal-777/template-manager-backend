@@ -13,7 +13,25 @@ public class DataCollectionDTO {
     @JsonProperty("author.lastName")
     private String authorLastName;
     private Date modifiedOn;
+    private Date createdOn;
+    private String fileName;
     private String attachment;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
 
     public Long getId() {
         return id;

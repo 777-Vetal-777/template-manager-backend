@@ -43,7 +43,9 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("id").value("1"))
                 .andExpect(jsonPath("name").value(requestDto.getName()))
                 .andExpect(jsonPath("type").value("JSON"))
-                .andExpect(jsonPath("modifiedOn").isNotEmpty());
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("fileName").value(file.getOriginalFilename()))
+                .andExpect(jsonPath("createdOn").isNotEmpty());
         assertTrue(dataCollectionRepository.existsByName(requestDto.getName()));
 
         //GET by name
@@ -63,6 +65,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").value("1"))
                 .andExpect(jsonPath("name").value(newCollectionName))
+                .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty());
 

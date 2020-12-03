@@ -26,6 +26,8 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setAuthorFirstName(entity.getAuthor().getFirstName());
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setModifiedOn(entity.getModifiedOn());
+        dto.setCreatedOn(entity.getModifiedOn());
+        dto.setFileName(entity.getFileName());
         dto.setAttachment(new String(entity.getData()));
         return dto;
     }

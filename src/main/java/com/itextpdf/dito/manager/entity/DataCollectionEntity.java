@@ -29,9 +29,10 @@ public class DataCollectionEntity {
 
     private byte[] data;
 
+    private String fileName;
+
     @Enumerated(EnumType.STRING)
     private DataCollectionType type;
-
     @Column(insertable = false)
     private Date modifiedOn;
 
@@ -42,6 +43,14 @@ public class DataCollectionEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", referencedColumnName = "id")
     private TemplateEntity template;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public Long getId() {
         return id;
