@@ -7,6 +7,7 @@ import java.util.Date;
 public class DataCollectionDTO {
     private Long id;
     private String name;
+    private String description;
     private DataCollectionType type;
     @JsonProperty("author.firstName")
     private String authorFirstName;
@@ -16,6 +17,14 @@ public class DataCollectionDTO {
     private Date createdOn;
     private String fileName;
     private String attachment;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getFileName() {
         return fileName;

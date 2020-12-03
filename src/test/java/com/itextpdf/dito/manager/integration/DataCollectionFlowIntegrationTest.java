@@ -44,6 +44,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("name").value(requestDto.getName()))
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty())
                 .andExpect(jsonPath("fileName").value(file.getOriginalFilename()))
                 .andExpect(jsonPath("createdOn").isNotEmpty());
         assertTrue(dataCollectionRepository.existsByName(requestDto.getName()));
@@ -63,6 +64,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("description").value(requestDto.getDescription()))
                 .andExpect(jsonPath("id").value("1"))
                 .andExpect(jsonPath("name").value(newCollectionName))
                 .andExpect(jsonPath("createdOn").isNotEmpty())

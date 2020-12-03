@@ -124,4 +124,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="016-add-description-to-data-collection" author="Yaroslav_Maievskiy">
+        <addColumn tableName="data_collection">
+            <column name="description" type="varchar(255)">
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

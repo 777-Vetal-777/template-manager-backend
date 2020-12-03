@@ -1,4 +1,5 @@
 {
   "name": "test-data-collection",
-  "type": "JSON"
+  "type": "JSON",
+  "description": "test-description"
 }

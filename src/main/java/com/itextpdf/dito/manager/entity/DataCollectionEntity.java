@@ -31,6 +31,8 @@ public class DataCollectionEntity {
 
     private String fileName;
 
+    private String description;
+
     @Enumerated(EnumType.STRING)
     private DataCollectionType type;
     @Column(insertable = false)
@@ -43,6 +45,14 @@ public class DataCollectionEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", referencedColumnName = "id")
     private TemplateEntity template;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getFileName() {
         return fileName;

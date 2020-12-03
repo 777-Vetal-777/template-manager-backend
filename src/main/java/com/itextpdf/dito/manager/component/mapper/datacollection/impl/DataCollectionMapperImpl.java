@@ -14,6 +14,7 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         final DataCollectionEntity entity = new DataCollectionEntity();
         entity.setName(dto.getName());
         entity.setType(dto.getType());
+        entity.setDescription(dto.getDescription());
         return entity;
     }
 
@@ -28,6 +29,7 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setModifiedOn(entity.getModifiedOn());
         dto.setCreatedOn(entity.getModifiedOn());
         dto.setFileName(entity.getFileName());
+        dto.setDescription(entity.getDescription());
         dto.setAttachment(new String(entity.getData()));
         return dto;
     }

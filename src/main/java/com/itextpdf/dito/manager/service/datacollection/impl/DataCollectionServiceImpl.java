@@ -80,6 +80,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         existingEntity.setTemplate(entity.getTemplate());
         existingEntity.setName(entity.getName());
         existingEntity.setAuthor(userService.findByEmail(userEmail));
+        existingEntity.setDescription(entity.getDescription());
         return dataCollectionRepository.save(existingEntity);
     }
 
