@@ -7,6 +7,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - "GF_FRONTEND_APP_BASE_URL=${hostIP}"
       - "SPRING_PROFILES_ACTIVE=dev"
       - "DITO_MANAGER_MAILING_ENABLE=true"
     depends_on:
