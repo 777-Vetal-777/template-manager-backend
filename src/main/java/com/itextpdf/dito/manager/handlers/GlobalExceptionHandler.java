@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
         log.error(ex.getMessage());
 
         return new ResponseEntity<>(
-                new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.BAD_REQUEST);
+                new ErrorResponseDTO("Invalid request parameter", ex.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ChangePasswordException.class)
