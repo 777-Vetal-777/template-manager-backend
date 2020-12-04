@@ -9,7 +9,7 @@ services:
     environment:
       - "GF_FRONTEND_APP_BASE_URL=${hostIP}"
       - "SPRING_PROFILES_ACTIVE=dev"
-      - "DITO_MANAGER_MAILING_ENABLE=true"
+      - "DITO_MANAGER_MAILING_ENABLE=false"
     depends_on:
       - db
   #=========== DATABASE ===============
