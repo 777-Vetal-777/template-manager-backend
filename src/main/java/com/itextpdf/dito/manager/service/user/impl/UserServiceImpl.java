@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
+import com.itextpdf.dito.manager.component.mail.MailClient;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
@@ -16,17 +17,19 @@ import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static java.lang.String.format;
 
 @Service
@@ -36,18 +39,29 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final FailedLoginRepository failedLoginRepository;
     private final PasswordEncoder encoder;
     private final UserMapper userMapper;
+    private final MailClient mailClient;
+
+    private final String MAIL_FROM = "ditotemplatemanager@gmail.com";
+    private final String MAIL_BODY = "<p>You are registered as a user in Template manager <p>Login: %s <p>Password: %s <p> <p><a href=%s>Please, reset your password after 1st-time login</a>";
+    private final String MAIL_SUBJECT = "DITO registration";
+    private final String FRONT_URL;
 
     public UserServiceImpl(final UserRepository userRepository,
-            final RoleRepository roleRepository,
-            final FailedLoginRepository failedLoginRepository,
-            final PasswordEncoder encoder,
-            final UserMapper userMapper) {
+                           final RoleRepository roleRepository,
+                           final FailedLoginRepository failedLoginRepository,
+                           final PasswordEncoder encoder,
+                           final UserMapper userMapper,
+                           final MailClient mailClient,
+                           @Value("${spring.mail.front-redirect}") final String frontUrl) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
         this.encoder = encoder;
         this.userMapper = userMapper;
+        this.mailClient = mailClient;
+        this.FRONT_URL = frontUrl;
     }
+
 
     @Override
     public UserEntity findByEmail(final String email) {
@@ -77,6 +91,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 .map(role -> roleRepository.findByName(role).orElseThrow(RoleNotFoundException::new))
                 .collect(Collectors.toSet());
         user.setRoles(roles);
+        sendMailToUser(request);
         return userRepository.save(user);
     }
 
@@ -117,8 +132,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public void updatePassword(final String oldPassword,
-            final String newPassword,
-            final String userEmail) {
+                               final String newPassword,
+                               final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException("Incorrect password");
@@ -132,7 +147,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public void updateUsersRoles(final List<String> emails, final List<String> roles,
-            final UpdateUsersRolesActionEnum actionEnum) {
+                                 final UpdateUsersRolesActionEnum actionEnum) {
         final List<UserEntity> userEntities = retrieveUsers(emails);
         final List<RoleEntity> roleEntities = retrieveRoles(roles);
 
@@ -176,6 +191,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return result;
     }
 
+    private void sendMailToUser(UserCreateRequestDTO request) {
+        final String mailBody = String.format(MAIL_BODY, request.getEmail(), request.getPassword(), FRONT_URL.concat("/login"));
+        mailClient.send(MAIL_FROM, request.getEmail(), MAIL_SUBJECT, mailBody);
+    }
 
     @Override
     protected List<String> getSupportedSortFields() {

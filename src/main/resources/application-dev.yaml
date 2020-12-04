@@ -8,6 +8,7 @@ spring:
     port: 465
     username: vadzim.sarokin.tech.acc@gmail.com
     password: 65[qXN?vq6k:fB$y
+    front-redirect: ${GF_FRONTEND_APP_BASE_URL}
     properties:
       mail:
         smtp:
