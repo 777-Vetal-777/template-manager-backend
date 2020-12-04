@@ -922,7 +922,7 @@
     <changeSet id="51-add-e8-us53-create-new-resource-image-default-permission" author="Vadim_Sorokin">
         <insert tableName="permission">
             <column name="id" value="51"/>
-            <column name="name" value="E8_US53_CREATE_NEW_RESOURCE_IMAGE_"/>
+            <column name="name" value="E8_US53_CREATE_NEW_RESOURCE_IMAGE"/>
             <column name="available_for_custom_role" value="true"/>
         </insert>
         <insert tableName="role_permission">
@@ -1202,7 +1202,7 @@
     <changeSet id="65-add-e8-us67-table-of-resource-permissions-image-default-permission" author="Vadim_Sorokin">
         <insert tableName="permission">
             <column name="id" value="65"/>
-            <column name="name" value="E8_US67_TABLE_OF_RESOURCE_PERMISSIONS-IMAGE"/>
+            <column name="name" value="E8_US67_TABLE_OF_RESOURCE_PERMISSIONS_IMAGE"/>
             <column name="available_for_custom_role" value="true"/>
         </insert>
         <insert tableName="role_permission">
