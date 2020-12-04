@@ -71,6 +71,12 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public void delete(final String name) {
         final RoleEntity role = roleRepository.findByName(name).orElseThrow(RoleNotFoundException::new);
+        if (role.getType().getName() == RoleType.SYSTEM) {
+            throw new RoleCannotBeRemovedException(
+                    new StringBuilder("System role cannot be removed: ")
+                            .append(name)
+                            .toString());
+        }
         if (!CollectionUtils.isEmpty(userRepository.countOfUserWithOnlyOneRole(name))) {
             throw new RoleCannotBeRemovedException(
                     new StringBuilder("Role cannot be removed. There are users with only one role: ")

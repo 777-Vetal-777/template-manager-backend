@@ -95,6 +95,13 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void delete_failureForSystemRole() throws Exception {
+        final String roleToBeDeletedName = "GLOBAL_ADMINISTRATOR";
+        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + roleToBeDeletedName))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void delete_failure_roleNotFound() throws Exception {
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + "unknown-role-name"))
                 .andExpect(status().isNotFound());
