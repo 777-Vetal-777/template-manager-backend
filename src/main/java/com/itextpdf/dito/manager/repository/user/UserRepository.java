@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked", "role.name");
 
-    @Query(value = "select u from UserEntity u "
+    @Query(value = "select distinct u from UserEntity u "
             + "join u.roles role")
     Page<UserEntity> findAll(Pageable pageable);
 
