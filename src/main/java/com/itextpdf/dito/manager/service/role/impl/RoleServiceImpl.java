@@ -32,9 +32,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final RoleTypeRepository roleTypeRepository;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-                           final UserRepository userRepository,
-                           final PermissionRepository permissionRepository,
-                           final RoleTypeRepository roleTypeRepository) {
+            final UserRepository userRepository,
+            final PermissionRepository permissionRepository,
+            final RoleTypeRepository roleTypeRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
@@ -61,7 +61,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public RoleEntity update(final String roleName, final RoleEntity updatedRole, final List<String> permissions) {
         RoleEntity existingRole = roleRepository.findByName(roleName).orElseThrow(RoleNotFoundException::new);
-        if (roleRepository.findByName(updatedRole.getName()).isPresent()) {
+        if (!roleName.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
             throw new RoleAlreadyExistsException(updatedRole.getName());
         }
         existingRole.setName(updatedRole.getName());
@@ -94,6 +94,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     private RoleEntity setPermissions(final RoleEntity role, List<String> permissionsName) {
+        role.getPermissions().clear();
         for (final String permissionName : permissionsName) {
             final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
             if (permissionEntity == null) {
