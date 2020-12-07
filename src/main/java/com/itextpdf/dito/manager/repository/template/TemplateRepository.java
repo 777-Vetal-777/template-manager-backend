@@ -29,6 +29,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Override
     @Query(value = "select template from TemplateEntity template "
-            + "join template.files file ")
+            + "join template.files file "
+            + "join template.type type ")
     Page<TemplateEntity> findAll(Pageable pageable);
 }
