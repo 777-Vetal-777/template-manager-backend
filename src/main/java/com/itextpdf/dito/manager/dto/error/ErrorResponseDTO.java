@@ -13,6 +13,10 @@ public class ErrorResponseDTO {
         this.details = details;
     }
 
+    public ErrorResponseDTO(String message) {
+        this.message = message;
+    }
+
     public String getMessage() {
         return message;
     }

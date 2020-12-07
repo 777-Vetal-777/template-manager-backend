@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.ChangePasswordException;
+import com.itextpdf.dito.manager.exception.GlobalAdminAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.UserAlreadyExistsException;
@@ -85,6 +86,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
                     .append(" already exists")
                     .toString());
         }
+
+        if (isGlobalAdminRolePresented(request.getRoles())) {
+            throw new GlobalAdminAlreadyExistsException();
+        }
+
         final UserEntity user = userMapper.map(request);
         user.setPassword(encoder.encode(request.getPassword()));
         Set<RoleEntity> roles = request.getRoles().stream()
@@ -148,6 +154,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     public void updateUsersRoles(final List<String> emails, final List<String> roles,
                                  final UpdateUsersRolesActionEnum actionEnum) {
+        if (isGlobalAdminRolePresented(roles)) {
+            throw new GlobalAdminAlreadyExistsException();
+        }
+
         final List<UserEntity> userEntities = retrieveUsers(emails);
         final List<RoleEntity> roleEntities = retrieveRoles(roles);
 
@@ -194,6 +204,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private void sendMailToUser(UserCreateRequestDTO request) {
         final String mailBody = String.format(MAIL_BODY, request.getEmail(), request.getPassword(), FRONT_URL.concat("/login"));
         mailClient.send(MAIL_FROM, request.getEmail(), MAIL_SUBJECT, mailBody);
+    }
+
+    private boolean isGlobalAdminRolePresented(final List<String> roles) {
+        return roles.contains("GLOBAL_ADMINISTRATOR");
     }
 
     @Override

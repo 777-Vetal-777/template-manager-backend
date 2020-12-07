@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.EntityNotFoundException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
+import com.itextpdf.dito.manager.exception.GlobalAdminAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.PermissionCantBeAttachedToCustomRole;
@@ -164,5 +165,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> roleAlreadyExistsExceptionHandler(final RoleAlreadyExistsException ex) {
         return new ResponseEntity<>(
                 new ErrorResponseDTO("Role already exists", ex.getName()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GlobalAdminAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> roleAlreadyExistsExceptionHandler(final GlobalAdminAlreadyExistsException ex) {
+        return new ResponseEntity<>(
+                new ErrorResponseDTO("Global administrator already exists", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }
