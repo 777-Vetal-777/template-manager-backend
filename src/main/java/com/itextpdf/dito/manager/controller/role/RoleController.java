@@ -16,9 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +41,7 @@ public interface RoleController {
     })
     ResponseEntity<RoleDTO> create(@RequestBody RoleCreateRequestDTO roleCreateRequestDTO);
 
-    @PutMapping(ROLE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PatchMapping(ROLE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Edit custom role", description = "Edit custom security role",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -49,7 +49,7 @@ public interface RoleController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = RoleCreateRequestDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or role already exists", content = @Content),
     })
-    ResponseEntity<RoleDTO> update(@Parameter(description = "role name to be updated") @PathVariable String name, @RequestBody RoleCreateRequestDTO roleCreateRequestDTO);
+    ResponseEntity<RoleDTO> update(@Parameter(description = "role name to be updated") @PathVariable String name, @RequestBody RoleCreateRequestDTO roleUpdateRequestDTO);
 
     @GetMapping
     @Operation(summary = "Get role list", description = "Get available roles",

@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Base64;
+
 @RestController
 public class RoleControllerImpl implements RoleController {
 
@@ -39,8 +41,10 @@ public class RoleControllerImpl implements RoleController {
     }
 
     @Override
-    public ResponseEntity<RoleDTO> update(final String name, final RoleCreateRequestDTO roleCreateRequestDTO) {
-        return new ResponseEntity<>(new RoleDTO(), HttpStatus.OK);
+    public ResponseEntity<RoleDTO> update(final String name, final RoleCreateRequestDTO roleUpdateRequestDTO) {
+        final String decodedRoleName = new String(Base64.getDecoder().decode(name));
+        final RoleEntity updatedRole = roleMapper.map(roleUpdateRequestDTO);
+        return new ResponseEntity<>(roleMapper.map(roleService.update(decodedRoleName, updatedRole, roleUpdateRequestDTO.getPermissions())), HttpStatus.OK);
     }
 
     @Override

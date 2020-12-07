@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.io.File;
+import java.util.Base64;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,12 +73,21 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testUpdateCustomRole() throws Exception {
+        final String roleToBeUpdatedName = "role-for-update";
+        RoleEntity roleToBeDeleted = new RoleEntity();
+        roleToBeDeleted.setName(roleToBeUpdatedName);
+        roleToBeDeleted.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
+        roleRepository.save(roleToBeDeleted);
+
         RoleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/roles/role-update-request.json"), RoleCreateRequestDTO.class);
-        mockMvc.perform(put(RoleController.BASE_NAME + "/my-custom-role")
+        final String encodedRoleName = Base64.getEncoder().encodeToString(roleToBeUpdatedName.getBytes());
+
+        mockMvc.perform(patch(RoleController.BASE_NAME + "/" + encodedRoleName)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value("edited-custom-role-name"));
     }
 
     @Test

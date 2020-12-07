@@ -16,6 +16,7 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -45,17 +46,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         if (roleRepository.findByName(roleEntity.getName()).isPresent()) {
             new RoleAlreadyExistsException(roleEntity.getName());
         }
-
-        for (final String permissionName : permissions) {
-            final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
-            if (permissionEntity == null) {
-                throw new PermissionNotFound();
-            } else if (!permissionEntity.getAvailableForCustomRole()) {
-                throw new PermissionCantBeAttachedToCustomRole();
-            } else {
-                roleEntity.getPermissions().add(permissionEntity);
-            }
-        }
+        setPermissions(roleEntity, permissions);
         roleEntity.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
         return roleRepository.save(roleEntity);
     }
@@ -68,8 +59,14 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public RoleEntity update(final RoleEntity entity) {
-        return null;
+    public RoleEntity update(final String roleName, final RoleEntity updatedRole, final List<String> permissions) {
+        RoleEntity existingRole = roleRepository.findByName(roleName).orElseThrow(RoleNotFoundException::new);
+        if (roleRepository.findByName(updatedRole.getName()).isPresent()) {
+            throw new RoleAlreadyExistsException(updatedRole.getName());
+        }
+        existingRole.setName(updatedRole.getName());
+        setPermissions(existingRole, permissions);
+        return roleRepository.save(existingRole);
     }
 
     @Override
@@ -94,5 +91,19 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     protected List<String> getSupportedSortFields() {
         return roleRepository.SUPPORTED_SORT_FIELDS;
+    }
+
+    private RoleEntity setPermissions(final RoleEntity role, List<String> permissionsName) {
+        for (final String permissionName : permissionsName) {
+            final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
+            if (permissionEntity == null) {
+                throw new PermissionNotFound();
+            } else if (!permissionEntity.getAvailableForCustomRole()) {
+                throw new PermissionCantBeAttachedToCustomRole();
+            } else {
+                role.getPermissions().add(permissionEntity);
+            }
+        }
+        return role;
     }
 }

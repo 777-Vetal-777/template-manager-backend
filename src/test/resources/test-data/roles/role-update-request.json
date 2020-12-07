@@ -1,3 +1,7 @@
 {
-  "name": "my-custom-role"
+  "name": "edited-custom-role-name",
+  "permissions": [
+    "E1_US1_LOG_IN_TO_THE_SYSTEM",
+    "E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"
+  ]
 }

@@ -13,7 +13,7 @@ public interface RoleService {
 
     Page<RoleEntity> list(Pageable pageable, String searchParam);
 
-    RoleEntity update(RoleEntity entity);
+    RoleEntity update(String roleName, RoleEntity updatedRole, List<String> permissions);
 
     void delete(String name);
 }
