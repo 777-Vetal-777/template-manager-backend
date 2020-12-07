@@ -44,7 +44,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public RoleEntity create(final RoleEntity roleEntity, final List<String> permissions) {
         if (roleRepository.findByName(roleEntity.getName()).isPresent()) {
-            new RoleAlreadyExistsException(roleEntity.getName());
+            throw new RoleAlreadyExistsException(roleEntity.getName());
         }
         setPermissions(roleEntity, permissions);
         roleEntity.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
