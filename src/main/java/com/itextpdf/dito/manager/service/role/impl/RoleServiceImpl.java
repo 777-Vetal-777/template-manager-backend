@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
 import com.itextpdf.dito.manager.exception.PermissionCantBeAttachedToCustomRole;
 import com.itextpdf.dito.manager.exception.PermissionNotFound;
+import com.itextpdf.dito.manager.exception.RoleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
 import com.itextpdf.dito.manager.exception.RoleNotFoundException;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
@@ -15,7 +16,6 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -42,6 +42,10 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public RoleEntity create(final RoleEntity roleEntity, final List<String> permissions) {
+        if (roleRepository.findByName(roleEntity.getName()).isPresent()) {
+            new RoleAlreadyExistsException(roleEntity.getName());
+        }
+
         for (final String permissionName : permissions) {
             final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
             if (permissionEntity == null) {
