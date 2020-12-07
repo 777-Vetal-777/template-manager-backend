@@ -8,7 +8,7 @@ public class TemplateDTO {
     private String name;
     @JsonProperty("type.name")
     private String type;
-    @JsonProperty("dataCollection.name")
+    @JsonProperty("dataCollection")
     private String dataCollection;
     @JsonProperty("file.author.email")
     private String author;
