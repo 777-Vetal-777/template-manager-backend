@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class UserDTO {
@@ -8,6 +10,7 @@ public class UserDTO {
     private String lastName;
     private Boolean active;
     private Boolean blocked;
+    @JsonProperty("role.name")
     private List<String> roles;
     private List<String> authorities;
 

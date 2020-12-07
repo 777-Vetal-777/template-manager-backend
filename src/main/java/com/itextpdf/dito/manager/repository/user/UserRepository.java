@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked", "roles");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked", "role.name");
 
     @Query(value = "select u from UserEntity u "
             + "join u.roles role")
