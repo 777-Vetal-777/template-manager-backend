@@ -91,7 +91,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdUser.email").value("user@email.com"))
                 .andExpect(jsonPath("createdUser.lastName").value("Kane"))
                 .andExpect(jsonPath("createdUser.blocked").value("false"))
-                .andExpect(jsonPath("createdUser.roles").isNotEmpty())
+                .andExpect(jsonPath("createdUser.authorities").isNotEmpty())
                 .andExpect(jsonPath("createdUser.active").value("true"));
 
         assertTrue(userRepository.findByEmailAndActiveTrue("user@email.com").isPresent());
@@ -266,7 +266,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     public void updateUserRoles_AddAndRemoveRole() throws Exception {
         UpdateUsersRolesRequestDTO request = new UpdateUsersRolesRequestDTO();
         request.setEmails(List.of(user1.getEmail()));
-        request.setRoles(List.of("GLOBAL_ADMINISTRATOR"));
+        request.setRoles(List.of("ADMINISTRATOR"));
         request.setUpdateUsersRolesActionEnum(UpdateUsersRolesActionEnum.ADD);
 
         mockMvc.perform(patch(UserController.BASE_NAME + UPDATE_USERS_ROLES_ENDPOINT)
@@ -276,8 +276,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         UserEntity updated = userRepository.findByEmailAndActiveTrue(user1.getEmail()).orElseThrow();
-        assertEquals(1, updated.getRoles().size());
-        assertEquals("GLOBAL_ADMINISTRATOR", updated.getRoles().iterator().next().getName());
+        assertEquals(2, updated.getRoles().size());
 
         request.setUpdateUsersRolesActionEnum(UpdateUsersRolesActionEnum.REMOVE);
         mockMvc.perform(patch(UserController.BASE_NAME + UPDATE_USERS_ROLES_ENDPOINT)
@@ -287,7 +286,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         updated = userRepository.findByEmailAndActiveTrue(user1.getEmail()).orElseThrow();
-        assertEquals(0, updated.getRoles().size());
+        assertEquals(1, updated.getRoles().size());
     }
 
 }

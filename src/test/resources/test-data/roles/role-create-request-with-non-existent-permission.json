@@ -1,4 +1,4 @@
 {
-  "name": "my-custom-role",
+  "name": "my-custom-role-1",
   "permissions": ["does_no_exist"]
 }

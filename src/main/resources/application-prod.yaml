@@ -1,3 +1,7 @@
+ditomanager:
+  mailing:
+    enabled: ${DITO_MANAGER_MAILING_ENABLE}
+
 security:
   jwt:
     private-key: ${DITO_MANAGER_JWT_PRIVATE_KEY}

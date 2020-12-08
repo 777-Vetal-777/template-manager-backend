@@ -18,6 +18,7 @@ import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,27 +41,27 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final FailedLoginRepository failedLoginRepository;
     private final PasswordEncoder encoder;
     private final UserMapper userMapper;
-    private final MailClient mailClient;
+    private MailClient mailClient;
 
-    private final String MAIL_FROM = "ditotemplatemanager@gmail.com";
-    private final String MAIL_BODY = "<p>You are registered as a user in Template manager <p>Login: %s <p>Password: %s <p> <p><a href=%s>Please, reset your password after 1st-time login</a>";
-    private final String MAIL_SUBJECT = "DITO registration";
-    private final String FRONT_URL;
+    private final Boolean mailingEnabled;
 
     public UserServiceImpl(final UserRepository userRepository,
                            final RoleRepository roleRepository,
                            final FailedLoginRepository failedLoginRepository,
                            final PasswordEncoder encoder,
                            final UserMapper userMapper,
-                           final MailClient mailClient,
-                           @Value("${spring.mail.front-redirect}") final String frontUrl) {
+                           @Value("${ditomanager.mailing.enabled") final String mailingEnabled) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
         this.encoder = encoder;
         this.userMapper = userMapper;
+        this.mailingEnabled = Boolean.valueOf(mailingEnabled);
+    }
+
+    @Autowired(required = false)
+    public void setMailClient(final MailClient mailClient) {
         this.mailClient = mailClient;
-        this.FRONT_URL = frontUrl;
     }
 
 
@@ -97,7 +98,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 .map(role -> roleRepository.findByName(role).orElseThrow(RoleNotFoundException::new))
                 .collect(Collectors.toSet());
         user.setRoles(roles);
-        sendMailToUser(request);
+        if (mailingEnabled) {
+            mailClient.sendRegistrationMessage(request.getEmail(), request.getPassword());
+        }
         return userRepository.save(user);
     }
 
@@ -201,10 +204,6 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return result;
     }
 
-    private void sendMailToUser(UserCreateRequestDTO request) {
-        final String mailBody = String.format(MAIL_BODY, request.getEmail(), request.getPassword(), FRONT_URL.concat("/login"));
-        mailClient.send(MAIL_FROM, request.getEmail(), MAIL_SUBJECT, mailBody);
-    }
 
     private boolean isGlobalAdminRolePresented(final List<String> roles) {
         return roles.contains("GLOBAL_ADMINISTRATOR");

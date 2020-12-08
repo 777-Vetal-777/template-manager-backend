@@ -1,3 +1,7 @@
+ditomanager:
+  mailing:
+    enabled: ${DITO_MANAGER_MAILING_ENABLE}
+
 spring:
   datasource:
     url: jdbc:postgresql://<socket>/dito

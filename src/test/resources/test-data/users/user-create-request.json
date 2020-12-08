@@ -4,6 +4,6 @@
   "lastName": "Kane",
   "password": "admin1234578",
   "roles": [
-    "GLOBAL_ADMINISTRATOR"
+    "TEMPLATE_DESIGNER"
   ]
 }

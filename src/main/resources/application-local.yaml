@@ -1,3 +1,7 @@
+ditomanager:
+  mailing:
+    enabled: false
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dito
@@ -8,7 +12,7 @@ spring:
     port: 587
     username: vadzim.sarokin.tech.acc@gmail.com
     password: 65[qXN?vq6k:fB$y
-    front-redirect: ${GF_FRONTEND_APP_BASE_URL}
+    front-redirect: 123
     properties:
       mail:
         smtp:
