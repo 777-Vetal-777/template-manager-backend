@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.controller.role;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
-import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -49,12 +51,14 @@ public interface RoleController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = RoleCreateRequestDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or role already exists", content = @Content),
     })
-    ResponseEntity<RoleDTO> update(@Parameter(description = "role name to be updated") @PathVariable String name, @RequestBody RoleCreateRequestDTO roleUpdateRequestDTO);
+    ResponseEntity<RoleDTO> update(@Parameter(description = "role name to be updated") @PathVariable String name,
+            @RequestBody RoleUpdateRequestDTO roleUpdateRequestDTO);
 
     @GetMapping
     @Operation(summary = "Get role list", description = "Get available roles",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<RoleDTO>> list(Pageable pageable, @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<RoleDTO>> list(Pageable pageable,
+            @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
 
 
     @DeleteMapping(ROLE_ENDPOINT_WITH_PATH_VARIABLE)

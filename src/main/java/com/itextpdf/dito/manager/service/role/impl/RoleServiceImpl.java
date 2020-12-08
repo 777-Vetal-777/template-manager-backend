@@ -3,11 +3,12 @@ package com.itextpdf.dito.manager.service.role.impl;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
-import com.itextpdf.dito.manager.exception.PermissionCantBeAttachedToCustomRole;
-import com.itextpdf.dito.manager.exception.PermissionNotFound;
-import com.itextpdf.dito.manager.exception.RoleAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
-import com.itextpdf.dito.manager.exception.RoleNotFoundException;
+import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
+import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
+import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
+import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
+import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
@@ -16,7 +17,6 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -59,9 +59,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public RoleEntity update(final String roleName, final RoleEntity updatedRole, final List<String> permissions) {
-        RoleEntity existingRole = roleRepository.findByName(roleName).orElseThrow(RoleNotFoundException::new);
-        if (!roleName.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
+    public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
+        RoleEntity existingRole = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+        if (!name.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
             throw new RoleAlreadyExistsException(updatedRole.getName());
         }
         existingRole.setName(updatedRole.getName());
@@ -71,19 +71,15 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public void delete(final String name) {
-        final RoleEntity role = roleRepository.findByName(name).orElseThrow(RoleNotFoundException::new);
+        final RoleEntity role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+
         if (role.getType().getName() == RoleType.SYSTEM) {
-            throw new RoleCannotBeRemovedException(
-                    new StringBuilder("System role cannot be removed: ")
-                            .append(name)
-                            .toString());
+            throw new AttemptToDeleteSystemRoleException();
         }
         if (!CollectionUtils.isEmpty(userRepository.countOfUserWithOnlyOneRole(name))) {
-            throw new RoleCannotBeRemovedException(
-                    new StringBuilder("Role cannot be removed. There are users with only one role: ")
-                            .append(name)
-                            .toString());
+            throw new UnableToDeleteSingularRoleException();
         }
+
         roleRepository.delete(role);
     }
 
@@ -98,9 +94,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         for (final String permissionName : permissionsName) {
             final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
             if (permissionEntity == null) {
-                throw new PermissionNotFound();
+                throw new PermissionNotFoundException(permissionName);
             } else if (!permissionEntity.getAvailableForCustomRole()) {
-                throw new PermissionCantBeAttachedToCustomRole();
+                throw new PermissionCantBeAttachedToCustomRoleException();
             } else {
                 role.getPermissions().add(permissionEntity);
             }

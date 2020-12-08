@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.service.role;
 
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 
 import java.util.List;

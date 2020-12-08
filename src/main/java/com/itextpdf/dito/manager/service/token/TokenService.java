@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.service.token;
 
-import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
+import com.itextpdf.dito.manager.exception.token.InvalidRefreshTokenException;
 
 public interface TokenService {
     String generateAccessToken(String subject);

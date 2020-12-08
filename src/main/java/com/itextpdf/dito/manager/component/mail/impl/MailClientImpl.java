@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.component.mail.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
-import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;

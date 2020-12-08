@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.integration;
 
 import com.itextpdf.dito.manager.controller.user.UserController;
-import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
         adminUser.setPassword(passwordEncoder.encode("adminnew@email.com"));
         userRepository.save(adminUser);
 
-        UpdatePasswordRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-password-request.json"), UpdatePasswordRequestDTO.class);
+        PasswordChangeRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-password-request.json"), PasswordChangeRequestDTO.class);
         mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -39,7 +39,7 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void failed_newPasswordSameAsOld() throws Exception {
-        UpdatePasswordRequestDTO request = new UpdatePasswordRequestDTO();
+        PasswordChangeRequestDTO request = new PasswordChangeRequestDTO();
         request.setOldPassword("admin@email.com");
         request.setNewPassword("admin@email.com");
         mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
@@ -51,7 +51,7 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void failed_InvalidPassword() throws Exception {
-        UpdatePasswordRequestDTO request = new UpdatePasswordRequestDTO();
+        PasswordChangeRequestDTO request = new PasswordChangeRequestDTO();
         request.setOldPassword("adminincorrect@email.com");
         mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))

@@ -4,6 +4,7 @@ package com.itextpdf.dito.manager.component.mapper.user.impl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
@@ -25,6 +26,16 @@ public class UserMapperImpl implements UserMapper {
 
         result.setEmail(dto.getEmail());
         result.setPassword(dto.getPassword());
+        result.setFirstName(dto.getFirstName());
+        result.setLastName(dto.getLastName());
+
+        return result;
+    }
+
+    @Override
+    public UserEntity map(UserUpdateRequestDTO dto) {
+        final UserEntity result = new UserEntity();
+
         result.setFirstName(dto.getFirstName());
         result.setLastName(dto.getLastName());
 

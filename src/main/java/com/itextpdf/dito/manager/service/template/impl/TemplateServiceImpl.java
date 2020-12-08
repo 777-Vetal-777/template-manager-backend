@@ -1,10 +1,9 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
-import com.itextpdf.dito.manager.exception.EntityNotFoundException;
-import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
+import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.template.TemplateFileNotFoundException;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -16,7 +15,6 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,11 +30,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final DataCollectionRepository dataCollectionRepository;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
-                               final TemplateRepository templateRepository,
-                               final TemplateTypeService templateTypeService,
-                               final UserService userService,
-                               final TemplateLoader templateLoader,
-                               final DataCollectionRepository dataCollectionRepository) {
+            final TemplateRepository templateRepository,
+            final TemplateTypeService templateTypeService,
+            final UserService userService,
+            final TemplateLoader templateLoader,
+            final DataCollectionRepository dataCollectionRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.templateTypeService = templateTypeService;
@@ -48,24 +46,27 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     @Transactional
-    public TemplateFileEntity create(final TemplateCreateRequestDTO templateCreateRequestDTO, String email) {
-        throwExceptionIfTemplateNameAlreadyIsRegistered(templateCreateRequestDTO.getName());
+    public TemplateEntity create(final String templateName, final String templateTypeName,
+            final String dataCollectionName, final String email) {
+        throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         TemplateEntity templateEntity = new TemplateEntity();
-        templateEntity.setName(templateCreateRequestDTO.getName());
-        templateEntity.setType(templateTypeService.findTemplateType(templateCreateRequestDTO.getType()));
-        if (!StringUtils.isEmpty(templateCreateRequestDTO.getDataCollection())) {
+        templateEntity.setName(templateName);
+        templateEntity.setType(templateTypeService.findTemplateType(templateTypeName));
+        if (!StringUtils.isEmpty(dataCollectionName)) {
             templateEntity.setDataCollection(
-                    dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()).orElseThrow(EntityNotFoundException::new));
+                    dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
+                            () -> new TemplateFileNotFoundException(dataCollectionName)));
         }
-        templateRepository.save(templateEntity);
+        final TemplateEntity persistedTemplateEntity = templateRepository.save(templateEntity);
 
         TemplateFileEntity templateFileEntity = new TemplateFileEntity();
         templateFileEntity.setAuthor(userService.findByEmail(email));
         templateFileEntity.setData(templateLoader.load());
-        templateFileEntity.setTemplate(templateEntity);
+        templateFileEntity.setTemplate(persistedTemplateEntity);
+        templateFileRepository.save(templateFileEntity);
 
-        return templateFileRepository.save(templateFileEntity);
+        return persistedTemplateEntity;
     }
 
     @Override
@@ -83,7 +84,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
-            throw new TemplateNameAlreadyRegisteredException(templateName);
+            throw new TemplateAlreadyExistsException(templateName);
         }
     }
 }

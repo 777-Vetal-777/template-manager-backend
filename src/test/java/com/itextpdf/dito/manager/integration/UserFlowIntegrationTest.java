@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
-import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
@@ -87,12 +87,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("createdUser.firstName").value("Harry"))
-                .andExpect(jsonPath("createdUser.email").value("user@email.com"))
-                .andExpect(jsonPath("createdUser.lastName").value("Kane"))
-                .andExpect(jsonPath("createdUser.blocked").value("false"))
-                .andExpect(jsonPath("createdUser.authorities").isNotEmpty())
-                .andExpect(jsonPath("createdUser.active").value("true"));
+                .andExpect(jsonPath("firstName").value("Harry"))
+                .andExpect(jsonPath("email").value("user@email.com"))
+                .andExpect(jsonPath("lastName").value("Kane"))
+                .andExpect(jsonPath("blocked").value("false"))
+                .andExpect(jsonPath("authorities").isNotEmpty())
+                .andExpect(jsonPath("active").value("true"));
 
         assertTrue(userRepository.findByEmailAndActiveTrue("user@email.com").isPresent());
 
@@ -264,7 +264,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void updateUserRoles_AddAndRemoveRole() throws Exception {
-        UpdateUsersRolesRequestDTO request = new UpdateUsersRolesRequestDTO();
+        UserRolesUpdateRequestDTO request = new UserRolesUpdateRequestDTO();
         request.setEmails(List.of(user1.getEmail()));
         request.setRoles(List.of("ADMINISTRATOR"));
         request.setUpdateUsersRolesActionEnum(UpdateUsersRolesActionEnum.ADD);

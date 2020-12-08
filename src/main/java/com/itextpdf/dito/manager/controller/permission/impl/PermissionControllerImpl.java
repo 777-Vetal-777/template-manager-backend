@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.permission.impl;
 
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
+import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.permission.PermissionController;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
@@ -12,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class PermissionControllerImpl implements PermissionController {
+public class PermissionControllerImpl extends AbstractController implements PermissionController {
     private final PermissionService permissionService;
     private final PermissionMapper permissionMapper;
 

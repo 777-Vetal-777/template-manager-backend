@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.component.auth.token.builder.impl.JwtAccessToke
 import com.itextpdf.dito.manager.component.auth.token.builder.impl.JwtRefreshTokenBuilder;
 import com.itextpdf.dito.manager.component.auth.token.helper.TokenHelper;
 import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtRefreshTokenHelper;
-import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
+import com.itextpdf.dito.manager.exception.token.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.service.token.TokenService;
 
 import org.springframework.beans.factory.annotation.Qualifier;

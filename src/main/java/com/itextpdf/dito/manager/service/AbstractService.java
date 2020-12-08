@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.service;
 
-import com.itextpdf.dito.manager.exception.UnsupportedSortFieldException;
+import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
 
 import java.util.List;
 import org.springframework.data.domain.Sort;

@@ -1,8 +1,8 @@
 package com.itextpdf.dito.manager.service.workspace.impl;
 
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
-import com.itextpdf.dito.manager.exception.WorkspaceNameAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.WorkspaceNotFoundException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         // TODO figure out how workspaces will be stored? Single or multiple workspaces per database?
         List<WorkspaceEntity> workspaces = workspaceRepository.findAll();
         if (workspaces.isEmpty()) {
-            throw new WorkspaceNotFoundException("workspace does not exist");
+            throw new WorkspaceNotFoundException();
         }
         return workspaces.get(0);
     }
@@ -47,7 +47,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     private void throwExceptionIfNameIsAlreadyInUse(final String workspaceName) {
         if (workspaceRepository.existsByName(workspaceName)) {
-            throw new WorkspaceNameAlreadyExistsException("workspace with name " + workspaceName + " already exists");
+            throw new WorkspaceNameAlreadyExistsException(workspaceName);
         }
     }
 }

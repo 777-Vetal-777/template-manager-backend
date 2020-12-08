@@ -1,8 +1,9 @@
 package com.itextpdf.dito.manager.controller.login.impl;
 
+import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.login.AuthenticationController;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationRequestDTO;
-import com.itextpdf.dito.manager.dto.auth.AuthenticationResponseDTO;
 import com.itextpdf.dito.manager.service.auth.AuthenticationService;
 
 import javax.validation.Valid;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class AuthenticationControllerImpl implements AuthenticationController {
+public class AuthenticationControllerImpl extends AbstractController implements AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
@@ -19,7 +20,7 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    public ResponseEntity<AuthenticationResponseDTO> login(
+    public ResponseEntity<AuthenticationDTO> login(
             final @Valid AuthenticationRequestDTO authenticationRequestDTO) {
         return new ResponseEntity<>(authenticationService
                 .authenticate(authenticationRequestDTO.getLogin(), authenticationRequestDTO.getPassword()),

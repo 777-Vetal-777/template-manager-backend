@@ -1,12 +1,12 @@
 package com.itextpdf.dito.manager.integration;
 
 import com.itextpdf.dito.manager.controller.role.RoleController;
-import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
-import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
