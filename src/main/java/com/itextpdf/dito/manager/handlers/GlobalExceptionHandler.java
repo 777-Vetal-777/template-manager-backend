@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WorkspaceNameAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDTO> workspaceNameAlreadyExists(final WorkspaceNameAlreadyExistsException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO("Workspace with that name already exists", ex.getMessage()),
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(WorkspaceNotFoundException.class)
