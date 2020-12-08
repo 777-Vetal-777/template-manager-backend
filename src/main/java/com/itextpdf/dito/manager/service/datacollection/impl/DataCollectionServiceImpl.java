@@ -1,10 +1,12 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.EntityNotFoundException;
 import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
 import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -22,11 +24,14 @@ import java.util.Date;
 public class DataCollectionServiceImpl implements DataCollectionService {
 
     private final DataCollectionRepository dataCollectionRepository;
+    private final DataCollectionLogRepository dataCollectionLogRepository;
     private final UserService userService;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
-                                     final UserService userService) {
+                                     final UserService userService,
+                                     final DataCollectionLogRepository dataCollectionLogRepository) {
         this.dataCollectionRepository = dataCollectionRepository;
+        this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.userService = userService;
     }
 
@@ -80,7 +85,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         existingEntity.setName(entity.getName());
         existingEntity.setAuthor(userService.findByEmail(userEmail));
         existingEntity.setDescription(entity.getDescription());
-        return dataCollectionRepository.save(existingEntity);
+        final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
+        logDataCollectionUpdate(savedCollection);
+        return savedCollection;
     }
 
     private DataCollectionEntity findByName(final String name) {
@@ -89,5 +96,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 .append(name)
                 .append(" not found")
                 .toString()));
+    }
+    private void logDataCollectionUpdate(DataCollectionEntity collectionEntity) {
+        final DataCollectionLogEntity logDataCollection = new DataCollectionLogEntity();
+        logDataCollection.setAuthor(collectionEntity.getAuthor());
+        logDataCollection.setDataCollection(collectionEntity);
+        logDataCollection.setDate(new Date());
+        dataCollectionLogRepository.save(logDataCollection);
     }
 }

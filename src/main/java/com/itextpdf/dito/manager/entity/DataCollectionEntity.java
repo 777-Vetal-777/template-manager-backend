@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.entity;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,9 +13,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Collection;
 import java.util.Date;
 
 @Entity
@@ -45,6 +49,22 @@ public class DataCollectionEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", referencedColumnName = "id")
     private TemplateEntity template;
+
+    @OneToMany(
+            mappedBy = "dataCollection",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @OrderBy("date DESC")
+    private Collection<DataCollectionLogEntity> dataCollectionLog;
+
+    public Collection<DataCollectionLogEntity> getDataCollectionLog() {
+        return dataCollectionLog;
+    }
+
+    public void setDataCollectionLog(Collection<DataCollectionLogEntity> dataCollectionLog) {
+        this.dataCollectionLog = dataCollectionLog;
+    }
 
     public String getDescription() {
         return description;

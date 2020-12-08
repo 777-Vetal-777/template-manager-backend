@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataCollectionRepository dataCollectionRepository;
+    @Autowired
+    private DataCollectionLogRepository dataCollectionLogRepository;
 
     @AfterEach
     public void clearDb() {
@@ -53,6 +56,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty());
         assertTrue(dataCollectionRepository.existsByName(requestDto.getName()));
 
+
         //GET by name
         mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + requestDto.getName())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,11 +83,14 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty());
+        assertFalse(dataCollectionLogRepository.findAll().isEmpty());
 
         //DELETE by name
         mockMvc.perform(delete(DataCollectionController.BASE_NAME + "/" + collectionUpdateRequestDTO.getName()))
                 .andExpect(status().isOk());
         assertFalse(dataCollectionRepository.existsByName(requestDto.getName()));
+        assertTrue(dataCollectionLogRepository.findAll().isEmpty());
+
     }
 
     @Test

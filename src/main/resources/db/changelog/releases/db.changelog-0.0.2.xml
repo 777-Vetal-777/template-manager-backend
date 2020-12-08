@@ -131,4 +131,23 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="017-data-collection-log--table" author="Yaroslav_Maievskiy">
+        <createTable tableName="data_collection_log">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="data_collection_log_pk"/>
+            </column>
+            <column name="date" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_data_collection_log_to_user" references="user(id)"/>
+            </column>
+            <column name="data_collection_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_data_collection_log_to_data_collection"
+                             references="data_collection(id)"/>
+            </column>
+        </createTable>
+        <createSequence sequenceName="data_collection_sequence_log"/>
+    </changeSet>
+
 </databaseChangeLog>
