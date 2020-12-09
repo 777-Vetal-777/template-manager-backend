@@ -117,6 +117,7 @@
     </dependencies>
 
     <build>
+        <finalName>template-manager</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
