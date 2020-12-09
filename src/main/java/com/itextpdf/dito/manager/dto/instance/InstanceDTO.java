@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.dto.instance;
 
 import org.springframework.lang.NonNull;
 import javax.validation.constraints.NotBlank;
+import java.sql.Date;
 
 public class InstanceDTO {
     @NotBlank
@@ -12,8 +13,28 @@ public class InstanceDTO {
     @NonNull
     private PromotionPathPositionType pathPositionType;
 
+    private String createdBy;
+
+    private Date createdOn;
+
     public PromotionPathPositionType getPathPositionType() {
         return pathPositionType;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 
     public void setPathPositionType(PromotionPathPositionType pathPositionType) {
