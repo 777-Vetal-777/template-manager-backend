@@ -43,7 +43,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         }
 
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
-                .create(name, dataCollectionType, data,
+                .create(decodeBase64(name), dataCollectionType, data,
                         multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
     }
@@ -56,7 +56,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> get(final String name) {
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.get(name)), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.get(decodeBase64(name))), HttpStatus.OK);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<Void> delete(final String name) {
-        dataCollectionService.delete(name);
+        dataCollectionService.delete(decodeBase64(name));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

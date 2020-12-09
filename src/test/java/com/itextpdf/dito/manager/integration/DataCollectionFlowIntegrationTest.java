@@ -42,7 +42,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
                 "{\"file\":\"data\"}".getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
-                .queryParam("name", NAME)
+                .queryParam("name", Base64.getEncoder().encodeToString(NAME.getBytes()))
                 .queryParam("type", TYPE)
                 .build().encode().toUri();
 
@@ -56,7 +56,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(dataCollectionRepository.existsByName(NAME));
 
         //GET by name
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + NAME)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(NAME.getBytes()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -83,7 +83,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         assertFalse(dataCollectionLogRepository.findAll().isEmpty());
 
         //DELETE by name
-        mockMvc.perform(delete(DataCollectionController.BASE_NAME + "/" + collectionUpdateRequestDTO.getName()))
+        mockMvc.perform(delete(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(collectionUpdateRequestDTO.getName().getBytes())))
                 .andExpect(status().isOk());
         assertFalse(dataCollectionRepository.existsByName(NAME));
         assertTrue(dataCollectionLogRepository.findAll().isEmpty());
@@ -95,7 +95,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
                 "{\"file\":\"data\"}".getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
-                .queryParam("name", NAME)
+                .queryParam("name", Base64.getEncoder().encodeToString(NAME.getBytes()))
                 .queryParam("type", TYPE)
                 .build().encode().toUri();
 
@@ -109,7 +109,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 "file data".getBytes());
 
         final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
-                .queryParam("name", NAME)
+                .queryParam("name", Base64.getEncoder().encodeToString(NAME.getBytes()))
                 .queryParam("type", TYPE)
                 .build().encode().toUri();
 
@@ -128,7 +128,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void test_failure_get() throws Exception {
         final String notExistingCollectionName = "unknown-collection";
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + notExistingCollectionName)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(notExistingCollectionName.getBytes()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());

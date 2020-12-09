@@ -52,7 +52,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
 
     @Override
     public ResponseEntity<Void> delete(final String name) {
-        roleService.delete(name);
+        roleService.delete(decodeBase64(name));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

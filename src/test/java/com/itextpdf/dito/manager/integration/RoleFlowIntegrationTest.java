@@ -98,20 +98,20 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         roleToBeDeleted.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
         roleRepository.save(roleToBeDeleted);
 
-        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + roleToBeDeletedName))
+        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void delete_failureForSystemRole() throws Exception {
         final String roleToBeDeletedName = "GLOBAL_ADMINISTRATOR";
-        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + roleToBeDeletedName))
+        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void delete_failure_roleNotFound() throws Exception {
-        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + "unknown-role-name"))
+        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString("unknown-role-name".getBytes())))
                 .andExpect(status().isNotFound());
     }
 
@@ -119,7 +119,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
     public void delete_failure_userWithOnlyThisRole() throws Exception {
         final String roleToBeDeletedName = "GLOBAL_ADMINISTRATOR";
 
-        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + roleToBeDeletedName))
+        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isBadRequest());
     }
 
