@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -19,6 +20,11 @@ public class InstanceControllerImpl extends AbstractController implements Instan
 
     @Override
     public ResponseEntity<List<InstanceDTO>> saveInstances(@Valid InstanceCreateRequestDTO createRequestDTO) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteInstance(@NotNull String name) {
         return null;
     }
 }

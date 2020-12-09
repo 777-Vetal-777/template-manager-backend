@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,13 +18,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RequestMapping(InstanceController.BASE_NAME)
 public interface InstanceController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/instances";
-
+    String INSTANCE_NAME_ENDPOINT = "/{name}";
     String INSTANCE_ENDPOINT = "/{socket}";
     String INSTANCE_STATUS = INSTANCE_ENDPOINT + "/status";
 
@@ -42,5 +44,15 @@ public interface InstanceController {
             @ApiResponse(responseCode = "400",description = "Instance already exist")
     })
     ResponseEntity<List<InstanceDTO>> saveInstances(@Valid @RequestBody InstanceCreateRequestDTO createRequestDTO);
+
+    @DeleteMapping(INSTANCE_NAME_ENDPOINT)
+    @Operation(summary = "Disconnect instance", description = "Break communication with an instance.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Instance disconnected successfully."),
+            @ApiResponse(responseCode = "400", description = "The Instance cannot be disconnected, because the instance is connected with template."),
+            @ApiResponse(responseCode = "401", description = "The Instance cannot be disconnected, because the instance is part of promotion path.")
+    })
+    ResponseEntity<Void> deleteInstance(@Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.", allowEmptyValue = false) @NotNull @PathVariable final String name);
+
 
 }
