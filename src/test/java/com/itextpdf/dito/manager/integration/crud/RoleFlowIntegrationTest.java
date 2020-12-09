@@ -1,9 +1,10 @@
-package com.itextpdf.dito.manager.integration;
+package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 
@@ -62,14 +63,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void getAll_WithSearchFilter() throws Exception {
-        mockMvc.perform(get(RoleController.BASE_NAME)
-                .param("search", "GLOBAL_ADMINISTRATOR")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
+
 
     @Test
     public void testUpdateCustomRole() throws Exception {

@@ -1,8 +1,9 @@
-package com.itextpdf.dito.manager.integration;
+package com.itextpdf.dito.manager.integration.security;
 
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

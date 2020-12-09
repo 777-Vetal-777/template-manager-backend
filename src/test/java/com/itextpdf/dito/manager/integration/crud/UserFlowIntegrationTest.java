@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.integration;
+package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -111,49 +112,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void getAll_WhenUsingSearchString_ThenResponseIsRelatedToSearch() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME)
-                .param("search", user1.getEmail())
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
 
-    }
-
-    @Test
-    public void getAll_WhenSearchStringDoesntMatchAnything_ThenResponseIsEmpty() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME)
-                .param("search", "StringThatDoesntMatchAnything")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
-    }
-
-    @Test
-    @Disabled
-    public void getAll_WhenSortedBySupportedFields_ThenResponseIsOk() throws Exception {
-        for (String field : UserRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(UserController.BASE_NAME)
-                    .param("sort", field)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-        }
-    }
-
-
-    @Test
-    public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME)
-                .param("sort", "unknownField")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
 
     @Test
     public void deactivateUsers() throws Exception {

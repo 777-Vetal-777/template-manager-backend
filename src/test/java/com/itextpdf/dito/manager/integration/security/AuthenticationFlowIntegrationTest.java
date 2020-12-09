@@ -1,8 +1,9 @@
-package com.itextpdf.dito.manager.integration;
+package com.itextpdf.dito.manager.integration.security;
 
 import com.itextpdf.dito.manager.controller.login.AuthenticationController;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;

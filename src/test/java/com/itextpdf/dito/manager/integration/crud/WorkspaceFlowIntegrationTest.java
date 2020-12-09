@@ -1,8 +1,9 @@
-package com.itextpdf.dito.manager.integration;
+package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,9 @@
-package com.itextpdf.dito.manager.integration;
+package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 
