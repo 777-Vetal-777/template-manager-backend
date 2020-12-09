@@ -28,7 +28,7 @@ public interface TokenController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully created new token", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = AccessTokenRefreshRequestDTO.class))}),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TokenDTO.class))}),
             @ApiResponse(responseCode = "401", description = "Invalid refresh token", content = @Content),
     })
     @PostMapping(REFRESH_ENDPOINT)

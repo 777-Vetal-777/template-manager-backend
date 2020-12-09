@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 
 public class WorkspaceDTO {
     @NotBlank
-    @Schema(example = "My-workspace", hidden = true)
+    @Schema(example = "My-workspace")
     private String name;
     @NotBlank
     @Schema(example = "America/Sao_Paulo")

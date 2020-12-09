@@ -4,9 +4,6 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.template.TemplateTypeDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -23,7 +20,5 @@ public interface TemplateTypeController {
     @GetMapping
     @Operation(summary = "Get template type list", description = "Get all template types",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", description = "Template types", content = {
-            @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateTypeDTO.class))})
     ResponseEntity<List<TemplateTypeDTO>> list();
 }
