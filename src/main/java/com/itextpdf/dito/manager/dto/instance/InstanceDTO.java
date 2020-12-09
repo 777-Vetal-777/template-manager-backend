@@ -2,13 +2,12 @@ package com.itextpdf.dito.manager.dto.instance;
 
 
 import org.springframework.lang.NonNull;
-
 import javax.validation.constraints.NotBlank;
 
 public class InstanceDTO {
     @NotBlank
     private String name;
-    @NonNull
+    @NotBlank
     private String socket;
     @NonNull
     private PromotionPathPositionType pathPositionType;
