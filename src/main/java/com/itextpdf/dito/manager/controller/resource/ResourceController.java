@@ -34,5 +34,5 @@ public interface ResourceController {
     @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get resource", description = "Get resource",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<ResourceDTO> get(@PathVariable("name") String name);
+    ResponseEntity<ResourceDTO> get(@PathVariable(RESOURCE_PATH_VARIABLE) String name);
 }

@@ -34,7 +34,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> create(final UserCreateRequestDTO userCreateRequestDTO) {
+    public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO) {
         final UserEntity user = userService
                 .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles());
         return new ResponseEntity<>(userMapper.map(user), HttpStatus.CREATED);

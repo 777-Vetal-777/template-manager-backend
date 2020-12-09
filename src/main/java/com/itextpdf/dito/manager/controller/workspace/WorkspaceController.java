@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.workspace;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
+import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 
@@ -13,8 +14,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -23,6 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface WorkspaceController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/workspaces";
+
+    String WORKSPACE_PATH_VARIABLE = "name";
+    String WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + WORKSPACE_PATH_VARIABLE + "}";
+    String WORKSPACE_PROMOTION_PATH_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/promotion-path";
 
     @PostMapping
     @Operation(summary = "Create workspace", description = "Create new workspace",
@@ -39,8 +45,19 @@ public interface WorkspaceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<WorkspaceDTO> get();
 
-    @PutMapping
+    @PatchMapping
     @Operation(summary = "Update workspace", description = "Update workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<WorkspaceDTO> update(@RequestBody WorkspaceDTO workspaceDTO);
+
+    @GetMapping(WORKSPACE_PROMOTION_PATH_ENDPOINT)
+    @Operation(summary = "Promotion path", description = "Retrieve full promotion path",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<PromotionPathDTO> getPromotionPath(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
+
+    @PatchMapping(WORKSPACE_PROMOTION_PATH_ENDPOINT)
+    @Operation(summary = "Update promotion path", description = "Update promotion path",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<PromotionPathDTO> updatePromotionPath(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
+            PromotionPathDTO promotionPathDTO);
 }

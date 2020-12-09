@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
-import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +51,7 @@ public interface UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or user already exists", content = @Content),
     })
-    ResponseEntity<UserDTO> create(@RequestBody @Valid UserCreateRequestDTO userCreateRequestDTO);
+    ResponseEntity<UserDTO> create(@RequestBody UserCreateRequestDTO userCreateRequestDTO);
 
     @GetMapping
     @Operation(summary = "Get users list", description = "Get available users",
@@ -67,7 +66,7 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    ResponseEntity<Void> updateActivationStatus(@RequestBody @Valid UsersActivateRequestDTO usersActivateRequestDTO);
+    ResponseEntity<Void> updateActivationStatus(@RequestBody UsersActivateRequestDTO usersActivateRequestDTO);
 
     @GetMapping(CURRENT_USER_INFO_ENDPOINT)
     @Operation(summary = "Get info about current user", description = "Get info about the user making request",

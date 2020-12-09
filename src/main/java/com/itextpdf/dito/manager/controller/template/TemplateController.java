@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
-import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +35,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or template already exists", content = @Content)})
-    ResponseEntity<TemplateDTO> create(@RequestBody @Valid TemplateCreateRequestDTO templateCreateRequestDTO,
+    ResponseEntity<TemplateDTO> create(@RequestBody TemplateCreateRequestDTO templateCreateRequestDTO,
             Principal principal);
 
     @GetMapping
