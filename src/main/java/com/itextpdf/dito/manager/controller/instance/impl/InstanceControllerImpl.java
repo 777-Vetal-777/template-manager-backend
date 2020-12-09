@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 public class InstanceControllerImpl extends AbstractController implements InstanceController {
     @Override
-    public ResponseEntity<Void> list(String socket) {
+    public ResponseEntity<Void> getInstanceStatus(String socket) {
         return null;
     }
 
@@ -31,7 +31,7 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
-    public ResponseEntity<Page<InstanceDTO>> list(Pageable pageable, InstanceFilterDTO instanceFilterDTO, String searchParam) {
+    public ResponseEntity<Page<InstanceDTO>> getInstanceStatus(Pageable pageable, InstanceFilterDTO instanceFilterDTO, String searchParam) {
         return null;
     }
 }

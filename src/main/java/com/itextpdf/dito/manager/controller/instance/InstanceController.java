@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.util.List;
-
 @Tag(name = "instance", description = "instance API")
 @RequestMapping(InstanceController.BASE_NAME)
 public interface InstanceController {
@@ -45,7 +44,7 @@ public interface InstanceController {
             @ApiResponse(responseCode = "200", description = "Instance available, ready to connect"),
             @ApiResponse(responseCode = "504", description = "No connection to the instance")
     })
-    ResponseEntity<Void> list(@Parameter(description = "encoded with base64 socket, with which you can check the status of the instance") @PathVariable("socket") String socket);
+    ResponseEntity<Void> getInstanceStatus(@Parameter(description = "encoded with base64 socket, with which you can check the status of the instance") @PathVariable("socket") String socket);
 
     @PostMapping
     @Operation(summary = "Save instances", description = "Save a set of instances", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -61,14 +60,13 @@ public interface InstanceController {
     ResponseEntity<Void> deleteInstance(@Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.") @PathVariable final String name);
 
     @GetMapping()
-    @Operation(summary = "Get information about instances", description = "Retrieving list of information about instances using sorting and filters.",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @Operation(summary = "Get information about instances", description = "Retrieving list of information about instances using sorting and filters.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Information about instances is prepared according to the specified conditions."),
     })
-    ResponseEntity<Page<InstanceDTO>> list(Pageable pageable,
-                                           @ParameterObject InstanceFilterDTO instanceFilterDTO,
-                                           @Parameter(description = "Universal search string which filter instance name, author name  and socket") @RequestParam(name = "searchParam", required = false) String searchParam);
+    ResponseEntity<Page<InstanceDTO>> getInstanceStatus(Pageable pageable,
+                                                        @ParameterObject InstanceFilterDTO instanceFilterDTO,
+                                                        @Parameter(description = "Universal search string which filter instance name, author name  and socket") @RequestParam(name = "searchParam", required = false) String searchParam);
 
 }
 
