@@ -24,7 +24,7 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
-    public ResponseEntity<Void> deleteInstance(@NotNull String name) {
+    public ResponseEntity<Void> deleteInstance(final String name) {
         return null;
     }
 }

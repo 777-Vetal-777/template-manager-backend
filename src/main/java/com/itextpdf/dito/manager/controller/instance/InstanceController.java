@@ -32,27 +32,23 @@ public interface InstanceController {
     @GetMapping(INSTANCE_STATUS)
     @Operation(summary = "Get instance status", description = "Get instance status by socket", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "Instance available, ready to connect"),
-            @ApiResponse(responseCode = "504",description = "No connection to the instance")
+            @ApiResponse(responseCode = "200", description = "Instance available, ready to connect"),
+            @ApiResponse(responseCode = "504", description = "No connection to the instance")
     })
-    ResponseEntity<Void> getInstanceStatus(@Parameter(description = "encoded with base64 socket, with which you can check the status of the instance") @NonNull @PathVariable("socket") String socket);
+    ResponseEntity<Void> getInstanceStatus(@Parameter(description = "encoded with base64 socket, with which you can check the status of the instance") @PathVariable("socket") String socket);
 
     @PostMapping
     @Operation(summary = "Save instances", description = "Save a set of instances", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Instances successfully saved"),
-            @ApiResponse(responseCode = "400",description = "Instance already exist")
+            @ApiResponse(responseCode = "400", description = "Instance already exist")
     })
     ResponseEntity<List<InstanceDTO>> saveInstances(@Valid @RequestBody InstanceCreateRequestDTO createRequestDTO);
 
     @DeleteMapping(INSTANCE_NAME_ENDPOINT)
     @Operation(summary = "Disconnect instance", description = "Break communication with an instance.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Instance disconnected successfully."),
-            @ApiResponse(responseCode = "400", description = "The Instance cannot be disconnected, because the instance is connected with template."),
-            @ApiResponse(responseCode = "401", description = "The Instance cannot be disconnected, because the instance is part of promotion path.")
-    })
-    ResponseEntity<Void> deleteInstance(@Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.", allowEmptyValue = false) @NotNull @PathVariable final String name);
+    @ApiResponse(responseCode = "200", description = "Instance disconnected successfully.")
+    ResponseEntity<Void> deleteInstance(@Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.", allowEmptyValue = false) @PathVariable final String name);
 
 
 }
