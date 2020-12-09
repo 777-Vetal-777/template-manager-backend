@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
+import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceCreateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RequestMapping(InstanceController.BASE_NAME)
 public interface InstanceController {
@@ -39,6 +41,6 @@ public interface InstanceController {
             @ApiResponse(responseCode = "200", description = "Instances successfully saved"),
             @ApiResponse(responseCode = "400",description = "Instance already exist")
     })
-    ResponseEntity<Void> saveInstances(@Valid @RequestBody InstanceCreateRequestDTO createRequestDTO);
+    ResponseEntity<List<InstanceDTO>> saveInstances(@Valid @RequestBody InstanceCreateRequestDTO createRequestDTO);
 
 }
