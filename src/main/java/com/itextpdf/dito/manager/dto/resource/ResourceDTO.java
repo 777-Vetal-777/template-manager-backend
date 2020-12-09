@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class ResourceDTO {
-    private Long id;
     private String name;
     private String type;
     @JsonProperty("author.firstName")
@@ -14,14 +13,6 @@ public class ResourceDTO {
     private String authorLastName;
     private Date modifiedOn;
     private String comment;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ResourceController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/resources";
+
     String RESOURCE_PATH_VARIABLE = "name";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
 
