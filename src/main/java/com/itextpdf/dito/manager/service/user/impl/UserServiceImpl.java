@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.role.AttemptToAttachGlobalAdministratorRoleException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
+import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
@@ -154,6 +155,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 break;
             case REMOVE:
                 for (final UserEntity userEntity : userEntities) {
+                    final Set<RoleEntity> userRoles = userEntity.getRoles();
+                    if (userRoles.size() <= roleEntities.size()) {
+                        throw new UnableToDeleteSingularRoleException();
+                    }
                     userEntity.getRoles().removeAll(roleEntities);
                 }
                 break;
