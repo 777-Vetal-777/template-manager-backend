@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.controller.role;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +59,7 @@ public interface RoleController {
     @GetMapping
     @Operation(summary = "Get role list", description = "Get available roles",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<RoleDTO>> list(Pageable pageable,
+    ResponseEntity<Page<RoleDTO>> list(Pageable pageable, @ParameterObject RoleFilterDTO filter,
             @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
 
 

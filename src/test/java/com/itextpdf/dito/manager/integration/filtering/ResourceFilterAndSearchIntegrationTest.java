@@ -8,9 +8,10 @@ import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationTest {
+public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest{
 
     @Test
+    @Override
     public void test_search() throws Exception {
         //TODO implement within https://jira.itextsupport.com/browse/DTM-472
         mockMvc.perform(get(ResourceController.BASE_NAME)
@@ -21,6 +22,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     }
 
     @Test
+    @Override
     public void test_filtering() throws Exception {
         //TODO implement within https://jira.itextsupport.com/browse/DTM-472
         mockMvc.perform(get(ResourceController.BASE_NAME)
@@ -43,6 +45,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     }
 
     @Test
+    @Override
     public void test_searchAndFiltering() throws Exception {
         //TODO implement within https://jira.itextsupport.com/browse/DTM-472
         mockMvc.perform(get(ResourceController.BASE_NAME)

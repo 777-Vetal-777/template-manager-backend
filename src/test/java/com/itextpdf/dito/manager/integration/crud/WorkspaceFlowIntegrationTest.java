@@ -67,7 +67,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated());
 
         WorkspaceDTO updateRequest = objectMapper.readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"), WorkspaceDTO.class);
-        mockMvc.perform(put(WorkspaceController.BASE_NAME)
+        mockMvc.perform(patch(WorkspaceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(updateRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

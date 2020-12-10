@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.repository.role;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -18,6 +19,12 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     Optional<RoleEntity> findByName(String name);
 
+    Page<RoleEntity> findAll(Specification<RoleEntity> specification, Pageable pageable);
+
+    /**
+     * @deprecated use {@link RoleSpecifications}.
+     */
+    @Deprecated
     @Query(value = "select r from RoleEntity r "
             + "join r.users user "
             + "where  LOWER(user.email) like  LOWER(CONCAT('%',:value,'%')) "

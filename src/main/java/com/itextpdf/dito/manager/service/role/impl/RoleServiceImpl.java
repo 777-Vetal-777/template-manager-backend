@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.role.impl;
 
+import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
@@ -17,11 +18,15 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.*;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
@@ -32,9 +37,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final RoleTypeRepository roleTypeRepository;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-            final UserRepository userRepository,
-            final PermissionRepository permissionRepository,
-            final RoleTypeRepository roleTypeRepository) {
+                           final UserRepository userRepository,
+                           final PermissionRepository permissionRepository,
+                           final RoleTypeRepository roleTypeRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
@@ -52,10 +57,15 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> list(final Pageable pageable, final String searchParam) {
-        return StringUtils.isEmpty(searchParam)
-                ? roleRepository.findAll(pageable)
-                : roleRepository.search(pageable, searchParam);
+    public Page<RoleEntity> list(final Pageable pageable, final RoleFilterDTO filterDTO, final String searchParam) {
+        Specification<RoleEntity> specification = Specification.where(
+                nameIsLike(filterDTO.getName())
+                        .and(typeIs(filterDTO.getType())
+                                .and(usersIn(filterDTO.getUsers()))));
+        if (!StringUtils.isEmpty(searchParam)) {
+            specification = specification.and(search(searchParam));
+        }
+        return roleRepository.findAll(specification, pageable);
     }
 
     @Override
