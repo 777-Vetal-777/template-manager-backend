@@ -25,7 +25,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
      * @deprecated use {@link RoleSpecifications}.
      */
     @Deprecated
-    @Query(value = "select r from RoleEntity r "
+    @Query(value = "select distinct r from RoleEntity r "
             + "join r.users user "
             + "where  LOWER(user.email) like  LOWER(CONCAT('%',:value,'%')) "
             + "or  LOWER(r.name) like  LOWER(CONCAT('%',:value,'%'))")
