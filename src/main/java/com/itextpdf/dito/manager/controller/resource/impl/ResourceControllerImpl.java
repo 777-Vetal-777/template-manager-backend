@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.controller.resource.impl;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceType;
 import com.itextpdf.dito.manager.dto.resource.filter.ResourceFilterDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 
@@ -33,5 +35,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         final ResourceDTO result = new ResourceDTO();
         result.setName(decodedResourceName);
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> create(String name, ResourceType type, MultipartFile resource) {
+        return null;
     }
 }

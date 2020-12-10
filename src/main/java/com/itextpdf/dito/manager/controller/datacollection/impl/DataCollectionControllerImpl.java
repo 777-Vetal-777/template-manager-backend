@@ -43,8 +43,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         }
 
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
-                .create(decodeBase64(name), dataCollectionType, data,
-                        multipartFile.getOriginalFilename(), principal.getName());
+                .create(name, dataCollectionType, data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
     }
 

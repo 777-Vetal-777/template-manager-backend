@@ -6,13 +6,21 @@ import java.util.Date;
 
 public class ResourceDTO {
     private String name;
-    private String type;
+    private ResourceType type;
     @JsonProperty("author.firstName")
     private String authorFirstName;
     @JsonProperty("author.lastName")
     private String authorLastName;
     private Date modifiedOn;
     private String comment;
+
+    public ResourceType getType() {
+        return type;
+    }
+
+    public void setType(ResourceType type) {
+        this.type = type;
+    }
 
     public String getName() {
         return name;
@@ -54,11 +62,4 @@ public class ResourceDTO {
         this.comment = comment;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 }

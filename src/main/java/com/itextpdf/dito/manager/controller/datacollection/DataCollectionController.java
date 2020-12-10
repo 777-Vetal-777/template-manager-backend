@@ -65,6 +65,7 @@ public interface DataCollectionController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted data collection", content = @Content),
+            @ApiResponse(responseCode = "409", description = "File with this name already exists", content = @Content),
             @ApiResponse(responseCode = "404", description = "Data collection not found", content = @Content),
     })
     ResponseEntity<Void> delete(@PathVariable("name") final String name);
