@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-public class DependencyControllerImpl extends AbstractController implements DependencyController{
+public class DependencyControllerImpl extends AbstractController implements DependencyController {
     @Override
-    public ResponseEntity<Page<DependencyDTO>> list(Pageable pageable, DependencyFilterDTO dependencyFilterDTO, String searchParam) {
+    public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final DependencyFilterDTO dependencyFilterDTO, final String searchParam) {
         return null;
     }
 }
