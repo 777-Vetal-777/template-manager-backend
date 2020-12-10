@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleExcepti
 import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
+import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
@@ -71,9 +72,15 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
         RoleEntity existingRole = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+
+        if (RoleType.SYSTEM.equals(existingRole.getType())) {
+            throw new UnableToUpdateSystemRoleException();
+        }
+
         if (!name.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
             throw new RoleAlreadyExistsException(updatedRole.getName());
         }
+
         existingRole.setName(updatedRole.getName());
         setPermissions(existingRole, permissions);
         return roleRepository.save(existingRole);
