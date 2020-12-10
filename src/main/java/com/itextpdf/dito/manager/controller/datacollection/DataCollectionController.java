@@ -68,5 +68,5 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "409", description = "File with this name already exists", content = @Content),
             @ApiResponse(responseCode = "404", description = "Data collection not found", content = @Content),
     })
-    ResponseEntity<Void> delete(@PathVariable("name") final String name);
+    ResponseEntity<Void> delete(@PathVariable("name") String name);
 }

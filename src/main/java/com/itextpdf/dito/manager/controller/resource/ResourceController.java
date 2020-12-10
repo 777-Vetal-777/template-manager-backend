@@ -49,10 +49,10 @@ public interface ResourceController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Resource saved successfully."),
             @ApiResponse(responseCode = "409", description = "A resource with the same name already exists."),
-            @ApiResponse(responseCode = "419", description = "The file cannot be read."),
-            @ApiResponse(responseCode = "421", description = "File extension not supported.")
+            @ApiResponse(responseCode = "400", description = "The file cannot be read."),
+            @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<Void> create(@Parameter(name = "name",description = "resource name") @RequestParam final String name,
-                                @Parameter(name = "type",description = "Resource type, e.g. image, font, style sheet")@RequestParam final ResourceType type,
-                                @Parameter(name = "resource",description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.")@RequestPart("resource") final MultipartFile resource);
+    ResponseEntity<Void> create(@Parameter(name = "name",description = "resource name") @RequestParam String name,
+                                @Parameter(name = "type",description = "Resource type, e.g. image, font, style sheet")@RequestParam ResourceType type,
+                                @Parameter(name = "resource",description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.")@RequestPart("resource") MultipartFile resource);
 }
