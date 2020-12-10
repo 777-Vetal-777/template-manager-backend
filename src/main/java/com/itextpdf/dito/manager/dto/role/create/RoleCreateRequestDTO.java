@@ -8,7 +8,7 @@ public class RoleCreateRequestDTO {
     @NotBlank
     private String name;
     @NotEmpty
-    private List<String> permissions;
+    private List<@NotBlank String> permissions;
 
     public String getName() {
         return name;
