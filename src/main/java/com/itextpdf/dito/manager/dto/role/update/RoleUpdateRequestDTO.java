@@ -1,10 +1,14 @@
 package com.itextpdf.dito.manager.dto.role.update;
 
 import java.util.List;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 public class RoleUpdateRequestDTO {
+    @NotBlank
     private String name;
-    private List<String> permissions;
+    @NotEmpty
+    private List<@NotBlank String> permissions;
 
     public String getName() {
         return name;
