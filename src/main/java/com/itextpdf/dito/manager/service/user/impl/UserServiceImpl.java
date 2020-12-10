@@ -19,6 +19,7 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -134,6 +135,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
             throw new NewPasswordTheSameAsOldPasswordException();
         }
         user.setPassword(encoder.encode(newPassword));
+        user.setModifiedAt(new Date());
         return userRepository.save(user);
     }
 
