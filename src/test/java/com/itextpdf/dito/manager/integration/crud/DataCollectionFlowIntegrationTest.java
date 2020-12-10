@@ -96,7 +96,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
                 "{\"file\":\"data\"}".getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
-                .queryParam("name", Base64.getEncoder().encodeToString(NAME.getBytes()))
+                .queryParam("name", NAME)
                 .queryParam("type", TYPE)
                 .build().encode().toUri();
 

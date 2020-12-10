@@ -17,17 +17,18 @@ import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
-
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.*;
+import java.util.List;
+
+import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.nameIsLike;
+import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.search;
+import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.typeIs;
+import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.usersIn;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
@@ -93,7 +94,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         if (role.getType().getName() == RoleType.SYSTEM) {
             throw new AttemptToDeleteSystemRoleException();
         }
-        if (!CollectionUtils.isEmpty(userRepository.countOfUserWithOnlyOneRole(name))) {
+        if (userRepository.countOfUserWithOnlyOneRole(name) > 0) {
             throw new UnableToDeleteSingularRoleException();
         }
 
