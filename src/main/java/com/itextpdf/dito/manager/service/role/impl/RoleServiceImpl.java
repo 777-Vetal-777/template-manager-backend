@@ -27,8 +27,7 @@ import java.util.List;
 
 import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.nameIsLike;
 import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.search;
-import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.typeIs;
-import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.usersIn;
+import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.typeIn;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
@@ -62,8 +61,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     public Page<RoleEntity> list(final Pageable pageable, final RoleFilterDTO filterDTO, final String searchParam) {
         Specification<RoleEntity> specification = Specification.where(
                 nameIsLike(filterDTO.getName())
-                        .and(typeIs(filterDTO.getType())
-                                .and(usersIn(filterDTO.getUsers()))));
+                        .and(typeIn(filterDTO.getTypes())));
         if (!StringUtils.isEmpty(searchParam)) {
             specification = specification.and(search(searchParam));
         }
