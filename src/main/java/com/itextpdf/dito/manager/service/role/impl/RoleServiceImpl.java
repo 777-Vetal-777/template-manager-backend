@@ -74,10 +74,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
         RoleEntity existingRole = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
 
-        if (RoleType.SYSTEM.equals(existingRole.getType())) {
+        if (existingRole.getType().getName() == RoleType.SYSTEM) {
             throw new UnableToUpdateSystemRoleException();
         }
-
         if (!name.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
             throw new RoleAlreadyExistsException(updatedRole.getName());
         }
