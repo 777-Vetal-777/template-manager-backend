@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.resource.ResourceType;
 import com.itextpdf.dito.manager.dto.resource.filter.ResourceFilterDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +45,7 @@ public interface ResourceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> get(@PathVariable(RESOURCE_PATH_VARIABLE) String name);
 
-    @PostMapping()
+    @PostMapping(consumes =  MediaType.MULTIPART_FORM_DATA_VALUE )
     @Operation(summary = "Save new resource.",description = "Api for loading images, fonts, stylesheets.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -52,7 +54,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "The file cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<Void> create(@Parameter(name = "name",description = "resource name") @RequestParam String name,
-                                @Parameter(name = "type",description = "Resource type, e.g. image, font, style sheet")@RequestParam ResourceType type,
-                                @Parameter(name = "resource",description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.")@RequestPart("resource") MultipartFile resource);
+    ResponseEntity<Void> create(@Parameter(name = "name",description = "resource name",style = ParameterStyle.FORM) @RequestParam String name,
+                                @Parameter(name = "type",description = "Resource type, e.g. image, font, style sheet",style = ParameterStyle.FORM)@RequestParam ResourceType type,
+                                @Parameter(name = "resource",description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.",style = ParameterStyle.FORM)@RequestPart("resource") MultipartFile resource);
 }
