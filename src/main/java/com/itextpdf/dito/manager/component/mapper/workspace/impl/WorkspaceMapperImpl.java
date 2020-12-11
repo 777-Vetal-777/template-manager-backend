@@ -1,14 +1,29 @@
 package com.itextpdf.dito.manager.component.mapper.workspace.impl;
 
+import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
+import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
+import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.PromotionPathEntity;
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WorkspaceMapperImpl implements WorkspaceMapper {
+    private final InstanceMapper instanceMapper;
+
+    public WorkspaceMapperImpl(final InstanceMapper instanceMapper) {
+        this.instanceMapper = instanceMapper;
+    }
+
     @Override
     public WorkspaceEntity map(final WorkspaceCreateRequestDTO dto) {
         final WorkspaceEntity result = new WorkspaceEntity();
@@ -40,5 +55,55 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
         result.setTimezone(entity.getTimezone());
 
         return result;
+    }
+
+    @Override
+    public PromotionPathDTO map(final PromotionPathEntity entity) {
+        final PromotionPathDTO promotionPathDTO = new PromotionPathDTO();
+
+        final List<StageDTO> stages = new ArrayList<>();
+        for (final StageEntity stage : entity.getStages()) {
+            stages.add(map(stage));
+        }
+        promotionPathDTO.setStages(stages);
+
+        return promotionPathDTO;
+    }
+
+    @Override
+    public PromotionPathEntity map(final PromotionPathDTO dto) {
+        final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
+
+        final List<StageEntity> stages = dto.getStages().stream().map(this::map).collect(Collectors.toList());
+        promotionPathEntity.setStages(stages);
+
+        return promotionPathEntity;
+    }
+
+    @Override
+    public StageDTO map(final StageEntity entity) {
+        final StageDTO stageDTO = new StageDTO();
+        stageDTO.setName(entity.getName());
+        stageDTO.setInstances(entity.getInstances().stream().map(instance -> instance.getName())
+                .collect(Collectors.toList()));
+        return stageDTO;
+    }
+
+    @Override
+    public StageEntity map(final StageDTO dto) {
+        final StageEntity stageEntity = new StageEntity();
+        final List<InstanceEntity> instances = new ArrayList<>();
+
+        stageEntity.setName(dto.getName());
+
+        final List<String> instancesNames = dto.getInstances();
+        for (final String instanceName : instancesNames) {
+            final InstanceEntity instanceEntity = new InstanceEntity();
+            instanceEntity.setName(instanceName);
+            instances.add(instanceEntity);
+        }
+        stageEntity.setInstances(instances);
+
+        return stageEntity;
     }
 }

@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.service.role;
 
-import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public interface RoleService {
 
     RoleEntity create(RoleEntity roleEntity, List<String> permissions);
 
-    Page<RoleEntity> list(Pageable pageable, RoleFilterDTO filter, String searchParam);
+    Page<RoleEntity> list(Pageable pageable, RoleFilter filter, String searchParam);
 
     RoleEntity update(String roleName, RoleEntity updatedRole, List<String> permissions);
 

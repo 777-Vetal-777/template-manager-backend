@@ -6,14 +6,16 @@ import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
-import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 public class WorkspaceControllerImpl extends AbstractController implements WorkspaceController {
 
@@ -27,29 +29,38 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO) {
-        WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO));
+        WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO),
+                workspaceCreateRequestDTO.getMainDevelopmentInstanceName());
         return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<WorkspaceDTO> get() {
-        return new ResponseEntity<>(workspaceMapper.map(workspaceService.get()), HttpStatus.OK);
+    public ResponseEntity<WorkspaceDTO> get(final String name) {
+        return new ResponseEntity<>(workspaceMapper.map(workspaceService.get(name)), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<WorkspaceDTO> update(final WorkspaceDTO workspaceDTO) {
+    public ResponseEntity<WorkspaceDTO> update(final String name, final WorkspaceDTO workspaceDTO) {
         WorkspaceEntity workspaceEntity = workspaceMapper.map(workspaceDTO);
-        return new ResponseEntity<>(workspaceMapper.map(workspaceService.update(workspaceEntity)), HttpStatus.OK);
+        return new ResponseEntity<>(workspaceMapper.map(workspaceService.update(name, workspaceEntity)), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<PromotionPathDTO> getPromotionPath(final String workspaceName) {
-        return null;
+        final PromotionPathEntity promotionPathEntity = workspaceService.getPromotionPath(workspaceName);
+        final PromotionPathDTO promotionPathDTO = workspaceMapper.map(promotionPathEntity);
+        return new ResponseEntity<>(promotionPathDTO, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<PromotionPathDTO> updatePromotionPath(final String workspaceName,
-            @Valid final PromotionPathDTO promotionPathDTO) {
-        return null;
+            final PromotionPathDTO promotionPathDTO) {
+        PromotionPathDTO result;
+
+        final PromotionPathEntity promotionPathEntity = workspaceService
+                .updatePromotionPath(workspaceName, workspaceMapper.map(promotionPathDTO));
+        result = workspaceMapper.map(promotionPathEntity);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

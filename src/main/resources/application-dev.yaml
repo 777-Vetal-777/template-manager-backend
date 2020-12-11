@@ -26,8 +26,9 @@ logging:
       itextpdf:
         dito:
           manager: debug
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
+
+jpa:
+  properties:
+    hibernate:
+      show_sql: true
+      format_sql: true

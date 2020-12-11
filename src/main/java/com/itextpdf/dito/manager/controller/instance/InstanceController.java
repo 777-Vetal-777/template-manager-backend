@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
-import com.itextpdf.dito.manager.dto.instance.create.InstanceCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.instance.filter.InstanceFilterDTO;
+import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
+import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.security.Principal;
 import java.util.List;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public interface InstanceController {
             @ApiResponse(responseCode = "200", description = "Instance available, ready to connect"),
             @ApiResponse(responseCode = "504", description = "No connection to the instance")
     })
-    ResponseEntity<Void> getInstanceStatus(
+    ResponseEntity<Void> ping(
             @Parameter(description = "encoded with base64 socket, with which you can check the status of the instance")
             @PathVariable(INSTANCE_SOCKET_PATH_VARIABLE) String socket);
 
@@ -58,12 +59,12 @@ public interface InstanceController {
             @ApiResponse(responseCode = "200", description = "Instances successfully saved"),
             @ApiResponse(responseCode = "400", description = "Instance already exist")
     })
-    ResponseEntity<List<InstanceDTO>> saveInstances(@RequestBody InstanceCreateRequestDTO createRequestDTO);
+    ResponseEntity<List<InstanceDTO>> remember(@RequestBody InstanceRememberRequestDTO createRequestDTO, Principal principal);
 
     @DeleteMapping(INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Disconnect instance", description = "Break communication with an instance.")
     @ApiResponse(responseCode = "200", description = "Instance disconnected successfully.")
-    ResponseEntity<Void> deleteInstance(
+    ResponseEntity<Void> forget(
             @Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.")
             @PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name);
 
@@ -74,8 +75,8 @@ public interface InstanceController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Information about instances is prepared according to the specified conditions."),
     })
-    ResponseEntity<Page<InstanceDTO>> getInstanceStatus(Pageable pageable,
-            @ParameterObject InstanceFilterDTO instanceFilterDTO,
+    ResponseEntity<Page<InstanceDTO>> getInstances(Pageable pageable,
+            @ParameterObject InstanceFilter instanceFilter,
             @Parameter(description = "Universal search string which filter instance name, author name  and socket")
             @RequestParam(name = "searchParam", required = false) String searchParam);
 

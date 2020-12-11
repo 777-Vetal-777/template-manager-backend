@@ -1,12 +1,17 @@
 package com.itextpdf.dito.manager.service.workspace;
 
+import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 
 
 public interface WorkspaceService {
-    WorkspaceEntity get();
+    WorkspaceEntity get(String name);
 
-    WorkspaceEntity create(WorkspaceEntity workspace);
+    WorkspaceEntity create(WorkspaceEntity workspace, String mainDevelopmentInstanceName);
 
-    WorkspaceEntity update(WorkspaceEntity workspace);
+    WorkspaceEntity update(String name, WorkspaceEntity workspace);
+
+    PromotionPathEntity getPromotionPath(String workspace);
+
+    PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity promotionPathEntity);
 }

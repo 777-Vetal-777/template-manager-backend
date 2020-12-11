@@ -1,12 +1,9 @@
-package com.itextpdf.dito.manager.dto.instance.filter;
-
-import com.itextpdf.dito.manager.dto.instance.PromotionPathPositionType;
+package com.itextpdf.dito.manager.filter.instance;
 
 import java.sql.Date;
 
-public class InstanceFilterDTO {
+public class InstanceFilter {
     private String name;
-    private PromotionPathPositionType pathPositionType;
     private String socket;
     private String createdBy;
 
@@ -16,14 +13,6 @@ public class InstanceFilterDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public PromotionPathPositionType getPathPositionType() {
-        return pathPositionType;
-    }
-
-    public void setPathPositionType(PromotionPathPositionType pathPositionType) {
-        this.pathPositionType = pathPositionType;
     }
 
     public String getSocket() {

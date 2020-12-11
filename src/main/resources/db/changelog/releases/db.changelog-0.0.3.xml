@@ -11,4 +11,69 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="002-add-promotion-path-table" author="Vadim_Sorokin">
+        <createTable tableName="promotion_path">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="promotion_path_pk"/>
+            </column>
+            <column name="workspace_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_promotion_path_to_workspace"
+                             references="workspace(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-promotion-path-id-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="promotion_path_sequence"/>
+    </changeSet>
+
+    <changeSet id="004-add-stage-table" author="Vadim_Sorokin">
+        <createTable tableName="stage">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="stage_id"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence_order" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="promotion_path_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_stage_to_promotion_path"
+                             references="promotion_path(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="005-create-stage-id-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="stage_sequence"/>
+    </changeSet>
+
+    <changeSet id="006-create-instance-table" author="Vadim_Sorokin">
+        <createTable tableName="instance">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="instance_id"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="socket" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_on" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint">
+                <constraints foreignKeyName="fk_instance_to_user" references="user(id)"/>
+            </column>
+            <column name="stage_id" type="bigint">
+                <constraints foreignKeyName="fk_instance_to_stage" references="stage(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="007-create-instance-id-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="instance_sequence"/>
+    </changeSet>
+
 </databaseChangeLog>

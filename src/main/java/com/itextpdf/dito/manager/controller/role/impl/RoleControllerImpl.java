@@ -5,12 +5,11 @@ import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
-import java.util.List;
 import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,9 +38,9 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
 
     @Override
     public ResponseEntity<Page<RoleDTO>> list(final Pageable pageable,
-                                              final RoleFilterDTO filterDTO,
-                                              final String searchParam) {
-        return new ResponseEntity<>(roleMapper.map(roleService.list(pageable, filterDTO, searchParam)), HttpStatus.OK);
+            final RoleFilter roleFilter,
+            final String searchParam) {
+        return new ResponseEntity<>(roleMapper.map(roleService.list(pageable, roleFilter, searchParam)), HttpStatus.OK);
     }
 
     @Override
@@ -49,7 +48,8 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
             @Valid final RoleUpdateRequestDTO roleUpdateRequestDTO) {
         final RoleEntity updatedRole = roleMapper.map(roleUpdateRequestDTO);
         return new ResponseEntity<>(
-                roleMapper.map(roleService.update(decodeBase64(name), updatedRole, roleUpdateRequestDTO.getPermissions())),
+                roleMapper.map(roleService
+                        .update(decodeBase64(name), updatedRole, roleUpdateRequestDTO.getPermissions())),
                 HttpStatus.OK);
     }
 

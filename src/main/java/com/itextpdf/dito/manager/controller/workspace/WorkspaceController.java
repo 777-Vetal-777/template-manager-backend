@@ -12,13 +12,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping(WorkspaceController.BASE_NAME)
 @Tag(name = "workspace", description = "workspace API")
@@ -40,15 +44,16 @@ public interface WorkspaceController {
     })
     ResponseEntity<WorkspaceDTO> create(@RequestBody WorkspaceCreateRequestDTO workspaceCreateRequestDTO);
 
-    @GetMapping
+    @GetMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get workspace", description = "Get workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<WorkspaceDTO> get();
+    ResponseEntity<WorkspaceDTO> get(@NotBlank @RequestParam(WORKSPACE_PATH_VARIABLE) String name);
 
-    @PatchMapping
+    @PutMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Update workspace", description = "Update workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<WorkspaceDTO> update(@RequestBody WorkspaceDTO workspaceDTO);
+    ResponseEntity<WorkspaceDTO> update(@NotBlank @RequestParam(WORKSPACE_PATH_VARIABLE) String name,
+            @Valid @RequestBody WorkspaceDTO workspaceDTO);
 
     @GetMapping(WORKSPACE_PROMOTION_PATH_ENDPOINT)
     @Operation(summary = "Promotion path", description = "Retrieve full promotion path",
@@ -59,5 +64,5 @@ public interface WorkspaceController {
     @Operation(summary = "Update promotion path", description = "Update promotion path",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<PromotionPathDTO> updatePromotionPath(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
-            PromotionPathDTO promotionPathDTO);
+            @Valid @RequestBody PromotionPathDTO promotionPathDTO);
 }

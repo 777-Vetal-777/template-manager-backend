@@ -1,9 +1,9 @@
 package com.itextpdf.dito.manager.component.builder.specification.role.impl;
 
 import com.itextpdf.dito.manager.component.builder.specification.role.RoleSpecificationBuilder;
-import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,10 +19,10 @@ public class RoleSpecificationBuilderImpl implements RoleSpecificationBuilder {
     private static final String LIKE_WILDCARD = "%%%s%%";
 
     @Override
-    public Specification<RoleEntity> build(final RoleFilterDTO roleFilterDTO, final String searchParam) {
+    public Specification<RoleEntity> build(final RoleFilter roleFilter, final String searchParam) {
         Specification<RoleEntity> specification = Specification.where(
-                nameIsLike(roleFilterDTO.getName())
-                        .and(typeIn(roleFilterDTO.getType())));
+                nameIsLike(roleFilter.getName())
+                        .and(typeIn(roleFilter.getType())));
         if (!StringUtils.isEmpty(searchParam)) {
             specification = specification.and(search(searchParam));
         }

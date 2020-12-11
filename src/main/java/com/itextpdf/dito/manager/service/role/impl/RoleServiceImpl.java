@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.service.role.impl;
 
 import com.itextpdf.dito.manager.component.builder.specification.role.RoleSpecificationBuilder;
-import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
@@ -12,6 +11,7 @@ import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
@@ -57,8 +57,8 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> list(final Pageable pageable, final RoleFilterDTO filterDTO, final String searchParam) {
-        final Specification<RoleEntity> specification = roleSpecificationBuilder.build(filterDTO, searchParam);
+    public Page<RoleEntity> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
+        final Specification<RoleEntity> specification = roleSpecificationBuilder.build(roleFilter, searchParam);
         return roleRepository.findAll(specification, pageable);
     }
 

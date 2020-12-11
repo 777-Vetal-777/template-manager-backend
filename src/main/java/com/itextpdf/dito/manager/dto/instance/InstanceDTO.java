@@ -1,25 +1,16 @@
 package com.itextpdf.dito.manager.dto.instance;
 
 
-import java.sql.Date;
+import java.util.Date;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 public class InstanceDTO {
     @NotBlank
     private String name;
     @NotBlank
     private String socket;
-    @NotNull
-    private PromotionPathPositionType pathPositionType;
-
     private String createdBy;
-
     private Date createdOn;
-
-    public PromotionPathPositionType getPathPositionType() {
-        return pathPositionType;
-    }
 
     public String getCreatedBy() {
         return createdBy;
@@ -35,10 +26,6 @@ public class InstanceDTO {
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
-    }
-
-    public void setPathPositionType(PromotionPathPositionType pathPositionType) {
-        this.pathPositionType = pathPositionType;
     }
 
     public String getName() {

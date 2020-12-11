@@ -2,17 +2,19 @@ package com.itextpdf.dito.manager.dto.promotionpath;
 
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 public class PromotionPathDTO {
-    @NotNull
-    private StageDTO stage;
+    @NotEmpty
+    private List<@Valid StageDTO> stages;
 
-    public StageDTO getStage() {
-        return stage;
+    public List<StageDTO> getStages() {
+        return stages;
     }
 
-    public void setStage(StageDTO stage) {
-        this.stage = stage;
+    public void setStages(List<StageDTO> stages) {
+        this.stages = stages;
     }
 }

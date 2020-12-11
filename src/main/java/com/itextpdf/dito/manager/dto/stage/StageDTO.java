@@ -1,8 +1,6 @@
 package com.itextpdf.dito.manager.dto.stage;
 
-import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
-
-import java.util.Set;
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
@@ -10,8 +8,7 @@ public class StageDTO {
     @NotBlank
     private String name;
     @NotEmpty
-    private Set<InstanceDTO> instances;
-    private Set<StageDTO> stages;
+    private List<@NotBlank String> instances;
 
     public String getName() {
         return name;
@@ -21,19 +18,11 @@ public class StageDTO {
         this.name = name;
     }
 
-    public Set<InstanceDTO> getInstances() {
+    public List<String> getInstances() {
         return instances;
     }
 
-    public void setInstances(Set<InstanceDTO> instances) {
+    public void setInstances(List<String> instances) {
         this.instances = instances;
-    }
-
-    public Set<StageDTO> getStages() {
-        return stages;
-    }
-
-    public void setStages(Set<StageDTO> stages) {
-        this.stages = stages;
     }
 }

@@ -1,10 +1,10 @@
-package com.itextpdf.dito.manager.dto.role.filter;
+package com.itextpdf.dito.manager.filter.role;
 
 import com.itextpdf.dito.manager.entity.RoleType;
 
 import java.util.List;
 
-public class RoleFilterDTO {
+public class RoleFilter {
     private String name;
     private List<RoleType> type;
 
