@@ -1,14 +1,15 @@
 package com.itextpdf.dito.manager.dto.user.update;
 
 import java.util.List;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class UserRolesUpdateRequestDTO {
     @NotEmpty
-    private List<String> emails;
+    private List<@NotBlank String> emails;
     @NotEmpty
-    private List<String> roles;
+    private List<@NotBlank String> roles;
     @NotNull
     private UpdateUsersRolesActionEnum updateUsersRolesActionEnum;
 
