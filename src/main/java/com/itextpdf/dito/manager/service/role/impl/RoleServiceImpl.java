@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.role.impl;
 
+import com.itextpdf.dito.manager.component.builder.specification.role.RoleSpecificationBuilder;
 import com.itextpdf.dito.manager.dto.role.filter.RoleFilterDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -17,17 +18,12 @@ import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
+
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.List;
-
-import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.nameIsLike;
-import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.search;
-import static com.itextpdf.dito.manager.repository.role.RoleSpecifications.typeIn;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
@@ -36,15 +32,18 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final RoleTypeRepository roleTypeRepository;
+    private final RoleSpecificationBuilder roleSpecificationBuilder;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-                           final UserRepository userRepository,
-                           final PermissionRepository permissionRepository,
-                           final RoleTypeRepository roleTypeRepository) {
+            final UserRepository userRepository,
+            final PermissionRepository permissionRepository,
+            final RoleTypeRepository roleTypeRepository,
+            final RoleSpecificationBuilder roleSpecificationBuilder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.roleTypeRepository = roleTypeRepository;
+        this.roleSpecificationBuilder = roleSpecificationBuilder;
     }
 
     @Override
@@ -59,12 +58,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public Page<RoleEntity> list(final Pageable pageable, final RoleFilterDTO filterDTO, final String searchParam) {
-        Specification<RoleEntity> specification = Specification.where(
-                nameIsLike(filterDTO.getName())
-                        .and(typeIn(filterDTO.getType())));
-        if (!StringUtils.isEmpty(searchParam)) {
-            specification = specification.and(search(searchParam));
-        }
+        final Specification<RoleEntity> specification = roleSpecificationBuilder.build(filterDTO, searchParam);
         return roleRepository.findAll(specification, pageable);
     }
 
