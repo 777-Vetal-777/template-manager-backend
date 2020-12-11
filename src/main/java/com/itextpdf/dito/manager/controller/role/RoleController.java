@@ -53,7 +53,7 @@ public interface RoleController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = RoleCreateRequestDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or role already exists", content = @Content),
     })
-    ResponseEntity<RoleDTO> update(@Parameter(description = "role name to be updated") @PathVariable String name,
+    ResponseEntity<RoleDTO> update(@Parameter(description = "Encoded with base64 role name, to be updated") @PathVariable String name,
             @RequestBody RoleUpdateRequestDTO roleUpdateRequestDTO);
 
     @GetMapping
@@ -71,7 +71,7 @@ public interface RoleController {
                     @Content(schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "404", description = "Role not found", content = @Content)
     })
-    ResponseEntity<Void> delete(@Parameter(description = "role name to be deleted") @PathVariable String name);
+    ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64role name, to be deleted") @PathVariable String name);
 
 
 }
