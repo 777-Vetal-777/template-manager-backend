@@ -54,7 +54,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "The file cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<Void> create(@Parameter(name = "name",description = "resource name",style = ParameterStyle.FORM) @RequestParam String name,
-                                @Parameter(name = "type",description = "Resource type, e.g. image, font, style sheet",style = ParameterStyle.FORM)@RequestParam ResourceType type,
+    ResponseEntity<Void> create(@Parameter(name = "name",description = "resource name",style = ParameterStyle.FORM) @RequestPart String name,
+                                @Parameter(name = "type",description = "Resource type, e.g. image, font, style sheet",style = ParameterStyle.FORM)@RequestPart ResourceType type,
                                 @Parameter(name = "resource",description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.",style = ParameterStyle.FORM)@RequestPart("resource") MultipartFile resource);
 }

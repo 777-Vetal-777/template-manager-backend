@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.mail.DailyMailQuotaExceededException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
 
 import java.util.stream.Collectors;
@@ -46,6 +47,10 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(UnsupportedSortFieldException.class)
     public ResponseEntity<ErrorResponseDTO> unsupportedSortFieldExceptionHandler(final UnsupportedSortFieldException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(DailyMailQuotaExceededException.class)
+    public ResponseEntity<ErrorResponseDTO> dailyMailQuotaExceededExceptionHandler(final DailyMailQuotaExceededException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }

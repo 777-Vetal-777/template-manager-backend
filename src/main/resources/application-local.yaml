@@ -8,10 +8,10 @@ spring:
     username: postgres
     password: postgres
   mail:
-    host: smtp.gmail.com
+    host: in-v3.mailjet.com
     port: 587
-    username: vadzim.sarokin.tech.acc@gmail.com
-    password: 65[qXN?vq6k:fB$y
+    username: 67953d863646b958af96c16d770019b2
+    password: ba29ac67832ca221913e4bbb46f0aec9
     front-redirect: 123
     properties:
       mail:
