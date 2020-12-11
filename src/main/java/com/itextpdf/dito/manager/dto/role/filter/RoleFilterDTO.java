@@ -6,7 +6,7 @@ import java.util.List;
 
 public class RoleFilterDTO {
     private String name;
-    private List<RoleType> types;
+    private List<RoleType> type;
 
     public String getName() {
         return name;
@@ -16,11 +16,11 @@ public class RoleFilterDTO {
         this.name = name;
     }
 
-    public List<RoleType> getTypes() {
-        return types;
+    public List<RoleType> getType() {
+        return type;
     }
 
-    public void setTypes(List<RoleType> types) {
-        this.types = types;
+    public void setType(List<RoleType> type) {
+        this.type = type;
     }
 }

@@ -38,27 +38,19 @@ public class RoleSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(jsonPath("$.content[0].name", is("GLOBAL_ADMINISTRATOR")));
 
         mockMvc.perform(get(RoleController.BASE_NAME)
-                .param("types", "CUSTOM")
+                .param("type", "CUSTOM")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
 
         mockMvc.perform(get(RoleController.BASE_NAME)
-                .param("types", "CUSTOM")
-                .param("types", "SYSTEM")
+                .param("type", "CUSTOM")
+                .param("type", "SYSTEM")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)));
-
-        mockMvc.perform(get(RoleController.BASE_NAME)
-                .param("users", "admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].users[0]", is("admin@email.com")));
     }
 
     @Override

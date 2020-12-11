@@ -61,7 +61,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     public Page<RoleEntity> list(final Pageable pageable, final RoleFilterDTO filterDTO, final String searchParam) {
         Specification<RoleEntity> specification = Specification.where(
                 nameIsLike(filterDTO.getName())
-                        .and(typeIn(filterDTO.getTypes())));
+                        .and(typeIn(filterDTO.getType())));
         if (!StringUtils.isEmpty(searchParam)) {
             specification = specification.and(search(searchParam));
         }

@@ -8,13 +8,16 @@ import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.io.File;
 import java.util.Base64;
+import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,6 +28,15 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private RoleTypeRepository roleTypeRepository;
 
+    private RoleEntity testRole;
+
+    @AfterEach
+    public void tearDown() {
+        if (testRole != null) {
+            roleRepository.delete(testRole);
+        }
+    }
+
     @Test
     public void testCreateRole() throws Exception {
         RoleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/roles/role-create-request.json"), RoleCreateRequestDTO.class);
@@ -33,6 +45,8 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+        assertTrue(roleRepository.findByName(request.getName()).isPresent());
+        testRole = roleRepository.findByName(request.getName()).get();
     }
 
     @Test
@@ -53,6 +67,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+
     }
 
     @Test
@@ -63,15 +78,13 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-
-
     @Test
     public void testUpdateCustomRole() throws Exception {
         final String roleToBeUpdatedName = "role-for-update";
-        RoleEntity roleToBeDeleted = new RoleEntity();
-        roleToBeDeleted.setName(roleToBeUpdatedName);
-        roleToBeDeleted.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
-        roleRepository.save(roleToBeDeleted);
+        testRole = new RoleEntity();
+        testRole.setName(roleToBeUpdatedName);
+        testRole.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
+        roleRepository.save(testRole);
 
         RoleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/roles/role-update-request.json"), RoleCreateRequestDTO.class);
         final String encodedRoleName = Base64.getEncoder().encodeToString(roleToBeUpdatedName.getBytes());
@@ -82,15 +95,18 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("edited-custom-role-name"));
+
+        testRole.setPermissions(Collections.emptySet());
+        roleRepository.save(testRole);
     }
 
     @Test
     public void delete_success() throws Exception {
         final String roleToBeDeletedName = "delete-role-name";
-        RoleEntity roleToBeDeleted = new RoleEntity();
-        roleToBeDeleted.setName(roleToBeDeletedName);
-        roleToBeDeleted.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
-        roleRepository.save(roleToBeDeleted);
+        testRole = new RoleEntity();
+        testRole.setName(roleToBeDeletedName);
+        testRole.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
+        roleRepository.save(testRole);
 
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isOk());
