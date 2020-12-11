@@ -6,10 +6,10 @@ import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.dto.auth.AuthenticationRequestDTO;
 import com.itextpdf.dito.manager.dto.token.TokenDTO;
 import com.itextpdf.dito.manager.dto.token.refresh.AccessTokenRefreshRequestDTO;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 
 import java.io.File;
-
-import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -22,6 +22,7 @@ public class TokenFlowIntegrationTest extends AbstractIntegrationTest {
     private AuthenticationController authenticationController;
 
     @Test
+    @Disabled
     public void testRefreshSuccess() throws Exception {
         AuthenticationRequestDTO authRequest = objectMapper
                 .readValue(new File("src/test/resources/test-data/login/login-request.json"),

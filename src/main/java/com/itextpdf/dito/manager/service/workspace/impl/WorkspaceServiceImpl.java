@@ -63,15 +63,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public WorkspaceEntity update(final String name, final WorkspaceEntity workspace) {
+    public WorkspaceEntity update(final String name, final WorkspaceEntity newWorkspace) {
         WorkspaceEntity oldWorkspace = get(name);
 
-        if (!workspace.getName().equals(oldWorkspace.getName())) {
-            throwExceptionIfNameIsAlreadyInUse(workspace.getName());
+        if (!newWorkspace.getName().equals(oldWorkspace.getName())) {
+            throwExceptionIfNameIsAlreadyInUse(newWorkspace.getName());
         }
 
-        workspace.setId(oldWorkspace.getId());
-        return workspaceRepository.save(workspace);
+        oldWorkspace.setName(newWorkspace.getName());
+        oldWorkspace.setLanguage(newWorkspace.getLanguage());
+        oldWorkspace.setTimezone(newWorkspace.getTimezone());
+
+        return workspaceRepository.save(oldWorkspace);
     }
 
     @Override

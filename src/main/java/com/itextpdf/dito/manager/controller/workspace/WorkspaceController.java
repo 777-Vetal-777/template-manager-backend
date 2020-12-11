@@ -47,12 +47,12 @@ public interface WorkspaceController {
     @GetMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get workspace", description = "Get workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<WorkspaceDTO> get(@NotBlank @RequestParam(WORKSPACE_PATH_VARIABLE) String name);
+    ResponseEntity<WorkspaceDTO> get(@NotBlank @PathVariable(WORKSPACE_PATH_VARIABLE) String name);
 
-    @PutMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PatchMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Update workspace", description = "Update workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<WorkspaceDTO> update(@NotBlank @RequestParam(WORKSPACE_PATH_VARIABLE) String name,
+    ResponseEntity<WorkspaceDTO> update(@NotBlank @PathVariable(WORKSPACE_PATH_VARIABLE) String name,
             @Valid @RequestBody WorkspaceDTO workspaceDTO);
 
     @GetMapping(WORKSPACE_PROMOTION_PATH_ENDPOINT)

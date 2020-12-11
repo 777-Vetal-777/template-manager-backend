@@ -36,18 +36,19 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<WorkspaceDTO> get(final String name) {
-        return new ResponseEntity<>(workspaceMapper.map(workspaceService.get(name)), HttpStatus.OK);
+        return new ResponseEntity<>(workspaceMapper.map(workspaceService.get(decodeBase64(name))), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<WorkspaceDTO> update(final String name, final WorkspaceDTO workspaceDTO) {
         WorkspaceEntity workspaceEntity = workspaceMapper.map(workspaceDTO);
-        return new ResponseEntity<>(workspaceMapper.map(workspaceService.update(name, workspaceEntity)), HttpStatus.OK);
+        return new ResponseEntity<>(workspaceMapper.map(workspaceService.update(decodeBase64(name), workspaceEntity)),
+                HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<PromotionPathDTO> getPromotionPath(final String workspaceName) {
-        final PromotionPathEntity promotionPathEntity = workspaceService.getPromotionPath(workspaceName);
+        final PromotionPathEntity promotionPathEntity = workspaceService.getPromotionPath(decodeBase64(workspaceName));
         final PromotionPathDTO promotionPathDTO = workspaceMapper.map(promotionPathEntity);
         return new ResponseEntity<>(promotionPathDTO, HttpStatus.OK);
     }
@@ -58,7 +59,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
         PromotionPathDTO result;
 
         final PromotionPathEntity promotionPathEntity = workspaceService
-                .updatePromotionPath(workspaceName, workspaceMapper.map(promotionPathDTO));
+                .updatePromotionPath(decodeBase64(workspaceName), workspaceMapper.map(promotionPathDTO));
         result = workspaceMapper.map(promotionPathEntity);
 
         return new ResponseEntity<>(result, HttpStatus.OK);

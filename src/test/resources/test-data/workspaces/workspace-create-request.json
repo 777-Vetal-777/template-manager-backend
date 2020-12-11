@@ -1,5 +1,6 @@
 {
   "name": "workspace-test",
   "language": "ENG",
-  "timezone": "America/Sao_Paulo"
+  "timezone": "America/Sao_Paulo",
+  "mainDevelopmentInstanceName": "MY-DEV-INSTANCE"
 }
