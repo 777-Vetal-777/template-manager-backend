@@ -76,4 +76,12 @@
         <createSequence sequenceName="instance_sequence"/>
     </changeSet>
 
+    <changeSet id="008-update-template-table" author="Vadim_Sorokin">
+        <addColumn tableName="template">
+            <column name="instance_id" type="bigint">
+                <constraints foreignKeyName="fk_template_to_instance" references="instance(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -43,7 +43,7 @@ public class DataCollectionEntity {
     private Date modifiedOn;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = " author_id")
+    @JoinColumn(name = " author_id", referencedColumnName = "id")
     private UserEntity author;
 
     @OneToOne(fetch = FetchType.LAZY)

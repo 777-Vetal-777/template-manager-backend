@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 
@@ -28,6 +29,8 @@ public class InstanceEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stage_id", referencedColumnName = "id")
     private StageEntity stage;
+    @OneToOne(mappedBy = "instance")
+    private TemplateEntity template;
 
     @PrePersist
     public void onPrePersist() {
@@ -80,5 +83,13 @@ public class InstanceEntity {
 
     public void setStage(StageEntity stage) {
         this.stage = stage;
+    }
+
+    public TemplateEntity getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(TemplateEntity template) {
+        this.template = template;
     }
 }

@@ -27,8 +27,12 @@ public class TemplateEntity {
     @JoinColumn(name = "type_id")
     private TemplateTypeEntity type;
 
-    @OneToOne(mappedBy = "template")
+    @OneToOne(mappedBy = "template", fetch = FetchType.LAZY)
     private DataCollectionEntity dataCollection;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instance_id", referencedColumnName = "id")
+    private InstanceEntity instance;
 
     @OneToMany(
             mappedBy = "template",
@@ -76,5 +80,13 @@ public class TemplateEntity {
 
     public void setDataCollection(DataCollectionEntity dataCollection) {
         this.dataCollection = dataCollection;
+    }
+
+    public InstanceEntity getInstance() {
+        return instance;
+    }
+
+    public void setInstance(InstanceEntity instance) {
+        this.instance = instance;
     }
 }

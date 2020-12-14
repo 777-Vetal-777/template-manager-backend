@@ -2,8 +2,10 @@ package com.itextpdf.dito.manager.service.instance.impl;
 
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
@@ -59,10 +61,15 @@ public class InstanceServiceImpl implements InstanceService {
     @Transactional
     public void forget(final String name) {
         final InstanceEntity instanceEntity = get(name);
-        final StageEntity stageEntity = instanceEntity.getStage();
 
+        final StageEntity stageEntity = instanceEntity.getStage();
         if (stageEntity != null) {
             throw new InstanceUsedInPromotionPathException(name);
+        }
+
+        final TemplateEntity templateEntity = instanceEntity.getTemplate();
+        if (templateEntity != null) {
+            throw new InstanceHasAttachedTemplateException(name);
         }
 
         instanceRepository.deleteByName(name);
