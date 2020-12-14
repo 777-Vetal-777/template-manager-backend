@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.service.role.impl;
 
-import com.itextpdf.dito.manager.component.builder.specification.role.RoleSpecificationBuilder;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
@@ -20,10 +19,13 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
@@ -32,18 +34,15 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final RoleTypeRepository roleTypeRepository;
-    private final RoleSpecificationBuilder roleSpecificationBuilder;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-            final UserRepository userRepository,
-            final PermissionRepository permissionRepository,
-            final RoleTypeRepository roleTypeRepository,
-            final RoleSpecificationBuilder roleSpecificationBuilder) {
+                           final UserRepository userRepository,
+                           final PermissionRepository permissionRepository,
+                           final RoleTypeRepository roleTypeRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.roleTypeRepository = roleTypeRepository;
-        this.roleSpecificationBuilder = roleSpecificationBuilder;
     }
 
     @Override
@@ -58,8 +57,11 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public Page<RoleEntity> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
-        final Specification<RoleEntity> specification = roleSpecificationBuilder.build(roleFilter, searchParam);
-        return roleRepository.findAll(specification, pageable);
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final String roleNameToLowerCase = StringUtils.isEmpty(roleFilter.getName()) ? "" : roleFilter.getName().toLowerCase();
+        return StringUtils.isEmpty(searchParam)
+                ? roleRepository.filter(pageable, roleNameToLowerCase, roleFilter.getType())
+                : roleRepository.search(pageable, roleNameToLowerCase, roleFilter.getType(), searchParam);
     }
 
     @Override

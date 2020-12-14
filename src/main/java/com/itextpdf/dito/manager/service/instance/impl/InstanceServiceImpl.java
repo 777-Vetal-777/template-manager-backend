@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.service.instance.impl;
 
-import com.itextpdf.dito.manager.component.builder.specification.instance.InstanceSpecificationBuilder;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
@@ -19,13 +18,10 @@ import org.springframework.stereotype.Service;
 public class InstanceServiceImpl implements InstanceService {
     private final UserService userService;
     private final InstanceRepository instanceRepository;
-    private final InstanceSpecificationBuilder instanceSpecificationBuilder;
 
-    public InstanceServiceImpl(final UserService userService, final InstanceRepository instanceRepository,
-            final InstanceSpecificationBuilder instanceSpecificationBuilder) {
+    public InstanceServiceImpl(final UserService userService, final InstanceRepository instanceRepository) {
         this.userService = userService;
         this.instanceRepository = instanceRepository;
-        this.instanceSpecificationBuilder = instanceSpecificationBuilder;
     }
 
 
@@ -46,8 +42,7 @@ public class InstanceServiceImpl implements InstanceService {
     @Override
     public Page<InstanceEntity> getAll(final InstanceFilter instanceFilter, final Pageable pageable,
             final String searchParam) {
-        final Specification<InstanceEntity> specification = instanceSpecificationBuilder
-                .build(instanceFilter, searchParam);
-        return instanceRepository.findAll(specification, pageable);
+        //TODO add search and sort
+        return instanceRepository.findAll(pageable);
     }
 }

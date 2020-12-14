@@ -3,6 +3,8 @@ package com.itextpdf.dito.manager.integration.filtering;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.repository.role.RoleRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -45,7 +47,7 @@ public class RoleSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(jsonPath("$.content", hasSize(0)));
 
         mockMvc.perform(get(RoleController.BASE_NAME)
-                .param("type", "CUSTOM")
+                //.param("type", "CUSTOM")
                 .param("type", "SYSTEM")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -72,5 +74,17 @@ public class RoleSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
+    }
+
+    @Test
+    @Disabled
+    public void getAll_WhenSortedBySupportedFields_ThenResponseIsOk() throws Exception {
+        for (String field : RoleRepository.SUPPORTED_SORT_FIELDS) {
+            mockMvc.perform(get(RoleController.BASE_NAME)
+                    .param("sort", field)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+        }
     }
 }
