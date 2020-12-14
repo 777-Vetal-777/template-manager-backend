@@ -4,6 +4,8 @@ import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.List;
+
+import com.itextpdf.dito.manager.filter.user.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +16,7 @@ public interface UserService {
 
     UserEntity updateUser(UserEntity userEntity, String email);
 
-    Page<UserEntity> getAll(Pageable pageable, String searchParam);
+    Page<UserEntity> getAll(Pageable pageable, UserFilter userFilter, String searchParam);
 
     void updateActivationStatus(List<String> emails, boolean activateAction);
 
@@ -25,5 +27,5 @@ public interface UserService {
     UserEntity updatePassword(String oldPassword, String newPassword, String userEmail);
 
     List<UserEntity> updateUsersRoles(List<String> emails, List<String> roles,
-            UpdateUsersRolesActionEnum actionEnum);
+                                      UpdateUsersRolesActionEnum actionEnum);
 }

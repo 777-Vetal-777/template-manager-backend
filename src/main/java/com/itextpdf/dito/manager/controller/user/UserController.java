@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 
+import com.itextpdf.dito.manager.filter.user.UserFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,8 +18,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.security.Principal;
 import java.util.List;
+
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +61,8 @@ public interface UserController {
     @Operation(summary = "Get users list", description = "Get available users",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<UserDTO>> list(Pageable pageable,
-            @Parameter(description = "user name or email search string") @RequestParam(name = "search", required = false) String searchParam);
+                                       @ParameterObject UserFilter userFilter,
+                                       @Parameter(description = "user name or email search string") @RequestParam(name = "search", required = false) String searchParam);
 
     @PatchMapping(USERS_ACTIVATION_ENDPOINT)
     @Operation(summary = "Activate(deactivate) users in batch", description = "Activate(deactivate) users in batch",
@@ -91,7 +96,7 @@ public interface UserController {
     @ApiResponse(responseCode = "200", description = "Successfully updated user data", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
     ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserUpdateRequestDTO userUpdateRequestDTO,
-            Principal principal);
+                                              Principal principal);
 
     @PatchMapping(CHANGE_PASSWORD_ENDPOINT)
     @Operation(summary = "Change current user password", description = "Change current user password",
@@ -101,7 +106,7 @@ public interface UserController {
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
     ResponseEntity<UserDTO> updatePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO,
-            Principal principal);
+                                           Principal principal);
 
     @PatchMapping(UPDATE_USERS_ROLES_ENDPOINT)
     @Operation(summary = "Update users' roles", description = "Update users' roles",

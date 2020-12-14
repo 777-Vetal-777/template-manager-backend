@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.filter.user.UserFilter;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.security.Principal;
@@ -41,8 +42,8 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<Page<UserDTO>> list(final Pageable pageable, final String searchParam) {
-        return new ResponseEntity<>(userMapper.map(userService.getAll(pageable, searchParam)), HttpStatus.OK);
+    public ResponseEntity<Page<UserDTO>> list(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
+        return new ResponseEntity<>(userMapper.map(userService.getAll(pageable, userFilter, searchParam)), HttpStatus.OK);
     }
 
     @Override

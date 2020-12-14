@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundException;
+import com.itextpdf.dito.manager.filter.user.UserFilter;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -23,12 +24,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -41,10 +46,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private MailClient mailClient;
 
     public UserServiceImpl(final UserRepository userRepository,
-            final RoleRepository roleRepository,
-            final FailedLoginRepository failedLoginRepository,
-            final PasswordEncoder encoder,
-            final UserMapper userMapper) {
+                           final RoleRepository roleRepository,
+                           final FailedLoginRepository failedLoginRepository,
+                           final PasswordEncoder encoder,
+                           final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
@@ -89,11 +94,17 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public Page<UserEntity> getAll(Pageable pageable, String searchParam) {
+    public Page<UserEntity> getAll(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final String email = StringUtils.isEmpty(userFilter.getEmail()) ? "" : userFilter.getEmail().toLowerCase();
+        final String firstName = StringUtils.isEmpty(userFilter.getFirstName()) ? "" : userFilter.getFirstName().toLowerCase();
+        final String lastName = StringUtils.isEmpty(userFilter.getLastName()) ? "" : userFilter.getLastName().toLowerCase();
+        final List<String> securityRoles = CollectionUtils.isEmpty(userFilter.getSecurityRoles()) ? null : userFilter.getSecurityRoles().stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
         return StringUtils.isEmpty(searchParam)
-                ? userRepository.findAll(pageable)
-                : userRepository.search(pageable, searchParam);
+                ? userRepository.filter(updateSort(pageable), email, firstName, lastName, securityRoles, userFilter.getActive())
+                : userRepository.search(updateSort(pageable), email, firstName, lastName, securityRoles, userFilter.getActive(), searchParam.toLowerCase());
     }
 
     @Override
@@ -125,8 +136,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public UserEntity updatePassword(final String oldPassword,
-            final String newPassword,
-            final String userEmail) {
+                                     final String newPassword,
+                                     final String userEmail) {
         final UserEntity user = findByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException();
@@ -141,7 +152,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public List<UserEntity> updateUsersRoles(final List<String> emails, final List<String> roles,
-            final UpdateUsersRolesActionEnum actionEnum) {
+                                             final UpdateUsersRolesActionEnum actionEnum) {
         if (isGlobalAdminRolePresented(roles)) {
             throw new AttemptToAttachGlobalAdministratorRoleException();
         }
@@ -198,6 +209,24 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     private boolean isGlobalAdminRolePresented(final List<String> roles) {
         return roles.contains("GLOBAL_ADMINISTRATOR");
+    }
+
+    /**
+     * W/A for sorting roles by number of users (as sort param cannot be changed on FE side).
+     *
+     * @param pageable from request
+     * @return pageable with updated sort params
+     */
+    private Pageable updateSort(Pageable pageable) {
+        Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (sortParam.getProperty().equals("roles")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "roles.size");
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
     @Override

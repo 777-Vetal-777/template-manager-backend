@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for filtering and search in {@link UserEntity} table.
  */
-public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest {
+public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest{
 
     @Autowired
     private UserRepository userRepository;
@@ -43,10 +43,11 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
     @BeforeEach
     public void setup() {
         RoleEntity role = roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow();
+        RoleEntity role2 = roleRepository.findByName("TEMPLATE_DESIGNER").orElseThrow();
         user1 = new UserEntity();
         user1.setEmail("user1@email.com");
-        user1.setFirstName("Harry");
-        user1.setLastName("Kane");
+        user1.setFirstName("Barry");
+        user1.setLastName("Lane");
         user1.setPassword("password1");
         user1.setRoles(Set.of(role));
         user1.setActive(Boolean.TRUE);
@@ -56,8 +57,8 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
         user2.setFirstName("Geoffrey");
         user2.setLastName("Grant");
         user2.setPassword("password2");
-        user2.setRoles(Set.of(role));
-        user2.setActive(Boolean.TRUE);
+        user2.setRoles(Set.of(role2));
+        user2.setActive(Boolean.FALSE);
 
         user1 = userRepository.save(user1);
         user2 = userRepository.save(user2);
@@ -73,7 +74,37 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
     }
 
     @Test
-    public void getAll_WhenUsingSearchString_ThenResponseIsRelatedToSearch() throws Exception {
+    public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
+        mockMvc.perform(get(UserController.BASE_NAME)
+                .param("sort", "unknownField")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Override
+    @Test
+    public void test_filtering() throws Exception {
+        mockMvc.perform(get(UserController.BASE_NAME)
+                .param("email", user1.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
+        mockMvc.perform(get(UserController.BASE_NAME)
+                .param("firstName", user1.getFirstName()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
+        mockMvc.perform(get(UserController.BASE_NAME)
+                .param("lastName", user1.getLastName()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
+    }
+
+    @Override
+    @Test
+    public void test_searchAndFiltering() throws Exception {
         mockMvc.perform(get(UserController.BASE_NAME)
                 .param("search", user1.getEmail())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -82,10 +113,6 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
 
-    }
-
-    @Test
-    public void getAll_WhenSearchStringDoesntMatchAnything_ThenResponseIsEmpty() throws Exception {
         mockMvc.perform(get(UserController.BASE_NAME)
                 .param("search", "StringThatDoesntMatchAnything")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -94,9 +121,22 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(jsonPath("$.content", hasSize(0)));
     }
 
+    @Override
     @Test
-    @Disabled
-    public void getAll_WhenSortedBySupportedFields_ThenResponseIsOk() throws Exception {
+    public void test_sortWithSearch() throws Exception {
+        for (String field : UserRepository.SUPPORTED_SORT_FIELDS) {
+            mockMvc.perform(get(UserController.BASE_NAME)
+                    .param("sort", field)
+                    .param("search", "test")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Override
+    @Test
+    public void test_sortWithFiltering() throws Exception {
         for (String field : UserRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(UserController.BASE_NAME)
                     .param("sort", field)
@@ -104,15 +144,5 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         }
-    }
-
-
-    @Test
-    public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME)
-                .param("sort", "unknownField")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
     }
 }

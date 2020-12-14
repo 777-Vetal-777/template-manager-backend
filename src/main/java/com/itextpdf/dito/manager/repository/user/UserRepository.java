@@ -11,23 +11,55 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked", "role.name");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "email", "firstName", "lastName", "active", "locked", "roles");
 
     @Query(value = "select distinct u from UserEntity u "
             + "join u.roles role")
     Page<UserEntity> findAll(Pageable pageable);
 
-    @Query(value = "select u from UserEntity u "
-            + "join u.roles role  "
-            + "where LOWER(u.email) like LOWER(CONCAT('%',:value,'%')) "
-            + "or LOWER(role.name) like LOWER(CONCAT('%',:value,'%')) "
-            + "or LOWER(u.firstName) like LOWER(CONCAT('%',:value,'%')) "
-            + "or LOWER(u.lastName) like LOWER(CONCAT('%',:value,'%'))")
-    Page<UserEntity> search(Pageable pageable, @Param("value") String searchParam);
+    @Query(value = "select user from UserEntity user "
+            + "join user.roles role "
+            + "where "
+            //filtering
+            + "("
+            + "(:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
+            + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
+            + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
+            + "and (:active=null or user.active IS :active) "
+            + "and (COALESCE(:securityRoles) is null or LOWER(role.name) in (:securityRoles))) "
+            //search
+            + "and (LOWER(user.email) like CONCAT('%',:search,'%') "
+            + "or LOWER(role.name) like CONCAT('%',:search,'%') "
+            + "or LOWER(user.firstName) like CONCAT('%',:search,'%') "
+            + "or LOWER(user.lastName) like CONCAT('%',:search,'%')) "
+            + "group by user.id")
+    Page<UserEntity> search(Pageable pageable,
+                            @Param("email") @Nullable String email,
+                            @Param("firstName") @Nullable String firstName,
+                            @Param("lastName") @Nullable String lastName,
+                            @Param("securityRoles") @Nullable List<String> securityRoles,
+                            @Param("active") @Nullable Boolean active,
+                            @Param("search") String searchParam);
+
+    @Query(value = "select user from UserEntity user "
+            + "join user.roles role "
+            + "where (:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
+            + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
+            + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
+            + "and (:active=null or user.active IS :active) "
+            + "and (COALESCE(:securityRoles) is null or LOWER(role.name) in (:securityRoles)) "
+            + "group by user.id")
+    Page<UserEntity> filter(Pageable pageable,
+                            @Param("email") @Nullable String email,
+                            @Param("firstName") @Nullable String firstName,
+                            @Param("lastName") @Nullable String lastName,
+                            @Param("securityRoles") @Nullable List<String> securityRoles,
+                            @Param("active") @Nullable Boolean active);
 
     @Query(value = "select count(u) from UserEntity u "
             + "join u.roles r "
