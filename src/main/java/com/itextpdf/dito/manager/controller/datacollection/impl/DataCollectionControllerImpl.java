@@ -7,17 +7,19 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-
-import java.io.IOException;
-import java.security.Principal;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.security.Principal;
 
 @RestController
 public class DataCollectionControllerImpl extends AbstractController implements DataCollectionController {
@@ -31,19 +33,20 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<DataCollectionDTO> create(final String name,
-            final DataCollectionType dataCollectionType,
-            final MultipartFile multipartFile, final Principal principal) {
-        byte[] data;
+    public ResponseEntity<DataCollectionDTO> create(final String name, final String dataCollectionType, final MultipartFile multipartFile, final Principal principal) {
+        if (!EnumUtils.isValidEnum(DataCollectionType.class, dataCollectionType)) {
+            throw new NoSuchDataCollectionTypeException(dataCollectionType);
+        }
+        final DataCollectionType collectionType = DataCollectionType.valueOf(dataCollectionType);
 
+        byte[] data;
         try {
             data = multipartFile.getBytes();
         } catch (IOException e) {
             throw new UnreadableDataCollectionException(multipartFile.getOriginalFilename());
         }
-
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
-                .create(name, dataCollectionType, data, multipartFile.getOriginalFilename(), principal.getName());
+                .create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
     }
 

@@ -3,10 +3,9 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.mail.DailyMailQuotaExceededException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
-
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -14,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
@@ -49,8 +50,14 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> unsupportedSortFieldExceptionHandler(final UnsupportedSortFieldException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(DailyMailQuotaExceededException.class)
     public ResponseEntity<ErrorResponseDTO> dailyMailQuotaExceededExceptionHandler(final DailyMailQuotaExceededException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoSuchDataCollectionTypeException.class)
+    public ResponseEntity<ErrorResponseDTO> noSuchEnumTypeExceptionHandler(final NoSuchDataCollectionTypeException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }
