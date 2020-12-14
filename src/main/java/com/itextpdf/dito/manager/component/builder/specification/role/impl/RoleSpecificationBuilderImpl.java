@@ -7,11 +7,15 @@ import com.itextpdf.dito.manager.filter.role.RoleFilter;
 
 import java.util.Collections;
 import java.util.List;
+import javax.persistence.FetchType;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 import static java.lang.String.format;
 
 @Component
@@ -24,7 +28,9 @@ public class RoleSpecificationBuilderImpl implements RoleSpecificationBuilder {
                 nameIsLike(roleFilter.getName())
                         .and(typeIn(roleFilter.getType())));
         if (!StringUtils.isEmpty(searchParam)) {
-            specification = specification.and(search(searchParam));
+            specification = specification != null
+                    ? specification.and(search(searchParam))
+                    : search(searchParam);
         }
         return specification;
     }
@@ -37,12 +43,12 @@ public class RoleSpecificationBuilderImpl implements RoleSpecificationBuilder {
 
     private Specification<RoleEntity> typeIn(final List<RoleType> types) {
         return (root, query, criteriaBuilder) -> {
-            final Join<Object, Object> typeJoin = root.join("type");
-            query.distinct(true);
+            /*query.distinct(true);
+            query.groupBy(root.get("type"));*/
             return CollectionUtils.isEmpty(types)
                     ? null
                     : types.stream()
-                            .map(u -> criteriaBuilder.equal(typeJoin.get("name"), u))
+                            .map(u -> criteriaBuilder.equal(root.get("type").get("name"), u))
                             .reduce(criteriaBuilder::or).orElse(null);
         };
 
@@ -54,6 +60,7 @@ public class RoleSpecificationBuilderImpl implements RoleSpecificationBuilder {
                 return null;
             } else {
                 final Join<Object, Object> userJoin = root.join("users");
+                //query.groupBy(root.get("users"));
                 query.distinct(true);
                 return users.stream()
                         .map(u -> criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("email")),
