@@ -20,15 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RoleSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
 
     @Override
-    public void test_search() throws Exception {
-        mockMvc.perform(get(RoleController.BASE_NAME)
-                .param("search", "GLOBAL_ADMINISTRATOR")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Override
     @Test
     public void test_filtering() throws Exception {
         mockMvc.perform(get(RoleController.BASE_NAME)
@@ -76,9 +67,22 @@ public class RoleSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(jsonPath("$.content", hasSize(0)));
     }
 
+    @Override
     @Test
-    @Disabled
-    public void getAll_WhenSortedBySupportedFields_ThenResponseIsOk() throws Exception {
+    public void test_sortWithSearch() throws Exception {
+        for (String field : RoleRepository.SUPPORTED_SORT_FIELDS) {
+            mockMvc.perform(get(RoleController.BASE_NAME)
+                    .param("sort", field)
+                    .param("search", "not-existing-user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Override
+    @Test
+    public void test_sortWithFiltering() throws Exception {
         for (String field : RoleRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(RoleController.BASE_NAME)
                     .param("sort", field)

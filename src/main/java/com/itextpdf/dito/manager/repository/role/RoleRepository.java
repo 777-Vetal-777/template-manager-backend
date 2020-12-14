@@ -20,15 +20,16 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     Optional<RoleEntity> findByName(String name);
 
-    @Query(value = "select distinct role from RoleEntity role "
+    @Query(value = "select role from RoleEntity role "
             + "left join role.users user "
             + "where (:name='' or LOWER(role.name) like CONCAT('%',:name,'%')) "
-            + "and (COALESCE(:types) is null or role.type.name in (:types))")
+            + "and (COALESCE(:types) is null or role.type.name in (:types)) "
+            + "group by (role.id, role.type.name)")
     Page<RoleEntity> filter(Pageable pageable,
                             @Param("name") @Nullable String name,
                             @Param("types") @Nullable List<RoleType> types);
 
-    @Query(value = "select distinct role from RoleEntity role "
+    @Query(value = "select role from RoleEntity role "
             + "left join role.users user "
             + "where  "
             //search
@@ -36,9 +37,10 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%'))) "
             //filtering
             + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%')) "
-            + "and (COALESCE(:types) is null or role.type.name in (:types))")
+            + "and (COALESCE(:types) is null or role.type.name in (:types)) "
+            + "group by (role.id, role.type.name)")
     Page<RoleEntity> search(Pageable pageable,
-                                     @Param("name") @Nullable String name,
-                                     @Param("types") @Nullable List<RoleType> types,
-                                     @Param("search") String search);
+                            @Param("name") @Nullable String name,
+                            @Param("types") @Nullable List<RoleType> types,
+                            @Param("search") String search);
 }

@@ -10,16 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest{
 
-    @Test
-    @Override
-    public void test_search() throws Exception {
-        //TODO implement within https://jira.itextsupport.com/browse/DTM-472
-        mockMvc.perform(get(ResourceController.BASE_NAME)
-                .param("search", "resource-name")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
 
     @Test
     @Override
@@ -54,5 +44,15 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Override
+    public void test_sortWithSearch() throws Exception {
+
+    }
+
+    @Override
+    public void test_sortWithFiltering() throws Exception {
+
     }
 }

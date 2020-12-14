@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -60,8 +61,8 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final String roleNameToLowerCase = StringUtils.isEmpty(roleFilter.getName()) ? "" : roleFilter.getName().toLowerCase();
         return StringUtils.isEmpty(searchParam)
-                ? roleRepository.filter(pageable, roleNameToLowerCase, roleFilter.getType())
-                : roleRepository.search(pageable, roleNameToLowerCase, roleFilter.getType(), searchParam);
+                ? roleRepository.filter(updateSort(pageable), roleNameToLowerCase, roleFilter.getType())
+                : roleRepository.search(updateSort(pageable), roleNameToLowerCase, roleFilter.getType(), searchParam);
     }
 
     @Override
@@ -113,5 +114,26 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
             }
         }
         return role;
+    }
+
+    /**
+     * W/A for sorting roles by number of users (as sort param cannot be changed on FE side).
+     *
+     * @param pageable from request
+     * @return pageable with updated sort params
+     */
+    private Pageable updateSort(Pageable pageable) {
+        Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (sortParam.getProperty().equals("users")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "users.size");
+                    }
+                    if (sortParam.getProperty().equals("type")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "type.name");
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 }
