@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
 
@@ -20,6 +21,12 @@ public class InstanceExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(InstanceUsedInPromotionPathException.class)
     public ResponseEntity<ErrorResponseDTO> notReachableInstanceExceptionHandler(
             final InstanceUsedInPromotionPathException ex) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InstanceHasAttachedTemplateException.class)
+    public ResponseEntity<ErrorResponseDTO> instanceHasAttachedTemplateExceptionHandler(
+            final InstanceHasAttachedTemplateException ex) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT);
     }
 }
