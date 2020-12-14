@@ -42,7 +42,7 @@ public interface WorkspaceController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = WorkspaceDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
     })
-    ResponseEntity<WorkspaceDTO> create(@RequestBody WorkspaceCreateRequestDTO workspaceCreateRequestDTO);
+    ResponseEntity<WorkspaceDTO> create(@Valid @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequestDTO);
 
     @GetMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get workspace", description = "Get workspace",
