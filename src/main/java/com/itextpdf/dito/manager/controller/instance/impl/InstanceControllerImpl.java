@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.controller.instance.impl;
 
+import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
+import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImplFake;
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
@@ -39,17 +41,28 @@ public class InstanceControllerImpl extends AbstractController implements Instan
 
     @Override
     public ResponseEntity<Void> ping(String socket) {
-        return null;
+        final InstanceClient instanceClient = new InstanceClientImplFake(decodeBase64(socket));
+        instanceClient.ping();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> forget(final String name) {
-        return null;
+        instanceService.forget(decodeBase64(name));
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
     public ResponseEntity<Page<InstanceDTO>> getInstances(final Pageable pageable, final InstanceFilter instanceFilter,
             String searchParam) {
-        return null;
+        final Page<InstanceEntity> instanceEntities = instanceService.getAll(instanceFilter, pageable, searchParam);
+        return new ResponseEntity<>(instanceMapper.map(instanceEntities), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<InstanceDTO> update(final String name, @Valid final InstanceDTO instanceDTO) {
+        final InstanceEntity instanceEntity = instanceService
+                .update(decodeBase64(name), instanceMapper.map(instanceDTO));
+        return new ResponseEntity<>(instanceMapper.map(instanceEntity), HttpStatus.OK);
     }
 }

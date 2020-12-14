@@ -13,4 +13,8 @@ public interface InstanceService {
     InstanceEntity get(String name);
 
     Page<InstanceEntity> getAll(InstanceFilter instanceFilter, Pageable pageable, String searchParam);
+
+    void forget(String name);
+
+    InstanceEntity update(String name, InstanceEntity instanceEntity);
 }

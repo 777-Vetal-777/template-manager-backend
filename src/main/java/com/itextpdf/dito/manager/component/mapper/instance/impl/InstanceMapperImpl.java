@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,5 +37,10 @@ public class InstanceMapperImpl implements InstanceMapper {
     @Override
     public List<InstanceDTO> mapEntities(final List<InstanceEntity> entities) {
         return entities.stream().map(this::map).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<InstanceDTO> map(Page<InstanceEntity> entities) {
+        return entities.map(this::map);
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,10 +60,12 @@ public interface InstanceController {
             @ApiResponse(responseCode = "200", description = "Instances successfully saved"),
             @ApiResponse(responseCode = "400", description = "Instance already exist")
     })
-    ResponseEntity<List<InstanceDTO>> remember(@RequestBody InstanceRememberRequestDTO createRequestDTO, Principal principal);
+    ResponseEntity<List<InstanceDTO>> remember(@RequestBody InstanceRememberRequestDTO instanceRememberRequestDTO,
+            Principal principal);
 
     @DeleteMapping(INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE)
-    @Operation(summary = "Disconnect instance", description = "Break communication with an instance.")
+    @Operation(summary = "Disconnect instance", description = "Break communication with an instance.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Instance disconnected successfully.")
     ResponseEntity<Void> forget(
             @Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.")
@@ -79,6 +82,13 @@ public interface InstanceController {
             @ParameterObject InstanceFilter instanceFilter,
             @Parameter(description = "Universal search string which filter instance name, author name  and socket")
             @RequestParam(name = "searchParam", required = false) String searchParam);
+
+    @PatchMapping(INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Update instance", description = "Update instance's name or socket.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Instance updated successfully.")
+    ResponseEntity<InstanceDTO> update(@PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name,
+            @RequestBody InstanceDTO instanceDTO);
 
 }
 
