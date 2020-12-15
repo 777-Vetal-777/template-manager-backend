@@ -33,6 +33,8 @@ public interface InstanceController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/instances";
 
+    String PAGEABLE_ENDPOINT = "/pageable";
+
     String INSTANCE_NAME_PATH_VARIABLE = "name";
     String INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE = "/{" + INSTANCE_NAME_PATH_VARIABLE + "}";
 
@@ -71,7 +73,7 @@ public interface InstanceController {
             @Parameter(description = "Encoded with base64 instance name, by which the instance will be disconnected.")
             @PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name);
 
-    @GetMapping()
+    @GetMapping(PAGEABLE_ENDPOINT)
     @Operation(summary = "Get information about instances",
             description = "Retrieving list of information about instances using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -82,6 +84,15 @@ public interface InstanceController {
             @ParameterObject InstanceFilter instanceFilter,
             @Parameter(description = "Universal search string which filter instance name, author name  and socket")
             @RequestParam(name = "searchParam", required = false) String searchParam);
+
+    @GetMapping
+    @Operation(summary = "Get information about instances",
+            description = "Retrieving list of information about instances using sorting and filters.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Information about instances is prepared according to the specified conditions."),
+    })
+    ResponseEntity<List<InstanceDTO>> getInstances();
 
     @PatchMapping(INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Update instance", description = "Update instance's name or socket.",

@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
+import com.itextpdf.dito.manager.exception.workspace.OnlyOneWorkspaceAllowedException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
 import com.itextpdf.dito.manager.repository.stage.StageRepository;
@@ -37,7 +38,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
+    public List<WorkspaceEntity> getAll() {
+        return workspaceRepository.findAll();
+    }
+
+    @Override
     public WorkspaceEntity create(final WorkspaceEntity workspace, final String mainDevelopmentInstanceName) {
+        // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
+        if (!workspaceRepository.findAll().isEmpty()) {
+            throw new OnlyOneWorkspaceAllowedException();
+        }
+
         throwExceptionIfNameIsAlreadyInUse(workspace.getName());
 
         final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(mainDevelopmentInstanceName);

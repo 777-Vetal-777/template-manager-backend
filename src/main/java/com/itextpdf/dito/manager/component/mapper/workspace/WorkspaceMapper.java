@@ -8,6 +8,8 @@ import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 
+import java.util.List;
+
 public interface WorkspaceMapper {
     WorkspaceEntity map(WorkspaceCreateRequestDTO dto);
 
@@ -22,4 +24,6 @@ public interface WorkspaceMapper {
     StageDTO map(StageEntity entity);
 
     StageEntity map(StageDTO dto);
+
+    List<WorkspaceDTO> map(List<WorkspaceEntity> entities);
 }

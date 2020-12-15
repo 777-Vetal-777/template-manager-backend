@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,11 @@ public interface WorkspaceController {
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
     })
     ResponseEntity<WorkspaceDTO> create(@Valid @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequestDTO);
+
+    @GetMapping
+    @Operation(summary = "Get all workspaces", description = "Get workspaces",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<WorkspaceDTO>> getAll();
 
     @GetMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get workspace", description = "Get workspace",

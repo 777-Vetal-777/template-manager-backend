@@ -60,6 +60,12 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
+    public ResponseEntity<List<InstanceDTO>> getInstances() {
+        final List<InstanceEntity> instanceEntities = instanceService.getAll();
+        return new ResponseEntity<>(instanceMapper.mapEntities(instanceEntities), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<InstanceDTO> update(final String name, @Valid final InstanceDTO instanceDTO) {
         final InstanceEntity instanceEntity = instanceService
                 .update(decodeBase64(name), instanceMapper.map(instanceDTO));

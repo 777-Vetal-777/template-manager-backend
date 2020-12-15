@@ -106,4 +106,9 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
 
         return stageEntity;
     }
+
+    @Override
+    public List<WorkspaceDTO> map(List<WorkspaceEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
+    }
 }

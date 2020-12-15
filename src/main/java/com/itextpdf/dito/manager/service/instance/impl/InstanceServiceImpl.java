@@ -51,6 +51,11 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
+    public List<InstanceEntity> getAll() {
+        return instanceRepository.findAll();
+    }
+
+    @Override
     public Page<InstanceEntity> getAll(final InstanceFilter instanceFilter, final Pageable pageable,
             final String searchParam) {
         //TODO add search and sort
