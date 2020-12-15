@@ -1,21 +1,20 @@
 package com.itextpdf.dito.manager.component.mail.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
-import com.itextpdf.dito.manager.exception.mail.DailyMailQuotaExceededException;
+import com.itextpdf.dito.manager.exception.mail.MailingException;
+
+import java.util.Properties;
+import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.util.Properties;
 
 @Component
 @ConditionalOnProperty(value = "ditomanager.mailing.enabled", havingValue = "true")
@@ -37,12 +36,12 @@ public class MailClientImpl implements MailClient {
     private final String FRONT_URL;
 
     public MailClientImpl(@Value("${spring.mail.host}") final String host,
-                          @Value("${spring.mail.port}") final Integer port,
-                          @Value("${spring.mail.username}") final String username,
-                          @Value("${spring.mail.password}") final String password,
-                          @Value("${spring.mail.properties.mail.smtp.auth}") final Boolean auth,
-                          @Value("${spring.mail.properties.mail.smtp.starttls.enable}") final Boolean tls,
-                          @Value("${spring.mail.front-redirect}") final String frontUrl) {
+            @Value("${spring.mail.port}") final Integer port,
+            @Value("${spring.mail.username}") final String username,
+            @Value("${spring.mail.password}") final String password,
+            @Value("${spring.mail.properties.mail.smtp.auth}") final Boolean auth,
+            @Value("${spring.mail.properties.mail.smtp.starttls.enable}") final Boolean tls,
+            @Value("${spring.mail.front-redirect}") final String frontUrl) {
         this.host = host;
         this.port = port;
         this.username = username;
@@ -64,23 +63,20 @@ public class MailClientImpl implements MailClient {
         final String mailBody = String.format(MAIL_BODY, email, password, FRONT_URL.concat("/login"));
         try {
             send(MAIL_FROM, email, MAIL_SUBJECT, mailBody);
-        } catch (MailSendException ex) {
-            throw new DailyMailQuotaExceededException();
+        } catch (MessagingException ex) {
+            throw new MailingException(ex.getMessage());
         }
     }
 
-    private void send(final String from, final String to, final String subject, final String text) {
-        try {
-            final MimeMessage mail = buildMailClient().createMimeMessage();
-            mail.setSubject(subject);
-            final MimeMessageHelper helper = new MimeMessageHelper(mail);
-            helper.setFrom(from);
-            helper.setTo(to);
-            helper.setText(text, true);
-            client.send(mail);
-        } catch (MessagingException e) {
-            log.error("Failed to send message. Exception:");
-        }
+    private void send(final String from, final String to, final String subject, final String text)
+            throws MessagingException {
+        final MimeMessage mail = buildMailClient().createMimeMessage();
+        mail.setSubject(subject);
+        final MimeMessageHelper helper = new MimeMessageHelper(mail);
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setText(text, true);
+        client.send(mail);
     }
 
     private JavaMailSenderImpl buildMailClient() {

@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
-import com.itextpdf.dito.manager.exception.mail.DailyMailQuotaExceededException;
+import com.itextpdf.dito.manager.exception.mail.MailingException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,8 +51,8 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(DailyMailQuotaExceededException.class)
-    public ResponseEntity<ErrorResponseDTO> dailyMailQuotaExceededExceptionHandler(final DailyMailQuotaExceededException ex) {
+    @ExceptionHandler(MailingException.class)
+    public ResponseEntity<ErrorResponseDTO> dailyMailQuotaExceededExceptionHandler(final MailingException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_GATEWAY);
     }
 
