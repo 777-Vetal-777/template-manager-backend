@@ -81,7 +81,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (isGlobalAdminRolePresented(roles)) {
             throw new AttemptToAttachGlobalAdministratorRoleException();
         }
-
+        String password = userEntity.getPassword();
         userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         Set<RoleEntity> persistedRoles = roles.stream()
                 .map(role -> roleRepository.findByName(role).orElseThrow(() -> new RoleNotFoundException(role)))
@@ -89,7 +89,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         userEntity.setRoles(persistedRoles);
         UserEntity savedUser = userRepository.save(userEntity);
         if (mailClient != null) {
-            mailClient.sendRegistrationMessage(userEntity.getEmail(), userEntity.getPassword());
+            mailClient.sendRegistrationMessage(userEntity.getEmail(), password);
         }
         return savedUser;
     }
