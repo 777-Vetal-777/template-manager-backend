@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class FilterUtils {
+public final class FilterUtils {
 
     public static String getStringFromFilter(final String value) {
         return StringUtils.isEmpty(value)
@@ -25,5 +25,9 @@ public class FilterUtils {
             throw new IllegalArgumentException(new StringBuilder().append("Invalid date param:").append(value).toString());
         }
         return result;
+    }
+
+    private FilterUtils() {
+        throw new AssertionError("Suppress default constructor for noninstantiability");
     }
 }
