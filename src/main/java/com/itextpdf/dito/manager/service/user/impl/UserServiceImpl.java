@@ -87,10 +87,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 .map(role -> roleRepository.findByName(role).orElseThrow(() -> new RoleNotFoundException(role)))
                 .collect(Collectors.toSet());
         userEntity.setRoles(persistedRoles);
+        UserEntity savedUser = userRepository.save(userEntity);
         if (mailClient != null) {
             mailClient.sendRegistrationMessage(userEntity.getEmail(), userEntity.getPassword());
         }
-        return userRepository.save(userEntity);
+        return savedUser;
     }
 
     @Override

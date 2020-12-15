@@ -53,7 +53,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(DailyMailQuotaExceededException.class)
     public ResponseEntity<ErrorResponseDTO> dailyMailQuotaExceededExceptionHandler(final DailyMailQuotaExceededException ex) {
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(ex, HttpStatus.BAD_GATEWAY);
     }
 
     @ExceptionHandler(NoSuchDataCollectionTypeException.class)
