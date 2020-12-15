@@ -13,7 +13,9 @@ pipeline {
     }
     environment{
         projectName = "dtm-backend"
+        dbName = "dtm-database"
         registryHost = "https://nexus-docker.andersenlab.dev"
+        REGISTRY = "nexus-docker.andersenlab.dev"
         registryCredentials = "nexus_andersen"
         hostIP="10.10.15.110"
         WORKING_ENV = "dev"
@@ -29,7 +31,8 @@ pipeline {
                 script {
                   env.RELEASE_VER = sh(script: """cat pom.xml | grep -i snapshot | cut -d'>' -f2 | cut -d'-' -f1""", returnStdout: true).trim()
                   dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
-                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"   
+                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"
+                  dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
                 }
             }
         }
@@ -52,13 +55,15 @@ pipeline {
                 script{
                     docker.withRegistry(registryHost, registryCredentials){
                         dockerImage.push()
+                        dockerImageDB.push()
                     }
                 }
             }
         }
         stage("Remove unused docker image"){
             steps{
-                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1''' 
+                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
+                sh '''docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
             }
         }
         stage("Deploy docker image to host"){
@@ -66,11 +71,7 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            sh """
-                            echo 'docker image ${registryHost}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}'
-                            docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d
-                            docker image prune -f
-                            """
+                            sh "docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
                         }
                     }
                 }

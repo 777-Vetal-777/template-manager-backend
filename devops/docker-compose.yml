@@ -3,10 +3,9 @@ services:
   #=========== BACKEND ===============      
   backend:
     container_name: backend
-    image: nexus-docker.andersenlab.dev/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+    image: ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     ports:
       - "8080:8080"
-      - "8000:8000"
     environment:
       - "GF_FRONTEND_APP_BASE_URL=${hostIP}"
       - "SPRING_PROFILES_ACTIVE=dev"
@@ -16,13 +15,6 @@ services:
   #=========== DATABASE ===============
   db:
     container_name: db
-    image: postgres:13
+    image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     ports:
       - "5432:5432"
-    volumes:
-      - /root/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - /root/postgres-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1111
-      - POSTGRES_DB=dito
