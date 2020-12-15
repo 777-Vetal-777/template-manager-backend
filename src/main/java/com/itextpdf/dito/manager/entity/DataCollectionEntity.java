@@ -42,6 +42,9 @@ public class DataCollectionEntity {
     @Column(insertable = false)
     private Date modifiedOn;
 
+    @Column
+    private Date createdOn;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " author_id", referencedColumnName = "id")
     private UserEntity author;
@@ -138,4 +141,11 @@ public class DataCollectionEntity {
         this.data = file;
     }
 
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
 }

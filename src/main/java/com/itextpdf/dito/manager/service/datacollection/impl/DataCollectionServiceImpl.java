@@ -55,11 +55,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         dataCollectionEntity.setType(type);
         dataCollectionEntity.setData(data);
         dataCollectionEntity.setModifiedOn(new Date());
+        dataCollectionEntity.setCreatedOn(new Date());
         dataCollectionEntity.setFileName(fileName);
         final UserEntity userEntity = userService.findByEmail(email);
         dataCollectionEntity.setAuthor(userEntity);
+        DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
+        logDataCollectionUpdate(savedCollection);
 
-        return dataCollectionRepository.save(dataCollectionEntity);
+        return savedCollection;
     }
 
     @Override
@@ -89,7 +92,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (updatedEntity.getData() != null) {
             existingEntity.setData(updatedEntity.getData());
         }
+        if (!name.equals(updatedEntity.getName()) && dataCollectionRepository.existsByName(updatedEntity.getName())) {
+            throw new DataCollectionAlreadyExistsException(name);
+        }
         existingEntity.setName(updatedEntity.getName());
+        existingEntity.setModifiedOn(new Date());
         existingEntity.setAuthor(userService.findByEmail(userEmail));
         existingEntity.setDescription(updatedEntity.getDescription());
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
