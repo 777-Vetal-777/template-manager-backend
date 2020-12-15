@@ -2,9 +2,11 @@ package com.itextpdf.dito.manager.dto.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 public class AuthenticationRequestDTO {
     @NotBlank
+    @Pattern(regexp = "[A-Za-z0-9._%-+]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}")
     @Schema(example = "admin@email.com")
     private String login;
     @NotBlank
