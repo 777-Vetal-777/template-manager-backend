@@ -58,19 +58,6 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
                 .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
 
         mockMvc.perform(get(InstanceController.BASE_NAME)
-                .param("createdBy", "Admin"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
-
-        mockMvc.perform(get(InstanceController.BASE_NAME)
-                .param("createdOn", "01/01/1970")
-                .param("createdOn", "01/01/2090"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
-
-        mockMvc.perform(get(InstanceController.BASE_NAME)
                 .param("createdOn", "01/01/1970")
                 .param("createdOn", "01/01/1980"))
                 .andExpect(status().isOk())
@@ -80,20 +67,16 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
     @Override
     @Test
     public void test_searchAndFiltering() throws Exception {
-        /*mockMvc.perform(get(InstanceController.BASE_NAME)
+        mockMvc.perform(get(InstanceController.BASE_NAME)
                 .param("name", "instance")
-                .param("search", "Admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .param("search", "test"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));*/
+                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
 
         mockMvc.perform(get(InstanceController.BASE_NAME)
                 .param("name", "instance")
-                .param("search", "not-existing-user")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .param("search", "not-existing-user"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
     }
@@ -104,9 +87,7 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
         for (String field : InstanceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(InstanceController.BASE_NAME)
                     .param("sort", field)
-                    .param("search", "not-existing-user")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
+                    .param("search", "not-existing-user"))
                     .andExpect(status().isOk());
         }
     }

@@ -28,6 +28,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
 
@@ -59,10 +61,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public Page<RoleEntity> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String roleNameToLowerCase = StringUtils.isEmpty(roleFilter.getName()) ? "" : roleFilter.getName().toLowerCase();
         return StringUtils.isEmpty(searchParam)
-                ? roleRepository.filter(updateSort(pageable), roleNameToLowerCase, roleFilter.getType())
-                : roleRepository.search(updateSort(pageable), roleNameToLowerCase, roleFilter.getType(), searchParam);
+                ? roleRepository.filter(updateSort(pageable), getStringFromFilter(roleFilter.getName()), roleFilter.getType())
+                : roleRepository.search(updateSort(pageable), getStringFromFilter(roleFilter.getName()), roleFilter.getType(), searchParam);
     }
 
     @Override

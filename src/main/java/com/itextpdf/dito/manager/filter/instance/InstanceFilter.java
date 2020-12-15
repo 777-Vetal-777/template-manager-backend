@@ -6,6 +6,7 @@ public class InstanceFilter {
     private String name;
     private String socket;
     private String createdBy;
+    //Always array with two elements from frontend
     private List<String> createdOn;
 
 

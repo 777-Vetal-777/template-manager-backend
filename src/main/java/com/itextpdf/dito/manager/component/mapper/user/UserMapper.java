@@ -19,6 +19,4 @@ public interface UserMapper {
     List<UserDTO> map(Collection<UserEntity> entities);
 
     Page<UserDTO> map(Page<UserEntity> entities);
-
-    UserEntity map(UserDTO dto);
 }
