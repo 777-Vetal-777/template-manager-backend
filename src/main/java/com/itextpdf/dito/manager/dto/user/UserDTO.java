@@ -10,7 +10,6 @@ public class UserDTO {
     private String lastName;
     private Boolean active;
     private Boolean blocked;
-    @JsonProperty("role.name")
     private List<String> roles;
     private List<String> authorities;
 

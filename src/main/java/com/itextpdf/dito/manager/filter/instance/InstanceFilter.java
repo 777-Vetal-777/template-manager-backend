@@ -1,11 +1,13 @@
 package com.itextpdf.dito.manager.filter.instance;
 
-import java.sql.Date;
+import java.util.List;
 
 public class InstanceFilter {
     private String name;
     private String socket;
     private String createdBy;
+    private List<String> createdOn;
+
 
     public String getName() {
         return name;
@@ -31,13 +33,11 @@ public class InstanceFilter {
         this.createdBy = createdBy;
     }
 
-    public Date getCreatedOn() {
+    public List<String> getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    public void setCreatedOn(List<String> createdOn) {
         this.createdOn = createdOn;
     }
-
-    private Date createdOn;
 }

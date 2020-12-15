@@ -83,7 +83,7 @@ public interface InstanceController {
     ResponseEntity<Page<InstanceDTO>> getInstances(Pageable pageable,
             @ParameterObject InstanceFilter instanceFilter,
             @Parameter(description = "Universal search string which filter instance name, author name  and socket")
-            @RequestParam(name = "searchParam", required = false) String searchParam);
+            @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping
     @Operation(summary = "Get information about instances",

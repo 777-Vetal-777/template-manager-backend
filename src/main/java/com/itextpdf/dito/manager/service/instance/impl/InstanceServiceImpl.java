@@ -10,17 +10,26 @@ import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
-public class InstanceServiceImpl implements InstanceService {
+public class InstanceServiceImpl extends AbstractService implements InstanceService {
     private final UserService userService;
     private final InstanceRepository instanceRepository;
 
@@ -57,9 +66,17 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Page<InstanceEntity> getAll(final InstanceFilter instanceFilter, final Pageable pageable,
-            final String searchParam) {
-        //TODO add search and sort
-        return instanceRepository.findAll(pageable);
+                                       final String searchParam) {
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final String name = StringUtils.isEmpty(instanceFilter.getName()) ? "" : instanceFilter.getName().toLowerCase();
+        final String socket = StringUtils.isEmpty(instanceFilter.getSocket()) ? "" : instanceFilter.getSocket().toLowerCase();
+        final String createdBy = StringUtils.isEmpty(instanceFilter.getCreatedBy()) ? "" : instanceFilter.getCreatedBy().toLowerCase();
+        final Date dateFrom = CollectionUtils.isEmpty(instanceFilter.getCreatedOn()) ? null :getDateFromString(instanceFilter.getCreatedOn().get(0));
+        final Date dateTo = CollectionUtils.isEmpty(instanceFilter.getCreatedOn()) ? null :getDateFromString(instanceFilter.getCreatedOn().get(1));
+
+        return StringUtils.isEmpty(searchParam)
+                ? instanceRepository.filter(pageable, name, socket, createdBy, dateFrom, dateTo)
+                : instanceRepository.search(pageable, name, socket, createdBy, dateFrom, dateTo, searchParam.toLowerCase());
     }
 
     @Override
@@ -92,5 +109,19 @@ public class InstanceServiceImpl implements InstanceService {
         oldInstanceEntity.setSocket(instanceEntity.getSocket());
 
         return instanceRepository.save(oldInstanceEntity);
+    }
+
+    @Override
+    protected List<String> getSupportedSortFields() {
+        return InstanceRepository.SUPPORTED_SORT_FIELDS;
+    }
+
+    private Date getDateFromString(String date) {
+        DateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+        try {
+            return format.parse(date);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(new StringBuilder().append("Invalid date param:").append(date).toString());
+        }
     }
 }
