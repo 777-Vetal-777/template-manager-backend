@@ -8,15 +8,11 @@ spring:
     username: postgres
     password: 1111
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: vadzim.sarokin.tech.acc@gmail.com
-    password: 65[qXN?vq6k:fB$y
-#    host: in-v3.mailjet.com
-#    port: 587
-#    username: 67953d863646b958af96c16d770019b2
-#    password: ba29ac67832ca221913e4bbb46f0aec9
-    front-redirect: ${GF_FRONTEND_APP_BASE_URL}
+    host: ${DITO_MANAGER_SMTP_HOST}
+    port: ${DITO_MANAGER_SMTP_PORT}
+    username: ${DITO_MANAGER_SMTP_USERNAME}
+    password: ${DITO_MANAGER_SMTP_PASSWORD}
+    front-redirect: ${DITO_MANAGER_FRONTEND_APP_BASE_URL}
     properties:
       mail:
         smtp:

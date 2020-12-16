@@ -63,14 +63,14 @@ public class MailClientImpl implements MailClient {
         final String mailBody = String.format(MAIL_BODY, email, password, FRONT_URL.concat("/login"));
         try {
             send(MAIL_FROM, email, MAIL_SUBJECT, mailBody);
-        } catch (MessagingException ex) {
+        } catch (Exception ex) {
             throw new MailingException(ex.getMessage());
         }
     }
 
     private void send(final String from, final String to, final String subject, final String text)
             throws MessagingException {
-        final MimeMessage mail = buildMailClient().createMimeMessage();
+        final MimeMessage mail = client.createMimeMessage();
         mail.setSubject(subject);
         final MimeMessageHelper helper = new MimeMessageHelper(mail);
         helper.setFrom(from);

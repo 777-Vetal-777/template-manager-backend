@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
-import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
+import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,7 +62,7 @@ public interface InstanceController {
             @ApiResponse(responseCode = "200", description = "Instances successfully saved"),
             @ApiResponse(responseCode = "400", description = "Instance already exist")
     })
-    ResponseEntity<List<InstanceDTO>> remember(@RequestBody InstanceRememberRequestDTO instanceRememberRequestDTO,
+    ResponseEntity<List<InstanceDTO>> remember(@RequestBody InstancesRememberRequestDTO instancesRememberRequestDTO,
             Principal principal);
 
     @DeleteMapping(INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE)

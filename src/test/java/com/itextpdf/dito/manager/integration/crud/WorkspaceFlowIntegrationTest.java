@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
+import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
@@ -34,13 +35,13 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testCreateWorkspace() throws Exception {
-        InstanceRememberRequestDTO instanceRememberRequestDTO = new InstanceRememberRequestDTO();
-        InstanceDTO instanceDTO = new InstanceDTO();
+        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
+        InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName("MY-DEV-INSTANCE");
         instanceDTO.setSocket("localhost:8080");
-        instanceRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(instanceRememberRequestDTO))
+                .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -81,13 +82,13 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testUpdateWorkspace() throws Exception {
         final String INSTANCE_NAME = "MY-DEV-INSTANCE1";
-        InstanceRememberRequestDTO instanceRememberRequestDTO = new InstanceRememberRequestDTO();
-        InstanceDTO instanceDTO = new InstanceDTO();
+        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
+        InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName(INSTANCE_NAME);
         instanceDTO.setSocket("localhost:8080");
-        instanceRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(instanceRememberRequestDTO))
+                .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());

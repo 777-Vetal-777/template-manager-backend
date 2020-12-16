@@ -73,6 +73,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserEntity create(final UserEntity userEntity, final List<String> roles) {
         if (userRepository.findByEmailAndActiveTrue(userEntity.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException(userEntity.getEmail());
