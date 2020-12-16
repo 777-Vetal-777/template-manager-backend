@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
+import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
 import java.security.Principal;
@@ -28,7 +29,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> create(@Valid final TemplateCreateRequestDTO templateCreateRequestDTO,
-            final Principal principal) {
+                                              final Principal principal) {
         final TemplateEntity templateEntity = templateService
                 .create(templateCreateRequestDTO.getName(), templateCreateRequestDTO.getType(),
                         templateCreateRequestDTO.getDataCollectionName(), principal.getName());
@@ -36,7 +37,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<Page<TemplateDTO>> list(final Pageable pageable, final String searchParam) {
-        return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable, searchParam)), HttpStatus.OK);
+    public ResponseEntity<Page<TemplateDTO>> list(final Pageable pageable, final TemplateFilter templateFilter,
+                                                  final String searchParam) {
+        return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable, templateFilter, searchParam)),
+                HttpStatus.OK);
     }
 }

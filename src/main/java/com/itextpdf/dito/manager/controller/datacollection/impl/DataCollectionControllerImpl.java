@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.Page;
@@ -27,7 +28,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataCollectionMapper dataCollectionMapper;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
-            final DataCollectionMapper dataCollectionMapper) {
+                                        final DataCollectionMapper dataCollectionMapper) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
     }
@@ -51,8 +52,10 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<Page<DataCollectionDTO>> list(final Pageable pageable, final String searchParam) {
-        final Page<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(pageable, searchParam);
+    public ResponseEntity<Page<DataCollectionDTO>> list(final Pageable pageable, final DataCollectionFilter filter,
+                                                        final String searchParam) {
+
+        final Page<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(pageable, filter, searchParam);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
     }
 
@@ -63,8 +66,8 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> update(final String name,
-            final DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
-            final Principal principal) {
+                                                    final DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
+                                                    final Principal principal) {
         final DataCollectionEntity entity = dataCollectionService
                 .update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),
                         principal.getName());

@@ -1,0 +1,37 @@
+package com.itextpdf.dito.manager.filter.datacollection;
+
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+
+import java.util.Date;
+import java.util.List;
+
+public class DataCollectionFilter {
+    private String name;
+    private List<String> modifiedOn;
+    private List<DataCollectionType> types;
+    private String modifiedBy;
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+
+    public List<String> getModifiedOn() {
+        return modifiedOn;
+    }
+
+    public void setModifiedOn(List<String> modifiedOn) {
+        this.modifiedOn = modifiedOn;
+    }
+
+    public List<DataCollectionType> getTypes() { return types; }
+
+    public void setTypes(List<DataCollectionType> types) { this.types = types; }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+}

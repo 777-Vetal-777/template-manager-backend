@@ -14,21 +14,16 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import javax.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import static com.itextpdf.dito.manager.filter.FilterUtils.getDateFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getDateRangeFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
@@ -71,12 +66,15 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
     public Page<InstanceEntity> getAll(final InstanceFilter instanceFilter, final Pageable pageable,
                                        final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final Date dateFrom = CollectionUtils.isEmpty(instanceFilter.getCreatedOn()) ? null : getDateFromFilter(instanceFilter.getCreatedOn().get(0));
-        final Date dateTo = CollectionUtils.isEmpty(instanceFilter.getCreatedOn()) ? null : getDateFromFilter(instanceFilter.getCreatedOn().get(1));
+
+        final String name = getStringFromFilter(instanceFilter.getName());
+        final String socket = getStringFromFilter(instanceFilter.getSocket());
+        final String createdBy = getStringFromFilter(instanceFilter.getCreatedBy());
+        final List<Date> dateRange = getDateRangeFromFilter(instanceFilter.getCreatedOn());
 
         return StringUtils.isEmpty(searchParam)
-                ? instanceRepository.filter(pageable, getStringFromFilter(instanceFilter.getName()), getStringFromFilter(instanceFilter.getSocket()), getStringFromFilter(instanceFilter.getCreatedBy()), dateFrom, dateTo)
-                : instanceRepository.search(pageable, getStringFromFilter(instanceFilter.getName()), getStringFromFilter(instanceFilter.getSocket()), getStringFromFilter(instanceFilter.getCreatedBy()), dateFrom, dateTo, searchParam.toLowerCase());
+                ? instanceRepository.filter(pageable, name, socket, createdBy, dateRange)
+                : instanceRepository.search(pageable, name, socket, createdBy, dateRange, searchParam.toLowerCase());
     }
 
     @Override

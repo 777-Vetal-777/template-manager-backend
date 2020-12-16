@@ -1,11 +1,14 @@
 package com.itextpdf.dito.manager.integration.filtering;
 
 import com.itextpdf.dito.manager.controller.template.TemplateController;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,56 +26,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for filtering and search in {@link TemplateEntity} table.
  */
-public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationTest {
+public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
     @Autowired
     private TemplateRepository templateRepository;
     @Autowired
     private TemplateFileRepository templateFileRepository;
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
+    private TemplateCreateRequestDTO request;
 
     @BeforeEach
-    public void clearDb() {
-        templateRepository.deleteAll();
-        templateFileRepository.deleteAll();
-    }
+    public void init() throws Exception {
+        dataCollectionService.create("data-collection-test", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json","admin@email.com");
 
-    @Test
-    public void getAll_WhenUsingSearchString_ThenResponseIsRelatedToSearch() throws Exception {
-        TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-with-data-collection.json"), TemplateCreateRequestDTO.class);
+        request.setDataCollectionName("data-collection-test");
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get(TemplateController.BASE_NAME)
-                .param("search", request.getName())
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(request.getName())));
-
+                .accept(MediaType.APPLICATION_JSON));
     }
 
-    @Test
-    public void getAll_WhenSearchStringDoesntMatchAnything_ThenResponseIsEmpty() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME)
-                .param("search", "StringThatDoesntMatchAnything")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
-    }
-
-    @Test
-    public void getAll_WhenSortedBySupportedFields_ThenResponseIsOk() throws Exception {
-        for (String field : TemplateRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(TemplateController.BASE_NAME)
-                    .param("sort", field)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-        }
+    @AfterEach
+    public void clearDb() {
+        templateRepository.deleteAll();
+        templateFileRepository.deleteAll();
+        dataCollectionService.delete("data-collection-test");
     }
 
     @Test
@@ -84,13 +64,61 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
                 .andExpect(status().isBadRequest());
     }
 
+    @Override
     @Test
-    public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
+    public void test_filtering() throws Exception {
         mockMvc.perform(get(TemplateController.BASE_NAME)
-                .param("sort", "unknownField")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .param("name", request.getName()))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is(request.getName())));
+        mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("editedOn", "01/01/1970")
+                .param("editedOn", "01/01/1980"))
+                .andExpect(jsonPath("$.content", hasSize(0)));
+        mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("type", "standard"))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is(request.getName())));
+        /*mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("dataCollection", request.getDataCollectionName()))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is(request.getName())));*/
     }
 
+    @Override
+    @Test
+    public void test_searchAndFiltering() throws Exception {
+        mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("search", "admin")
+                .param("name", "unknown-template"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)));
+
+        mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("search", request.getName()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is(request.getName())));
+    }
+
+    @Override
+    @Test
+    public void test_sortWithSearch() throws Exception {
+        for (String field : TemplateRepository.SUPPORTED_SORT_FIELDS) {
+            mockMvc.perform(get(TemplateController.BASE_NAME)
+                    .param("sort", field)
+                    .param("search", "template"))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Override
+    @Test
+    public void test_sortWithFiltering() throws Exception {
+        for (String field : TemplateRepository.SUPPORTED_SORT_FIELDS) {
+            mockMvc.perform(get(TemplateController.BASE_NAME)
+                    .param("sort", field))
+                    .andExpect(status().isOk());
+        }
+    }
 }

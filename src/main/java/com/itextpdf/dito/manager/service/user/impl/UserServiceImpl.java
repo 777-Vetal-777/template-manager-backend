@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+
 @Service
 public class UserServiceImpl extends AbstractService implements UserService {
     private final UserRepository userRepository;
@@ -98,15 +100,19 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     public Page<UserEntity> getAll(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String email = StringUtils.isEmpty(userFilter.getEmail()) ? "" : userFilter.getEmail().toLowerCase();
-        final String firstName = StringUtils.isEmpty(userFilter.getFirstName()) ? "" : userFilter.getFirstName().toLowerCase();
-        final String lastName = StringUtils.isEmpty(userFilter.getLastName()) ? "" : userFilter.getLastName().toLowerCase();
-        final List<String> securityRoles = CollectionUtils.isEmpty(userFilter.getSecurityRoles()) ? null : userFilter.getSecurityRoles().stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toList());
+
+        final Pageable pageWithSort = updateSort(pageable);
+        final String email = getStringFromFilter(userFilter.getEmail());
+        final String firstName = getStringFromFilter(userFilter.getFirstName());
+        final String lastName = getStringFromFilter(userFilter.getLastName());
+        final List<String> securityRoles = !CollectionUtils.isEmpty(userFilter.getSecurityRoles())
+                ? userFilter.getSecurityRoles().stream().map(String::toLowerCase).collect(Collectors.toList())
+                : null;
+        final Boolean active = userFilter.getActive();
+
         return StringUtils.isEmpty(searchParam)
-                ? userRepository.filter(updateSort(pageable), email, firstName, lastName, securityRoles, userFilter.getActive())
-                : userRepository.search(updateSort(pageable), email, firstName, lastName, securityRoles, userFilter.getActive(), searchParam.toLowerCase());
+                ? userRepository.filter(pageWithSort, email, firstName, lastName, securityRoles, active)
+                : userRepository.search(pageWithSort, email, firstName, lastName, securityRoles, active, searchParam.toLowerCase());
     }
 
     @Override

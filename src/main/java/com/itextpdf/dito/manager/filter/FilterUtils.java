@@ -6,7 +6,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public final class FilterUtils {
 
@@ -16,7 +18,13 @@ public final class FilterUtils {
                 : value.toLowerCase();
     }
 
-    public static Date getDateFromFilter(final String value) {
+    public static List<Date> getDateRangeFromFilter(final List<String> dates) {
+        return dates != null
+                ? dates.stream().map(FilterUtils::getDateFromFilter).collect(Collectors.toList())
+                : null;
+    }
+
+    private static Date getDateFromFilter(final String value) {
         final Date result;
         final DateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
         try {
