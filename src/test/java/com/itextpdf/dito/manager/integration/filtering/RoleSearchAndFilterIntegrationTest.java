@@ -51,18 +51,14 @@ public class RoleSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
     public void test_searchAndFiltering() throws Exception {
         mockMvc.perform(get(RoleController.BASE_NAME)
                 .param("name", "GLOBAL_ADMINISTRATOR")
-                .param("search", "admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .param("search", "syst"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].name", is("GLOBAL_ADMINISTRATOR")));
 
         mockMvc.perform(get(RoleController.BASE_NAME)
                 .param("name", "GLOBAL_ADMINISTRATOR")
-                .param("search", "not-existing-user")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                .param("search", "not-existing-user"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
     }

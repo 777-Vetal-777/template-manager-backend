@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "users");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "users");
 
     Optional<RoleEntity> findByName(String name);
 
@@ -34,6 +34,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + "where  "
             //search
             + "(LOWER(user.email) like  LOWER(CONCAT('%',:search,'%')) "
+            + " or LOWER(role.type.name) like  LOWER(CONCAT('%',:search,'%')) "
             + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%'))) "
             //filtering
             + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%')) "

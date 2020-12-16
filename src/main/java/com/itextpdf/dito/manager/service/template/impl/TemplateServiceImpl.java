@@ -121,7 +121,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                     if (sortParam.getProperty().equals("modifiedBy")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "file.author.firstName");
                     }
-                    if (sortParam.getProperty().equals("modifiedOn")) {
+                    if (sortParam.getProperty().equals("editedOn")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
                     }
                     return sortParam;
