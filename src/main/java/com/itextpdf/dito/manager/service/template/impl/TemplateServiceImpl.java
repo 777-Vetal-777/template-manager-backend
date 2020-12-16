@@ -89,8 +89,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(templateFilter.getName());
         final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
-        final List<String> types = templateFilter.getTypes();
-        final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollectionName());
+        final List<String> types = templateFilter.getType();
+        final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
         final List<Date> dateRange = getDateRangeFromFilter(templateFilter.getEditedOn());
 
         return StringUtils.isEmpty(searchParam)
@@ -117,6 +117,12 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                     }
                     if (sortParam.getProperty().equals("dataCollection")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "dataCollection.name");
+                    }
+                    if (sortParam.getProperty().equals("modifiedBy")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "file.author.firstName");
+                    }
+                    if (sortParam.getProperty().equals("modifiedOn")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
                     }
                     return sortParam;
                 })

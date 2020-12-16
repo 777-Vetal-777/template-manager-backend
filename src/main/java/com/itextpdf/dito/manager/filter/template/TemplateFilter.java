@@ -5,11 +5,11 @@ import java.util.List;
 
 public class TemplateFilter {
     private String name;
-    private String dataCollectionName;
+    private String dataCollection;
     //always array with two dates as string from FE
     private List<String> editedOn;
     private String modifiedBy;
-    private List<String> types;
+    private List<String> type;
 
     public String getName() { return name; }
 
@@ -31,11 +31,15 @@ public class TemplateFilter {
         this.modifiedBy = modifiedBy;
     }
 
-    public String getDataCollectionName() { return dataCollectionName; }
+    public String getDataCollection() {
+        return dataCollection;
+    }
 
-    public void setDataCollectionName(String dataCollectionName) { this.dataCollectionName = dataCollectionName; }
+    public void setDataCollection(String dataCollection) {
+        this.dataCollection = dataCollection;
+    }
 
-    public List<String> getTypes() { return types; }
+    public List<String> getType() { return type; }
 
-    public void setTypes(List<String> types) { this.types = types; }
+    public void setType(List<String> type) { this.type = type; }
 }

@@ -24,6 +24,14 @@ public final class FilterUtils {
                 : null;
     }
 
+    public static Boolean getBooleanMultiselectFromFilter(final List<Boolean> values) {
+        if (values == null || values.size() > 1) {
+            return null;
+        } else {
+            return values.get(0);
+        }
+    }
+
     private static Date getDateFromFilter(final String value) {
         final Date result;
         final DateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);

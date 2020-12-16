@@ -6,8 +6,8 @@ public class UserFilter {
     private String email;
     private String firstName;
     private String lastName;
-    private List<String> securityRoles;
-    private Boolean active;
+    private List<String> roles;
+    private List<Boolean> active;
 
     public String getEmail() {
         return email;
@@ -33,19 +33,19 @@ public class UserFilter {
         this.lastName = lastName;
     }
 
-    public List<String> getSecurityRoles() {
-        return securityRoles;
+    public List<String> getRoles() {
+        return roles;
     }
 
-    public void setSecurityRoles(List<String> securityRoles) {
-        this.securityRoles = securityRoles;
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
-    public Boolean getActive() {
+    public List<Boolean> getActive() {
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(List<Boolean> active) {
         this.active = active;
     }
 }

@@ -142,6 +142,9 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                     if (sortParam.getProperty().equals("template")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
                     }
+                    if (sortParam.getProperty().equals("modifiedBy")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
+                    }
                     return sortParam;
                 })
                 .collect(Collectors.toList()));

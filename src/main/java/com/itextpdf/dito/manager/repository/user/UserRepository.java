@@ -52,7 +52,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
             + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
             + "and (:active=null or user.active IS :active) "
-            + "and (COALESCE(:securityRoles) is null or LOWER(role.name) in (:securityRoles)) "
+            + "and (COALESCE(:securityRoles) is null or role.name in (:securityRoles)) "
             + "group by user.id")
     Page<UserEntity> filter(Pageable pageable,
                             @Param("email") @Nullable String email,

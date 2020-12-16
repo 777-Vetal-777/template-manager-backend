@@ -33,9 +33,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
@@ -105,10 +105,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final String email = getStringFromFilter(userFilter.getEmail());
         final String firstName = getStringFromFilter(userFilter.getFirstName());
         final String lastName = getStringFromFilter(userFilter.getLastName());
-        final List<String> securityRoles = !CollectionUtils.isEmpty(userFilter.getSecurityRoles())
-                ? userFilter.getSecurityRoles().stream().map(String::toLowerCase).collect(Collectors.toList())
-                : null;
-        final Boolean active = userFilter.getActive();
+        final List<String> securityRoles = userFilter.getRoles();
+        final Boolean active = getBooleanMultiselectFromFilter(userFilter.getActive());
 
         return StringUtils.isEmpty(searchParam)
                 ? userRepository.filter(pageWithSort, email, firstName, lastName, securityRoles, active)

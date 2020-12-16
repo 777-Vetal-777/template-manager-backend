@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type.name", "dataCollection.name");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedOn", "modifiedOn");
 
     Optional<TemplateEntity> findByName(String name);
 
