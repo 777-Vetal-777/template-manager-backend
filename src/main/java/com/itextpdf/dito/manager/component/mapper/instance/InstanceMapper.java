@@ -18,5 +18,7 @@ public interface InstanceMapper {
 
     List<InstanceDTO> mapEntities(List<InstanceEntity> entities);
 
+    List<InstanceEntity> mapDTOs(List<InstanceDTO> dtos);
+
     Page<InstanceDTO> map(Page<InstanceEntity> entities);
 }

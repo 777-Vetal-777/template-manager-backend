@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.TemplateEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,11 @@ public class InstanceMapperImpl implements InstanceMapper {
         instanceDTO.setSocket(entity.getSocket());
         instanceDTO.setCreatedBy(entity.getCreatedBy().getEmail());
         instanceDTO.setCreatedOn(entity.getCreatedOn());
+        final List<TemplateEntity> templateEntities = entity.getTemplates();
+        if (templateEntities != null && !templateEntities.isEmpty()) {
+            instanceDTO.setTemplates(templateEntities.stream().map(templateEntity -> templateEntity.getName())
+                    .collect(Collectors.toList()));
+        }
         return instanceDTO;
     }
 
@@ -46,6 +52,11 @@ public class InstanceMapperImpl implements InstanceMapper {
     @Override
     public List<InstanceDTO> mapEntities(final List<InstanceEntity> entities) {
         return entities.stream().map(this::map).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InstanceEntity> mapDTOs(List<InstanceDTO> dtos) {
+        return dtos.stream().map(this::map).collect(Collectors.toList());
     }
 
     @Override

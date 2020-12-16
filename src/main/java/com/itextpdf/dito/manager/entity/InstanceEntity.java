@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,7 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 
@@ -29,8 +30,8 @@ public class InstanceEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stage_id", referencedColumnName = "id")
     private StageEntity stage;
-    @OneToOne(mappedBy = "instance")
-    private TemplateEntity template;
+    @OneToMany(mappedBy = "instance")
+    private List<TemplateEntity> templates;
 
     @PrePersist
     public void onPrePersist() {
@@ -85,11 +86,11 @@ public class InstanceEntity {
         this.stage = stage;
     }
 
-    public TemplateEntity getTemplate() {
-        return template;
+    public List<TemplateEntity> getTemplates() {
+        return templates;
     }
 
-    public void setTemplate(TemplateEntity template) {
-        this.template = template;
+    public void setTemplates(List<TemplateEntity> templates) {
+        this.templates = templates;
     }
 }

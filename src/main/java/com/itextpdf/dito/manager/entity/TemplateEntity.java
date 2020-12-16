@@ -30,7 +30,7 @@ public class TemplateEntity {
     @OneToOne(mappedBy = "template", fetch = FetchType.LAZY)
     private DataCollectionEntity dataCollection;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instance_id", referencedColumnName = "id")
     private InstanceEntity instance;
 

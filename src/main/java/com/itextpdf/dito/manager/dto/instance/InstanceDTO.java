@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.dto.instance;
 
 
 import java.util.Date;
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 
 public class InstanceDTO {
@@ -11,6 +12,7 @@ public class InstanceDTO {
     private String socket;
     private String createdBy;
     private Date createdOn;
+    private List<String> templates;
 
     public String getCreatedBy() {
         return createdBy;
@@ -44,5 +46,11 @@ public class InstanceDTO {
         this.socket = socket;
     }
 
+    public List<String> getTemplates() {
+        return templates;
+    }
 
+    public void setTemplates(List<String> templates) {
+        this.templates = templates;
+    }
 }

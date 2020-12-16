@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateFileNotFoundException;
 import com.itextpdf.dito.manager.filter.FilterUtils;
@@ -69,7 +70,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (!StringUtils.isEmpty(dataCollectionName)) {
             templateEntity.setDataCollection(
                     dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
-                            () -> new TemplateFileNotFoundException(dataCollectionName)));
+                            () -> new DataCollectionNotFoundException(dataCollectionName)));
         }
         final TemplateEntity persistedTemplateEntity = templateRepository.save(templateEntity);
 

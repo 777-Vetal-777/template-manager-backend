@@ -6,7 +6,6 @@ import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
-import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
@@ -84,26 +83,15 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
     public StageDTO map(final StageEntity entity) {
         final StageDTO stageDTO = new StageDTO();
         stageDTO.setName(entity.getName());
-        stageDTO.setInstances(entity.getInstances().stream().map(instance -> instance.getName())
-                .collect(Collectors.toList()));
+        stageDTO.setInstances(instanceMapper.mapEntities(entity.getInstances()));
         return stageDTO;
     }
 
     @Override
     public StageEntity map(final StageDTO dto) {
         final StageEntity stageEntity = new StageEntity();
-        final List<InstanceEntity> instances = new ArrayList<>();
-
         stageEntity.setName(dto.getName());
-
-        final List<String> instancesNames = dto.getInstances();
-        for (final String instanceName : instancesNames) {
-            final InstanceEntity instanceEntity = new InstanceEntity();
-            instanceEntity.setName(instanceName);
-            instances.add(instanceEntity);
-        }
-        stageEntity.setInstances(instances);
-
+        stageEntity.setInstances(instanceMapper.mapDTOs(dto.getInstances()));
         return stageEntity;
     }
 
