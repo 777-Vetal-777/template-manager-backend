@@ -25,11 +25,7 @@ public final class FilterUtils {
     }
 
     public static Boolean getBooleanMultiselectFromFilter(final List<Boolean> values) {
-        if (values == null || values.size() > 1) {
-            return null;
-        } else {
-            return values.get(0);
-        }
+        return (values == null || values.size() > 1) ? null : values.get(0);
     }
 
     private static Date getDateFromFilter(final String value) {
