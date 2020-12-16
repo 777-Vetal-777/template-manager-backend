@@ -6,10 +6,6 @@ public class EmptyDataCollectionFileException extends RuntimeException {
 
     private static final String message = "Data collection's file couldn't be empty.";
 
-    public EmptyDataCollectionFileException(final String message) {
-        super(message);
-    }
-
     public EmptyDataCollectionFileException() {
         super(message);
     }
