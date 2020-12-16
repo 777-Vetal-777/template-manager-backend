@@ -84,7 +84,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="008-add-column-created-on-to-data-collection-table" author="Vadim_Sorokin">
+    <changeSet id="009-add-column-created-on-to-data-collection-table" author="Ivan_Semenov">
         <addColumn tableName="data_collection">
             <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp"/>
         </addColumn>
