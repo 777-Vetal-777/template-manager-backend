@@ -85,7 +85,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final String name = getStringFromFilter(dataCollectionFilter.getName());
         final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
         final List<Date> dateRange = getDateRangeFromFilter(dataCollectionFilter.getModifiedOn());
-        final List<DataCollectionType> types = dataCollectionFilter.getTypes();
+        final List<DataCollectionType> types = dataCollectionFilter.getType();
 
         return StringUtils.isEmpty(searchParam)
                 ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, dateRange, types)

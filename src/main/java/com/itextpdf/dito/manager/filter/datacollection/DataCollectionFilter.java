@@ -8,7 +8,7 @@ import java.util.List;
 public class DataCollectionFilter {
     private String name;
     private List<String> modifiedOn;
-    private List<DataCollectionType> types;
+    private List<DataCollectionType> type;
     private String modifiedBy;
 
     public String getName() { return name; }
@@ -23,9 +23,13 @@ public class DataCollectionFilter {
         this.modifiedOn = modifiedOn;
     }
 
-    public List<DataCollectionType> getTypes() { return types; }
+    public List<DataCollectionType> getType() {
+        return type;
+    }
 
-    public void setTypes(List<DataCollectionType> types) { this.types = types; }
+    public void setType(List<DataCollectionType> type) {
+        this.type = type;
+    }
 
     public String getModifiedBy() {
         return modifiedBy;
