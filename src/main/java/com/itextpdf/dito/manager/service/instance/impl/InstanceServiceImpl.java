@@ -84,12 +84,12 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
 
         final StageEntity stageEntity = instanceEntity.getStage();
         if (stageEntity != null) {
-            throw new InstanceUsedInPromotionPathException(name);
+            throw new InstanceUsedInPromotionPathException();
         }
 
         final TemplateEntity templateEntity = instanceEntity.getTemplate();
         if (templateEntity != null) {
-            throw new InstanceHasAttachedTemplateException(name);
+            throw new InstanceHasAttachedTemplateException();
         }
 
         instanceRepository.deleteByName(name);
