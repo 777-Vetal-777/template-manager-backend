@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
@@ -35,6 +36,9 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> create(final String name, final String dataCollectionType, final MultipartFile multipartFile, final Principal principal) {
+        if (multipartFile.isEmpty()) {
+            throw new EmptyDataCollectionFileException();
+        }
         if (!EnumUtils.isValidEnum(DataCollectionType.class, dataCollectionType)) {
             throw new NoSuchDataCollectionTypeException(dataCollectionType);
         }
