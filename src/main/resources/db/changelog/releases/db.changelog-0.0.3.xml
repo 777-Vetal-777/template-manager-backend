@@ -90,4 +90,78 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="010-create-resource-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="resource_pk"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="type" type="varchar(50)"/>
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_to_user"
+                             references="user(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="011-create-resource-sequence" author="Yaroslav_Maievskiy">
+        <createSequence sequenceName="resource_sequence"/>
+    </changeSet>
+
+    <changeSet id="012-create-resource-log-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource_log">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="resource_log_pk"/>
+            </column>
+            <column name="date" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_log_to_user"
+                             references="user(id)"/>
+            </column>
+            <column name="resource_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_log_to_resource"
+                             references="resource(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="013-create-resource-log-sequence" author="Yaroslav_Maievskiy">
+        <createSequence sequenceName="resource_log_sequence"/>
+    </changeSet>
+
+    <changeSet id="014-create-resource-file-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource_file">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="resource_file_pk"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="file" type="${blob}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="varchar(255)"/>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="resource_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_file_to_resource"
+                             references="resource(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-create-resource-file-sequence" author="Yaroslav_Maievskiy">
+        <createSequence sequenceName="resource_file_sequence"/>
+    </changeSet>
+
 </databaseChangeLog>

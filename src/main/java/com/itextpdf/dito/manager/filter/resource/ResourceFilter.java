@@ -1,13 +1,23 @@
-package com.itextpdf.dito.manager.dto.resource.filter;
+package com.itextpdf.dito.manager.filter.resource;
 
 import java.util.Date;
 
-public class ResourceFilterDTO {
+public class ResourceFilter {
     private String name;
     private String type;
     private String modifiedBy;
     private Date modifiedOn;
     private String comment;
+    private String sort;
+
+
+    public String getSort() {
+        return sort;
+    }
+
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
 
     public String getName() {
         return name;

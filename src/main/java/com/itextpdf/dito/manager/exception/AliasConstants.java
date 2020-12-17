@@ -9,6 +9,7 @@ public final class AliasConstants {
     public static final String DATA_COLLECTION = "Data collection";
     public static final String WORKSPACE = "Workspace";
     public static final String INSTANCE = "Instance";
+    public static final String RESOURCE = "Resource";
 
     private AliasConstants() {
         throw new AssertionError("Suppress default constructor for noninstantiability");

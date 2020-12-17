@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -22,6 +23,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     public void test_getByName() throws Exception {
         final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
         mockMvc.perform(get(ResourceController.BASE_NAME + "/" + encodedResourceName)

@@ -8,16 +8,21 @@ public class ResourceDTO {
     private String name;
     private String comment;
     private String description;
-    private ResourceType type;
+    private ResourceTypeEnum type;
     @JsonProperty("author.firstName")
     private String authorFirstName;
     @JsonProperty("author.lastName")
     private String authorLastName;
     private Date createdOn;
+    @JsonProperty("modified.firstName")
+    private String modifiedFirstName;
+    @JsonProperty("modified.lastName")
+    private String modifiedLastName;
     private Date modifiedOn;
     private Long version;
-    private Byte[] file;
+    private String coment;
     private String fileName;
+    private byte[] file;
 
     public String getDescription() {
         return description;
@@ -35,6 +40,14 @@ public class ResourceDTO {
         this.createdOn = createdOn;
     }
 
+    public String getComent() {
+        return coment;
+    }
+
+    public void setComent(String coment) {
+        this.coment = coment;
+    }
+
     public Long getVersion() {
         return version;
     }
@@ -43,11 +56,11 @@ public class ResourceDTO {
         this.version = version;
     }
 
-    public Byte[] getFile() {
+    public byte[] getFile() {
         return file;
     }
 
-    public void setFile(Byte[] file) {
+    public void setFile(byte[] file) {
         this.file = file;
     }
 
@@ -59,11 +72,11 @@ public class ResourceDTO {
         this.fileName = fileName;
     }
 
-    public ResourceType getType() {
+    public ResourceTypeEnum getType() {
         return type;
     }
 
-    public void setType(ResourceType type) {
+    public void setType(ResourceTypeEnum type) {
         this.type = type;
     }
 
@@ -107,4 +120,19 @@ public class ResourceDTO {
         this.comment = comment;
     }
 
+    public String getModifiedFirstName() {
+        return modifiedFirstName;
+    }
+
+    public void setModifiedFirstName(String modifiedFirstName) {
+        this.modifiedFirstName = modifiedFirstName;
+    }
+
+    public String getModifiedLastName() {
+        return modifiedLastName;
+    }
+
+    public void setModifiedLastName(String modifiedLastName) {
+        this.modifiedLastName = modifiedLastName;
+    }
 }
