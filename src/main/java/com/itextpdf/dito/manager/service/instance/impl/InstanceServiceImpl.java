@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getDateRangeFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -68,11 +69,12 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final String name = getStringFromFilter(instanceFilter.getName());
         final String socket = getStringFromFilter(instanceFilter.getSocket());
         final String createdBy = getStringFromFilter(instanceFilter.getCreatedBy());
-        final List<Date> dateRange = getDateRangeFromFilter(instanceFilter.getCreatedOn());
+        final Date startDate =  getDateRangeFromFilter(instanceFilter.getCreatedOn()).get(0);
+        final Date endDate =  getDateRangeFromFilter(instanceFilter.getCreatedOn()).get(1);
 
         return StringUtils.isEmpty(searchParam)
-                ? instanceRepository.filter(pageable, name, socket, createdBy, dateRange)
-                : instanceRepository.search(pageable, name, socket, createdBy, dateRange, searchParam.toLowerCase());
+                ? instanceRepository.filter(pageable, name, socket, createdBy, startDate, endDate)
+                : instanceRepository.search(pageable, name, socket, createdBy, startDate, endDate, searchParam.toLowerCase());
     }
 
     @Override

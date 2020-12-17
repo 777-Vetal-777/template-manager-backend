@@ -1,10 +1,12 @@
 package com.itextpdf.dito.manager.filter;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -19,9 +21,9 @@ public final class FilterUtils {
     }
 
     public static List<Date> getDateRangeFromFilter(final List<String> dates) {
-        return dates != null
+        return !CollectionUtils.isEmpty(dates)
                 ? dates.stream().map(FilterUtils::getDateFromFilter).collect(Collectors.toList())
-                : null;
+                : Arrays.asList(null, null);
     }
 
     public static Boolean getBooleanMultiselectFromFilter(final List<Boolean> values) {

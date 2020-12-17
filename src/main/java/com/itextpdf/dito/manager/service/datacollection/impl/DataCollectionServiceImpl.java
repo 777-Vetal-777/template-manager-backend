@@ -8,7 +8,6 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
-import com.itextpdf.dito.manager.filter.FilterUtils;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -84,12 +83,13 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(dataCollectionFilter.getName());
         final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
-        final List<Date> dateRange = getDateRangeFromFilter(dataCollectionFilter.getModifiedOn());
+        final Date startDate = getDateRangeFromFilter(dataCollectionFilter.getModifiedOn()).get(0);
+        final Date endDate = getDateRangeFromFilter(dataCollectionFilter.getModifiedOn()).get(1);
         final List<DataCollectionType> types = dataCollectionFilter.getType();
 
         return StringUtils.isEmpty(searchParam)
-                ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, dateRange, types)
-                : dataCollectionRepository.search(pageWithSort, name, modifiedBy, dateRange, types, searchParam.toLowerCase());
+                ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, startDate, endDate, types)
+                : dataCollectionRepository.search(pageWithSort, name, modifiedBy, startDate, endDate, types, searchParam.toLowerCase());
     }
 
     @Override

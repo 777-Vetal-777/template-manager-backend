@@ -27,12 +27,13 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
             //filtering
             + "(:name='' or LOWER(dc.name) like CONCAT('%',:name,'%')) "
             + "and (:modifiedBy='' or LOWER(dc.author.firstName) like CONCAT('%',:modifiedBy,'%') or LOWER(dc.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (COALESCE(:modificationPeriod) is null or dc.modifiedOn in (:modificationPeriod)) "
+            + "and (cast(:startDate as date) is null or dc.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (COALESCE(:types) is null or dc.type in (:types))")
     Page<DataCollectionEntity> filter(Pageable pageable,
                                       @Param("name") @Nullable String name,
                                       @Param("modifiedBy") @Nullable String modifiedBy,
-                                      @Param("modificationPeriod") @Nullable List<Date> modificationPeriod,
+                                      @Param("startDate") @Nullable Date modificationStartDate,
+                                      @Param("endDate") @Nullable Date modificationEndDate,
                                       @Param("types") @Nullable List<DataCollectionType> types);
 
     @Query(value = "select dc from DataCollectionEntity dc "
@@ -40,18 +41,18 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
             //filtering
             + "(:name='' or LOWER(dc.name) like CONCAT('%',:name,'%')) "
             + "and (:modifiedBy='' or LOWER(dc.author.firstName) like CONCAT('%',:modifiedBy,'%') or LOWER(dc.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (COALESCE(:modificationPeriod) is null or dc.modifiedOn in (:modificationPeriod)) "
+            + "and (cast(:startDate as date) is null or dc.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (COALESCE(:types) is null or dc.type in (:types)) "
             //search
             + "and (LOWER(dc.name) like LOWER(CONCAT('%',:search,'%')) "
             + "or LOWER(dc.author.lastName) like LOWER(CONCAT('%',:search,'%')) "
             + "or LOWER(dc.author.firstName) like LOWER(CONCAT('%',:search,'%')) "
-            + "or LOWER(dc.type) like LOWER(CONCAT('%',:search,'%'))) "
-            + "group by dc.id")
+            + "or LOWER(dc.type) like LOWER(CONCAT('%',:search,'%'))) ")
     Page<DataCollectionEntity> search(Pageable pageable,
                                       @Param("name") @Nullable String name,
                                       @Param("modifiedBy") @Nullable String modifiedBy,
-                                      @Param("modificationPeriod") @Nullable List<Date> modificationPeriod,
+                                      @Param("startDate") @Nullable Date modificationStartDate,
+                                      @Param("endDate") @Nullable Date modificationEndDate,
                                       @Param("types") @Nullable List<DataCollectionType> types,
                                       @Param("search") String searchParam);
 }

@@ -4,8 +4,6 @@ import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.template.TemplateFileNotFoundException;
-import com.itextpdf.dito.manager.filter.FilterUtils;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -22,13 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
-import org.hibernate.mapping.Collection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getDateRangeFromFilter;
@@ -92,11 +88,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
         final List<String> types = templateFilter.getType();
         final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
-        final List<Date> dateRange = getDateRangeFromFilter(templateFilter.getEditedOn());
-
+        final Date startDate =  getDateRangeFromFilter(templateFilter.getEditedOn()).get(0);
+        final Date endDate =  getDateRangeFromFilter(templateFilter.getEditedOn()).get(1);
         return StringUtils.isEmpty(searchParam)
-                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, dateRange)
-                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, dateRange, searchParam.toLowerCase());
+                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, startDate, endDate)
+                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, startDate, endDate, searchParam.toLowerCase());
     }
 
     @Override

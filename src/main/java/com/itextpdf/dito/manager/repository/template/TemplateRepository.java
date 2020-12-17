@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,15 +30,15 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or LOWER(template.type.name) in (:types)) "
             + "and (:modifiedBy='' or LOWER(file.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(file.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (COALESCE(:modificationPeriod) is null or file.version in (:modificationPeriod)) "
-            + "and (template.dataCollection is null or (:dataCollectionName='' or LOWER(template.dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))"
-            + "group by template.id")
+            + "and (cast(:startDate as date) is null or file.version between cast(:startDate as date) and cast(:endDate as date)) "
+            + "and (template.dataCollection is null or (:dataCollectionName='' or LOWER(template.dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))")
     Page<TemplateEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("modifiedBy") @Nullable String modifiedBy,
                                 @Param("types") @Nullable List<String> types,
                                 @Param("dataCollectionName") @Nullable String dataCollectionName,
-                                @Param("modificationPeriod") @Nullable List<Date> modificationPeriod);
+                                @Param("startDate") @Nullable Date modifiedOnStartDate,
+                                @Param("endDate") @Nullable Date modifiedOnEndDate);
 
 
     @Query(value = "select template from TemplateEntity template "
@@ -49,21 +50,21 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "((:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or LOWER(template.type.name) in (:types)) "
             + "and (:modifiedBy='' or LOWER(file.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(file.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (COALESCE(:modificationPeriod) is null or file.version in (:modificationPeriod)) "
+            + "and (cast(:startDate as date) is null or file.version between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (template.dataCollection is null or (:dataCollectionName='' or LOWER(template.dataCollection.name) like CONCAT('%',:dataCollectionName,'%'))))"
             //search
             + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or LOWER(template.dataCollection.name) like CONCAT('%',:search,'%') "
             + "or LOWER(template.type.name) like CONCAT('%',:search,'%') "
             + "or LOWER(file.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.author.lastName) like CONCAT('%',:search,'%')) "
-            + "group by template.id")
+            + "or LOWER(file.author.lastName) like CONCAT('%',:search,'%')) ")
     Page<TemplateEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("modifiedBy") @Nullable String modifiedBy,
                                 @Param("types") @Nullable List<String> types,
                                 @Param("dataCollectionName") @Nullable String dataCollectionName,
-                                @Param("modificationPeriod") @Nullable List<Date> modificationPeriod,
+                                @Param("startDate") @Nullable Date startDate,
+                                @Param("endDate") @Nullable Date endDate,
                                 @Param("search") String searchParam);
 
     @Override

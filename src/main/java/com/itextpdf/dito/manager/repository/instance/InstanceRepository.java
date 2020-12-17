@@ -26,7 +26,7 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
     @Query("select i from instance i "
             + "where (:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
             + "and (:socket='' or LOWER(i.socket) like CONCAT('%',:socket,'%')) "
-            + "and (COALESCE(:dateRange) is null or i.createdOn in (:dateRange)) "
+            + "and (cast(:startDate as date) is null or i.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and ((:createdBy='' or LOWER(i.createdBy.firstName) like CONCAT('%',:createdBy,'%')) "
             + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%'))) "
     )
@@ -34,7 +34,8 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
                                 @Param("name") @Nullable String name,
                                 @Param("socket") @Nullable String socket,
                                 @Param("createdBy") @Nullable String createdBy,
-                                @Param("dateRange") @Nullable List<Date> dateRange);
+                                @Param("startDate") @Nullable Date startDate,
+                                @Param("endDate")@Nullable Date endDate);
 
     @Query("select i from instance i "
             + "where "
@@ -42,7 +43,7 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
             + "("
             + "(:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
             + "and (:socket='' or LOWER(i.socket) like CONCAT('%',:socket,'%')) "
-            + "and (COALESCE(:dateRange) is null or i.createdOn in (:dateRange)) "
+            + "and (:startDate is null or i.createdOn between :startDate and :endDate) "
             + "and ((:createdBy='' or LOWER(i.createdBy.firstName) like CONCAT('%',:createdBy,'%')) "
             + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%')))) "
             //search
@@ -55,7 +56,8 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
                                 @Param("name") @Nullable String name,
                                 @Param("socket") @Nullable String socket,
                                 @Param("createdBy") @Nullable String createdBy,
-                                @Param("dateRange") @Nullable List<Date> dateRange,
+                                @Param("startDate") @Nullable Date startDate,
+                                @Param("endDate") @Nullable Date endDate,
                                 @Param("search") String searchParam);
 
     void deleteByName(String name);
