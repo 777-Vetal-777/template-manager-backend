@@ -14,15 +14,19 @@ public class ResourceDTO {
     @JsonProperty("author.lastName")
     private String authorLastName;
     private Date createdOn;
-    @JsonProperty("modified.firstName")
-    private String modifiedFirstName;
-    @JsonProperty("modified.lastName")
-    private String modifiedLastName;
+    private String modifiedBy;
     private Date modifiedOn;
     private Long version;
-    private String coment;
     private String fileName;
     private byte[] file;
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
 
     public String getDescription() {
         return description;
@@ -38,14 +42,6 @@ public class ResourceDTO {
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
-    }
-
-    public String getComent() {
-        return coment;
-    }
-
-    public void setComent(String coment) {
-        this.coment = coment;
     }
 
     public Long getVersion() {
@@ -120,19 +116,4 @@ public class ResourceDTO {
         this.comment = comment;
     }
 
-    public String getModifiedFirstName() {
-        return modifiedFirstName;
-    }
-
-    public void setModifiedFirstName(String modifiedFirstName) {
-        this.modifiedFirstName = modifiedFirstName;
-    }
-
-    public String getModifiedLastName() {
-        return modifiedLastName;
-    }
-
-    public void setModifiedLastName(String modifiedLastName) {
-        this.modifiedLastName = modifiedLastName;
-    }
 }

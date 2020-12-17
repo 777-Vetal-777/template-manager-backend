@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.filter.datacollection;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 
-import java.util.Date;
 import java.util.List;
 
 public class DataCollectionFilter {

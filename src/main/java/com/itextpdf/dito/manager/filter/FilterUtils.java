@@ -5,11 +5,9 @@ import org.springframework.util.StringUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public final class FilterUtils {
 
@@ -28,7 +26,7 @@ public final class FilterUtils {
     }
 
     public static Date getEndDateFromRange(final List<String> dates) {
-         return getDateFromFilter(dates.get(1));
+        return getDateFromFilter(dates.get(1));
     }
 
     private static Date getDateFromFilter(final String value) {

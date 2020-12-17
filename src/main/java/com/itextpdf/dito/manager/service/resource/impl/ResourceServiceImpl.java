@@ -11,17 +11,27 @@ import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
+import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
-public class ResourceServiceImpl implements ResourceService {
+public class ResourceServiceImpl extends AbstractService implements ResourceService {
     private final ResourceRepository resourceRepository;
     private final ResourceLogRepository resourceLogRepository;
     private final ResourceFileRepository resourceFileRepository;
@@ -44,12 +54,19 @@ public class ResourceServiceImpl implements ResourceService {
             throw new ResourceAlreadyExistsException(name);
         }
 
+        final UserEntity userEntity = userService.findByEmail(email);
+
         final ResourceEntity resourceEntity = new ResourceEntity();
         resourceEntity.setName(name);
         resourceEntity.setType(type);
         resourceEntity.setCreatedOn(new Date());
-        final UserEntity userEntity = userService.findByEmail(email);
         resourceEntity.setCreatedBy(userEntity);
+
+        final ResourceLogEntity logEntity = new ResourceLogEntity();
+        logEntity.setAuthor(userEntity);
+        logEntity.setDate(new Date());
+        logEntity.setResource(resourceEntity);
+
 
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
         fileEntity.setResource(resourceEntity);
@@ -57,6 +74,7 @@ public class ResourceServiceImpl implements ResourceService {
         fileEntity.setFile(data);
         fileEntity.setFileName(fileName);
         resourceEntity.setResourceFiles(Collections.singletonList(fileEntity));
+        resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
         return resourceRepository.save(resourceEntity);
     }
 
@@ -89,7 +107,49 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Page<ResourceEntity> list(final Pageable pageable, final ResourceFilter filter, final String searchParam) {
-        return resourceRepository.findAll(pageable);
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+
+        final Pageable pageWithSort = updateSort(pageable);
+        final String name = getStringFromFilter(filter.getName());
+        final List<ResourceTypeEnum> resourceTypes = filter.getType();
+        final String modifiedBy = getStringFromFilter(filter.getModifiedBy());
+        final String comment = getStringFromFilter(filter.getComment());
+
+        Date modifiedOnStartDate = null;
+        Date modifiedOnEndDate = null;
+        final List<String> modifiedOnDateRange = filter.getModifiedOn();
+        if (modifiedOnDateRange != null) {
+            if (modifiedOnDateRange.size() != 2) {
+                throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+            }
+            modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
+            modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
+        }
+
+        return StringUtils.isEmpty(searchParam)
+                ? resourceRepository.filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
+                : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, searchParam);
+    }
+
+    private Pageable updateSort(Pageable pageable) {
+        Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (sortParam.getProperty().equals("type")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "type");
+                    }
+                    if (sortParam.getProperty().equals("modifiedBy")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "logs.author.firstName");
+                    }
+                    if (sortParam.getProperty().equals("modifiedOn")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "logs.date");
+                    }
+                    if (sortParam.getProperty().equals("comment")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "files.comment");
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
     private void throwExceptiontIfResourceExist(final ResourceEntity entity) {
@@ -98,7 +158,12 @@ public class ResourceServiceImpl implements ResourceService {
         }
     }
 
-    private ResourceEntity getResource(final String name,final ResourceTypeEnum type) {
+    private ResourceEntity getResource(final String name, final ResourceTypeEnum type) {
         return resourceRepository.findByNameAndType(name, type).orElseThrow(() -> new ResourceNotFoundException(name));
+    }
+
+    @Override
+    public List<String> getSupportedSortFields() {
+        return ResourceRepository.SUPPORTED_SORT_FIELDS;
     }
 }

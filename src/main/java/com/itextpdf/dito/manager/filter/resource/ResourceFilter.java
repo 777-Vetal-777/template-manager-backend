@@ -1,23 +1,15 @@
 package com.itextpdf.dito.manager.filter.resource;
 
-import java.util.Date;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+
+import java.util.List;
 
 public class ResourceFilter {
     private String name;
-    private String type;
+    private List<ResourceTypeEnum> type;
     private String modifiedBy;
-    private Date modifiedOn;
+    private List<String> modifiedOn;
     private String comment;
-    private String sort;
-
-
-    public String getSort() {
-        return sort;
-    }
-
-    public void setSort(String sort) {
-        this.sort = sort;
-    }
 
     public String getName() {
         return name;
@@ -27,11 +19,11 @@ public class ResourceFilter {
         this.name = name;
     }
 
-    public String getType() {
+    public List<ResourceTypeEnum> getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(List<ResourceTypeEnum> type) {
         this.type = type;
     }
 
@@ -43,11 +35,11 @@ public class ResourceFilter {
         this.modifiedBy = modifiedBy;
     }
 
-    public Date getModifiedOn() {
+    public List<String> getModifiedOn() {
         return modifiedOn;
     }
 
-    public void setModifiedOn(Date modifiedOn) {
+    public void setModifiedOn(List<String> modifiedOn) {
         this.modifiedOn = modifiedOn;
     }
 

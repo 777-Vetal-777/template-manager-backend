@@ -34,6 +34,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             final ResourceFileEntity fileEntity = files.stream().findFirst().get();
             result.setVersion(fileEntity.getVersion());
             result.setFileName(fileEntity.getFileName());
+            result.setComment(fileEntity.getComment());
         }
 
         final Collection<ResourceLogEntity> logs = entity.getResourceLogs();
@@ -42,8 +43,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             result.setModifiedOn(log.getDate());
             final UserEntity updatedBy = log.getAuthor();
             if (Objects.nonNull(updatedBy)) {
-                result.setModifiedFirstName(updatedBy.getFirstName());
-                result.setModifiedLastName(updatedBy.getLastName());
+                result.setModifiedBy(new StringBuilder(updatedBy.getFirstName()).append(" ").append(updatedBy.getLastName()).toString());
             }
         }
         return result;
