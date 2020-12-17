@@ -30,7 +30,6 @@ import org.springframework.util.StringUtils;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
-import static com.itextpdf.dito.manager.filter.FilterUtils.validateDateRangeSize;
 
 @Service
 public class TemplateServiceImpl extends AbstractService implements TemplateService {
@@ -84,16 +83,24 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public Page<TemplateEntity> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final List<String> editedOnDateRange = templateFilter.getEditedOn();
-        validateDateRangeSize(editedOnDateRange);
 
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(templateFilter.getName());
         final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
         final List<String> types = templateFilter.getType();
         final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
-        final Date editedOnStartDate = getStartDateFromRange(editedOnDateRange);
-        final Date editedOnEndDate = getEndDateFromRange(editedOnDateRange);
+
+        Date editedOnStartDate = null;
+        Date editedOnEndDate = null;
+        final List<String> editedOnDateRange = templateFilter.getEditedOn();
+        if (editedOnDateRange != null) {
+            if (editedOnDateRange.size() != 2) {
+                throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+            }
+            editedOnStartDate = getStartDateFromRange(editedOnDateRange);
+            editedOnEndDate = getEndDateFromRange(editedOnDateRange);
+        }
+
         return StringUtils.isEmpty(searchParam)
                 ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
                 : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate, searchParam.toLowerCase());

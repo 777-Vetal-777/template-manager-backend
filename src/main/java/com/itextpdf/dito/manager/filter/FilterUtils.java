@@ -24,17 +24,11 @@ public final class FilterUtils {
     }
 
     public static Date getStartDateFromRange(final List<String> dates) {
-        return dates != null ? getDateFromFilter(dates.get(0)) : null;
+        return getDateFromFilter(dates.get(0));
     }
 
     public static Date getEndDateFromRange(final List<String> dates) {
-         return dates != null ? getDateFromFilter(dates.get(1)) : null;
-    }
-
-    public static void validateDateRangeSize(List<String> dates) {
-        if (dates != null && dates.size() != 2) {
-            throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
-        }
+         return getDateFromFilter(dates.get(1));
     }
 
     private static Date getDateFromFilter(final String value) {
