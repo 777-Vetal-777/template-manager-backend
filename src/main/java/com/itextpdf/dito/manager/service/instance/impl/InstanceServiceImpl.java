@@ -69,12 +69,11 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final String name = getStringFromFilter(instanceFilter.getName());
         final String socket = getStringFromFilter(instanceFilter.getSocket());
         final String createdBy = getStringFromFilter(instanceFilter.getCreatedBy());
-        final Date startDate =  getDateRangeFromFilter(instanceFilter.getCreatedOn()).get(0);
-        final Date endDate =  getDateRangeFromFilter(instanceFilter.getCreatedOn()).get(1);
+        final List<Date> createdOnDateRange = getDateRangeFromFilter(instanceFilter.getCreatedOn());
 
         return StringUtils.isEmpty(searchParam)
-                ? instanceRepository.filter(pageable, name, socket, createdBy, startDate, endDate)
-                : instanceRepository.search(pageable, name, socket, createdBy, startDate, endDate, searchParam.toLowerCase());
+                ? instanceRepository.filter(pageable, name, socket, createdBy, createdOnDateRange.get(0), createdOnDateRange.get(1))
+                : instanceRepository.search(pageable, name, socket, createdBy, createdOnDateRange.get(0), createdOnDateRange.get(1), searchParam.toLowerCase());
     }
 
     @Override

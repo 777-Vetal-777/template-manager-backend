@@ -88,11 +88,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
         final List<String> types = templateFilter.getType();
         final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
-        final Date startDate =  getDateRangeFromFilter(templateFilter.getEditedOn()).get(0);
-        final Date endDate =  getDateRangeFromFilter(templateFilter.getEditedOn()).get(1);
+        final List<Date> editedOnDateRange = getDateRangeFromFilter(templateFilter.getEditedOn());
         return StringUtils.isEmpty(searchParam)
-                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, startDate, endDate)
-                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, startDate, endDate, searchParam.toLowerCase());
+                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnDateRange.get(0), editedOnDateRange.get(1))
+                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnDateRange.get(0), editedOnDateRange.get(1), searchParam.toLowerCase());
     }
 
     @Override
