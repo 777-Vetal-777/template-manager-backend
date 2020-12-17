@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
 
@@ -32,8 +33,8 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
     Page<DataCollectionEntity> filter(Pageable pageable,
                                       @Param("name") @Nullable String name,
                                       @Param("modifiedBy") @Nullable String modifiedBy,
-                                      @Param("startDate") @Nullable Date modificationStartDate,
-                                      @Param("endDate") @Nullable Date modificationEndDate,
+                                      @Param("startDate") @Nullable @Temporal Date modificationStartDate,
+                                      @Param("endDate") @Nullable @Temporal Date modificationEndDate,
                                       @Param("types") @Nullable List<DataCollectionType> types);
 
     @Query(value = "select dc from DataCollectionEntity dc "
@@ -51,8 +52,8 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
     Page<DataCollectionEntity> search(Pageable pageable,
                                       @Param("name") @Nullable String name,
                                       @Param("modifiedBy") @Nullable String modifiedBy,
-                                      @Param("startDate") @Nullable Date modificationStartDate,
-                                      @Param("endDate") @Nullable Date modificationEndDate,
+                                      @Param("startDate") @Nullable @Temporal Date modificationStartDate,
+                                      @Param("endDate") @Nullable @Temporal Date modificationEndDate,
                                       @Param("types") @Nullable List<DataCollectionType> types,
                                       @Param("search") String searchParam);
 }
