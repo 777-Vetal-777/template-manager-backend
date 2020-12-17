@@ -39,7 +39,7 @@ services:
     image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     ports:
       - "5432:5432"
-      environment:
+    environment:
       - "POSTGRES_DB=dito" # Database name
       - "POSTGRES_USER=postgres" # Database username
       - "POSTGRES_PASSWORD=1111" # Database password
