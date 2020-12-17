@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.filter;
 
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.DateFormat;
@@ -20,17 +19,24 @@ public final class FilterUtils {
                 : value.toLowerCase();
     }
 
-    public static List<Date> getDateRangeFromFilter(final List<String> dates) {
+    public static Boolean getBooleanMultiselectFromFilter(final List<Boolean> values) {
+        return (values == null || values.size() > 1) ? null : values.get(0);
+    }
+
+    public static Date getStartDateFromRange(final List<String> dates) {
+        validateDateRangeSize(dates);
+        return dates != null ? getDateFromFilter(dates.get(0)) : null;
+    }
+
+    public static Date getEndDateFromRange(final List<String> dates) {
+        validateDateRangeSize(dates);
+        return dates != null ? getDateFromFilter(dates.get(1)) : null;
+    }
+
+    private static void validateDateRangeSize(List<String> dates) {
         if (dates != null && dates.size() != 2) {
             throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
         }
-        return !CollectionUtils.isEmpty(dates)
-                ? dates.stream().map(FilterUtils::getDateFromFilter).collect(Collectors.toList())
-                : Arrays.asList(null, null);
-    }
-
-    public static Boolean getBooleanMultiselectFromFilter(final List<Boolean> values) {
-        return (values == null || values.size() > 1) ? null : values.get(0);
     }
 
     private static Date getDateFromFilter(final String value) {

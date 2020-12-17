@@ -27,7 +27,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import static com.itextpdf.dito.manager.filter.FilterUtils.getDateRangeFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
@@ -83,12 +84,13 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(dataCollectionFilter.getName());
         final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
-        final List<Date> modifiedOnDateRange = getDateRangeFromFilter(dataCollectionFilter.getModifiedOn());
+        final Date modifiedOnStartDate = getStartDateFromRange(dataCollectionFilter.getModifiedOn());
+        final Date modifiedOnEndDate = getEndDateFromRange(dataCollectionFilter.getModifiedOn());
         final List<DataCollectionType> types = dataCollectionFilter.getType();
 
         return StringUtils.isEmpty(searchParam)
-                ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, modifiedOnDateRange.get(0), modifiedOnDateRange.get(1), types)
-                : dataCollectionRepository.search(pageWithSort, name, modifiedBy, modifiedOnDateRange.get(0), modifiedOnDateRange.get(1), types, searchParam.toLowerCase());
+                ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types)
+                : dataCollectionRepository.search(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types, searchParam.toLowerCase());
     }
 
     @Override

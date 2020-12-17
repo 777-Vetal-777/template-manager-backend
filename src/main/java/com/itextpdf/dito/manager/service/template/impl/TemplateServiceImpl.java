@@ -27,7 +27,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import static com.itextpdf.dito.manager.filter.FilterUtils.getDateRangeFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
@@ -88,10 +89,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
         final List<String> types = templateFilter.getType();
         final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
-        final List<Date> editedOnDateRange = getDateRangeFromFilter(templateFilter.getEditedOn());
+        final Date editedOnStartDate = getStartDateFromRange(templateFilter.getEditedOn());
+        final Date editedOnEndDate = getEndDateFromRange(templateFilter.getEditedOn());
         return StringUtils.isEmpty(searchParam)
-                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnDateRange.get(0), editedOnDateRange.get(1))
-                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnDateRange.get(0), editedOnDateRange.get(1), searchParam.toLowerCase());
+                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
+                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate, searchParam.toLowerCase());
     }
 
     @Override
