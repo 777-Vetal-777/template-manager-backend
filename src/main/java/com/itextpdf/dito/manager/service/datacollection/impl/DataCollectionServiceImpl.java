@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.validateDateRangeSize;
 
 @Service
 public class DataCollectionServiceImpl extends AbstractService implements DataCollectionService {
@@ -80,12 +81,14 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     public Page<DataCollectionEntity> list(final Pageable pageable, final DataCollectionFilter dataCollectionFilter,
                                            final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final List<String> modifiedOnDateRange = dataCollectionFilter.getModifiedOn();
+        validateDateRangeSize(modifiedOnDateRange);
 
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(dataCollectionFilter.getName());
         final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
-        final Date modifiedOnStartDate = getStartDateFromRange(dataCollectionFilter.getModifiedOn());
-        final Date modifiedOnEndDate = getEndDateFromRange(dataCollectionFilter.getModifiedOn());
+        final Date modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
+        final Date modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         final List<DataCollectionType> types = dataCollectionFilter.getType();
 
         return StringUtils.isEmpty(searchParam)

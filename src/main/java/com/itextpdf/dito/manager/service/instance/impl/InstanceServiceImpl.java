@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.validateDateRangeSize;
 
 @Service
 public class InstanceServiceImpl extends AbstractService implements InstanceService {
@@ -66,12 +67,14 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
     public Page<InstanceEntity> getAll(final InstanceFilter instanceFilter, final Pageable pageable,
             final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final List<String> createdOnDateRange = instanceFilter.getCreatedOn();
+        validateDateRangeSize(createdOnDateRange);
 
         final String name = getStringFromFilter(instanceFilter.getName());
         final String socket = getStringFromFilter(instanceFilter.getSocket());
         final String createdBy = getStringFromFilter(instanceFilter.getCreatedBy());
-        final Date createdOnStartDate = getStartDateFromRange(instanceFilter.getCreatedOn());
-        final Date createdOnEndDate = getEndDateFromRange(instanceFilter.getCreatedOn());
+        final Date createdOnStartDate = getStartDateFromRange(createdOnDateRange);
+        final Date createdOnEndDate = getEndDateFromRange(createdOnDateRange);
 
         return StringUtils.isEmpty(searchParam)
                 ? instanceRepository.filter(pageable, name, socket, createdBy, createdOnStartDate, createdOnEndDate)

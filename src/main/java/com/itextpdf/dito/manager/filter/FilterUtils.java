@@ -24,16 +24,14 @@ public final class FilterUtils {
     }
 
     public static Date getStartDateFromRange(final List<String> dates) {
-        validateDateRangeSize(dates);
         return dates != null ? getDateFromFilter(dates.get(0)) : null;
     }
 
     public static Date getEndDateFromRange(final List<String> dates) {
-        validateDateRangeSize(dates);
-        return dates != null ? getDateFromFilter(dates.get(1)) : null;
+         return dates != null ? getDateFromFilter(dates.get(1)) : null;
     }
 
-    private static void validateDateRangeSize(List<String> dates) {
+    public static void validateDateRangeSize(List<String> dates) {
         if (dates != null && dates.size() != 2) {
             throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
         }
