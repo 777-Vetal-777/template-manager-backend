@@ -7,6 +7,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - "GF_FRONTEND_APP_BASE_URL=${hostIP}"
       - "DITO_MANAGER_FRONTEND_APP_BASE_URL=${hostIP}" # Frontend IP address
       - "SPRING_PROFILES_ACTIVE=prod" # Used profile (Default=prod)
       # === JWT access token settings ===
