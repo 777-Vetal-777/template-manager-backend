@@ -21,6 +21,9 @@ public final class FilterUtils {
     }
 
     public static List<Date> getDateRangeFromFilter(final List<String> dates) {
+        if (dates != null && dates.size() != 2) {
+            throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+        }
         return !CollectionUtils.isEmpty(dates)
                 ? dates.stream().map(FilterUtils::getDateFromFilter).collect(Collectors.toList())
                 : Arrays.asList(null, null);
