@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -70,7 +71,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> update(final String name,
-                                                    final DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
+                                                    final @Valid DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
                                                     final Principal principal) {
         final DataCollectionEntity entity = dataCollectionService
                 .update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),

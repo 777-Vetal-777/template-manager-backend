@@ -2,8 +2,13 @@ package com.itextpdf.dito.manager.dto.datacollection.update;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 public class DataCollectionUpdateRequestDTO {
+    @NotBlank
     private String name;
+    @NotNull
     private DataCollectionType type;
     private String description;
 
