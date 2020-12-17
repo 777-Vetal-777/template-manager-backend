@@ -124,7 +124,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
             existingEntity.setData(updatedEntity.getData());
         }
         if (!name.equals(updatedEntity.getName()) && dataCollectionRepository.existsByName(updatedEntity.getName())) {
-            throw new DataCollectionAlreadyExistsException(name);
+            throw new DataCollectionAlreadyExistsException(updatedEntity.getName());
         }
         existingEntity.setName(updatedEntity.getName());
         existingEntity.setModifiedOn(new Date());
