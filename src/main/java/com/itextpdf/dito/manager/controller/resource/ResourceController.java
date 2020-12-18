@@ -39,18 +39,18 @@ public interface ResourceController {
     String RESOURCE_PATH_VARIABLE = "name";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
 
+    @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE+"/")
+    @Operation(summary = "Get resource", description = "Get resource",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<ResourceDTO> get(@Parameter(name = "name",description = "Encoded with base64 new name of resource", required = true) @PathVariable String name,
+                                    @Parameter(name = "type",description = "Type of resource, image or font or stylesheet",required = true) @RequestParam ResourceTypeEnum type);
+
     @GetMapping
     @Operation(summary = "Get resource list", description = "Get available resources",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<ResourceDTO>> list(Pageable pageable,
                                            @ParameterObject ResourceFilter filter,
                                            @Parameter(description = "Universal filter to find resource name, modified by and version comment ") @RequestParam(name = "search", required = false) String searchParam);
-
-    @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
-    @Operation(summary = "Get resource", description = "Get resource",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<ResourceDTO> get(@Parameter(name = "Encoded with base64 new name of resource", required = true) @PathVariable String name,
-                                    @Parameter(name = "Type of resource, image or font or stylesheet") @RequestParam ResourceTypeEnum type);
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Save new resource.", description = "Api for loading images, fonts, stylesheets.",
@@ -67,12 +67,12 @@ public interface ResourceController {
                                        @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @PatchMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
-    @Operation(summary = "Update resource", description = "Update resourse metadata (name, description)", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @Operation(summary = "Update resource", description = "Update resource metadata (name, description)", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Resource updated successfully", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ResourceDTO.class))}),
             @ApiResponse(responseCode = "409", description = "There is already a resource with the same name")
     })
-    ResponseEntity<ResourceDTO> update(@Parameter(description = "Base64-encoded name of the resource to be updated", required = true) @PathVariable String name, @RequestBody ResourceUpdateRequestDTO updateRequestDTO, Principal principal);
+    ResponseEntity<ResourceDTO> update(@Parameter(name = "name", description = "Base64-encoded name of the resource to be updated", required = true) @PathVariable String name, @RequestBody ResourceUpdateRequestDTO updateRequestDTO, Principal principal);
 
 
 }

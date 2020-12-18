@@ -58,7 +58,8 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
             + "and (LOWER(resource.name) like CONCAT('%',:search,'%') "
             + "or LOWER(files.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(logs.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(logs.author.lastName) like CONCAT('%',:search,'%')) ")
+            + "or LOWER(logs.author.lastName) like CONCAT('%',:search,'%')) "
+            + "group by resource.id")
     Page<ResourceEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,

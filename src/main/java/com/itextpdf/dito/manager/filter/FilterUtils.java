@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +27,8 @@ public final class FilterUtils {
     }
 
     public static Date getEndDateFromRange(final List<String> dates) {
-        return getDateFromFilter(dates.get(1));
+        final Date endDate = getDateFromFilter(dates.get(1));
+        return addDayToDate(endDate);
     }
 
     private static Date getDateFromFilter(final String value) {
@@ -38,6 +40,13 @@ public final class FilterUtils {
             throw new IllegalArgumentException(new StringBuilder().append("Invalid date param:").append(value).toString());
         }
         return result;
+    }
+
+    private static Date addDayToDate(final Date date){
+        final Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, 1);
+        return c.getTime();
     }
 
     private FilterUtils() {
