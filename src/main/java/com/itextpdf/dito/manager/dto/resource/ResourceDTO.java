@@ -2,12 +2,16 @@ package com.itextpdf.dito.manager.dto.resource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 public class ResourceDTO {
+    @NotBlank
     private String name;
     private String comment;
     private String description;
+    @NotNull
     private ResourceTypeEnum type;
     @JsonProperty("author.firstName")
     private String authorFirstName;

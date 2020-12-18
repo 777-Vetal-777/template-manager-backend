@@ -39,7 +39,7 @@ public interface ResourceController {
     String RESOURCE_PATH_VARIABLE = "name";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
 
-    @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE+"/")
+    @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get resource", description = "Get resource",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> get(@Parameter(name = "name",description = "Encoded with base64 new name of resource", required = true) @PathVariable String name,
