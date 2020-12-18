@@ -6,19 +6,18 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
-
-import java.net.URI;
-import java.util.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.Base64;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -43,17 +42,19 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     public void test_success_createAndGet() throws Exception {
         //CREATE
-        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
-                "{\"file\":\"data\"}".getBytes());
-        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
-                .queryParam("name", NAME)
-                .queryParam("type", TYPE)
-                .build().encode().toUri();
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", TYPE.getBytes());
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
 
-        performPostFilesInteraction(uri, file).andExpect(status().isCreated())
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("name").value(NAME))
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
@@ -96,35 +97,41 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(dataCollectionLogRepository.findAll().isEmpty());
 
     }
-
     @Test
-    @Disabled
-    public void create_WhenCollectionsWithSameNameAlreadyExists_ThenResponseIsBadRequest() throws Exception {
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-        map.add("name", NAME);
-        map.add("type", TYPE);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map);
+    public void shouldDropNoSuchDataCollectionTypeWhenTypeUnknown() throws Exception {
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{\"file\":\"data\"}".getBytes());
-;
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", "WRONG".getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
 
-        performPostFilesInteraction(uri, file).andExpect(status().isCreated());
-        performPostFilesInteraction(uri, file).andExpect(status().isConflict());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    @Disabled
-    public void shouldDropFileTypeNotSupportedException() throws Exception {
-        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.pdf", "text/plain",
-                "file data".getBytes());
+    public void create_WhenCollectionsWithSameNameAlreadyExists_ThenResponseIsBadRequest() throws Exception {
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", TYPE.getBytes());
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
 
-        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME)
-                .queryParam("name", Base64.getEncoder().encodeToString(NAME.getBytes()))
-                .queryParam("type", TYPE)
-                .build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated());
 
-        performPostFilesInteraction(uri, file).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("message").value("Data collection is not valid."));
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(jsonPath("message").value(String.format("Data collection with id %s already exists.",NAME)));
     }
 
     @Test
