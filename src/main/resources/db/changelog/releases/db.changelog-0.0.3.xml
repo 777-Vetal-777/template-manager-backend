@@ -164,22 +164,25 @@
         <createSequence sequenceName="resource_file_sequence"/>
     </changeSet>
 
-    <changeSet id="016-remove-template-column-from-data-collection" author="Ivan_Semenov">
+    <changeSet id="016-drop-fk-between-data-collection-and-template-tables" author="Ivan_Semenov">
+        <dropForeignKeyConstraint baseTableName="data_collection"
+                                  constraintName="fk_data_collection_to_template"/>
+    </changeSet>
+
+    <changeSet id="017-drop-template-id-column-from-data-collection-table" author="Ivan_Semenov">
         <dropColumn tableName="data_collection">
             <column name="template_id"/>
         </dropColumn>
     </changeSet>
 
-    <changeSet id="017-add-template-data-collection-link" author="Ivan_Semenov">
+    <changeSet id="018-add-data-collection-id-column-to-template-table" author="Ivan_Semenov">
         <addColumn tableName="template">
             <column name="data_collection_id"
-                    type="bigint"/>
+                    type="bigint">
+                <constraints nullable="true" foreignKeyName="fk_template_to_data_collection"
+                             references="data_collection(id)"/>
+            </column>
         </addColumn>
-        <addForeignKeyConstraint baseColumnNames="data_collection_id"
-                                 baseTableName="template"
-                                 constraintName="fk_template_date_collection"
-                                 referencedColumnNames="id"
-                                 referencedTableName="data_collection"/>
     </changeSet>
 
 </databaseChangeLog>
