@@ -34,8 +34,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
             + "and (COALESCE(:types) is null or resource.type in (:types)) "
             + "and (:comment='' or LOWER(files.comment) like LOWER(CONCAT('%',:comment,'%'))) "
             + "and (:modifiedBy='' or LOWER(logs.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(logs.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (cast(:startDate as date) is null or logs.date between cast(:startDate as date) and cast(:endDate as date)) "
-            + "group by resource.id")
+            + "and (cast(:startDate as date) is null or logs.date between cast(:startDate as date) and cast(:endDate as date)) ")
     Page<ResourceEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,
@@ -58,8 +57,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
             + "and (LOWER(resource.name) like CONCAT('%',:search,'%') "
             + "or LOWER(files.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(logs.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(logs.author.lastName) like CONCAT('%',:search,'%')) "
-            + "group by resource.id")
+            + "or LOWER(logs.author.lastName) like CONCAT('%',:search,'%')) ")
     Page<ResourceEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,
