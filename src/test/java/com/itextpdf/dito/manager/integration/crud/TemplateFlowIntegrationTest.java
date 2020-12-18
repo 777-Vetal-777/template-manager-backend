@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.template.TemplateController;
-import com.itextpdf.dito.manager.controller.template.TemplateTypeController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
@@ -10,8 +9,8 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionReposi
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-import org.checkerframework.checker.nullness.Opt;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,9 +18,6 @@ import org.springframework.http.MediaType;
 import java.io.File;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -96,19 +92,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void createTemplate_WhenInvalidTemplateType_ThenResponseIsBadRequest() throws Exception {
-        TemplateCreateRequestDTO request = new TemplateCreateRequestDTO();
-        request.setName("template1");
-        request.setType("invalidType");
-
-        mockMvc.perform(post(TemplateController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     public void testGetAll() throws Exception {
         mockMvc.perform(get(TemplateController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +102,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testGetAllTemplateTypes() throws Exception {
-        mockMvc.perform(get(TemplateTypeController.BASE_NAME)
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());

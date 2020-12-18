@@ -3,6 +3,8 @@ package com.itextpdf.dito.manager.entity;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,9 +24,8 @@ public class TemplateEntity {
     @SequenceGenerator(name = "template_gen", sequenceName = "template_sequence", allocationSize = 1)
     private Long id;
     private String name;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id")
-    private TemplateTypeEntity type;
+    @Enumerated(EnumType.STRING)
+    private TemplateTypeEnum type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " data_collection_id")
@@ -58,11 +59,11 @@ public class TemplateEntity {
         this.name = name;
     }
 
-    public TemplateTypeEntity getType() {
+    public TemplateTypeEnum getType() {
         return type;
     }
 
-    public void setType(TemplateTypeEntity type) {
+    public void setType(TemplateTypeEnum type) {
         this.type = type;
     }
 

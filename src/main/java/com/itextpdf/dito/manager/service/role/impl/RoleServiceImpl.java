@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.service.role.impl;
 
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
-import com.itextpdf.dito.manager.entity.RoleType;
+import com.itextpdf.dito.manager.entity.RoleTypeEnum;
 import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
 import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
@@ -13,7 +13,6 @@ import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleExceptio
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
-import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
@@ -36,16 +35,13 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
-    private final RoleTypeRepository roleTypeRepository;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
                            final UserRepository userRepository,
-                           final PermissionRepository permissionRepository,
-                           final RoleTypeRepository roleTypeRepository) {
+                           final PermissionRepository permissionRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
-        this.roleTypeRepository = roleTypeRepository;
     }
 
     @Override
@@ -54,7 +50,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
             throw new RoleAlreadyExistsException(roleEntity.getName());
         }
         setPermissions(roleEntity, permissions);
-        roleEntity.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
+        roleEntity.setType(RoleTypeEnum.CUSTOM);
         return roleRepository.save(roleEntity);
     }
 
@@ -64,18 +60,18 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(roleFilter.getName());
-        final List<RoleType> roleTypes = roleFilter.getType();
+        final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
 
         return StringUtils.isEmpty(searchParam)
-                ? roleRepository.filter(pageWithSort, name, roleTypes)
-                : roleRepository.search(pageWithSort, name, roleTypes, searchParam.toLowerCase());
+                ? roleRepository.filter(pageWithSort, name, roleTypeEnums)
+                : roleRepository.search(pageWithSort, name, roleTypeEnums, searchParam.toLowerCase());
     }
 
     @Override
     public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
         RoleEntity existingRole = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
 
-        if (existingRole.getType().getName() == RoleType.SYSTEM) {
+        if (existingRole.getType() == RoleTypeEnum.SYSTEM) {
             throw new UnableToUpdateSystemRoleException();
         }
         if (!name.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
@@ -91,7 +87,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     public void delete(final String name) {
         final RoleEntity role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
 
-        if (role.getType().getName() == RoleType.SYSTEM) {
+        if (role.getType() == RoleTypeEnum.SYSTEM) {
             throw new AttemptToDeleteSystemRoleException();
         }
         if (userRepository.countOfUserWithOnlyOneRole(name) > 0) {

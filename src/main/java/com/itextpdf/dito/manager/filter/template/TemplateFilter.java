@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.filter.template;
 
-import java.util.Date;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+
 import java.util.List;
 
 public class TemplateFilter {
@@ -9,11 +10,15 @@ public class TemplateFilter {
     //always array with two dates as string from FE
     private List<String> editedOn;
     private String modifiedBy;
-    private List<String> type;
+    private List<TemplateTypeEnum> type;
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public List<String> getEditedOn() {
         return editedOn;
@@ -39,7 +44,11 @@ public class TemplateFilter {
         this.dataCollection = dataCollection;
     }
 
-    public List<String> getType() { return type; }
+    public List<TemplateTypeEnum> getType() {
+        return type;
+    }
 
-    public void setType(List<String> type) { this.type = type; }
+    public void setType(List<TemplateTypeEnum> type) {
+        this.type = type;
+    }
 }

@@ -1,5 +1,5 @@
 package com.itextpdf.dito.manager.entity;
 
-public enum RoleType {
+public enum RoleTypeEnum {
     SYSTEM, CUSTOM
 }

@@ -1,7 +1,4 @@
-package com.itextpdf.dito.manager.controller.dependency;
-
-import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
-import com.itextpdf.dito.manager.dto.dependency.DependencyType;
+package com.itextpdf.dito.manager.dto.dependency;
 
 public class DependencyDTO {
     private String name;

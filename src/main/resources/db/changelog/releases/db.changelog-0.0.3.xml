@@ -185,4 +185,75 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="019-add-type-column-to-role-table" author="Vadim_Sorokin">
+        <addColumn tableName="role">
+            <column name="type" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="020-fill-type-column-in-role-table" author="Vadim_Sorokin">
+        <update tableName="role">
+            <column name="type" value="SYSTEM"/>
+            <where>type_id=1</where>
+        </update>
+        <update tableName="role">
+            <column name="type" value="CUSTOM"/>
+            <where>type_id=2</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="021-add-not-null-constraint-to-type-column-in-role-table" author="Vadim_Sorokin">
+        <addNotNullConstraint tableName="role" columnName="type"/>
+    </changeSet>
+
+    <changeSet id="022-drop-fk-between-role-and-role-type-tables" author="Vadim_Sorokin">
+        <dropForeignKeyConstraint baseTableName="role" constraintName="fk_role_to_role_type"/>
+    </changeSet>
+
+    <changeSet id="023-drop-type-id-column-in-role-table" author="Vadim_Sorokin">
+        <dropColumn tableName="role" columnName="type_id"/>
+    </changeSet>
+
+    <changeSet id="024-drop-role-type-table" author="Vadim_Sorokin">
+        <dropTable tableName="role_type"/>
+    </changeSet>
+
+    <changeSet id="025-add-type-column-to-template-table" author="Vadim_Sorokin">
+        <addColumn tableName="template">
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="026-fill-type-column-in-template-table" author="Vadim_Sorokin">
+        <update tableName="template">
+            <column name="type" value="HEADER"/>
+            <where>type_id=1</where>
+        </update>
+        <update tableName="template">
+            <column name="type" value="STANDARD"/>
+            <where>type_id=2</where>
+        </update>
+        <update tableName="template">
+            <column name="type" value="FOOTER"/>
+            <where>type_id=3</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="027-add-not-null-constraint-to-type-column-in-template-table" author="Vadim_Sorokin">
+        <addNotNullConstraint tableName="template" columnName="type"/>
+    </changeSet>
+
+    <changeSet id="028-drop-fk-between-template-and-template-type-tables" author="Vadim_Sorokin">
+        <dropForeignKeyConstraint baseTableName="template" constraintName="fk_template_to_type"/>
+    </changeSet>
+
+    <changeSet id="029-drop-type-id-column-in-template-table" author="Vadim_Sorokin">
+        <dropColumn tableName="template" columnName="type_id"/>
+    </changeSet>
+
+    <changeSet id="030-drop-template-type-table" author="Vadim_Sorokin">
+        <dropTable tableName="template_type"/>
+    </changeSet>
 </databaseChangeLog>

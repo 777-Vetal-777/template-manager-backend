@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,10 +36,8 @@ public class RoleEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "permission_id"))
     private Set<PermissionEntity> permissions = new HashSet<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id")
-    private RoleTypeEntity type;
+    @Enumerated(EnumType.STRING)
+    private RoleTypeEnum type;
 
     public Long getId() {
         return id;
@@ -71,11 +71,11 @@ public class RoleEntity {
         this.permissions = permissions;
     }
 
-    public RoleTypeEntity getType() {
+    public RoleTypeEnum getType() {
         return type;
     }
 
-    public void setType(RoleTypeEntity type) {
+    public void setType(RoleTypeEnum type) {
         this.type = type;
     }
 }

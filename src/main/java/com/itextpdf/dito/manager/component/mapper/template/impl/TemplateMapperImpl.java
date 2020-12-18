@@ -18,7 +18,7 @@ public class TemplateMapperImpl implements TemplateMapper {
     public TemplateDTO map(final TemplateEntity entity) {
         final TemplateDTO result = new TemplateDTO();
         result.setName(entity.getName());
-        result.setType(entity.getType().getName());
+        result.setType(entity.getType());
         if (entity.getFiles() != null) {
             final TemplateFileEntity file = entity.getFiles().get(0);
             result.setAuthor(new StringBuilder()

@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRep
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.Date;
@@ -37,15 +38,18 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
     private final UserService userService;
+    private final TemplateService templateService;
     private final JsonValidator jsonValidator;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
                                      final UserService userService,
+                                     final TemplateService templateService,
                                      final DataCollectionLogRepository dataCollectionLogRepository,
                                      final JsonValidator jsonValidator) {
         this.dataCollectionRepository = dataCollectionRepository;
-        this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.userService = userService;
+        this.templateService = templateService;
+        this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.jsonValidator = jsonValidator;
     }
 
@@ -106,6 +110,11 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     @Override
     public DataCollectionEntity get(final String name) {
         return findByName(name);
+    }
+
+    @Override
+    public DataCollectionEntity getByTemplateName(final String templateName) {
+        return templateService.get(templateName).getDataCollection();
     }
 
     @Override

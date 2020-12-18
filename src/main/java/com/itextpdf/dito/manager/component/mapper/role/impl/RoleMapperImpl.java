@@ -40,7 +40,7 @@ public class RoleMapperImpl implements RoleMapper {
         final RoleDTO dto = new RoleDTO();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
-        dto.setType(entity.getType().getName().toString());
+        dto.setType(entity.getType().toString());
         dto.setUsersEmails(entity.getUsers() != null
                 ? entity.getUsers().stream().map(UserEntity::getEmail).collect(Collectors.toList())
                 : Collections.emptyList());

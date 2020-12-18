@@ -3,10 +3,10 @@ package com.itextpdf.dito.manager.exception.template;
 import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
 
-public class TemplateFileNotFoundException extends AbstractResourceNotFoundException {
+public class TemplateNotFoundException extends AbstractResourceNotFoundException {
     private static final long serialVersionUID = 1L;
 
-    public TemplateFileNotFoundException(String id) {
+    public TemplateNotFoundException(String id) {
         super(id);
     }
 

@@ -3,10 +3,9 @@ package com.itextpdf.dito.manager.integration.crud;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
-import com.itextpdf.dito.manager.entity.RoleType;
+import com.itextpdf.dito.manager.entity.RoleTypeEnum;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
-import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    private RoleTypeRepository roleTypeRepository;
 
     private RoleEntity testRole;
 
@@ -83,7 +80,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         final String roleToBeUpdatedName = "role-for-update";
         testRole = new RoleEntity();
         testRole.setName(roleToBeUpdatedName);
-        testRole.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
+        testRole.setType(RoleTypeEnum.CUSTOM);
         roleRepository.save(testRole);
 
         RoleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/roles/role-update-request.json"), RoleCreateRequestDTO.class);
@@ -105,7 +102,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         final String roleToBeDeletedName = "delete-role-name";
         testRole = new RoleEntity();
         testRole.setName(roleToBeDeletedName);
-        testRole.setType(roleTypeRepository.findByName(RoleType.CUSTOM));
+        testRole.setType(RoleTypeEnum.CUSTOM);
         roleRepository.save(testRole);
 
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))

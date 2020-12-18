@@ -2,8 +2,10 @@ package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -11,21 +13,18 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
-import com.itextpdf.dito.manager.service.template.TemplateTypeService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -34,35 +33,31 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 public class TemplateServiceImpl extends AbstractService implements TemplateService {
     private final TemplateFileRepository templateFileRepository;
     private final TemplateRepository templateRepository;
-    private final TemplateTypeService templateTypeService;
     private final UserService userService;
     private final TemplateLoader templateLoader;
     private final DataCollectionRepository dataCollectionRepository;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
-                               final TemplateRepository templateRepository,
-                               final TemplateTypeService templateTypeService,
-                               final UserService userService,
-                               final TemplateLoader templateLoader,
-                               final DataCollectionRepository dataCollectionRepository) {
+            final TemplateRepository templateRepository,
+            final UserService userService,
+            final TemplateLoader templateLoader,
+            final DataCollectionRepository dataCollectionRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
-        this.templateTypeService = templateTypeService;
         this.userService = userService;
         this.templateLoader = templateLoader;
         this.dataCollectionRepository = dataCollectionRepository;
     }
 
-
     @Override
     @Transactional
-    public TemplateEntity create(final String templateName, final String templateTypeName,
-                                 final String dataCollectionName, final String email) {
+    public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
+            final String dataCollectionName, final String email) {
         throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateName);
-        templateEntity.setType(templateTypeService.findTemplateType(templateTypeName));
+        templateEntity.setType(templateTypeEnum);
         if (!StringUtils.isEmpty(dataCollectionName)) {
             templateEntity.setDataCollection(
                     dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
@@ -86,7 +81,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(templateFilter.getName());
         final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
-        final List<String> types = templateFilter.getType();
+        final List<TemplateTypeEnum> types = templateFilter.getType();
         final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
 
         Date editedOnStartDate = null;
@@ -101,8 +96,16 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
 
         return StringUtils.isEmpty(searchParam)
-                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
-                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate, searchParam.toLowerCase());
+                ? templateRepository
+                .filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
+                : templateRepository
+                        .search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate,
+                                editedOnEndDate, searchParam.toLowerCase());
+    }
+
+    @Override
+    public TemplateEntity get(final String name) {
+        return templateRepository.findByName(name).orElseThrow(() -> new TemplateNotFoundException(name));
     }
 
     @Override
