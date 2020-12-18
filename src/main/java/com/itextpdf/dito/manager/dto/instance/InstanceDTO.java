@@ -3,12 +3,9 @@ package com.itextpdf.dito.manager.dto.instance;
 
 import java.util.Date;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
 
 public class InstanceDTO {
-    @NotBlank
     private String name;
-    @NotBlank
     private String socket;
     private String createdBy;
     private Date createdOn;

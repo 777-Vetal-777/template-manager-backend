@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.mapper.instance;
 
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 
@@ -21,4 +22,7 @@ public interface InstanceMapper {
     List<InstanceEntity> mapDTOs(List<InstanceDTO> dtos);
 
     Page<InstanceDTO> map(Page<InstanceEntity> entities);
+
+    InstanceEntity map(InstanceUpdateRequestDTO dto);
+
 }

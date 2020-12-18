@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
@@ -66,9 +67,9 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
-    public ResponseEntity<InstanceDTO> update(final String name, @Valid final InstanceDTO instanceDTO) {
+    public ResponseEntity<InstanceDTO> update(final String name, @Valid final InstanceUpdateRequestDTO instanceUpdateRequestDTO) {
         final InstanceEntity instanceEntity = instanceService
-                .update(decodeBase64(name), instanceMapper.map(instanceDTO));
+                .update(decodeBase64(name), instanceMapper.map(instanceUpdateRequestDTO));
         return new ResponseEntity<>(instanceMapper.map(instanceEntity), HttpStatus.OK);
     }
 }

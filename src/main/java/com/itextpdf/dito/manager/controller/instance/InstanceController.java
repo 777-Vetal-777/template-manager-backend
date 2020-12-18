@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
 
@@ -98,8 +99,8 @@ public interface InstanceController {
     @Operation(summary = "Update instance", description = "Update instance's name or socket.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Instance updated successfully.")
-    ResponseEntity<InstanceDTO> update(@PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name,
-            @RequestBody InstanceDTO instanceDTO);
+    ResponseEntity<InstanceDTO> update(@Parameter(description = "Instance name to update.")@PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name,
+            @RequestBody InstanceUpdateRequestDTO instanceUpdateRequestDTO);
 
 }
 

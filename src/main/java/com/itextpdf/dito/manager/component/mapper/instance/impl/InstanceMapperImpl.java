@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.component.mapper.instance.impl;
 
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
@@ -62,5 +63,13 @@ public class InstanceMapperImpl implements InstanceMapper {
     @Override
     public Page<InstanceDTO> map(Page<InstanceEntity> entities) {
         return entities.map(this::map);
+    }
+
+    @Override
+    public InstanceEntity map(InstanceUpdateRequestDTO dto) {
+        final InstanceEntity entity = new InstanceEntity();
+        entity.setName(dto.getName());
+        entity.setSocket(dto.getSocket());
+        return entity;
     }
 }
