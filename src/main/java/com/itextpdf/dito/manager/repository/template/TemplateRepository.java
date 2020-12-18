@@ -25,13 +25,14 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query(value = "select template from TemplateEntity template "
             + "join template.type type "
             + "join template.files file "
+            + "left join template.dataCollection dataCollection "
             + "where "
             //filtering
             + "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or LOWER(template.type.name) in (:types)) "
             + "and (:modifiedBy='' or LOWER(file.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(file.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.version between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (template.dataCollection is null or (:dataCollectionName='' or LOWER(template.dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))")
+            + "and (dataCollection is null or (:dataCollectionName='' or LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))")
     Page<TemplateEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("modifiedBy") @Nullable String modifiedBy,
@@ -44,16 +45,17 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query(value = "select template from TemplateEntity template "
             + "join template.type type "
             + "join template.files file "
+            + "left join template.dataCollection dataCollection "
             + "where "
             //filtering
             + "((:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or LOWER(template.type.name) in (:types)) "
             + "and (:modifiedBy='' or LOWER(file.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(file.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.version between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (template.dataCollection is null or (:dataCollectionName='' or LOWER(template.dataCollection.name) like CONCAT('%',:dataCollectionName,'%'))))"
+            + "and (dataCollection is null or (:dataCollectionName='' or LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%'))))"
             //search
             + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(template.dataCollection.name) like CONCAT('%',:search,'%') "
+            + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
             + "or LOWER(template.type.name) like CONCAT('%',:search,'%') "
             + "or LOWER(file.author.firstName) like CONCAT('%',:search,'%') "
             + "or LOWER(file.author.lastName) like CONCAT('%',:search,'%')) ")
