@@ -98,7 +98,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         }
 
         final List<TemplateEntity> templateEntities = instanceEntity.getTemplates();
-        if (templateEntities != null && templateEntities.isEmpty()) {
+        if (templateEntities != null && !templateEntities.isEmpty()) {
             throw new InstanceHasAttachedTemplateException();
         }
 
