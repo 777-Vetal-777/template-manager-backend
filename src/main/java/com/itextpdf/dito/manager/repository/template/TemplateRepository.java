@@ -25,7 +25,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query(value = "select template from TemplateEntity template "
             + "join template.type type "
             + "join template.files file "
-            + "left join template.dataCollection "
             + "where "
             //filtering
             + "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
@@ -45,7 +44,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query(value = "select template from TemplateEntity template "
             + "join template.type type "
             + "join template.files file "
-            + "left join template.dataCollection "
             + "where "
             //filtering
             + "((:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "

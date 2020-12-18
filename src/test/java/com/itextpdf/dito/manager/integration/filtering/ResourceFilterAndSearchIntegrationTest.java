@@ -46,11 +46,6 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
                 .andExpect(jsonPath("$.content", Matchers.hasSize(1)));
 
         mockMvc.perform(get(ResourceController.BASE_NAME)
-                .param("modifiedBy", "admin"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", Matchers.hasSize(1)));
-
-        mockMvc.perform(get(ResourceController.BASE_NAME)
                 .param("comment", "resource-comment"))
                 .andExpect(status().isOk());
     }

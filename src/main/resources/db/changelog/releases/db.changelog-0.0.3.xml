@@ -164,4 +164,22 @@
         <createSequence sequenceName="resource_file_sequence"/>
     </changeSet>
 
+    <changeSet id="016-remove-template-column-from-data-collection" author="Ivan_Semenov">
+        <dropColumn tableName="data_collection">
+            <column name="template_id"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="017-add-template-data-collection-link" author="Ivan_Semenov">
+        <addColumn tableName="template">
+            <column name="data_collection_id"
+                    type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="data_collection_id"
+                                 baseTableName="template"
+                                 constraintName="fk_template_date_collection"
+                                 referencedColumnNames="id"
+                                 referencedTableName="data_collection"/>
+    </changeSet>
+
 </databaseChangeLog>

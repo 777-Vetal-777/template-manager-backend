@@ -16,8 +16,7 @@ import java.util.Optional;
 
 
 public interface DataCollectionRepository extends JpaRepository<DataCollectionEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedOn", "modifiedBy",
-            "author.firstName", "template.name");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedOn", "modifiedBy");
 
     Optional<DataCollectionEntity> findByName(String name);
 

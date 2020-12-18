@@ -148,12 +148,9 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         dataCollectionLogRepository.save(logDataCollection);
     }
 
-    private Pageable updateSort(Pageable pageable) {
+    private Pageable updateSort(final Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if (sortParam.getProperty().equals("template")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
-                    }
                     if (sortParam.getProperty().equals("modifiedBy")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
                     }

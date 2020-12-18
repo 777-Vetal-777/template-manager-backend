@@ -14,7 +14,6 @@ import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateTypeService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -117,7 +116,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
     }
 
-    private Pageable updateSort(Pageable pageable) {
+    private Pageable updateSort(final Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("type")) {

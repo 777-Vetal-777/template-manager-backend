@@ -33,7 +33,7 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
 
     @AfterEach
     public void clearDb() {
-        dataCollectionRepository.deleteAll();
+        dataCollectionService.delete("data-collection-test");
     }
 
     @Test
@@ -50,9 +50,6 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
     public void test_filtering() throws Exception {
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("name", "data-COLLECTION-test"))
-                .andExpect(jsonPath("$.content", hasSize(1)));
-        mockMvc.perform(get(DataCollectionController.BASE_NAME)
-                .param("types", "JSON"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("modifiedOn", "01/01/1970")
