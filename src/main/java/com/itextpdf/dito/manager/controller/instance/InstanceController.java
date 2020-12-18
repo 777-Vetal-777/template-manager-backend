@@ -49,7 +49,7 @@ public interface InstanceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Instance available, ready to connect"),
-            @ApiResponse(responseCode = "504", description = "No connection to the instance")
+            @ApiResponse(responseCode = "502", description = "No connection to the instance")
     })
     ResponseEntity<Void> ping(
             @Parameter(description = "encoded with base64 socket, with which you can check the status of the instance")
