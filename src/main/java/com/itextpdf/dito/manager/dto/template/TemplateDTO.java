@@ -6,13 +6,13 @@ import java.util.Date;
 
 public class TemplateDTO {
     private String name;
-    @JsonProperty("type.name")
+    @JsonProperty("type")
     private String type;
     @JsonProperty("dataCollection")
     private String dataCollection;
-    @JsonProperty("file.author.email")
+    @JsonProperty("modifiedBy")
     private String author;
-    @JsonProperty("file.version")
+    @JsonProperty("editedOn")
     private Date lastUpdate;
 
     public String getName() {

@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.controller.login;
 
 import com.itextpdf.dito.manager.dto.auth.AuthenticationRequestDTO;
-import com.itextpdf.dito.manager.dto.auth.AuthenticationResponseDTO;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,10 +23,10 @@ public interface AuthenticationController {
     @Operation(summary = "Login", description = "Login using username and password")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticationResponseDTO.class))}),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticationDTO.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "423", description = "Account is locked", content = @Content)
     })
-    ResponseEntity<AuthenticationResponseDTO> login(@RequestBody AuthenticationRequestDTO loginRequest);
+    ResponseEntity<AuthenticationDTO> login(@RequestBody AuthenticationRequestDTO authenticationRequestDTO);
 
 }

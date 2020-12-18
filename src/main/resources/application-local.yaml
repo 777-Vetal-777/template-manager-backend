@@ -1,6 +1,6 @@
 ditomanager:
   mailing:
-    enabled: false
+    enabled: true
 
 spring:
   datasource:
@@ -19,14 +19,21 @@ spring:
           auth: true
           starttls:
             enable: true
-
 logging:
   level:
-    liquibase: debug
+    liquibase: error
     org:
+      hibernate:
+        SQL: debug
+        type: trace
       springframework:
-        security: debug
+        security: error
     com:
       itextpdf:
         dito:
           manager: debug
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true

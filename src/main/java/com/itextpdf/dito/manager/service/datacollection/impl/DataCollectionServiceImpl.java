@@ -1,66 +1,106 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
+import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.DataCollectionLogEntity;
-import com.itextpdf.dito.manager.exception.CollectionAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.EntityNotFoundException;
-import com.itextpdf.dito.manager.exception.FileCannotBeReadException;
-import com.itextpdf.dito.manager.exception.FileTypeNotSupportedException;
+import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.user.UserService;
-import liquibase.util.file.FilenameUtils;
+
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Date;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
-public class DataCollectionServiceImpl implements DataCollectionService {
+public class DataCollectionServiceImpl extends AbstractService implements DataCollectionService {
 
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
     private final UserService userService;
+    private final JsonValidator jsonValidator;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
                                      final UserService userService,
-                                     final DataCollectionLogRepository dataCollectionLogRepository) {
+                                     final DataCollectionLogRepository dataCollectionLogRepository,
+                                     final JsonValidator jsonValidator) {
         this.dataCollectionRepository = dataCollectionRepository;
         this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.userService = userService;
+        this.jsonValidator = jsonValidator;
     }
 
     @Override
-    public DataCollectionEntity create(final DataCollectionEntity collectionEntity, final MultipartFile attachment, final String email) {
-        if (dataCollectionRepository.existsByName(collectionEntity.getName())) {
-            throw new CollectionAlreadyExistsException(collectionEntity.getName());
+    public DataCollectionEntity create(final String name, final DataCollectionType type, final byte[] data,
+                                       final String fileName,
+                                       final String email) {
+        if (dataCollectionRepository.existsByName(name)) {
+            throw new DataCollectionAlreadyExistsException(name);
         }
-        final String fileName = attachment.getOriginalFilename();
-        final String fileExtension = FilenameUtils.getExtension(fileName).toLowerCase();
-        if (StringUtils.isEmpty(fileExtension) || !fileExtension.equals("json")) {
-            throw new FileTypeNotSupportedException(fileExtension);
+
+        if (!jsonValidator.isValid(data)) {
+            throw new InvalidDataCollectionException();
         }
-        try {
-            collectionEntity.setData(attachment.getBytes());
-        } catch (IOException e) {
-            throw new FileCannotBeReadException(attachment.getOriginalFilename());
-        }
-        collectionEntity.setModifiedOn(new Date());
-        collectionEntity.setFileName(fileName);
-        collectionEntity.setAuthor(userService.findByEmail(email));
-        return dataCollectionRepository.save(collectionEntity);
+
+        final DataCollectionEntity dataCollectionEntity = new DataCollectionEntity();
+        dataCollectionEntity.setName(name);
+        dataCollectionEntity.setType(type);
+        dataCollectionEntity.setData(data);
+        dataCollectionEntity.setModifiedOn(new Date());
+        dataCollectionEntity.setCreatedOn(new Date());
+        dataCollectionEntity.setFileName(fileName);
+        final UserEntity userEntity = userService.findByEmail(email);
+        dataCollectionEntity.setAuthor(userEntity);
+        DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
+        logDataCollectionUpdate(savedCollection);
+
+        return savedCollection;
     }
 
     @Override
-    public Page<DataCollectionEntity> list(final Pageable pageable, final String searchParam) {
+    public Page<DataCollectionEntity> list(final Pageable pageable, final DataCollectionFilter dataCollectionFilter,
+                                           final String searchParam) {
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+
+        final Pageable pageWithSort = updateSort(pageable);
+        final String name = getStringFromFilter(dataCollectionFilter.getName());
+        final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
+
+        Date modifiedOnStartDate = null;
+        Date modifiedOnEndDate = null;
+        final List<String> modifiedOnDateRange = dataCollectionFilter.getModifiedOn();
+        if (modifiedOnDateRange != null) {
+            if (modifiedOnDateRange.size() != 2) {
+                throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+            }
+            modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
+            modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
+        }
+
+        final List<DataCollectionType> types = dataCollectionFilter.getType();
+
         return StringUtils.isEmpty(searchParam)
-                ? dataCollectionRepository.findAll(pageable)
-                : dataCollectionRepository.search(pageable, searchParam);
+                ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types)
+                : dataCollectionRepository.search(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types, searchParam.toLowerCase());
     }
 
     @Override
@@ -74,34 +114,54 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    @Transactional
     public DataCollectionEntity update(final String name,
-                                       final DataCollectionEntity entity,
+                                       final DataCollectionEntity updatedEntity,
                                        final String userEmail) {
         final DataCollectionEntity existingEntity = findByName(name);
-        existingEntity.setType(entity.getType());
-        if (entity.getData() != null) {
-            existingEntity.setData(entity.getData());
+        existingEntity.setType(updatedEntity.getType());
+        if (updatedEntity.getData() != null) {
+            existingEntity.setData(updatedEntity.getData());
         }
-        existingEntity.setName(entity.getName());
+        final String newName = updatedEntity.getName();
+        if (!name.equals(newName) && dataCollectionRepository.existsByName(newName)) {
+            throw new DataCollectionAlreadyExistsException(newName);
+        }
+        existingEntity.setName(newName);
+        existingEntity.setModifiedOn(new Date());
         existingEntity.setAuthor(userService.findByEmail(userEmail));
-        existingEntity.setDescription(entity.getDescription());
+        existingEntity.setDescription(updatedEntity.getDescription());
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
         logDataCollectionUpdate(savedCollection);
         return savedCollection;
     }
 
     private DataCollectionEntity findByName(final String name) {
-        return dataCollectionRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException(new StringBuilder()
-                .append("Data collection with name ")
-                .append(name)
-                .append(" not found")
-                .toString()));
+        return dataCollectionRepository.findByName(name).orElseThrow(() -> new DataCollectionNotFoundException(name));
     }
+
     private void logDataCollectionUpdate(DataCollectionEntity collectionEntity) {
         final DataCollectionLogEntity logDataCollection = new DataCollectionLogEntity();
         logDataCollection.setAuthor(collectionEntity.getAuthor());
         logDataCollection.setDataCollection(collectionEntity);
         logDataCollection.setDate(new Date());
         dataCollectionLogRepository.save(logDataCollection);
+    }
+
+    private Pageable updateSort(final Pageable pageable) {
+        Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (sortParam.getProperty().equals("modifiedBy")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
+    }
+
+    @Override
+    protected List<String> getSupportedSortFields() {
+        return DataCollectionRepository.SUPPORTED_SORT_FIELDS;
     }
 }

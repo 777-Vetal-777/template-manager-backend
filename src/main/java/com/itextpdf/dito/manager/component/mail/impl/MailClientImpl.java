@@ -1,7 +1,12 @@
 package com.itextpdf.dito.manager.component.mail.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
-import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.exception.mail.MailingException;
+
+import java.util.Properties;
+import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,11 +15,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.util.Properties;
 
 @Component
 @ConditionalOnProperty(value = "ditomanager.mailing.enabled", havingValue = "true")
@@ -30,18 +30,18 @@ public class MailClientImpl implements MailClient {
 
     private JavaMailSender client;
 
-    private final String MAIL_FROM = "ditotemplatemanager@gmail.com";
+    private final String MAIL_FROM = "vadzim.sarokin.tech.acc@gmail.com";
     private final String MAIL_BODY = "<p>You are registered as a user in Template manager <p>Login: %s <p>Password: %s <p> <p><a href=%s>Please, reset your password after 1st-time login</a>";
     private final String MAIL_SUBJECT = "DITO registration";
     private final String FRONT_URL;
 
     public MailClientImpl(@Value("${spring.mail.host}") final String host,
-                          @Value("${spring.mail.port}") final Integer port,
-                          @Value("${spring.mail.username}") final String username,
-                          @Value("${spring.mail.password}") final String password,
-                          @Value("${spring.mail.properties.mail.smtp.auth}") final Boolean auth,
-                          @Value("${spring.mail.properties.mail.smtp.starttls.enable}") final Boolean tls,
-                          @Value("${spring.mail.front-redirect}") final String frontUrl) {
+            @Value("${spring.mail.port}") final Integer port,
+            @Value("${spring.mail.username}") final String username,
+            @Value("${spring.mail.password}") final String password,
+            @Value("${spring.mail.properties.mail.smtp.auth}") final Boolean auth,
+            @Value("${spring.mail.properties.mail.smtp.starttls.enable}") final Boolean tls,
+            @Value("${spring.mail.front-redirect}") final String frontUrl) {
         this.host = host;
         this.port = port;
         this.username = username;
@@ -56,27 +56,27 @@ public class MailClientImpl implements MailClient {
         if (log.isDebugEnabled()) {
             log.debug("Mailing is turned on.");
         }
-
         client = buildMailClient();
     }
 
     public void sendRegistrationMessage(final String email, final String password) {
         final String mailBody = String.format(MAIL_BODY, email, password, FRONT_URL.concat("/login"));
-        send(MAIL_FROM, email, MAIL_SUBJECT, mailBody);
+        try {
+            send(MAIL_FROM, email, MAIL_SUBJECT, mailBody);
+        } catch (Exception ex) {
+            throw new MailingException(ex.getMessage());
+        }
     }
 
-    private void send(final String from, final String to, final String subject, final String text) {
-        try {
-            final MimeMessage mail = buildMailClient().createMimeMessage();
-            mail.setSubject(subject);
-            final MimeMessageHelper helper = new MimeMessageHelper(mail);
-            helper.setFrom(from);
-            helper.setTo(to);
-            helper.setText(text, true);
-            client.send(mail);
-        } catch (MessagingException e) {
-            log.error("Failed to send message. Exception:");
-        }
+    private void send(final String from, final String to, final String subject, final String text)
+            throws MessagingException {
+        final MimeMessage mail = client.createMimeMessage();
+        mail.setSubject(subject);
+        final MimeMessageHelper helper = new MimeMessageHelper(mail);
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setText(text, true);
+        client.send(mail);
     }
 
     private JavaMailSenderImpl buildMailClient() {

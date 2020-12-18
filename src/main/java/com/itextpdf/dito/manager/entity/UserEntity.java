@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
@@ -34,9 +35,10 @@ public class UserEntity implements UserDetails {
     private String lastName;
     @Column(insertable = false)
     private Boolean active;
-
     @Column(insertable = false)
     private Boolean locked;
+    @Column(name = "modified_at")
+    private Date modifiedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -146,6 +148,14 @@ public class UserEntity implements UserDetails {
 
     public void setLocked(Boolean locked) {
         this.locked = locked;
+    }
+
+    public Date getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }
 

@@ -9,6 +9,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,17 @@ public abstract class JwtTokenHelper implements TokenHelper {
         return parse(token)
                 .getBody()
                 .getSubject();
+    }
+
+    @Override
+    public boolean isTokenWasIssuedAfter(final String token, final Date date) {
+        boolean result = true;
+
+        if (date != null) {
+            result = parse(token).getBody().getIssuedAt().after(date);
+        }
+
+        return result;
     }
 
     protected Jws<Claims> parse(final String token) {

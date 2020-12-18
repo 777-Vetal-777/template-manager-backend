@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.service.auth.impl;
 
-import com.itextpdf.dito.manager.dto.auth.AuthenticationResponseDTO;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.service.auth.AuthenticationService;
 import com.itextpdf.dito.manager.service.token.TokenService;
 
@@ -26,7 +26,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticationResponseDTO authenticate(final String subject, final String password) {
+    public AuthenticationDTO authenticate(final String subject, final String password) {
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(subject, password));
 
@@ -35,8 +35,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return collectAuthenticationResponse(authentication);
     }
 
-    private AuthenticationResponseDTO collectAuthenticationResponse(Authentication authentication) {
-        AuthenticationResponseDTO result;
+    private AuthenticationDTO collectAuthenticationResponse(Authentication authentication) {
+        AuthenticationDTO result;
 
         final String subject = authentication.getName();
         final String accessToken = tokenService.generateAccessToken(subject);
@@ -45,7 +45,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        result = new AuthenticationResponseDTO(accessToken, refreshToken, authorities);
+        result = new AuthenticationDTO(accessToken, refreshToken, authorities);
 
         return result;
     }

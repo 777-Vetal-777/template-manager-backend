@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.feature.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
+import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.feature.OptionController;
 import com.itextpdf.dito.manager.dto.option.OptionsDTO;
 
@@ -10,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class OptionControllerImpl implements OptionController {
+public class OptionControllerImpl extends AbstractController implements OptionController {
     private MailClient mailSender;
 
     @Override

@@ -20,6 +20,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "data_collection")
@@ -42,13 +43,15 @@ public class DataCollectionEntity {
     @Column(insertable = false)
     private Date modifiedOn;
 
+    @Column
+    private Date createdOn;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = " author_id")
+    @JoinColumn(name = " author_id", referencedColumnName = "id")
     private UserEntity author;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", referencedColumnName = "id")
-    private TemplateEntity template;
+    @OneToMany(mappedBy = "dataCollection")
+    private List<TemplateEntity> templates;
 
     @OneToMany(
             mappedBy = "dataCollection",
@@ -122,12 +125,12 @@ public class DataCollectionEntity {
         this.author = author;
     }
 
-    public TemplateEntity getTemplate() {
-        return template;
+    public List<TemplateEntity> getTemplates() {
+        return templates;
     }
 
-    public void setTemplate(TemplateEntity template) {
-        this.template = template;
+    public void setTemplates(List<TemplateEntity> templates) {
+        this.templates = templates;
     }
 
     public byte[] getData() {
@@ -138,4 +141,11 @@ public class DataCollectionEntity {
         this.data = file;
     }
 
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
 }

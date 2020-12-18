@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.itextpdf.dito</groupId>
     <artifactId>template-manager</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>DITO PDF Template Manager</name>
 
     <properties>
@@ -23,6 +23,7 @@
         <mojo.license.plugin.version>2.0.0</mojo.license.plugin.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <javax.mail.version>1.4.7</javax.mail.version>
+        <projectreactor.reactor-spring>1.0.1.RELEASE</projectreactor.reactor-spring>
 
         <license.report.path>${project.basedir}/license/generated-report.xml</license.report.path>
     </properties>
@@ -54,6 +55,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
         <!--other dependencies-->
@@ -90,6 +95,11 @@
             <artifactId>mail</artifactId>
             <version>${javax.mail.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectreactor</groupId>
+            <artifactId>reactor-spring</artifactId>
+            <version>${projectreactor.reactor-spring}</version>
+        </dependency>
 
         <!--TESTING-->
         <dependency>
@@ -117,6 +127,7 @@
     </dependencies>
 
     <build>
+        <finalName>template-manager</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

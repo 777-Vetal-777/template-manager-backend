@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.dto.option;
 public class OptionsDTO {
     private boolean emailDeliveryEnabled;
 
-    public OptionsDTO(final boolean emailDeliveryEnabled) {
+    public OptionsDTO(boolean emailDeliveryEnabled) {
         this.emailDeliveryEnabled = emailDeliveryEnabled;
     }
 

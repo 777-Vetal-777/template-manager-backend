@@ -1,10 +1,10 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
-import com.itextpdf.dito.manager.exception.EntityNotFoundException;
-import com.itextpdf.dito.manager.exception.TemplateNameAlreadyRegisteredException;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
+import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -14,13 +14,21 @@ import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateTypeService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class TemplateServiceImpl extends AbstractService implements TemplateService {
@@ -48,32 +56,53 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     @Transactional
-    public TemplateFileEntity create(final TemplateCreateRequestDTO templateCreateRequestDTO, String email) {
-        throwExceptionIfTemplateNameAlreadyIsRegistered(templateCreateRequestDTO.getName());
+    public TemplateEntity create(final String templateName, final String templateTypeName,
+                                 final String dataCollectionName, final String email) {
+        throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         TemplateEntity templateEntity = new TemplateEntity();
-        templateEntity.setName(templateCreateRequestDTO.getName());
-        templateEntity.setType(templateTypeService.findTemplateType(templateCreateRequestDTO.getType()));
-        if (!StringUtils.isEmpty(templateCreateRequestDTO.getDataCollection())) {
+        templateEntity.setName(templateName);
+        templateEntity.setType(templateTypeService.findTemplateType(templateTypeName));
+        if (!StringUtils.isEmpty(dataCollectionName)) {
             templateEntity.setDataCollection(
-                    dataCollectionRepository.findByName(templateCreateRequestDTO.getDataCollection()).orElseThrow(EntityNotFoundException::new));
+                    dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
+                            () -> new DataCollectionNotFoundException(dataCollectionName)));
         }
-        templateRepository.save(templateEntity);
+        final TemplateEntity persistedTemplateEntity = templateRepository.save(templateEntity);
 
         TemplateFileEntity templateFileEntity = new TemplateFileEntity();
         templateFileEntity.setAuthor(userService.findByEmail(email));
         templateFileEntity.setData(templateLoader.load());
-        templateFileEntity.setTemplate(templateEntity);
+        templateFileEntity.setTemplate(persistedTemplateEntity);
+        templateFileRepository.save(templateFileEntity);
 
-        return templateFileRepository.save(templateFileEntity);
+        return persistedTemplateEntity;
     }
 
     @Override
-    public Page<TemplateEntity> getAll(Pageable pageable, String searchParam) {
+    public Page<TemplateEntity> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+
+        final Pageable pageWithSort = updateSort(pageable);
+        final String name = getStringFromFilter(templateFilter.getName());
+        final String modifiedBy = getStringFromFilter(templateFilter.getModifiedBy());
+        final List<String> types = templateFilter.getType();
+        final String dataCollectionName = getStringFromFilter(templateFilter.getDataCollection());
+
+        Date editedOnStartDate = null;
+        Date editedOnEndDate = null;
+        final List<String> editedOnDateRange = templateFilter.getEditedOn();
+        if (editedOnDateRange != null) {
+            if (editedOnDateRange.size() != 2) {
+                throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+            }
+            editedOnStartDate = getStartDateFromRange(editedOnDateRange);
+            editedOnEndDate = getEndDateFromRange(editedOnDateRange);
+        }
+
         return StringUtils.isEmpty(searchParam)
-                ? templateRepository.findAll(pageable)
-                : templateRepository.search(pageable, searchParam);
+                ? templateRepository.filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
+                : templateRepository.search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate, searchParam.toLowerCase());
     }
 
     @Override
@@ -83,7 +112,28 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
-            throw new TemplateNameAlreadyRegisteredException(templateName);
+            throw new TemplateAlreadyExistsException(templateName);
         }
+    }
+
+    private Pageable updateSort(final Pageable pageable) {
+        Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (sortParam.getProperty().equals("type")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "type.name");
+                    }
+                    if (sortParam.getProperty().equals("dataCollection")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "dataCollection.name");
+                    }
+                    if (sortParam.getProperty().equals("modifiedBy")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "file.author.firstName");
+                    }
+                    if (sortParam.getProperty().equals("editedOn")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 }

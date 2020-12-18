@@ -3,11 +3,14 @@ package com.itextpdf.dito.manager.service.role.impl;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleType;
-import com.itextpdf.dito.manager.exception.PermissionCantBeAttachedToCustomRole;
-import com.itextpdf.dito.manager.exception.PermissionNotFound;
-import com.itextpdf.dito.manager.exception.RoleAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.RoleCannotBeRemovedException;
-import com.itextpdf.dito.manager.exception.RoleNotFoundException;
+import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
+import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
+import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
+import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
+import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
+import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.role.RoleTypeRepository;
@@ -16,12 +19,16 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
@@ -32,9 +39,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final RoleTypeRepository roleTypeRepository;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-            final UserRepository userRepository,
-            final PermissionRepository permissionRepository,
-            final RoleTypeRepository roleTypeRepository) {
+                           final UserRepository userRepository,
+                           final PermissionRepository permissionRepository,
+                           final RoleTypeRepository roleTypeRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
@@ -52,18 +59,29 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> list(final Pageable pageable, final String searchParam) {
+    public Page<RoleEntity> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+
+        final Pageable pageWithSort = updateSort(pageable);
+        final String name = getStringFromFilter(roleFilter.getName());
+        final List<RoleType> roleTypes = roleFilter.getType();
+
         return StringUtils.isEmpty(searchParam)
-                ? roleRepository.findAll(pageable)
-                : roleRepository.search(pageable, searchParam);
+                ? roleRepository.filter(pageWithSort, name, roleTypes)
+                : roleRepository.search(pageWithSort, name, roleTypes, searchParam);
     }
 
     @Override
-    public RoleEntity update(final String roleName, final RoleEntity updatedRole, final List<String> permissions) {
-        RoleEntity existingRole = roleRepository.findByName(roleName).orElseThrow(RoleNotFoundException::new);
-        if (!roleName.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
+    public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
+        RoleEntity existingRole = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+
+        if (existingRole.getType().getName() == RoleType.SYSTEM) {
+            throw new UnableToUpdateSystemRoleException();
+        }
+        if (!name.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
             throw new RoleAlreadyExistsException(updatedRole.getName());
         }
+
         existingRole.setName(updatedRole.getName());
         setPermissions(existingRole, permissions);
         return roleRepository.save(existingRole);
@@ -71,19 +89,15 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public void delete(final String name) {
-        final RoleEntity role = roleRepository.findByName(name).orElseThrow(RoleNotFoundException::new);
+        final RoleEntity role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+
         if (role.getType().getName() == RoleType.SYSTEM) {
-            throw new RoleCannotBeRemovedException(
-                    new StringBuilder("System role cannot be removed: ")
-                            .append(name)
-                            .toString());
+            throw new AttemptToDeleteSystemRoleException();
         }
-        if (!CollectionUtils.isEmpty(userRepository.countOfUserWithOnlyOneRole(name))) {
-            throw new RoleCannotBeRemovedException(
-                    new StringBuilder("Role cannot be removed. There are users with only one role: ")
-                            .append(name)
-                            .toString());
+        if (userRepository.countOfUserWithOnlyOneRole(name) > 0) {
+            throw new UnableToDeleteSingularRoleException();
         }
+
         roleRepository.delete(role);
     }
 
@@ -98,13 +112,34 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         for (final String permissionName : permissionsName) {
             final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
             if (permissionEntity == null) {
-                throw new PermissionNotFound();
+                throw new PermissionNotFoundException(permissionName);
             } else if (!permissionEntity.getAvailableForCustomRole()) {
-                throw new PermissionCantBeAttachedToCustomRole();
+                throw new PermissionCantBeAttachedToCustomRoleException();
             } else {
                 role.getPermissions().add(permissionEntity);
             }
         }
         return role;
+    }
+
+    /**
+     * W/A for sorting roles by number of users (as sort param cannot be changed on FE side).
+     *
+     * @param pageable from request
+     * @return pageable with updated sort params
+     */
+    private Pageable updateSort(Pageable pageable) {
+        Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (sortParam.getProperty().equals("users")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "users.size");
+                    }
+                    if (sortParam.getProperty().equals("type")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "type.name");
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 }

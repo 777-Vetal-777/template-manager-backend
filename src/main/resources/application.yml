@@ -34,3 +34,8 @@ spring:
 server:
   servlet:
     context-path: /api
+
+resources:
+  pictures:
+    extensions:
+      supported: bmp,ccit,gif,jpg,jpg2000,png,svg,wmf

@@ -5,14 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class DataCollectionDTO {
-    private Long id;
     private String name;
     private String description;
     private DataCollectionType type;
-    @JsonProperty("author.firstName")
-    private String authorFirstName;
-    @JsonProperty("author.lastName")
-    private String authorLastName;
+    private String modifiedBy;
     private Date modifiedOn;
     private Date createdOn;
     private String fileName;
@@ -42,14 +38,6 @@ public class DataCollectionDTO {
         this.createdOn = createdOn;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -66,20 +54,12 @@ public class DataCollectionDTO {
         this.type = type;
     }
 
-    public String getAuthorLastName() {
-        return authorLastName;
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 
-    public void setAuthorLastName(String authorLastName) {
-        this.authorLastName = authorLastName;
-    }
-
-    public String getAuthorFirstName() {
-        return authorFirstName;
-    }
-
-    public void setAuthorFirstName(String authorFirstName) {
-        this.authorFirstName = authorFirstName;
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     public Date getModifiedOn() {

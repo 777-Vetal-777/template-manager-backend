@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 @Service
 public class PermissionServiceImpl implements PermissionService {
     private final PermissionRepository permissionRepository;
@@ -18,9 +20,14 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public Page<PermissionEntity> list(Pageable pageable, String searchParam) {
+    public Page<PermissionEntity> list(final Pageable pageable, final String searchParam) {
         return StringUtils.isEmpty(searchParam)
                 ? permissionRepository.findAll(pageable)
                 : permissionRepository.search(pageable, searchParam);
+    }
+
+    @Override
+    public List<PermissionEntity> list() {
+        return permissionRepository.findAll();
     }
 }

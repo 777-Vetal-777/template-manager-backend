@@ -1,31 +1,31 @@
 package com.itextpdf.dito.manager.controller.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
+import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.user.create.UserCreateResponseDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
-import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
-import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
+import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.filter.user.UserFilter;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class UserControllerImpl implements UserController {
+public class UserControllerImpl extends AbstractController implements UserController {
     private final UserService userService;
     private final UserMapper userMapper;
 
@@ -35,19 +35,20 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserCreateResponseDTO> create(final UserCreateRequestDTO userCreateRequest) {
-        final UserDTO user = userMapper.map(userService.create(userCreateRequest));
-        return new ResponseEntity<>(new UserCreateResponseDTO(user), HttpStatus.CREATED);
+    public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO) {
+        final UserEntity user = userService
+                .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles());
+        return new ResponseEntity<>(userMapper.map(user), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<Page<UserDTO>> list(final Pageable pageable, final String searchParam) {
-        return new ResponseEntity<>(userMapper.map(userService.getAll(pageable, searchParam)), HttpStatus.OK);
+    public ResponseEntity<Page<UserDTO>> list(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
+        return new ResponseEntity<>(userMapper.map(userService.getAll(pageable, userFilter, searchParam)), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> updateActivationStatus(final @Valid UsersActivateRequestDTO activateRequestDTO) {
-        userService.updateActivationStatus(activateRequestDTO.getEmails(), activateRequestDTO.isActivate());
+    public ResponseEntity<Void> updateActivationStatus(final @Valid UsersActivateRequestDTO usersActivateRequestDTO) {
+        userService.updateActivationStatus(usersActivateRequestDTO.getEmails(), usersActivateRequestDTO.isActivate());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -58,14 +59,16 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserDTO> updateCurrentUser(final UserUpdateRequestDTO updateRequest, Principal principal) {
-        UserDTO user = userMapper.map(userService.updateUser(updateRequest, principal.getName()));
+    public ResponseEntity<UserDTO> updateCurrentUser(final UserUpdateRequestDTO userUpdateRequestDTO,
+            Principal principal) {
+        UserDTO user = userMapper
+                .map(userService.updateUser(userMapper.map(userUpdateRequestDTO), principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<UserDTO>> unblock(final UsersUnblockRequestDTO userUnblockRequestDTO) {
-        final List<UserDTO> unblockedUsers = userUnblockRequestDTO.getUserEmails()
+    public ResponseEntity<List<UserDTO>> unblock(final UsersUnblockRequestDTO usersUnblockRequestDTO) {
+        final List<UserDTO> unblockedUsers = usersUnblockRequestDTO.getUserEmails()
                 .stream()
                 .map(email -> userMapper.map(userService.unblock(email)))
                 .collect(Collectors.toList());
@@ -73,19 +76,21 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Void> updatePassword(final @Valid UpdatePasswordRequestDTO updatePasswordRequestDTO,
-                                               final Principal principal) {
-        userService.updatePassword(updatePasswordRequestDTO.getOldPassword(),
-                updatePasswordRequestDTO.getNewPassword(),
+    public ResponseEntity<UserDTO> updatePassword(final @Valid PasswordChangeRequestDTO passwordChangeRequestDTO,
+            final Principal principal) {
+        final UserEntity userEntity = userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
+                passwordChangeRequestDTO.getNewPassword(),
                 principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> updateUsersRoles(@Valid final UpdateUsersRolesRequestDTO updateUsersRolesRequestDTO) {
-        userService.updateUsersRoles(updateUsersRolesRequestDTO.getEmails(), updateUsersRolesRequestDTO.getRoles(),
-                updateUsersRolesRequestDTO.getUpdateUsersRolesActionEnum());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<List<UserDTO>> updateUsersRoles(
+            @Valid final UserRolesUpdateRequestDTO userRolesUpdateRequestDTO) {
+        final List<UserEntity> userEntities = userService
+                .updateUsersRoles(userRolesUpdateRequestDTO.getEmails(), userRolesUpdateRequestDTO.getRoles(),
+                        userRolesUpdateRequestDTO.getUpdateUsersRolesActionEnum());
+        return new ResponseEntity<>(userMapper.map(userEntities), HttpStatus.OK);
     }
 
 }

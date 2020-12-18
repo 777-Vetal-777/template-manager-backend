@@ -1,9 +1,12 @@
 package com.itextpdf.dito.manager.component.mapper.user.impl;
 
 
+import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
+import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
@@ -18,6 +21,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapperImpl implements UserMapper {
+    private final RoleMapper roleMapper;
+
+    public UserMapperImpl(final RoleMapper roleMapper) {
+        this.roleMapper = roleMapper;
+    }
 
     @Override
     public UserEntity map(final UserCreateRequestDTO dto) {
@@ -25,6 +33,16 @@ public class UserMapperImpl implements UserMapper {
 
         result.setEmail(dto.getEmail());
         result.setPassword(dto.getPassword());
+        result.setFirstName(dto.getFirstName());
+        result.setLastName(dto.getLastName());
+
+        return result;
+    }
+
+    @Override
+    public UserEntity map(UserUpdateRequestDTO dto) {
+        final UserEntity result = new UserEntity();
+
         result.setFirstName(dto.getFirstName());
         result.setLastName(dto.getLastName());
 
@@ -40,7 +58,7 @@ public class UserMapperImpl implements UserMapper {
         result.setLastName(entity.getLastName());
         result.setActive(entity.isEnabled());
         result.setBlocked(!entity.isAccountNonLocked());
-        result.setRoles(entity.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()));
+        result.setRoles(entity.getRoles().stream().map(roleMapper::map).collect(Collectors.toList()));
         result.setAuthorities(entity.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
 
@@ -59,18 +77,4 @@ public class UserMapperImpl implements UserMapper {
         return entities.map(this::map);
     }
 
-    @Override
-    public UserEntity map(UserDTO dto) {
-        final UserEntity result = new UserEntity();
-
-        if (dto.getRoles() != null) {
-            for (final String role : dto.getRoles()) {
-                final RoleEntity roleEntity = new RoleEntity();
-                roleEntity.setName(role);
-                result.getRoles().add(roleEntity);
-            }
-        }
-
-        return result;
-    }
 }

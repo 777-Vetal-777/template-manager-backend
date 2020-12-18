@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -27,8 +26,13 @@ public class TemplateEntity {
     @JoinColumn(name = "type_id")
     private TemplateTypeEntity type;
 
-    @OneToOne(mappedBy = "template")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = " data_collection_id")
     private DataCollectionEntity dataCollection;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instance_id", referencedColumnName = "id")
+    private InstanceEntity instance;
 
     @OneToMany(
             mappedBy = "template",
@@ -76,5 +80,13 @@ public class TemplateEntity {
 
     public void setDataCollection(DataCollectionEntity dataCollection) {
         this.dataCollection = dataCollection;
+    }
+
+    public InstanceEntity getInstance() {
+        return instance;
+    }
+
+    public void setInstance(InstanceEntity instance) {
+        this.instance = instance;
     }
 }

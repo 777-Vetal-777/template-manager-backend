@@ -1,8 +1,11 @@
 package com.itextpdf.dito.manager.controller.role;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
-import com.itextpdf.dito.manager.dto.role.RoleCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -49,12 +53,14 @@ public interface RoleController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = RoleCreateRequestDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or role already exists", content = @Content),
     })
-    ResponseEntity<RoleDTO> update(@Parameter(description = "role name to be updated") @PathVariable String name, @RequestBody RoleCreateRequestDTO roleUpdateRequestDTO);
+    ResponseEntity<RoleDTO> update(@Parameter(description = "Encoded with base64 role name, to be updated") @PathVariable String name,
+            @RequestBody RoleUpdateRequestDTO roleUpdateRequestDTO);
 
     @GetMapping
     @Operation(summary = "Get role list", description = "Get available roles",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<RoleDTO>> list(Pageable pageable, @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<RoleDTO>> list(Pageable pageable, @ParameterObject RoleFilter roleFilter,
+            @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
 
 
     @DeleteMapping(ROLE_ENDPOINT_WITH_PATH_VARIABLE)
@@ -65,7 +71,7 @@ public interface RoleController {
                     @Content(schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "404", description = "Role not found", content = @Content)
     })
-    ResponseEntity<Void> delete(@Parameter(description = "role name to be deleted") @PathVariable String name);
+    ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64role name, to be deleted") @PathVariable String name);
 
 
 }

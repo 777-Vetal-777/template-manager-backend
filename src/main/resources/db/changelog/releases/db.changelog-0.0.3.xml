@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="001-add-modified-at-column-to-user-table" author="Vadim_Sorokin">
+        <addColumn tableName="user">
+            <column name="modified_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="002-add-promotion-path-table" author="Vadim_Sorokin">
+        <createTable tableName="promotion_path">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="promotion_path_pk"/>
+            </column>
+            <column name="workspace_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_promotion_path_to_workspace"
+                             references="workspace(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-promotion-path-id-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="promotion_path_sequence"/>
+    </changeSet>
+
+    <changeSet id="004-add-stage-table" author="Vadim_Sorokin">
+        <createTable tableName="stage">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="stage_id"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence_order" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="promotion_path_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_stage_to_promotion_path"
+                             references="promotion_path(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="005-create-stage-id-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="stage_sequence"/>
+    </changeSet>
+
+    <changeSet id="006-create-instance-table" author="Vadim_Sorokin">
+        <createTable tableName="instance">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="instance_id"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="socket" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_on" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint">
+                <constraints foreignKeyName="fk_instance_to_user" references="user(id)"/>
+            </column>
+            <column name="stage_id" type="bigint">
+                <constraints foreignKeyName="fk_instance_to_stage" references="stage(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="007-create-instance-id-sequence" author="Vadim_Sorokin">
+        <createSequence sequenceName="instance_sequence"/>
+    </changeSet>
+
+    <changeSet id="008-update-template-table" author="Vadim_Sorokin">
+        <addColumn tableName="template">
+            <column name="instance_id" type="bigint">
+                <constraints foreignKeyName="fk_template_to_instance" references="instance(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="009-add-column-created-on-to-data-collection-table" author="Ivan_Semenov">
+        <addColumn tableName="data_collection">
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="010-create-resource-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="resource_pk"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="type" type="varchar(50)"/>
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_to_user"
+                             references="user(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="011-create-resource-sequence" author="Yaroslav_Maievskiy">
+        <createSequence sequenceName="resource_sequence"/>
+    </changeSet>
+
+    <changeSet id="012-create-resource-log-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource_log">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="resource_log_pk"/>
+            </column>
+            <column name="date" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_log_to_user"
+                             references="user(id)"/>
+            </column>
+            <column name="resource_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_log_to_resource"
+                             references="resource(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="013-create-resource-log-sequence" author="Yaroslav_Maievskiy">
+        <createSequence sequenceName="resource_log_sequence"/>
+    </changeSet>
+
+    <changeSet id="014-create-resource-file-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource_file">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="resource_file_pk"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="file" type="${blob}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="varchar(255)"/>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="resource_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_resource_file_to_resource"
+                             references="resource(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="015-create-resource-file-sequence" author="Yaroslav_Maievskiy">
+        <createSequence sequenceName="resource_file_sequence"/>
+    </changeSet>
+
+    <changeSet id="016-drop-fk-between-data-collection-and-template-tables" author="Ivan_Semenov">
+        <dropForeignKeyConstraint baseTableName="data_collection"
+                                  constraintName="fk_data_collection_to_template"/>
+    </changeSet>
+
+    <changeSet id="017-drop-template-id-column-from-data-collection-table" author="Ivan_Semenov">
+        <dropColumn tableName="data_collection">
+            <column name="template_id"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="018-add-data-collection-id-column-to-template-table" author="Ivan_Semenov">
+        <addColumn tableName="template">
+            <column name="data_collection_id"
+                    type="bigint">
+                <constraints nullable="true" foreignKeyName="fk_template_to_data_collection"
+                             references="data_collection(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,9 +1,10 @@
 package com.itextpdf.dito.manager.controller.token;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
-import com.itextpdf.dito.manager.dto.token.refresh.RefreshTokenRequestDTO;
-import com.itextpdf.dito.manager.dto.token.refresh.RefreshTokenResponseDTO;
-import com.itextpdf.dito.manager.exception.InvalidRefreshTokenException;
+import com.itextpdf.dito.manager.dto.token.refresh.AccessTokenRefreshRequestDTO;
+import com.itextpdf.dito.manager.dto.token.TokenDTO;
+import com.itextpdf.dito.manager.exception.token.InvalidRefreshTokenException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,11 +28,11 @@ public interface TokenController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully created new token", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = RefreshTokenResponseDTO.class))}),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TokenDTO.class))}),
             @ApiResponse(responseCode = "401", description = "Invalid refresh token", content = @Content),
     })
     @PostMapping(REFRESH_ENDPOINT)
-    ResponseEntity<RefreshTokenResponseDTO> refreshToken(@RequestBody RefreshTokenRequestDTO loginRequest)
+    ResponseEntity<TokenDTO> refresh(@RequestBody AccessTokenRefreshRequestDTO accessTokenRefreshRequestDTO)
             throws InvalidRefreshTokenException;
 
 }

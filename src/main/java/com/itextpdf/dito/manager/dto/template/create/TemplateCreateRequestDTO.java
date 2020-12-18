@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.dto.template.create;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import javax.validation.constraints.NotBlank;
 
 public class TemplateCreateRequestDTO {
@@ -12,7 +11,7 @@ public class TemplateCreateRequestDTO {
     @Schema(example = "standard")
     private String type;
     @Schema(example = "some-data-collection")
-    private String dataCollection;
+    private String dataCollectionName;
 
     public String getName() {
         return name;
@@ -30,11 +29,11 @@ public class TemplateCreateRequestDTO {
         this.type = type;
     }
 
-    public String getDataCollection() {
-        return dataCollection;
+    public String getDataCollectionName() {
+        return dataCollectionName;
     }
 
-    public void setDataCollection(String dataCollection) {
-        this.dataCollection = dataCollection;
+    public void setDataCollectionName(String dataCollectionName) {
+        this.dataCollectionName = dataCollectionName;
     }
 }

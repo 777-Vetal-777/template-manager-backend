@@ -115,7 +115,6 @@
                         startValue="4"/>
     </changeSet>
 
-
     <changeSet id="015-add-file-name-in-data-collection" author="Yaroslav_Maievskiy">
         <addColumn tableName="data_collection">
             <column name="file_name" type="varchar(255)">

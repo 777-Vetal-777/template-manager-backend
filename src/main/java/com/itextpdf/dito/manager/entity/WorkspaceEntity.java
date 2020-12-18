@@ -1,9 +1,11 @@
 package com.itextpdf.dito.manager.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -17,8 +19,15 @@ public class WorkspaceEntity {
     private String name;
     private String language;
     private String timezone;
+    @OneToOne(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PromotionPathEntity promotionPath;
 
-    public WorkspaceEntity() {
+    public void setPromotionPath(PromotionPathEntity promotionPath) {
+        if (this.promotionPath != null) {
+            this.promotionPath.setWorkspace(null);
+        }
+        promotionPath.setWorkspace(this);
+        this.promotionPath = promotionPath;
     }
 
     public Long getId() {
@@ -53,5 +62,8 @@ public class WorkspaceEntity {
         this.timezone = timezone;
     }
 
+    public PromotionPathEntity getPromotionPath() {
+        return promotionPath;
+    }
 
 }

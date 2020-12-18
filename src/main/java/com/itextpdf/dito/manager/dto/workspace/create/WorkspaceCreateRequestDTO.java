@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.dto.workspace.create;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import javax.validation.constraints.NotBlank;
 
 public class WorkspaceCreateRequestDTO {
@@ -14,6 +13,9 @@ public class WorkspaceCreateRequestDTO {
     @NotBlank
     @Schema(example = "ENG")
     String language;
+    @NotBlank
+    @Schema(example = "main-dev-instance")
+    String mainDevelopmentInstanceName;
 
     public String getName() {
         return name;
@@ -37,5 +39,13 @@ public class WorkspaceCreateRequestDTO {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getMainDevelopmentInstanceName() {
+        return mainDevelopmentInstanceName;
+    }
+
+    public void setMainDevelopmentInstanceName(String mainDevelopmentInstanceName) {
+        this.mainDevelopmentInstanceName = mainDevelopmentInstanceName;
     }
 }

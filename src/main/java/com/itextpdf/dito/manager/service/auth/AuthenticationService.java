@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.service.auth;
 
-import com.itextpdf.dito.manager.dto.auth.AuthenticationResponseDTO;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 
 public interface AuthenticationService {
-    AuthenticationResponseDTO authenticate(String username, String password);
+    AuthenticationDTO authenticate(String username, String password);
 }

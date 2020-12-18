@@ -1,12 +1,12 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
-import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.exception.UserNotFoundException;
+import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,7 +70,7 @@ class UserServiceImplTest {
     void findByEmail_WhenUserDoesNotExist_ThenExceptionIsThrown() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(AbstractResourceNotFoundException.class,
                 () -> userService.findByEmail(user.getEmail()));
     }
 
@@ -78,7 +78,7 @@ class UserServiceImplTest {
     void updateUser_WhenCorrectRequestsIsSent_ThenUserFieldsAreUpdated() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
-        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO();
+        UserEntity updateRequest = new UserEntity();
         String newFirstName = "myNewFirstName";
         String newLastName = "myNewLastName";
         updateRequest.setFirstName(newFirstName);
@@ -93,11 +93,11 @@ class UserServiceImplTest {
     @Test
     void updateUser_WhenUserDoesNotExists_ThenExceptionIsThrown() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.empty());
-        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO();
+        UserEntity updateRequest = new UserEntity();
         updateRequest.setFirstName("");
         updateRequest.setLastName("");
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(AbstractResourceNotFoundException.class,
                 () -> userService.updateUser(updateRequest, user.getEmail()));
     }
 }

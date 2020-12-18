@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.manager.entity.TemplateTypeEntity;
-import com.itextpdf.dito.manager.exception.UnsupportedTemplateTypeException;
+import com.itextpdf.dito.manager.exception.template.TemplateTypeNotFoundException;
 import com.itextpdf.dito.manager.repository.template.TemplateTypeRepository;
 import com.itextpdf.dito.manager.service.template.TemplateTypeService;
 
@@ -23,7 +23,7 @@ public class TemplateTypeServiceImpl implements TemplateTypeService {
         Optional<TemplateTypeEntity> result = templateTypeRepository.findByName(type);
 
         if (result.isEmpty()) {
-            throw new UnsupportedTemplateTypeException(type);
+            throw new TemplateTypeNotFoundException(type);
         }
 
         return result.get();
