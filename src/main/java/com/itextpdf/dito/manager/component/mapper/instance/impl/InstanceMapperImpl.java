@@ -56,17 +56,17 @@ public class InstanceMapperImpl implements InstanceMapper {
     }
 
     @Override
-    public List<InstanceEntity> mapDTOs(List<InstanceDTO> dtos) {
+    public List<InstanceEntity> mapDTOs(final List<InstanceDTO> dtos) {
         return dtos.stream().map(this::map).collect(Collectors.toList());
     }
 
     @Override
-    public Page<InstanceDTO> map(Page<InstanceEntity> entities) {
+    public Page<InstanceDTO> map(final Page<InstanceEntity> entities) {
         return entities.map(this::map);
     }
 
     @Override
-    public InstanceEntity map(InstanceUpdateRequestDTO dto) {
+    public InstanceEntity map(final InstanceUpdateRequestDTO dto) {
         final InstanceEntity entity = new InstanceEntity();
         entity.setName(dto.getName());
         entity.setSocket(dto.getSocket());
