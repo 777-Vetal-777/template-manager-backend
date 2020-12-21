@@ -1,0 +1,13 @@
+{
+  "stages": [
+    {
+      "name": "test-promotion-path",
+      "instances": [
+        {
+          "name": "test-name",
+          "socket": "localhost:9999"
+        }
+      ]
+    }
+  ]
+}
