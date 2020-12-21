@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.entity.TemplateEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,10 @@ public class InstanceMapperImpl implements InstanceMapper {
         final InstanceDTO instanceDTO = new InstanceDTO();
         instanceDTO.setName(entity.getName());
         instanceDTO.setSocket(entity.getSocket());
-        instanceDTO.setCreatedBy(entity.getCreatedBy().getEmail());
+        instanceDTO.setCreatedBy(new StringBuilder().append(entity.getCreatedBy().getFirstName())
+                .append(" ")
+                .append(entity.getCreatedBy().getLastName())
+                .toString());
         instanceDTO.setCreatedOn(entity.getCreatedOn());
         final List<TemplateEntity> templateEntities = entity.getTemplates();
         if (templateEntities != null && !templateEntities.isEmpty()) {
