@@ -92,7 +92,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Override
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
         final ResourceEntity existingResource = getResource(name, entity.getType());
-        throwExceptiontIfResourceExist(entity);
+        if(!existingResource.getName().equals(entity.getName())){
+            throwExceptiontIfResourceExist(entity);
+        }
         existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
 
