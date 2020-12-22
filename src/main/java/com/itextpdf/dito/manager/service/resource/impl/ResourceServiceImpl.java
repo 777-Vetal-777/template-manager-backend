@@ -130,7 +130,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         return StringUtils.isEmpty(searchParam)
                 ? resourceRepository.filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
-                : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, searchParam);
+                : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, searchParam.toLowerCase());
     }
 
     private Pageable updateSort(Pageable pageable) {

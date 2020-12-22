@@ -68,7 +68,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
         return StringUtils.isEmpty(searchParam)
                 ? roleRepository.filter(pageWithSort, name, roleTypes)
-                : roleRepository.search(pageWithSort, name, roleTypes, searchParam);
+                : roleRepository.search(pageWithSort, name, roleTypes, searchParam.toLowerCase());
     }
 
     @Override
