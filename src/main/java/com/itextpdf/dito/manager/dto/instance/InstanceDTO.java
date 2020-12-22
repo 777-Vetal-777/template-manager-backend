@@ -9,6 +9,7 @@ public class InstanceDTO {
     private String socket;
     private String createdBy;
     private Date createdOn;
+    private String stage;
     private List<String> templates;
 
     public String getCreatedBy() {
@@ -45,6 +46,14 @@ public class InstanceDTO {
 
     public List<String> getTemplates() {
         return templates;
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
     public void setTemplates(List<String> templates) {

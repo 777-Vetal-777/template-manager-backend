@@ -17,39 +17,40 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "socket", "createdBy", "createdOn");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "stage", "socket", "createdBy", "createdOn");
 
+    String FILTER_CONDITION = " (:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
+            + "and (:socket='' or LOWER(i.socket) like CONCAT('%',:socket,'%')) "
+            + "and (stage is null or COALESCE(:stages) is null or (LOWER(stage.name) in (:stages))) "
+            + "and (cast(:startDate as date) is null or i.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
+            + "and ((:createdBy='' or LOWER(i.createdBy.firstName) like CONCAT('%',:createdBy,'%')) "
+            + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%'))) ";
 
     Optional<InstanceEntity> findByName(String name);
 
     Page<InstanceEntity> findAll(Pageable pageable);
 
     @Query("select i from instance i "
-            + "where (:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
-            + "and (:socket='' or LOWER(i.socket) like CONCAT('%',:socket,'%')) "
-            + "and (cast(:startDate as date) is null or i.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and ((:createdBy='' or LOWER(i.createdBy.firstName) like CONCAT('%',:createdBy,'%')) "
-            + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%'))) "
+            + "left join i.stage stage "
+            + "where " + FILTER_CONDITION
     )
     Page<InstanceEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("socket") @Nullable String socket,
                                 @Param("createdBy") @Nullable String createdBy,
                                 @Param("startDate") @Nullable @Temporal Date startDate,
-                                @Param("endDate")@Nullable @Temporal Date endDate);
+                                @Param("endDate") @Nullable @Temporal Date endDate,
+                                @Param("stages") @Nullable List<String> stages);
 
     @Query("select i from instance i "
+            + "left join i.stage stage "
             + "where "
             //filter
-            + "("
-            + "(:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
-            + "and (:socket='' or LOWER(i.socket) like CONCAT('%',:socket,'%')) "
-            + "and (:startDate is null or i.createdOn between :startDate and :endDate) "
-            + "and ((:createdBy='' or LOWER(i.createdBy.firstName) like CONCAT('%',:createdBy,'%')) "
-            + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%')))) "
+            + "(" + FILTER_CONDITION + ")"
             //search
             + " and (LOWER(i.name) like CONCAT('%',:search,'%') "
             + " or LOWER(i.socket) like CONCAT('%',:search,'%') "
+            + " or LOWER(i.stage.name) like CONCAT('%',:search,'%') "
             + " or LOWER(i.createdBy.firstName) like CONCAT('%',:search,'%') "
             + " or LOWER(i.createdBy.lastName) like CONCAT('%',:search,'%')) "
     )
@@ -59,6 +60,7 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
                                 @Param("createdBy") @Nullable String createdBy,
                                 @Param("startDate") @Nullable @Temporal Date startDate,
                                 @Param("endDate") @Nullable @Temporal Date endDate,
+                                @Param("stages") @Nullable List<String> stages,
                                 @Param("search") String searchParam);
 
     void deleteByName(String name);

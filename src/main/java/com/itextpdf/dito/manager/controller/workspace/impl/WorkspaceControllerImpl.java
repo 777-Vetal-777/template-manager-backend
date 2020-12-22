@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
+import com.itextpdf.dito.manager.dto.stage.WorkspaceStageListDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
@@ -70,5 +71,14 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
         result = workspaceMapper.map(promotionPathEntity);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<WorkspaceStageListDTO> getStages(final String workspaceName) {
+        final List<String> stageNames = workspaceService.getStages(decodeBase64(workspaceName));
+        final WorkspaceStageListDTO result = new WorkspaceStageListDTO();
+        result.setStages(stageNames);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+
     }
 }

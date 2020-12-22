@@ -6,6 +6,7 @@ public class InstanceFilter {
     private String name;
     private String socket;
     private String createdBy;
+    private List<String> stage;
     //Always array with two elements from frontend
     private List<String> createdOn;
 
@@ -40,5 +41,13 @@ public class InstanceFilter {
 
     public void setCreatedOn(List<String> createdOn) {
         this.createdOn = createdOn;
+    }
+
+    public List<String> getStage() {
+        return stage;
+    }
+
+    public void setStage(List<String> stage) {
+        this.stage = stage;
     }
 }

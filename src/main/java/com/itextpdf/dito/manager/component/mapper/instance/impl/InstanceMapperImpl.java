@@ -35,8 +35,11 @@ public class InstanceMapperImpl implements InstanceMapper {
         instanceDTO.setCreatedOn(entity.getCreatedOn());
         final List<TemplateEntity> templateEntities = entity.getTemplates();
         if (templateEntities != null && !templateEntities.isEmpty()) {
-            instanceDTO.setTemplates(templateEntities.stream().map(templateEntity -> templateEntity.getName())
+            instanceDTO.setTemplates(templateEntities.stream().map(TemplateEntity::getName)
                     .collect(Collectors.toList()));
+        }
+        if (entity.getStage() != null) {
+            instanceDTO.setStage(entity.getStage().getName());
         }
         return instanceDTO;
     }

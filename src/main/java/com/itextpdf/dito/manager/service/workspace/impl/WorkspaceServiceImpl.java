@@ -107,6 +107,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.save(workspaceEntity).getPromotionPath();
     }
 
+    @Override
+    public List<String> getStages(final String workspaceName) {
+        return workspaceRepository.getStageNames(workspaceName);
+    }
+
     private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities) {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 

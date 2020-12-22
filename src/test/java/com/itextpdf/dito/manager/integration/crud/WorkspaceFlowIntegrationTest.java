@@ -13,10 +13,12 @@ import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Base64;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -138,7 +140,6 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("timezone").value(request.getTimezone()));
     }
 
-
     @Test
     public void testGetWorkspaceNotFound() throws Exception {
         final String base64EncodedName = Base64.getEncoder()
@@ -146,5 +147,14 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void test_getStageNames() throws Exception {
+        final String base64EncodedName = Base64.getEncoder()
+                .encodeToString("workspace-test".getBytes());
+        mockMvc.perform(get(WorkspaceController.BASE_NAME + WorkspaceController.WORKSPACE_STAGES_ENDPOINT, base64EncodedName))
+                .andExpect(status().isOk());
+
     }
 }
