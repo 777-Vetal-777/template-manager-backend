@@ -3,6 +3,7 @@ services:
   #=========== BACKEND ===============      
   backend:
     container_name: backend
+    restart: always    
     image: ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     ports:
       - "8080:8080"
@@ -33,6 +34,7 @@ services:
   #=========== DATABASE ===============
   db:
     container_name: db
+    restart: always
     image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     ports:
       - "5432:5432"
