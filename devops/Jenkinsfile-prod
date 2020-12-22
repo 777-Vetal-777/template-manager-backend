@@ -17,9 +17,9 @@ pipeline {
         registryHost = "https://nexus-docker.andersenlab.dev"
         REGISTRY = "nexus-docker.andersenlab.dev"
         registryCredentials = "nexus_andersen"
-        hostIP="10.10.15.110"
-        WORKING_ENV = "dev"
-        dockerCredentials="docker-dev-itext"
+        hostIP="10.10.15.15"
+        WORKING_ENV = "demo"
+        dockerCredentials="docker-demo-itext"
         SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
     }
     agent{
@@ -29,9 +29,9 @@ pipeline {
         stage("Build docker image"){
             steps{
                 script {
-                  env.RELEASE_VER = sh(script: """cat pom.xml | grep -i snapshot | cut -d'>' -f2 | cut -d'-' -f1""", returnStdout: true).trim()
+                  env.RELEASE_VER = sh(script: "cat release", returnStdout: true).trim()
                   dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
-                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"
+                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"   
                   dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
                 }
             }
@@ -62,7 +62,7 @@ pipeline {
         }
         stage("Remove unused docker image"){
             steps{
-                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
+                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1''' 
                 sh '''docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
             }
         }
@@ -71,7 +71,7 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            sh "docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
+                            sh "docker-compose --env-file ${WORKSPACE}/devops/.env.${WORKING_ENV} --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
                         }
                     }
                 }
