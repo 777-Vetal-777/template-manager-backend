@@ -5,20 +5,11 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyType;
 
 
 public class DependencyFilterDTO {
-    private String sort;
     private String name;
     private Long version;
     private DependencyType dependencyType;
     private Boolean active;
     private DependencyDirectionType directionType;
-
-    public String getSort() {
-        return sort;
-    }
-
-    public void setSort(String sort) {
-        this.sort = sort;
-    }
 
     public DependencyType getDependencyType() {
         return dependencyType;

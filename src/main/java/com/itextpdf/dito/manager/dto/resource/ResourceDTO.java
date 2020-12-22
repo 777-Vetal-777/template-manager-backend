@@ -19,6 +19,15 @@ public class ResourceDTO {
     private Long version;
     private String fileName;
     private byte[] file;
+    private Boolean deploy;
+
+    public Boolean getDeploy() {
+        return deploy;
+    }
+
+    public void setDeploy(Boolean deploy) {
+        this.deploy = deploy;
+    }
 
     public String getModifiedBy() {
         return modifiedBy;

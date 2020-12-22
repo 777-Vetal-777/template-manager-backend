@@ -1,10 +1,13 @@
 package com.itextpdf.dito.manager.controller.resource;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
+import com.itextpdf.dito.manager.controller.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
+import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.security.Principal;
 
 @RequestMapping(ResourceController.BASE_NAME)
@@ -38,12 +42,44 @@ public interface ResourceController {
 
     String RESOURCE_PATH_VARIABLE = "name";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
+    String RESOURCE_VERSION_ENDPOINT = "/versions";
+    String RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_VERSION_ENDPOINT;
+    String RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
+
+    @GetMapping(RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of versions of resource by name.", description = "Get a list of resource versions using the resource name and resource type, sorting and filters.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<ResourceDTO>> getVersions(Principal principal,
+                                                  Pageable pageable,
+                                                  @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                                  @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet",required = true) @RequestParam(name = "type") ResourceTypeEnum type,
+                                                  @ParameterObject VersionFilter versionFilter,
+                                                  @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
+
+    @PostMapping(RESOURCE_VERSION_ENDPOINT)
+    @Operation(summary = "Create new version of resource", description = "Make a new version of a resource: upload a new resource and a comment for the new version.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<ResourceDTO> create(Principal principal,
+                                       @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
+                                       @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
+                                       @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet",required = true, style = ParameterStyle.FORM) @RequestPart String type,
+                                       @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.",required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
+
+    @GetMapping(RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving list of information about resource dependencies using sorting and filters.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Information about one resource dependencies is prepared according to the specified conditions.")
+    ResponseEntity<Page<DependencyDTO>> listDependencies(Pageable pageable,
+                                                         @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                                         @ParameterObject DependencyFilterDTO dependencyFilterDTO,
+                                                         @Parameter(description = "Universal search string which filter dependencies names.")
+                                                         @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get resource", description = "Get resource",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<ResourceDTO> get(@Parameter(name = "name",description = "Encoded with base64 new name of resource", required = true) @PathVariable String name,
-                                    @Parameter(name = "type",description = "Type of resource, image or font or stylesheet",required = true) @RequestParam ResourceTypeEnum type);
+    ResponseEntity<ResourceDTO> get(@Parameter(name = "name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                    @Parameter(name = "type", description = "Type of resource, image or font or stylesheet", required = true) @RequestParam ResourceTypeEnum type);
 
     @GetMapping
     @Operation(summary = "Get resource list", description = "Get available resources",
@@ -51,6 +87,7 @@ public interface ResourceController {
     ResponseEntity<Page<ResourceDTO>> list(Pageable pageable,
                                            @ParameterObject ResourceFilter filter,
                                            @Parameter(description = "Universal filter to find resource name, modified by and version comment ") @RequestParam(name = "search", required = false) String searchParam);
+
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Save new resource.", description = "Api for loading images, fonts, stylesheets.",
@@ -63,7 +100,7 @@ public interface ResourceController {
     })
     ResponseEntity<ResourceDTO> create(Principal principal,
                                        @Parameter(name = "name", description = "resource name", style = ParameterStyle.FORM) @RequestPart String name,
-                                       @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM)@RequestPart String type,
+                                       @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM) @RequestPart String type,
                                        @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @PatchMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
@@ -72,7 +109,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "200", description = "Resource updated successfully", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ResourceDTO.class))}),
             @ApiResponse(responseCode = "409", description = "There is already a resource with the same name")
     })
-    ResponseEntity<ResourceDTO> update(@Parameter(name = "name", description = "Base64-encoded name of the resource to be updated", required = true) @PathVariable String name, @RequestBody ResourceUpdateRequestDTO updateRequestDTO, Principal principal);
+    ResponseEntity<ResourceDTO> update(@Parameter(name = "name", description = "Base64-encoded name of the resource to be updated", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name, @RequestBody ResourceUpdateRequestDTO updateRequestDTO, Principal principal);
 
 
 }
