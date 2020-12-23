@@ -224,12 +224,12 @@
         </addColumn>
     </changeSet>
 
-    <!-- Change sets from 026 to 30 are required in order to make unique name constraint deferrable.
+    <!-- Change sets from 026 to 31 are required in order to make unique name constraint deferrable.
     Otherwise at least postgres will fail on 31th change set. -->
     <changeSet id="026-add-buffer-name-column-to-template-table" author="Vadim_Sorokin">
         <addColumn tableName="template">
             <column name="buffer_name" type="varchar(255)">
-                <constraints unique="true" deferrable="true"/>
+                <constraints deferrable="true"/>
             </column>
         </addColumn>
     </changeSet>
