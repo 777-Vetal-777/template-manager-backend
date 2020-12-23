@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.controller.resource;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
-import com.itextpdf.dito.manager.controller.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;

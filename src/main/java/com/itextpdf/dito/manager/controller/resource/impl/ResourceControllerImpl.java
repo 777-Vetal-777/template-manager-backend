@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.controller.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
-import com.itextpdf.dito.manager.controller.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
+import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
