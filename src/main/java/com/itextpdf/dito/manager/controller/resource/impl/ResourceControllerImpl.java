@@ -102,4 +102,9 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         final ResourceDTO dto = resourceMapper.mapWithFile(entity);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<Void> delete(String name, String type) {
+        return null;
+    }
 }

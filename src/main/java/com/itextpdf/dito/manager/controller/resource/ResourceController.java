@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -111,5 +112,15 @@ public interface ResourceController {
     })
     ResponseEntity<ResourceDTO> update(@Parameter(name = "name", description = "Base64-encoded name of the resource to be updated", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name, @RequestBody ResourceUpdateRequestDTO updateRequestDTO, Principal principal);
 
+    @DeleteMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Delete resource", description = "Delete resource by name and type - the resource cannot be deleted if the resource version is used in the template.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted resource.", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The resource is used.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content),
+    })
+    ResponseEntity<Void> delete(@Parameter(description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true) @RequestParam String type);
 
 }
