@@ -224,7 +224,15 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="026-fill-type-column-in-template-table" author="Vadim_Sorokin">
+    <changeSet id="026-drop-unique-name-constraint-from-template-table" author="Vadim_Sorokin">
+        <dropUniqueConstraint tableName="template" constraintName="template_name_key"/>
+    </changeSet>
+
+    <changeSet id="027-add-unique-name-constraint-to-template-table" author="Vadim_Sorokin">
+        <addUniqueConstraint tableName="template" columnNames="name" deferrable="true"/>
+    </changeSet>
+
+    <changeSet id="028-fill-type-column-in-template-table" author="Vadim_Sorokin">
         <update tableName="template">
             <column name="type" value="HEADER"/>
             <where>type_id=1</where>
@@ -239,19 +247,19 @@
         </update>
     </changeSet>
 
-    <changeSet id="027-add-not-null-constraint-to-type-column-in-template-table" author="Vadim_Sorokin">
+    <changeSet id="029-add-not-null-constraint-to-type-column-in-template-table" author="Vadim_Sorokin">
         <addNotNullConstraint tableName="template" columnName="type"/>
     </changeSet>
 
-    <changeSet id="028-drop-fk-between-template-and-template-type-tables" author="Vadim_Sorokin">
+    <changeSet id="030-drop-fk-between-template-and-template-type-tables" author="Vadim_Sorokin">
         <dropForeignKeyConstraint baseTableName="template" constraintName="fk_template_to_type"/>
     </changeSet>
 
-    <changeSet id="029-drop-type-id-column-in-template-table" author="Vadim_Sorokin">
+    <changeSet id="031-drop-type-id-column-in-template-table" author="Vadim_Sorokin">
         <dropColumn tableName="template" columnName="type_id"/>
     </changeSet>
 
-    <changeSet id="030-drop-template-type-table" author="Vadim_Sorokin">
+    <changeSet id="032-drop-template-type-table" author="Vadim_Sorokin">
         <dropTable tableName="template_type"/>
     </changeSet>
 </databaseChangeLog>
