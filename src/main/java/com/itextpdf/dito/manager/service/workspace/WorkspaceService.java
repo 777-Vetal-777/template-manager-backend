@@ -19,5 +19,5 @@ public interface WorkspaceService {
 
     PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity promotionPathEntity);
 
-    List<String> getStages(String workspaceName);
+    List<String> getStageNames(String workspaceName);
 }

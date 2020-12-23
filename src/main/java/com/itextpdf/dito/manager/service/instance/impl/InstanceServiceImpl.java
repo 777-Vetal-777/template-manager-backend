@@ -76,8 +76,9 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final String name = getStringFromFilter(instanceFilter.getName());
         final String socket = getStringFromFilter(instanceFilter.getSocket());
         final String createdBy = getStringFromFilter(instanceFilter.getCreatedBy());
-        final List<String> stages = !CollectionUtils.isEmpty(instanceFilter.getStage())
-                ? instanceFilter.getStage().stream().map(String::toLowerCase).collect(Collectors.toList())
+        final List<String> stagesFromFilter = instanceFilter.getStage();
+        final List<String> stages = !CollectionUtils.isEmpty(stagesFromFilter)
+                ? stagesFromFilter.stream().map(String::toLowerCase).collect(Collectors.toList())
                 : null;
         Date createdOnStartDate = null;
         Date createdOnEndDate = null;

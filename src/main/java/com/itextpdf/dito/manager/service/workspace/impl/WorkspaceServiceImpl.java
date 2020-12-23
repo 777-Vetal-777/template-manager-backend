@@ -108,7 +108,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public List<String> getStages(final String workspaceName) {
+    public List<String> getStageNames(final String workspaceName) {
         return workspaceRepository.getStageNames(workspaceName);
     }
 

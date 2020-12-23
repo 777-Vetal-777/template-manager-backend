@@ -19,21 +19,27 @@ import org.springframework.stereotype.Repository;
 public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "stage", "socket", "createdBy", "createdOn");
 
-    String FILTER_CONDITION = " (:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
+    String PAGEABLE_SELECT_CLAUSE = "select i from instance i "
+            + "left join i.stage stage ";
+
+    String FILTER_CONDITION = " ((:name='' or LOWER(i.name) like CONCAT('%',:name,'%')) "
             + "and (:socket='' or LOWER(i.socket) like CONCAT('%',:socket,'%')) "
             + "and (stage is null or COALESCE(:stages) is null or (LOWER(stage.name) in (:stages))) "
             + "and (cast(:startDate as date) is null or i.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and ((:createdBy='' or LOWER(i.createdBy.firstName) like CONCAT('%',:createdBy,'%')) "
-            + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%'))) ";
+            + "or (:createdBy='' or LOWER(i.createdBy.lastName) like CONCAT('%',:createdBy,'%')))) ";
+
+    String SEARCH_CONDITION = "(LOWER(i.name) like CONCAT('%',:search,'%') "
+            + " or LOWER(i.socket) like CONCAT('%',:search,'%') "
+            + " or LOWER(i.stage.name) like CONCAT('%',:search,'%') "
+            + " or LOWER(i.createdBy.firstName) like CONCAT('%',:search,'%') "
+            + " or LOWER(i.createdBy.lastName) like CONCAT('%',:search,'%')) ";
 
     Optional<InstanceEntity> findByName(String name);
 
     Page<InstanceEntity> findAll(Pageable pageable);
 
-    @Query("select i from instance i "
-            + "left join i.stage stage "
-            + "where " + FILTER_CONDITION
-    )
+    @Query(PAGEABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION)
     Page<InstanceEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("socket") @Nullable String socket,
@@ -42,18 +48,7 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
                                 @Param("endDate") @Nullable @Temporal Date endDate,
                                 @Param("stages") @Nullable List<String> stages);
 
-    @Query("select i from instance i "
-            + "left join i.stage stage "
-            + "where "
-            //filter
-            + "(" + FILTER_CONDITION + ")"
-            //search
-            + " and (LOWER(i.name) like CONCAT('%',:search,'%') "
-            + " or LOWER(i.socket) like CONCAT('%',:search,'%') "
-            + " or LOWER(i.stage.name) like CONCAT('%',:search,'%') "
-            + " or LOWER(i.createdBy.firstName) like CONCAT('%',:search,'%') "
-            + " or LOWER(i.createdBy.lastName) like CONCAT('%',:search,'%')) "
-    )
+    @Query(PAGEABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION + " and " + SEARCH_CONDITION)
     Page<InstanceEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("socket") @Nullable String socket,

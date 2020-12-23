@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.controller.workspace;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
-import com.itextpdf.dito.manager.dto.stage.WorkspaceStageListDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 
@@ -77,5 +76,5 @@ public interface WorkspaceController {
     @GetMapping(WORKSPACE_STAGES_ENDPOINT)
     @Operation(summary = "List of stages for workspace", description = "Retrieve list of stage names for workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<WorkspaceStageListDTO> getStages(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
+    ResponseEntity<List<String>> getStageNames(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
 }
