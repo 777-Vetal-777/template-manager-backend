@@ -2,18 +2,21 @@ package com.itextpdf.dito.manager.entity.resource;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -50,6 +53,16 @@ public class ResourceEntity {
     )
     @OrderBy("date DESC")
     private Collection<ResourceLogEntity> resourceLogs;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT log.id " +
+            "FROM manager.resource_log log " +
+            "WHERE log.resource_id = id " +
+            "ORDER BY log.date DESC " +
+            "LIMIT 1" +
+            ")")
+    private ResourceLogEntity latestLogRecord;
 
     public Long getId() {
         return id;
@@ -115,5 +128,11 @@ public class ResourceEntity {
         this.createdOn = createdOn;
     }
 
+    public ResourceLogEntity getLatestLogRecord() {
+        return latestLogRecord;
+    }
 
+    public void setLatestLogRecord(ResourceLogEntity latestLogRecord) {
+        this.latestLogRecord = latestLogRecord;
+    }
 }

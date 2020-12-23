@@ -127,7 +127,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
-
         return StringUtils.isEmpty(searchParam)
                 ? resourceRepository.filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
                 : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, searchParam.toLowerCase());
@@ -140,10 +139,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                         sortParam = new Sort.Order(sortParam.getDirection(), "type");
                     }
                     if (sortParam.getProperty().equals("modifiedBy")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "logs.author.firstName");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.author.firstName");
                     }
                     if (sortParam.getProperty().equals("modifiedOn")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "logs.date");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.date");
                     }
                     if (sortParam.getProperty().equals("comment")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "files.comment");
