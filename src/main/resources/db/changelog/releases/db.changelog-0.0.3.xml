@@ -224,15 +224,35 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="026-drop-unique-name-constraint-from-template-table" author="Vadim_Sorokin">
-        <dropUniqueConstraint tableName="template" uniqueColumns="name"/>
+    <!-- Change sets from 026 to 30 are required in order to make unique name constraint deferrable.
+    Otherwise at least postgres will fail on 31th change set. -->
+    <changeSet id="026-add-buffer-name-column-to-template-table" author="Vadim_Sorokin">
+        <addColumn tableName="template">
+            <column name="buffer_name" type="varchar(255)">
+                <constraints unique="true" deferrable="true" uniqueConstraintName="template_name_unique"/>
+            </column>
+        </addColumn>
     </changeSet>
 
-    <changeSet id="027-add-unique-name-constraint-to-template-table" author="Vadim_Sorokin">
-        <addUniqueConstraint tableName="template" columnNames="name" deferrable="true"/>
+    <changeSet id="027-move-data-from-template-name-column-to-template-buffer-name-column" author="Vadim_Sorokin">
+        <update tableName="template">
+            <column name="buffer_name" valueComputed="name"/>
+        </update>
     </changeSet>
 
-    <changeSet id="028-fill-type-column-in-template-table" author="Vadim_Sorokin">
+    <changeSet id="028-add-not-null-constraint-to-template-buffer-name-column" author="Vadim_Sorokin">
+        <addNotNullConstraint tableName="template" columnName="buffer_name"/>
+    </changeSet>
+
+    <changeSet id="029-drop-name-column-from-template-table" author="Vadim_Sorokin">
+        <dropColumn tableName="template" columnName="name"/>
+    </changeSet>
+
+    <changeSet id="030-rename-template-buffer-name-column-to-name" author="Vadim_Sorokin">
+        <renameColumn tableName="template" oldColumnName="buffer_name" newColumnName="name"/>
+    </changeSet>
+
+    <changeSet id="031-fill-type-column-in-template-table" author="Vadim_Sorokin">
         <update tableName="template">
             <column name="type" value="HEADER"/>
             <where>type_id=1</where>
@@ -247,19 +267,19 @@
         </update>
     </changeSet>
 
-    <changeSet id="029-add-not-null-constraint-to-type-column-in-template-table" author="Vadim_Sorokin">
+    <changeSet id="032-add-not-null-constraint-to-type-column-in-template-table" author="Vadim_Sorokin">
         <addNotNullConstraint tableName="template" columnName="type"/>
     </changeSet>
 
-    <changeSet id="030-drop-fk-between-template-and-template-type-tables" author="Vadim_Sorokin">
+    <changeSet id="033-drop-fk-between-template-and-template-type-tables" author="Vadim_Sorokin">
         <dropForeignKeyConstraint baseTableName="template" constraintName="fk_template_to_type"/>
     </changeSet>
 
-    <changeSet id="031-drop-type-id-column-in-template-table" author="Vadim_Sorokin">
+    <changeSet id="034-drop-type-id-column-in-template-table" author="Vadim_Sorokin">
         <dropColumn tableName="template" columnName="type_id"/>
     </changeSet>
 
-    <changeSet id="032-drop-template-type-table" author="Vadim_Sorokin">
+    <changeSet id="035-drop-template-type-table" author="Vadim_Sorokin">
         <dropTable tableName="template_type"/>
     </changeSet>
 </databaseChangeLog>
