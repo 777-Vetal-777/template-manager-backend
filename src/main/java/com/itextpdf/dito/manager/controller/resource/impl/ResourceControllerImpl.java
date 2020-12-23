@@ -104,7 +104,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<Void> delete(String name, String type) {
+    public ResponseEntity<Void> delete(final String name, final ResourceTypeEnum type) {
         return null;
     }
 }

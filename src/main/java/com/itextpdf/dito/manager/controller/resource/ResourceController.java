@@ -121,6 +121,6 @@ public interface ResourceController {
             @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content),
     })
     ResponseEntity<Void> delete(@Parameter(description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-                                @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true) @RequestParam String type);
+                                @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true) @RequestParam ResourceTypeEnum type);
 
 }
