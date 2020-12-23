@@ -31,6 +31,9 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
             </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -58,6 +61,7 @@
         <insert tableName="role">
             <column name="id" value="1"/>
             <column name="name" value="GLOBAL_ADMINISTRATOR"/>
+            <column name="type" value="SYSTEM"/>
         </insert>
         <insert tableName="user">
             <column name="id" value="1"/>
@@ -93,37 +97,7 @@
         <createSequence sequenceName="workspace_sequence"/>
     </changeSet>
 
-    <changeSet id="009-create-template-type-table" author="Vadim_Sorokin">
-        <createTable tableName="template_type">
-            <column name="id" type="bigint">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="template_type_pk"/>
-            </column>
-            <column name="name" type="varchar(255)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="010-insert-default-template-types" author="Vadim_Sorokin">
-        <insert tableName="template_type">
-            <column name="id" value="1"/>
-            <column name="name" value="header"/>
-        </insert>
-        <insert tableName="template_type">
-            <column name="id" value="2"/>
-            <column name="name" value="standard"/>
-        </insert>
-        <insert tableName="template_type">
-            <column name="id" value="3"/>
-            <column name="name" value="footer"/>
-        </insert>
-    </changeSet>
-
-    <changeSet id="011-create-template-type-sequence" author="Vadim_Sorokin">
-        <createSequence sequenceName="template_type_sequence"/>
-    </changeSet>
-
-    <changeSet id="012-create-template-table" author="Vadim_Sorokin">
+    <changeSet id="009-create-template-table" author="Vadim_Sorokin">
         <createTable tableName="template">
             <column name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="template_pk"/>
@@ -131,17 +105,17 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="type_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_template_to_type" references="template_type(id)"/>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="013-create-template-sequence" author="Vadim_Sorokin">
+    <changeSet id="010-create-template-sequence" author="Vadim_Sorokin">
         <createSequence sequenceName="template_sequence"/>
     </changeSet>
 
-    <changeSet id="014-create-template-file-table" author="Vadim_Sorokin">
+    <changeSet id="011-create-template-file-table" author="Vadim_Sorokin">
         <createTable tableName="template_file">
             <column name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="template_file_pk"/>
@@ -162,11 +136,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="015-create-template-file-sequence" author="Vadim_Sorokin">
+    <changeSet id="012-create-template-file-sequence" author="Vadim_Sorokin">
         <createSequence sequenceName="template_file_sequence"/>
     </changeSet>
 
-    <changeSet id="016-create-failed-login-attempt-table" author="Vadim_Sorokin">
+    <changeSet id="013-create-failed-login-attempt-table" author="Vadim_Sorokin">
         <createTable tableName="failed_login_attempt">
             <column name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="login_attempt_pk"/>
@@ -180,11 +154,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="017-create-failed-login-attempt-sequence" author="Vadim_Sorokin">
+    <changeSet id="014-create-failed-login-attempt-sequence" author="Vadim_Sorokin">
         <createSequence sequenceName="failed_login_attempt_sequence"/>
     </changeSet>
 
-    <changeSet id="018-create-data-collection-table" author="Ivan_Semenov">
+    <changeSet id="015-create-data-collection-table" author="Ivan_Semenov">
         <createTable tableName="data_collection">
             <column name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="data_collection_pk"/>
@@ -207,7 +181,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="019-create-data-collection-sequence" author="Ivan_Semenov">
+    <changeSet id="016-create-data-collection-sequence" author="Ivan_Semenov">
         <createSequence sequenceName="data_collection_sequence"/>
     </changeSet>
 </databaseChangeLog>
