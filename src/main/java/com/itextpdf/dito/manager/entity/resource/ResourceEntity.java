@@ -56,11 +56,19 @@ public class ResourceEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
+            "SELECT file.id " +
+            "FROM manager.resource_file file " +
+            "WHERE file.resource_id = id and file.version=(" +
+            "select max(file.version) from manager.resource_file file where file.resource_id = id)" +
+            ")")
+    private ResourceFileEntity latestFile;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
             "SELECT log.id " +
             "FROM manager.resource_log log " +
-            "WHERE log.resource_id = id " +
-            "ORDER BY log.date DESC " +
-            "LIMIT 1" +
+            "WHERE log.resource_id = id and log.date=(" +
+            "select max(log.date) from manager.resource_log log where log.resource_id = id)" +
             ")")
     private ResourceLogEntity latestLogRecord;
 
@@ -134,5 +142,13 @@ public class ResourceEntity {
 
     public void setLatestLogRecord(ResourceLogEntity latestLogRecord) {
         this.latestLogRecord = latestLogRecord;
+    }
+
+    public ResourceFileEntity getLatestFile() {
+        return latestFile;
+    }
+
+    public void setLatestFile(ResourceFileEntity latestFile) {
+        this.latestFile = latestFile;
     }
 }

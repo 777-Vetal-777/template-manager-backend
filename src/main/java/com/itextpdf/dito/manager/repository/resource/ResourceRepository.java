@@ -19,17 +19,16 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedBy", "modifiedOn", "comment");
 
-    String SELECT_CLAUSE = "select resource from ResourceEntity resource "
-            + "left join resource.resourceFiles files ";
+    String SELECT_CLAUSE = "select resource from ResourceEntity resource ";
 
     String FILTER_CONDITION = "((:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or resource.type in (:types)) "
-            + "and (:comment='' or LOWER(files.comment) like LOWER(CONCAT('%',:comment,'%'))) "
+            + "and (:comment='' or LOWER(resource.latestFile.comment) like LOWER(CONCAT('%',:comment,'%'))) "
             + "and (:modifiedBy='' or LOWER(resource.latestLogRecord.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(resource.latestLogRecord.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or resource.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date))) ";
 
     String SEARCH_CONDITION = "(LOWER(resource.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(files.comment) like CONCAT('%',:search,'%') "
+            + "or LOWER(resource.latestFile.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(resource.latestLogRecord.author.firstName) like CONCAT('%',:search,'%') "
             + "or LOWER(resource.latestLogRecord.author.lastName) like CONCAT('%',:search,'%')) ";
 
