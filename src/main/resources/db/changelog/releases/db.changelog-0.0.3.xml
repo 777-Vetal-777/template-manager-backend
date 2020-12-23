@@ -225,7 +225,7 @@
     </changeSet>
 
     <changeSet id="026-drop-unique-name-constraint-from-template-table" author="Vadim_Sorokin">
-        <dropUniqueConstraint tableName="template" constraintName="template_name_key"/>
+        <dropUniqueConstraint tableName="template" uniqueColumns="name"/>
     </changeSet>
 
     <changeSet id="027-add-unique-name-constraint-to-template-table" author="Vadim_Sorokin">
