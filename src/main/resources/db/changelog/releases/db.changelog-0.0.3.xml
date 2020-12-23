@@ -220,9 +220,7 @@
 
     <changeSet id="025-add-type-column-to-template-table" author="Vadim_Sorokin">
         <addColumn tableName="template">
-            <column name="type" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="type" type="varchar(255)"/>
         </addColumn>
     </changeSet>
 
