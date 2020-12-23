@@ -2,6 +2,8 @@ package com.itextpdf.dito.manager.component.mapper.template.impl;
 
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
 
@@ -11,6 +13,7 @@ import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
@@ -30,6 +33,36 @@ public class TemplateMapperImpl implements TemplateMapper {
         }
         result.setDataCollection(Objects.nonNull(entity.getDataCollection())
                 ? entity.getDataCollection().getName()
+                : null);
+        return result;
+    }
+
+    @Override
+    public TemplateMetadataDTO mapToMetadata(final TemplateEntity entity) {
+        final TemplateMetadataDTO result = new TemplateMetadataDTO();
+        result.setName(entity.getName());
+        final List<TemplateFileEntity> templateFiles = entity.getFiles();
+        if (!CollectionUtils.isEmpty(templateFiles)) {
+            final TemplateFileEntity lastFileVersion = templateFiles.get(0);
+            result.setModifiedBy(new StringBuilder()
+                    .append(lastFileVersion.getAuthor().getFirstName())
+                    .append(" ")
+                    .append(lastFileVersion.getAuthor().getLastName())
+                    .toString());
+            result.setModifiedOn(lastFileVersion.getVersion());
+            result.setDescription(lastFileVersion.getComment());
+
+            final TemplateFileEntity firstFileVersion = templateFiles.get(templateFiles.size() - 1);
+            result.setCreatedBy(new StringBuilder()
+                    .append(firstFileVersion.getAuthor().getFirstName())
+                    .append(" ")
+                    .append(firstFileVersion.getAuthor().getLastName())
+                    .toString());
+            result.setCreatedOn(firstFileVersion.getVersion());
+        }
+        final DataCollectionEntity dataCollection = entity.getDataCollection();
+        result.setDataCollection(Objects.nonNull(dataCollection)
+                ? dataCollection.getName()
                 : null);
         return result;
     }

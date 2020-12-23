@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
@@ -71,4 +72,10 @@ public interface TemplateController {
             @ParameterObject DependencyFilterDTO dependencyFilterDTO,
             @Parameter(description = "Universal search string which filter dependencies names.")
             @RequestParam(name = "search", required = false) String searchParam);
+
+    @GetMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get template metadata", description = "Get template metadata",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<TemplateMetadataDTO> get(@Parameter(description = "Template name encoded with base64.") @PathVariable("name") String name);
+
 }

@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
@@ -19,6 +20,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -78,5 +80,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         }
 
         return new ResponseEntity<>(new PageImpl<>(dependencies), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<TemplateMetadataDTO> get(final String name) {
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.get(decodeBase64(name))), HttpStatus.OK);
     }
 }

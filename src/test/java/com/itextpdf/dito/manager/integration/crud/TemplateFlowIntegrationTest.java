@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.io.File;
+import java.util.Base64;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,7 +62,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testCreateTemplateWithData() throws Exception {
-        dataCollectionService.create("data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json","admin@email.com");
+        dataCollectionService.create("data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         request.setDataCollectionName("data-collection");
@@ -73,6 +74,19 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("dataCollection").value("data-collection"));
         Optional<TemplateEntity> template = templateRepository.findByName(request.getName());
         assertTrue(template.isPresent());
+
+        String encodedTemplateName = Base64.getEncoder().encodeToString(request.getName().getBytes());
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").isNotEmpty())
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
+                .andExpect(jsonPath("createdBy").isNotEmpty())
+                .andExpect(jsonPath("createdOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty());
     }
 
     @Test
