@@ -188,6 +188,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.saveAll(userEntities);
     }
 
+    @Override
+    public Integer calculateCountOfUsersWithOnlyOneRole(final String roleName) {
+        return userRepository.countOfUserWithOnlyOneRole(roleName);
+    }
+
     private List<UserEntity> retrieveUsers(final List<String> emails) {
         final List<UserEntity> result = new ArrayList<>();
 

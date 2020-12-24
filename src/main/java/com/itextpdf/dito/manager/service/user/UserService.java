@@ -28,4 +28,6 @@ public interface UserService {
 
     List<UserEntity> updateUsersRoles(List<String> emails, List<String> roles,
                                       UpdateUsersRolesActionEnum actionEnum);
+
+    Integer calculateCountOfUsersWithOnlyOneRole(String roleName);
 }

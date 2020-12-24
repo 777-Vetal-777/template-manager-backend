@@ -15,7 +15,9 @@ import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
+import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
+import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,17 +33,18 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
-
+    // Repositories
     private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
-    private final PermissionRepository permissionRepository;
+    // Services
+    private final UserService userService;
+    private final PermissionService permissionService;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-                           final UserRepository userRepository,
-                           final PermissionRepository permissionRepository) {
+                           final UserService userService,
+                           final PermissionService permissionService) {
         this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
-        this.permissionRepository = permissionRepository;
+        this.userService = userService;
+        this.permissionService = permissionService;
     }
 
     @Override
@@ -50,6 +53,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
             throw new RoleAlreadyExistsException(roleEntity.getName());
         }
         setPermissions(roleEntity, permissions);
+        setDefaultPermissions(roleEntity);
         roleEntity.setType(RoleTypeEnum.CUSTOM);
         return roleRepository.save(roleEntity);
     }
@@ -90,7 +94,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         if (role.getType() == RoleTypeEnum.SYSTEM) {
             throw new AttemptToDeleteSystemRoleException();
         }
-        if (userRepository.countOfUserWithOnlyOneRole(name) > 0) {
+        if (userService.calculateCountOfUsersWithOnlyOneRole(name) > 0) {
             throw new UnableToDeleteSingularRoleException();
         }
 
@@ -106,7 +110,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private RoleEntity setPermissions(final RoleEntity role, List<String> permissionsName) {
         role.getPermissions().clear();
         for (final String permissionName : permissionsName) {
-            final PermissionEntity permissionEntity = permissionRepository.findByName(permissionName);
+            final PermissionEntity permissionEntity = permissionService.get(permissionName);
             if (permissionEntity == null) {
                 throw new PermissionNotFoundException(permissionName);
             } else if (!permissionEntity.getOptionalForCustomRole()) {
@@ -115,6 +119,12 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
                 role.getPermissions().add(permissionEntity);
             }
         }
+        return role;
+    }
+
+    private RoleEntity setDefaultPermissions(final RoleEntity role) {
+        final List<PermissionEntity> defaultPermissions = permissionService.defaultPermissions();
+        role.getPermissions().addAll(defaultPermissions);
         return role;
     }
 

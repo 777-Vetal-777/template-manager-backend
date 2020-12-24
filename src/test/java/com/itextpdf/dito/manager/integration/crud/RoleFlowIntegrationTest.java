@@ -8,7 +8,6 @@ import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,7 +35,6 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     public void testCreateRole() throws Exception {
         RoleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/roles/role-create-request.json"), RoleCreateRequestDTO.class);
         mockMvc.perform(post(RoleController.BASE_NAME)
@@ -78,7 +76,6 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     public void testUpdateCustomRole() throws Exception {
         final String roleToBeUpdatedName = "role-for-update";
         testRole = new RoleEntity();
