@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.dto.permission;
 
 public class PermissionDTO {
     private String name;
-    private Boolean availableForCustomRole;
+    private Boolean optionalForCustomRole;
 
     public String getName() {
         return name;
@@ -12,11 +12,11 @@ public class PermissionDTO {
         this.name = name;
     }
 
-    public Boolean getAvailableForCustomRole() {
-        return availableForCustomRole;
+    public Boolean getOptionalForCustomRole() {
+        return optionalForCustomRole;
     }
 
-    public void setAvailableForCustomRole(Boolean availableForCustomRole) {
-        this.availableForCustomRole = availableForCustomRole;
+    public void setOptionalForCustomRole(Boolean optionalForCustomRole) {
+        this.optionalForCustomRole = optionalForCustomRole;
     }
 }

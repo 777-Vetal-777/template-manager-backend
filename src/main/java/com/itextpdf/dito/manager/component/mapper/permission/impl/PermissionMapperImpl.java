@@ -19,7 +19,7 @@ public class PermissionMapperImpl implements PermissionMapper {
         final PermissionDTO result = new PermissionDTO();
 
         result.setName(entity.getName());
-        result.setAvailableForCustomRole(entity.getAvailableForCustomRole());
+        result.setOptionalForCustomRole(entity.getOptionalForCustomRole());
 
         return result;
     }
@@ -29,7 +29,7 @@ public class PermissionMapperImpl implements PermissionMapper {
         final PermissionEntity result = new PermissionEntity();
 
         result.setName(dto.getName());
-        result.setAvailableForCustomRole(dto.getAvailableForCustomRole());
+        result.setOptionalForCustomRole(dto.getOptionalForCustomRole());
 
         return result;
     }

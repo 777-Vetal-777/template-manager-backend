@@ -18,8 +18,8 @@ public class PermissionEntity {
     @SequenceGenerator(name = "permission_gen", sequenceName = "permission_sequence", allocationSize = 1)
     private Long id;
     private String name;
-    @Column(name = "available_for_custom_role")
-    private Boolean availableForCustomRole;
+    @Column(name = "optional_for_custom_role")
+    private Boolean optionalForCustomRole;
 
     @ManyToMany(mappedBy = "permissions")
     private Set<RoleEntity> roles;
@@ -48,11 +48,11 @@ public class PermissionEntity {
         this.roles = roles;
     }
 
-    public Boolean getAvailableForCustomRole() {
-        return availableForCustomRole == null ? Boolean.FALSE : availableForCustomRole;
+    public Boolean getOptionalForCustomRole() {
+        return optionalForCustomRole == null ? Boolean.FALSE : optionalForCustomRole;
     }
 
-    public void setAvailableForCustomRole(Boolean availableForCustomRole) {
-        this.availableForCustomRole = availableForCustomRole;
+    public void setOptionalForCustomRole(Boolean optionalForCustomRole) {
+        this.optionalForCustomRole = optionalForCustomRole;
     }
 }

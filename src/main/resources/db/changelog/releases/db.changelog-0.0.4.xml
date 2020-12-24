@@ -11,4 +11,52 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="002-rename-available-for-custom-role-column-in-permission-table" author="Vadim_Srookin">
+        <renameColumn tableName="permission" oldColumnName="available_for_custom_role"
+                      newColumnName="optional_for_custom_role"/>
+    </changeSet>
+
+    <changeSet id="003-reset-values-in-optional-for-custom-role-column-in-permission-table" author="Vadim_Sorokin">
+        <update tableName="permission">
+            <column name="optional_for_custom_role" value="false"/>
+            <where>optional_for_custom_role=true</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="004-set-default-values-for-optional-for-custom-role-column-in-permission-table" author="Vadim_Sorokin">
+        <update tableName="permission">
+            <column name="optional_for_custom_role" value="true"/>
+            <where>name in ('E6_US32_CREATE_NEW_DATA_COLLECTIONS_USING_JSON',
+                'E6_US34_EDIT_DATA_COLLECTION_METADATA',
+                'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON',
+                'E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION',
+                'E6_US38_DELETE_DATA_COLLECTION',
+                'E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE',
+                'E7_US47_EDIT_SAMPLE_METADATA',
+                'E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE',
+                'E7_US50_DELETE_DATA_SAMPLE',
+                'E8_US53_CREATE_NEW_RESOURCE_IMAGE',
+                'E8_US55_EDIT_RESOURCE_METADATA_IMAGE',
+                'E8_US56_CREATE_NEW_RESOURCE_FONT',
+                'E8_US58_EDIT_RESOURCE_METADATA_FONT',
+                'E8_US59_CREATE_NEW_RESOURCE_STYLESHEET',
+                'E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET',
+                'E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE',
+                'E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET',
+                'E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE',
+                'E8_US66_DELETE_RESOURCE_IMAGE',
+                'E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA',
+                'E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD',
+                'E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION',
+                'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD',
+                'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD',
+                'E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED',
+                'E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE',
+                'E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE',
+                'E9_US81_PREVIEW_TEMPLATE_STANDARD',
+                'E9_US24_EXPORT_TEMPLATE_DATA',
+                'E9_US25_IMPORT_TEMPLATE_DATA')</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
