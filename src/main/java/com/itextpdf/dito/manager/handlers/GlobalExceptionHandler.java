@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.stream.Collectors;
 
@@ -58,6 +59,11 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(NoSuchDataCollectionTypeException.class)
     public ResponseEntity<ErrorResponseDTO> noSuchEnumTypeExceptionHandler(final NoSuchDataCollectionTypeException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponseDTO> maxUploadSizeExeededExceptionHandler(final MaxUploadSizeExceededException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }

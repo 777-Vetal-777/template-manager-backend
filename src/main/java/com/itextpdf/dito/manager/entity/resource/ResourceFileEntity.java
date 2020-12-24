@@ -24,6 +24,15 @@ public class ResourceFileEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " resource_id")
     private ResourceEntity resource;
+    private Boolean deployed;
+
+    public Boolean getDeployed() {
+        return deployed;
+    }
+
+    public void setDeployed(Boolean deployed) {
+        this.deployed = deployed;
+    }
 
     public Long getId() {
         return id;

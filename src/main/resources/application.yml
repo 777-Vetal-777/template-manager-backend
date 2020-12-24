@@ -30,7 +30,10 @@ spring:
   liquibase:
     default-schema: manager
     change-log: classpath:db/changelog/db.changelog-master.xml
-
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 server:
   servlet:
     context-path: /api
@@ -39,3 +42,4 @@ resources:
   pictures:
     extensions:
       supported: bmp,ccit,gif,jpg,jpg2000,png,svg,wmf
+    size-limit: 1048576

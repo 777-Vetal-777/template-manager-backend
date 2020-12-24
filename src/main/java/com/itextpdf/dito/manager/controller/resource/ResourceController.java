@@ -60,6 +60,12 @@ public interface ResourceController {
     @PostMapping(RESOURCE_VERSION_ENDPOINT)
     @Operation(summary = "Create new version of resource", description = "Make a new version of a resource: upload a new resource and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Resource new version saved successfully."),
+            @ApiResponse(responseCode = "400", description = "Resource file exceeds the file limit."),
+            @ApiResponse(responseCode = "400", description = "The file cannot be read."),
+            @ApiResponse(responseCode = "400", description = "File extension not supported.")
+    })
     ResponseEntity<ResourceDTO> create(Principal principal,
                                        @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
@@ -96,6 +102,7 @@ public interface ResourceController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Resource saved successfully."),
             @ApiResponse(responseCode = "409", description = "A resource with the same name already exists."),
+            @ApiResponse(responseCode = "400", description = "Resource file exceeds the file limit."),
             @ApiResponse(responseCode = "400", description = "The file cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })

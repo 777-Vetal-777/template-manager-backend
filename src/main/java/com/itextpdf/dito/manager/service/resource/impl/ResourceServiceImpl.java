@@ -73,9 +73,34 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         fileEntity.setVersion(1L);
         fileEntity.setFile(data);
         fileEntity.setFileName(fileName);
+        fileEntity.setDeployed(false);
         resourceEntity.setResourceFiles(Collections.singletonList(fileEntity));
         resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
         return resourceRepository.save(resourceEntity);
+    }
+
+    @Override
+    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email, final String comment) {
+        final ResourceEntity existingResourceEntity = getResource(name, type);
+        final UserEntity userEntity = userService.findByEmail(email);
+        final Long oldVersion = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
+        //TODO CHECK IF USER HAVE PERMISSION TO UPDATE TEMPLATE
+        final ResourceLogEntity logEntity = new ResourceLogEntity();
+        logEntity.setAuthor(userEntity);
+        logEntity.setDate(new Date());
+        logEntity.setResource(existingResourceEntity);
+
+        final ResourceFileEntity fileEntity = new ResourceFileEntity();
+        fileEntity.setResource(existingResourceEntity);
+        fileEntity.setVersion(oldVersion+1);
+        fileEntity.setFile(data);
+        fileEntity.setFileName(fileName);
+        fileEntity.setDeployed(false);
+        fileEntity.setComment(comment);
+
+        existingResourceEntity.getResourceFiles().add(fileEntity);
+        existingResourceEntity.getResourceLogs().add(logEntity);
+        return resourceRepository.save(existingResourceEntity);
     }
 
     @Override

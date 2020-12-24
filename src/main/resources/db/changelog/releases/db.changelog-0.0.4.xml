@@ -59,4 +59,13 @@
         </update>
     </changeSet>
 
+    <changeSet id="005-add-deployed-column-to-resource-file-table" author="Yaroslav_Maievskiy">
+        <addColumn tableName="resource_file">
+            <column name="deployed" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="006-add-unique-constraint-to-deployed-column-in-resource-file-table" author="Yaroslav_Maievskiy">
+        <addUniqueConstraint tableName="resource_file" columnNames="deployed" constraintName="resource_file_deployed_unique_constraint"/>
+    </changeSet>
 </databaseChangeLog>

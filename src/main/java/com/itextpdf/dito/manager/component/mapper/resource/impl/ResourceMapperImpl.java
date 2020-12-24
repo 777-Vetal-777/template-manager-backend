@@ -35,6 +35,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             result.setVersion(fileEntity.getVersion());
             result.setFileName(fileEntity.getFileName());
             result.setComment(fileEntity.getComment());
+            result.setDeployed(fileEntity.getDeployed());
         }
 
         final Collection<ResourceLogEntity> logs = entity.getResourceLogs();
