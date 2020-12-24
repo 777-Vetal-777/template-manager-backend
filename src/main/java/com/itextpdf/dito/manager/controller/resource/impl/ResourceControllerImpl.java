@@ -57,7 +57,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment, final String type, final MultipartFile file) {
         final ResourceTypeEnum resourceTypeEnum = getResourceType(type);
         checkFileExtensionIsSupported(file);
-        checkFileSizeIsNotExceedLimit(file.getSize());
+        checkFileSizeIsNotExceededLimit(file.getSize());
         final byte[] data = getFileBytes(file);
         final ResourceEntity resourceEntity = resourceService.createNewVersion(name, resourceTypeEnum, data, file.getOriginalFilename(), principal.getName(), comment);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
@@ -86,7 +86,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type, final MultipartFile multipartFile) {
         final ResourceTypeEnum resourceTypeEnum = getResourceType(type);
         checkFileExtensionIsSupported(multipartFile);
-        checkFileSizeIsNotExceedLimit(multipartFile.getSize());
+        checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         byte[] data = getFileBytes(multipartFile);
 
         final ResourceEntity resourceEntity = resourceService.create(name, resourceTypeEnum, data, multipartFile.getOriginalFilename(), principal.getName());
@@ -112,7 +112,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         return ResourceTypeEnum.valueOf(type);
     }
 
-    private void checkFileSizeIsNotExceedLimit(final Long fileSize) {
+    private void checkFileSizeIsNotExceededLimit(final Long fileSize) {
         if (fileSize > sizePictureLimit) {
             throw new ResourceFileSizeExceedLimitException(fileSize);
         }

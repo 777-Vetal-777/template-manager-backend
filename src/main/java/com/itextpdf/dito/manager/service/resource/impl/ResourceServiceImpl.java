@@ -67,7 +67,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         logEntity.setDate(new Date());
         logEntity.setResource(resourceEntity);
 
-
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
         fileEntity.setResource(resourceEntity);
         fileEntity.setVersion(1L);
@@ -118,7 +117,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
         final ResourceEntity existingResource = getResource(name, entity.getType());
         if(!existingResource.getName().equals(entity.getName())){
-            throwExceptiontIfResourceExist(entity);
+            throwExceptionIfResourceExist(entity);
         }
         existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
@@ -178,7 +177,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
-    private void throwExceptiontIfResourceExist(final ResourceEntity entity) {
+    private void throwExceptionIfResourceExist(final ResourceEntity entity) {
         if (resourceRepository.existsByNameEqualsAndTypeEquals(entity.getName(), entity.getType())) {
             throw new ResourceAlreadyExistsException(entity.getName());
         }
