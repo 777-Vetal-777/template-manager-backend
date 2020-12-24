@@ -65,8 +65,8 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="006-add-unique-constraint-to-deployed-column-in-resource-file-table" author="Yaroslav_Maievskiy">
-        <addUniqueConstraint tableName="resource_file" columnNames="deployed" constraintName="resource_file_deployed_unique_constraint"/>
+    <changeSet id="006-add-notnull-constraint-to-deployed-column-in-resource-file-table" author="Yaroslav_Maievskiy">
+        <addNotNullConstraint tableName="resource_file" columnName="deployed" constraintName="resource_file_deployed_not_null_constraint"/>
     </changeSet>
       
 </databaseChangeLog>
