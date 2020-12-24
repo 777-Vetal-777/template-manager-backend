@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration.crud;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,7 +78,19 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(template.isPresent());
 
         String encodedTemplateName = Base64.getEncoder().encodeToString(request.getName().getBytes());
-        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").isNotEmpty())
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
+                .andExpect(jsonPath("createdBy").isNotEmpty())
+                .andExpect(jsonPath("createdOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty());
+
+        TemplateUpdateRequestDTO updateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-update-request.json"), TemplateUpdateRequestDTO.class);
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
+                .content(objectMapper.writeValueAsString(updateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -86,8 +100,9 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
-                .andExpect(jsonPath("description").isEmpty());
+                .andExpect(jsonPath("description").isNotEmpty());
     }
+
 
     @Test
     public void createTemplate_WhenTemplateWithSameNameExists_ThenResponseIsBadRequest() throws Exception {

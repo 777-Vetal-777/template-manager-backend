@@ -26,6 +26,7 @@ public class TemplateEntity {
     private String name;
     @Enumerated(EnumType.STRING)
     private TemplateTypeEnum type;
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " data_collection_id")
@@ -89,5 +90,13 @@ public class TemplateEntity {
 
     public void setInstance(InstanceEntity instance) {
         this.instance = instance;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

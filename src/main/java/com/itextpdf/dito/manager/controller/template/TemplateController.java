@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -77,5 +79,12 @@ public interface TemplateController {
     @Operation(summary = "Get template metadata", description = "Get template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> get(@Parameter(description = "Template name encoded with base64.") @PathVariable("name") String name);
+
+    @PatchMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Update template metadata", description = "Update template metadata",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<TemplateMetadataDTO> update(@Parameter(description = "Template name encoded with base64.") @PathVariable("name") String name,
+                                               @RequestBody TemplateUpdateRequestDTO templateUpdateRequestDTO,
+                                               Principal principal);
 
 }

@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.mapper.template.impl;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateFileEntity;
@@ -35,6 +36,14 @@ public class TemplateMapperImpl implements TemplateMapper {
                 ? entity.getDataCollection().getName()
                 : null);
         return result;
+    }
+
+    @Override
+    public TemplateEntity map(final TemplateUpdateRequestDTO dto) {
+        final TemplateEntity entity = new TemplateEntity();
+        entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
+        return entity;
     }
 
     @Override

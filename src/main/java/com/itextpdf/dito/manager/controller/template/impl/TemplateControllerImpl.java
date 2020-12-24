@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -36,8 +37,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final DependencyMapper dependencyMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
-            final DataCollectionService dataCollectionService, final TemplateMapper templateMapper,
-            final DependencyMapper dependencyMapper) {
+                                  final DataCollectionService dataCollectionService, final TemplateMapper templateMapper,
+                                  final DependencyMapper dependencyMapper) {
         this.templateService = templateService;
         this.dataCollectionService = dataCollectionService;
         this.templateMapper = templateMapper;
@@ -46,7 +47,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> create(@Valid final TemplateCreateRequestDTO templateCreateRequestDTO,
-            final Principal principal) {
+                                              final Principal principal) {
         final TemplateEntity templateEntity = templateService
                 .create(templateCreateRequestDTO.getName(), templateCreateRequestDTO.getType(),
                         templateCreateRequestDTO.getDataCollectionName(), principal.getName());
@@ -55,8 +56,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<Page<TemplateDTO>> listTemplateTypes(final Pageable pageable,
-            final TemplateFilter templateFilter,
-            final String searchParam) {
+                                                               final TemplateFilter templateFilter,
+                                                               final String searchParam) {
         return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable, templateFilter, searchParam)),
                 HttpStatus.OK);
     }
@@ -68,9 +69,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependencies(final String name,
-            final Pageable pageable,
-            final DependencyFilterDTO dependencyFilterDTO,
-            final String searchParam) {
+                                                                final Pageable pageable,
+                                                                final DependencyFilterDTO dependencyFilterDTO,
+                                                                final String searchParam) {
         final List<DependencyDTO> dependencies = new ArrayList<>();
 
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
@@ -85,5 +86,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<TemplateMetadataDTO> get(final String name) {
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.get(decodeBase64(name))), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<TemplateMetadataDTO> update(final String name, final TemplateUpdateRequestDTO templateUpdateRequestDTO, final Principal principal) {
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.update(decodeBase64(name), templateMapper.map(templateUpdateRequestDTO), principal.getName())), HttpStatus.OK);
     }
 }

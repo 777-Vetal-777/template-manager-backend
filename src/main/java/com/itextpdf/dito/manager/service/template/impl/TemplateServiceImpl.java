@@ -19,12 +19,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -38,10 +40,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final DataCollectionRepository dataCollectionRepository;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
-            final TemplateRepository templateRepository,
-            final UserService userService,
-            final TemplateLoader templateLoader,
-            final DataCollectionRepository dataCollectionRepository) {
+                               final TemplateRepository templateRepository,
+                               final UserService userService,
+                               final TemplateLoader templateLoader,
+                               final DataCollectionRepository dataCollectionRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -52,7 +54,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     @Transactional
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
-            final String dataCollectionName, final String email) {
+                                 final String dataCollectionName, final String email) {
         throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         TemplateEntity templateEntity = new TemplateEntity();
@@ -99,13 +101,13 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                 ? templateRepository
                 .filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
                 : templateRepository
-                        .search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate,
-                                editedOnEndDate, searchParam.toLowerCase());
+                .search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate,
+                        editedOnEndDate, searchParam.toLowerCase());
     }
 
     @Override
     public TemplateEntity get(final String name) {
-        return templateRepository.findByName(name).orElseThrow(() -> new TemplateNotFoundException(name));
+        return findByName(name);
     }
 
     @Override
@@ -113,10 +115,27 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return TemplateRepository.SUPPORTED_SORT_FIELDS;
     }
 
+    @Override
+    public TemplateEntity update(final String name, final TemplateEntity updatedTemplateEntity, final String userEmail) {
+
+        throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
+        final TemplateEntity existingTemplate = findByName(name);
+        if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
+            existingTemplate.setName(updatedTemplateEntity.getName());
+        }
+        existingTemplate.setDescription(updatedTemplateEntity.getDescription());
+        //TODO add logging version https://jira.itextsupport.com/browse/DTM-755
+        return templateRepository.save(existingTemplate);
+    }
+
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
             throw new TemplateAlreadyExistsException(templateName);
         }
+    }
+
+    private TemplateEntity findByName(final String name) {
+        return templateRepository.findByName(name).orElseThrow(() -> new TemplateNotFoundException(name));
     }
 
     private Pageable updateSort(final Pageable pageable) {
