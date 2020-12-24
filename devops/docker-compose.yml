@@ -4,7 +4,7 @@ services:
   backend:
     container_name: backend
     restart: always    
-    image: ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+    image: ${REGISTRY}/${projectName}-${WORKING_ENV}:latest
     ports:
       - "8080:8080"
     environment:
@@ -35,6 +35,6 @@ services:
   db:
     container_name: db
     restart: always
-    image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+    image: ${REGISTRY}/${dbName}-${WORKING_ENV}:latest
     ports:
       - "5432:5432"
