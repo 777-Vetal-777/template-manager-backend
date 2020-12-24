@@ -15,6 +15,7 @@ import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                  final String dataCollectionName, final String email) {
         throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
-        TemplateEntity templateEntity = new TemplateEntity();
+        final TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateName);
         templateEntity.setType(templateTypeEnum);
         if (!StringUtils.isEmpty(dataCollectionName)) {
@@ -65,15 +66,15 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                     dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
                             () -> new DataCollectionNotFoundException(dataCollectionName)));
         }
-        final TemplateEntity persistedTemplateEntity = templateRepository.save(templateEntity);
 
-        TemplateFileEntity templateFileEntity = new TemplateFileEntity();
+        final TemplateFileEntity templateFileEntity = new TemplateFileEntity();
         templateFileEntity.setAuthor(userService.findByEmail(email));
+        templateFileEntity.setVersion(new Date());
         templateFileEntity.setData(templateLoader.load());
-        templateFileEntity.setTemplate(persistedTemplateEntity);
-        templateFileRepository.save(templateFileEntity);
+        templateFileEntity.setTemplate(templateEntity);
+        templateEntity.setFiles(Arrays.asList(templateFileEntity));
 
-        return persistedTemplateEntity;
+        return templateRepository.save(templateEntity);
     }
 
     @Override
