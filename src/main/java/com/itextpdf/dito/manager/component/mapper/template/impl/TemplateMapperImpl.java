@@ -59,7 +59,6 @@ public class TemplateMapperImpl implements TemplateMapper {
                     .append(lastFileVersion.getAuthor().getLastName())
                     .toString());
             result.setModifiedOn(lastFileVersion.getVersion());
-            result.setDescription(lastFileVersion.getComment());
 
             final TemplateFileEntity firstFileVersion = templateFiles.get(templateFiles.size() - 1);
             result.setCreatedBy(new StringBuilder()
@@ -69,6 +68,7 @@ public class TemplateMapperImpl implements TemplateMapper {
                     .toString());
             result.setCreatedOn(firstFileVersion.getVersion());
         }
+        result.setDescription(entity.getDescription());
         final DataCollectionEntity dataCollection = entity.getDataCollection();
         result.setDataCollection(Objects.nonNull(dataCollection)
                 ? dataCollection.getName()
