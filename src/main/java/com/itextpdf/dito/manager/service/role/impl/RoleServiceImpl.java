@@ -147,9 +147,6 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
                     if (sortParam.getProperty().equals("users")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "users.size");
                     }
-                    if (sortParam.getProperty().equals("type")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "type.name");
-                    }
                     return sortParam;
                 })
                 .collect(Collectors.toList()));

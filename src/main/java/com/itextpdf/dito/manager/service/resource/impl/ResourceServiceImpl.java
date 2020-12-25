@@ -222,9 +222,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if (sortParam.getProperty().equals("type")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "type");
-                    }
                     if (sortParam.getProperty().equals("modifiedBy")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.author.firstName");
                     }

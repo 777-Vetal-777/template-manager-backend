@@ -141,9 +141,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private Pageable updateSort(final Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if (sortParam.getProperty().equals("type")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "type.name");
-                    }
                     if (sortParam.getProperty().equals("dataCollection")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "dataCollection.name");
                     }
