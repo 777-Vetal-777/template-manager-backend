@@ -227,6 +227,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
+                    if (sortParam.getProperty().equals("active")) {
+                        //W/A for sorting: on FE false shows as NOT ACTIVE, TRUE as ACTIVE.
+                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.DESC, "active");
+                    }
                     if (sortParam.getProperty().equals("roles")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "roles.size");
                     }
