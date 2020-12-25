@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @RequestMapping(ResourceController.BASE_NAME)
 @Tag(name = "resource", description = "resource API")
@@ -41,11 +42,15 @@ public interface ResourceController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/resources";
 
+    String PAGEABLE_ENDPOINT = "/pageable";
+
     String RESOURCE_PATH_VARIABLE = "name";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
     String RESOURCE_VERSION_ENDPOINT = "/versions";
+    String RESOURCE_DEPENDENCIES_ENDPOINT = "/dependencies";
     String RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_VERSION_ENDPOINT;
-    String RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
+    String RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT;
+    String RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT + PAGEABLE_ENDPOINT;
 
     @GetMapping(RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of resource by name.", description = "Get a list of resource versions using the resource name and resource type, sorting and filters.",
@@ -53,7 +58,7 @@ public interface ResourceController {
     ResponseEntity<Page<ResourceDTO>> getVersions(Principal principal,
                                                   Pageable pageable,
                                                   @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-                                                  @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet",required = true) @RequestParam(name = "type") ResourceTypeEnum type,
+                                                  @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true) @RequestParam(name = "type") ResourceTypeEnum type,
                                                   @ParameterObject VersionFilter versionFilter,
                                                   @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
@@ -69,11 +74,11 @@ public interface ResourceController {
     ResponseEntity<ResourceDTO> create(Principal principal,
                                        @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
-                                       @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet",required = true, style = ParameterStyle.FORM) @RequestPart String type,
-                                       @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.",required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
+                                       @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true, style = ParameterStyle.FORM) @RequestPart String type,
+                                       @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
-    @GetMapping(RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
-    @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving list of information about resource dependencies using sorting and filters.",
+    @GetMapping(RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving resource dependencies page using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about one resource dependencies is prepared according to the specified conditions.")
     ResponseEntity<Page<DependencyDTO>> listDependencies(Pageable pageable,
@@ -81,6 +86,12 @@ public interface ResourceController {
                                                          @ParameterObject DependencyFilterDTO dependencyFilterDTO,
                                                          @Parameter(description = "Universal search string which filter dependencies names.")
                                                          @RequestParam(name = "search", required = false) String searchParam);
+
+    @GetMapping(RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving list of information about resource dependencies.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Information about resource dependencies")
+    ResponseEntity<List<DependencyDTO>> listDependencies(@Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name);
 
     @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get resource", description = "Get resource",

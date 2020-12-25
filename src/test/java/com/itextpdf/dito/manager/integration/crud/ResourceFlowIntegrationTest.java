@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
+import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
@@ -67,6 +68,20 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE,
                 Base64.getEncoder().encodeToString(NAME.getBytes()))
                 .param("type", ResourceTypeEnum.IMAGE.name()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetDependencies() throws Exception {
+        final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetDependenciesPageable() throws Exception {
+        final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName))
                 .andExpect(status().isOk());
     }
 }

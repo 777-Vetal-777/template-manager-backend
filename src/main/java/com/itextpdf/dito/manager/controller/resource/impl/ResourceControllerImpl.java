@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -66,6 +67,11 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependencies(final Pageable pageable, final String name, final DependencyFilterDTO dependencyFilterDTO, final String searchParam) {
         return null;
+    }
+
+    @Override
+    public ResponseEntity<List<DependencyDTO>> listDependencies(String name) {
+        return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
     }
 
     @Override
