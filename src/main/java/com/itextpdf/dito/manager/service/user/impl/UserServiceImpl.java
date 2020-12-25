@@ -205,7 +205,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final List<RoleEntity> result = new ArrayList<>();
 
         for (final String role : roles) {
-            final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue(role)
+            final RoleEntity roleEntity = roleRepository.findByName(role)
                     .orElseThrow(() -> new RoleNotFoundException(role));
             result.add(roleEntity);
         }
@@ -227,10 +227,6 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if (sortParam.getProperty().equals("active")) {
-                        //W/A for sorting: on FE false shows as NOT ACTIVE, TRUE as ACTIVE.
-                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC, "active");
-                    }
                     if (sortParam.getProperty().equals("roles")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "roles.size");
                     }
