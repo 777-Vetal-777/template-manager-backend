@@ -4,7 +4,7 @@ services:
   backend:
     container_name: backend
     restart: always    
-    image: ${REGISTRY}/${projectName}-${WORKING_ENV}:latest
+    image: ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
     environment:
       - GF_FRONTEND_APP_BASE_URL=${GF_FRONTEND_APP_BASE_URL}
       - DITO_MANAGER_FRONTEND_APP_BASE_URL=${DITO_MANAGER_FRONTEND_APP_BASE_URL}
@@ -33,4 +33,4 @@ services:
   db:
     container_name: db
     restart: always
-    image: ${REGISTRY}/${dbName}-${WORKING_ENV}:latest
+    image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
