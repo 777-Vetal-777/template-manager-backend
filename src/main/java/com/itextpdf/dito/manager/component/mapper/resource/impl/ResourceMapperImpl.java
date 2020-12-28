@@ -1,20 +1,26 @@
 package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
+import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Objects;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceMapperImpl implements ResourceMapper {
+    private final RoleMapper roleMapper;
+
+    public ResourceMapperImpl(final RoleMapper roleMapper) {
+        this.roleMapper = roleMapper;
+    }
 
     @Override
     public ResourceDTO map(final ResourceEntity entity) {
@@ -44,9 +50,14 @@ public class ResourceMapperImpl implements ResourceMapper {
             result.setModifiedOn(log.getDate());
             final UserEntity updatedBy = log.getAuthor();
             if (Objects.nonNull(updatedBy)) {
-                result.setModifiedBy(new StringBuilder(updatedBy.getFirstName()).append(" ").append(updatedBy.getLastName()).toString());
+                result.setModifiedBy(
+                        new StringBuilder(updatedBy.getFirstName()).append(" ").append(updatedBy.getLastName())
+                                .toString());
             }
         }
+
+        result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+
         return result;
     }
 

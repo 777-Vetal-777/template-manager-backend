@@ -23,7 +23,8 @@
         </update>
     </changeSet>
 
-    <changeSet id="004-set-default-values-for-optional-for-custom-role-column-in-permission-table" author="Vadim_Sorokin">
+    <changeSet id="004-set-default-values-for-optional-for-custom-role-column-in-permission-table"
+               author="Vadim_Sorokin">
         <update tableName="permission">
             <column name="optional_for_custom_role" value="true"/>
             <where>name in ('E6_US32_CREATE_NEW_DATA_COLLECTIONS_USING_JSON',
@@ -55,7 +56,8 @@
                 'E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE',
                 'E9_US81_PREVIEW_TEMPLATE_STANDARD',
                 'E9_US24_EXPORT_TEMPLATE_DATA',
-                'E9_US25_IMPORT_TEMPLATE_DATA')</where>
+                'E9_US25_IMPORT_TEMPLATE_DATA')
+            </where>
         </update>
     </changeSet>
 
@@ -66,7 +68,21 @@
     </changeSet>
 
     <changeSet id="006-add-notnull-constraint-to-deployed-column-in-resource-file-table" author="Yaroslav_Maievskiy">
-        <addNotNullConstraint tableName="resource_file" columnName="deployed" constraintName="resource_file_deployed_not_null_constraint"/>
+        <addNotNullConstraint tableName="resource_file" columnName="deployed"
+                              constraintName="resource_file_deployed_not_null_constraint"/>
     </changeSet>
-      
+
+    <changeSet id="007-add-resource-role-table" author="Vadim_Sorokin">
+        <createTable tableName="resource_role">
+            <column name="resource_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="resource_role_resource_id_not_null_constraint"
+                             foreignKeyName="fk_resource_role_to_resource" references="resource(id)"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="resource_role_role_id_not_null_constraint"
+                             foreignKeyName="fk_resource_role_to_role" references="role(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

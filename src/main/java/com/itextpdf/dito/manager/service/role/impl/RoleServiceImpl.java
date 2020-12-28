@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.role.impl;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
 import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
@@ -11,9 +12,7 @@ import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
-import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
-import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
@@ -21,14 +20,12 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Component
@@ -40,11 +37,21 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final PermissionService permissionService;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-                           final UserService userService,
-                           final PermissionService permissionService) {
+            final UserService userService,
+            final PermissionService permissionService) {
         this.roleRepository = roleRepository;
         this.userService = userService;
         this.permissionService = permissionService;
+    }
+
+    @Override
+    public RoleEntity get(final String name) {
+        return roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+    }
+
+    @Override
+    public Page<RoleEntity> getByResource(final Pageable pageable, final ResourceEntity resource) {
+        return roleRepository.findAllByResources(pageable, resource);
     }
 
     @Override

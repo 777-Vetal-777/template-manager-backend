@@ -1,7 +1,13 @@
 package com.itextpdf.dito.manager.entity.resource;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
@@ -16,7 +22,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -71,6 +76,15 @@ public class ResourceEntity {
             "select max(log.date) from manager.resource_log log where log.resource_id = id)" +
             ")")
     private ResourceLogEntity latestLogRecord;
+
+    @ManyToMany
+    @JoinTable(
+            name = "resource_role",
+            joinColumns = @JoinColumn(
+                    name = "resource_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id"))
+    private Set<RoleEntity> appliedRoles = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -150,5 +164,13 @@ public class ResourceEntity {
 
     public void setLatestFile(ResourceFileEntity latestFile) {
         this.latestFile = latestFile;
+    }
+
+    public Set<RoleEntity> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
+        this.appliedRoles = appliedRoles;
     }
 }

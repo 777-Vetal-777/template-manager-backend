@@ -2,6 +2,9 @@ package com.itextpdf.dito.manager.repository.role;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+
+import javax.management.relation.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +22,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "users");
 
     Optional<RoleEntity> findByName(String name);
+
+    Page<RoleEntity> findAllByResources(Pageable pageable, ResourceEntity resourceEntity);
 
     @Query(value = "select role from RoleEntity role "
             + "left join role.users user "

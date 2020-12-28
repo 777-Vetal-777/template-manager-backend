@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -13,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -36,8 +37,12 @@ public class RoleEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "permission_id"))
     private Set<PermissionEntity> permissions = new HashSet<>();
+
     @Enumerated(EnumType.STRING)
     private RoleTypeEnum type;
+
+    @ManyToMany(mappedBy = "appliedRoles")
+    private Set<ResourceEntity> resources = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -77,5 +82,13 @@ public class RoleEntity {
 
     public void setType(RoleTypeEnum type) {
         this.type = type;
+    }
+
+    public Set<ResourceEntity> getResources() {
+        return resources;
+    }
+
+    public void setResources(Set<ResourceEntity> resources) {
+        this.resources = resources;
     }
 }
