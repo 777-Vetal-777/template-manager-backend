@@ -56,7 +56,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
             + "or LOWER(template.type) like CONCAT('%',:search,'%') "
             + "or LOWER(file.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.author.lastName) like CONCAT('%',:search,'%')) ")
+            + "or LOWER(file.author.lastName) like CONCAT('%',:search,'%')) "
+            + "or CAST(CAST(file.version as date) as string) like CONCAT('%',:search,'%') ")
     Page<TemplateEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("modifiedBy") @Nullable String modifiedBy,

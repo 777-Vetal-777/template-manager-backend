@@ -30,7 +30,9 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
     String SEARCH_CONDITION = "(LOWER(resource.name) like CONCAT('%',:search,'%') "
             + "or LOWER(resource.latestFile.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(resource.latestLogRecord.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(resource.latestLogRecord.author.lastName) like CONCAT('%',:search,'%')) ";
+            + "or LOWER(resource.latestLogRecord.author.lastName) like CONCAT('%',:search,'%')) "
+            + "or CAST(CAST(resource.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
+
 
     String PAGEABLE_FILTER_QUERY = SELECT_CLAUSE + " where " + FILTER_CONDITION;
     String PAGEABLE_SEARCH_AND_FILTER_QUERY = PAGEABLE_FILTER_QUERY + " and" + SEARCH_CONDITION;

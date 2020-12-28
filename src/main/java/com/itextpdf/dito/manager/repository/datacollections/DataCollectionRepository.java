@@ -47,7 +47,8 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
             + "and (LOWER(dc.name) like LOWER(CONCAT('%',:search,'%')) "
             + "or LOWER(dc.author.lastName) like LOWER(CONCAT('%',:search,'%')) "
             + "or LOWER(dc.author.firstName) like LOWER(CONCAT('%',:search,'%')) "
-            + "or LOWER(dc.type) like LOWER(CONCAT('%',:search,'%'))) ")
+            + "or LOWER(dc.type) like LOWER(CONCAT('%',:search,'%'))) "
+            + "or CAST(CAST(dc.modifiedOn as date) as string) like CONCAT('%',:search,'%')")
     Page<DataCollectionEntity> search(Pageable pageable,
                                       @Param("name") @Nullable String name,
                                       @Param("modifiedBy") @Nullable String modifiedBy,
