@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 
+import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.LockedException;
@@ -28,5 +29,10 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ErrorResponseDTO> lockedExceptionHandler(final LockedException ex) {
         return buildErrorResponse(ex, "Account is locked.", HttpStatus.LOCKED);
+    }
+
+    @ExceptionHandler(UserNotFoundOrNotActiveException.class)
+    public ResponseEntity<ErrorResponseDTO> userNotFoundExceptionHandler(final UserNotFoundOrNotActiveException ex) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
     }
 }
