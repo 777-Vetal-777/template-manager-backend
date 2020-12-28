@@ -229,7 +229,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("active")) {
                         //W/A for sorting: on FE false shows as NOT ACTIVE, TRUE as ACTIVE.
-                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.DESC, "active");
+                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC, "active");
                     }
                     if (sortParam.getProperty().equals("roles")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "roles.size");
