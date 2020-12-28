@@ -26,7 +26,7 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
             + "where "
             //filtering
             + "(:name='' or LOWER(dc.name) like CONCAT('%',:name,'%')) "
-            + "and (:modifiedBy='' or LOWER(dc.author.firstName) like CONCAT('%',:modifiedBy,'%') or LOWER(dc.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(dc.author.firstName, ' ',dc.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or dc.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (COALESCE(:types) is null or dc.type in (:types))")
     Page<DataCollectionEntity> filter(Pageable pageable,
@@ -40,13 +40,12 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
             + "where "
             //filtering
             + "(:name='' or LOWER(dc.name) like CONCAT('%',:name,'%')) "
-            + "and (:modifiedBy='' or LOWER(dc.author.firstName) like CONCAT('%',:modifiedBy,'%') or LOWER(dc.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(dc.author.firstName, ' ', dc.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or dc.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (COALESCE(:types) is null or dc.type in (:types)) "
             //search
             + "and (LOWER(dc.name) like LOWER(CONCAT('%',:search,'%')) "
-            + "or LOWER(dc.author.lastName) like LOWER(CONCAT('%',:search,'%')) "
-            + "or LOWER(dc.author.firstName) like LOWER(CONCAT('%',:search,'%')) "
+            + "or LOWER(CONCAT(dc.author.firstName, ' ', dc.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
             + "or LOWER(dc.type) like LOWER(CONCAT('%',:search,'%'))) "
             + "or CAST(CAST(dc.modifiedOn as date) as string) like CONCAT('%',:search,'%')")
     Page<DataCollectionEntity> search(Pageable pageable,
