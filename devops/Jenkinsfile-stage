@@ -17,10 +17,34 @@ pipeline {
         registryHost = "https://nexus-docker.andersenlab.dev"
         REGISTRY = "nexus-docker.andersenlab.dev"
         registryCredentials = "nexus_andersen"
-        hostIP="10.10.15.15"
-        WORKING_ENV = "demo"
-        dockerCredentials="docker-demo-itext"
+        hostIP="10.10.15.109"
+        WORKING_ENV = "stage"
+        dockerCredentials="docker-stage-itext"
         SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
+
+        // === ENV FOR DEPLOY ===
+        GF_FRONTEND_APP_BASE_URL='frontend'
+        DITO_MANAGER_FRONTEND_APP_BASE_URL='frontend'
+        SPRING_PROFILES_ACTIVE='prod'
+        DITO_MANAGER_JWT_PRIVATE_KEY='pEBNLmtEX657LTgwgTR624GLy5qES3bH'
+        DITO_MANAGER_ACCESS_TOKEN_TIME_TO_LIVE='1800'
+        DITO_MANAGER_REFRESH_TOKEN_TIME_TO_LIVE='86400'
+        DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS='5'
+        DITO_MANAGER_CORS_ALLOWED_PATHS='/**'
+        DITO_MANAGER_CORS_ALLOWED_ORIGINS='*'
+        DITO_MANAGER_CORS_ALLOWED_METHODS='*'
+        DITO_MANAGER_DATABASE_URL='db:5432'
+        DITO_MANAGER_DATABASE_NAME='dito'
+        DITO_MANAGER_DATABASE_USERNAME='postgres'
+        DITO_MANAGER_DATABASE_PASSWORD='1111'
+        DITO_MANAGER_MAILING_ENABLE='true'
+        DITO_MANAGER_SMTP_HOST='smtp.gmail.com'
+        DITO_MANAGER_SMTP_PORT='587'
+        DITO_MANAGER_SMTP_USERNAME='vadzim.sarokin.tech.acc@gmail.com'
+        DITO_MANAGER_SMTP_PASSWORD='abDeQgrgX99xaK5h'
+        DITO_MANAGER_SMTP_AUTH='true'
+        DITO_MANAGER_SMTP_TLS_ENABLE='true'
+        //=== END ====
     }
     agent{
         label "master"
@@ -31,7 +55,7 @@ pipeline {
                 script {
                   env.RELEASE_VER = sh(script: "cat release", returnStdout: true).trim()
                   dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
-                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"   
+                  sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"
                   dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
                 }
             }
@@ -55,14 +79,16 @@ pipeline {
                 script{
                     docker.withRegistry(registryHost, registryCredentials){
                         dockerImage.push()
+                        dockerImage.push('latest')
                         dockerImageDB.push()
+                        dockerImageDB.push('latest')
                     }
                 }
             }
         }
         stage("Remove unused docker image"){
             steps{
-                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1''' 
+                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
                 sh '''docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
             }
         }
