@@ -8,12 +8,14 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
+import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
@@ -91,5 +93,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<TemplateMetadataDTO> update(final String name, final TemplateUpdateRequestDTO templateUpdateRequestDTO, final Principal principal) {
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.update(decodeBase64(name), templateMapper.map(templateUpdateRequestDTO), principal.getName())), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Page<TemplateVersionDTO>> getVersions(final Pageable pageable, final String name, final VersionFilter versionFilter, final String searchParam) {
+        return new ResponseEntity<>(Page.empty(), HttpStatus.OK);
     }
 }

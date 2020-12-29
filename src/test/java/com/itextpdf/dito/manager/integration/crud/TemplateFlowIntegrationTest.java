@@ -11,7 +11,6 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -131,9 +130,13 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testGetAllTemplateTypes() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void test_getVersions() throws Exception{
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, "name"))
                 .andExpect(status().isOk());
     }
 }

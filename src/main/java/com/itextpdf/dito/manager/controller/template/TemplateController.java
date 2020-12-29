@@ -5,11 +5,13 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 
+import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,8 +41,11 @@ public interface TemplateController {
 
     String TEMPLATE_TYPES_ENDPOINT = "/types";
     String TEMPLATE_PATH_VARIABLE = "name";
+    String TEMPLATE_VERSION_ENDPOINT = "/versions";
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
+    String TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_VERSION_ENDPOINT;
+
 
     @PostMapping
     @Operation(summary = "Create template", description = "Create new template",
@@ -86,5 +91,14 @@ public interface TemplateController {
     ResponseEntity<TemplateMetadataDTO> update(@Parameter(description = "Template name encoded with base64.") @PathVariable("name") String name,
                                                @RequestBody TemplateUpdateRequestDTO templateUpdateRequestDTO,
                                                Principal principal);
+
+    @GetMapping(TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of versions of template by name.", description = "Get a list of template versions using the template name and template type, sorting and filters.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<TemplateVersionDTO>> getVersions(Pageable pageable,
+                                                         @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                         @ParameterObject VersionFilter versionFilter,
+                                                         @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+
 
 }
