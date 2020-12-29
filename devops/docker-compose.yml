@@ -3,43 +3,34 @@ services:
   #=========== BACKEND ===============      
   backend:
     container_name: backend
+    restart: always    
     image: ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-    ports:
-      - "8080:8080"
     environment:
-      - "DITO_MANAGER_FRONTEND_APP_BASE_URL=${hostIP}" # Frontend IP address
-      - "SPRING_PROFILES_ACTIVE=prod" # Used profile (Default=prod)
-      # === JWT access token settings ===
-      - "DITO_MANAGER_JWT_PRIVATE_KEY=pEBNLmtEX657LTgwgTR624GLy5qES3bH" # JWT private key
-      - "DITO_MANAGER_ACCESS_TOKEN_TIME_TO_LIVE=1800" # Access token time to live (Default=1800)
-      - "DITO_MANAGER_REFRESH_TOKEN_TIME_TO_LIVE=86400" # Refresh token time to live (Default=86400)
-      - "DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS=5" # Maximum failed login attempts (Default=5)
-      # === CORS settings ===
-      - "DITO_MANAGER_CORS_ALLOWED_PATHS=/**" # CORS allowed path (Default=/**)
-      - "DITO_MANAGER_CORS_ALLOWED_ORIGINS=*" # CORS allowed origins (Default=*)
-      - "DITO_MANAGER_CORS_ALLOWED_METHODS=*" # CORS allowed methods (Default=*)
-      # === Database settings ===
-      - "DITO_MANAGER_DATABASE_URL=${hostIP}:5432" # Used dadabase URL and port (Default port=5432)
-      - "DITO_MANAGER_DATABASE_NAME=dito" # Database name
-      - "DITO_MANAGER_DATABASE_USERNAME=postgres" # Database username
-      - "DITO_MANAGER_DATABASE_PASSWORD=1111" # Database password
-      # === Mailing system settings ===
-      - "DITO_MANAGER_MAILING_ENABLE=true" # Enable or disable mailing system (Default=enable)
-      - "DITO_MANAGER_SMTP_HOST=smtp.gmail.com" # SMTP server URL
-      - "DITO_MANAGER_SMTP_PORT=587" # SMTP server port (Default=587)
-      - "DITO_MANAGER_SMTP_USERNAME=vadzim.sarokin.tech.acc@gmail.com" # SMTP username
-      - "DITO_MANAGER_SMTP_PASSWORD=65[qXN?vq6k:fB$y" # SMTP password
-      - "DITO_MANAGER_SMTP_AUTH=true" # SMTP authentication requirement (Default=true)
-      - "DITO_MANAGER_SMTP_TLS_ENABLE=true" # SMTP TLS requrement (Default=true)
+      - GF_FRONTEND_APP_BASE_URL=${GF_FRONTEND_APP_BASE_URL}
+      - DITO_MANAGER_FRONTEND_APP_BASE_URL=${DITO_MANAGER_FRONTEND_APP_BASE_URL}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - DITO_MANAGER_JWT_PRIVATE_KEY=${DITO_MANAGER_JWT_PRIVATE_KEY}
+      - DITO_MANAGER_ACCESS_TOKEN_TIME_TO_LIVE=${DITO_MANAGER_ACCESS_TOKEN_TIME_TO_LIVE}
+      - DITO_MANAGER_REFRESH_TOKEN_TIME_TO_LIVE=${DITO_MANAGER_REFRESH_TOKEN_TIME_TO_LIVE}
+      - DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS=${DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS}
+      - DITO_MANAGER_CORS_ALLOWED_PATHS=${DITO_MANAGER_CORS_ALLOWED_PATHS}
+      - DITO_MANAGER_CORS_ALLOWED_ORIGINS=${DITO_MANAGER_CORS_ALLOWED_ORIGINS}
+      - DITO_MANAGER_CORS_ALLOWED_METHODS=${DITO_MANAGER_CORS_ALLOWED_METHODS}
+      - DITO_MANAGER_DATABASE_URL=${DITO_MANAGER_DATABASE_URL}
+      - DITO_MANAGER_DATABASE_NAME=${DITO_MANAGER_DATABASE_NAME}
+      - DITO_MANAGER_DATABASE_USERNAME=${DITO_MANAGER_DATABASE_USERNAME}
+      - DITO_MANAGER_DATABASE_PASSWORD=${DITO_MANAGER_DATABASE_PASSWORD}
+      - DITO_MANAGER_MAILING_ENABLE=${DITO_MANAGER_MAILING_ENABLE}
+      - DITO_MANAGER_SMTP_HOST=${DITO_MANAGER_SMTP_HOST}
+      - DITO_MANAGER_SMTP_PORT=${DITO_MANAGER_SMTP_PORT}
+      - DITO_MANAGER_SMTP_USERNAME=${DITO_MANAGER_SMTP_USERNAME}
+      - DITO_MANAGER_SMTP_PASSWORD=${DITO_MANAGER_SMTP_PASSWORD}
+      - DITO_MANAGER_SMTP_AUTH=${DITO_MANAGER_SMTP_AUTH}
+      - DITO_MANAGER_SMTP_TLS_ENABLE=${DITO_MANAGER_SMTP_TLS_ENABLE}
     depends_on:
       - db
   #=========== DATABASE ===============
   db:
     container_name: db
+    restart: always
     image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-    ports:
-      - "5432:5432"
-      environment:
-      - "POSTGRES_DB=dito" # Database name
-      - "POSTGRES_USER=postgres" # Database username
-      - "POSTGRES_PASSWORD=1111" # Database password
