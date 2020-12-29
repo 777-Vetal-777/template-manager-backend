@@ -108,5 +108,4 @@ public interface TemplateController {
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
     ResponseEntity<byte[]> preview(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
-
 }
