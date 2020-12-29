@@ -19,6 +19,7 @@ import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,7 +38,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_create_get_and_update() throws Exception {
+    public void test_create_get_update_delete() throws Exception {
         final MockMultipartFile file = new MockMultipartFile("resource", "any-name.png", "text/plain", "{\"file\":\"data\"}".getBytes());
         final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
         final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", TYPE.getBytes());
@@ -69,6 +70,20 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 Base64.getEncoder().encodeToString(NAME.getBytes()))
                 .param("type", ResourceTypeEnum.IMAGE.name()))
                 .andExpect(status().isOk());
+        
+        //DELETE by name
+        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE,
+                Base64.getEncoder().encodeToString(NAME.getBytes()))
+                .param("type", ResourceTypeEnum.IMAGE.name()))
+                .andExpect(status().isAccepted());
+
+        //repeat DELETE by name
+        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE,
+                Base64.getEncoder().encodeToString(NAME.getBytes()))
+                .param("type", ResourceTypeEnum.IMAGE.name()))
+                .andExpect(status().isNotFound());
+        
+        
     }
 
     @Test
