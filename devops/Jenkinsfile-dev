@@ -84,7 +84,7 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            sh "docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
+                            sh "docker-compose --file ${WORKSPACE}/devops/docker-compose-dev.yml up --force-recreate -d"
                         }
                     }
                 }
