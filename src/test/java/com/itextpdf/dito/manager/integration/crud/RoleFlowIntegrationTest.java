@@ -42,8 +42,8 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-        assertTrue(roleRepository.findByName(request.getName()).isPresent());
-        testRole = roleRepository.findByName(request.getName()).get();
+        assertTrue(roleRepository.findByNameAndMasterTrue(request.getName()).isPresent());
+        testRole = roleRepository.findByNameAndMasterTrue(request.getName()).get();
     }
 
     @Test
@@ -81,6 +81,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         testRole = new RoleEntity();
         testRole.setName(roleToBeUpdatedName);
         testRole.setType(RoleTypeEnum.CUSTOM);
+        testRole.setMaster(Boolean.TRUE);
         roleRepository.save(testRole);
 
         RoleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/roles/role-update-request.json"), RoleCreateRequestDTO.class);
@@ -103,6 +104,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         testRole = new RoleEntity();
         testRole.setName(roleToBeDeletedName);
         testRole.setType(RoleTypeEnum.CUSTOM);
+        testRole.setMaster(Boolean.TRUE);
         roleRepository.save(testRole);
 
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))

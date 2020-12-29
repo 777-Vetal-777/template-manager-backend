@@ -77,7 +77,7 @@ public class ResourceEntity {
             ")")
     private ResourceLogEntity latestLogRecord;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "resource_role",
             joinColumns = @JoinColumn(

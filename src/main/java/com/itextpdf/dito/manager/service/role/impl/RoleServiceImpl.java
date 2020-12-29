@@ -20,6 +20,7 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.management.relation.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,23 +46,31 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public RoleEntity get(final String name) {
-        return roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+    public RoleEntity getMasterRole(final String name) {
+        return roleRepository.findByNameAndMasterTrue(name).orElseThrow(() -> new RoleNotFoundException(name));
     }
 
     @Override
-    public Page<RoleEntity> getByResource(final Pageable pageable, final ResourceEntity resource) {
-        return roleRepository.findAllByResources(pageable, resource);
+    public RoleEntity getSlaveRole(final String name, final ResourceEntity resourceEntity) {
+        return roleRepository.findByNameAndMasterFalseAndResources(name, resourceEntity);
     }
 
     @Override
-    public RoleEntity create(final RoleEntity roleEntity, final List<String> permissions) {
-        if (roleRepository.findByName(roleEntity.getName()).isPresent()) {
-            throw new RoleAlreadyExistsException(roleEntity.getName());
+    public Page<RoleEntity> getSlaveRolesByResource(final Pageable pageable, final ResourceEntity resource) {
+        return roleRepository.findAllByResourcesAndMasterFalse(pageable, resource);
+    }
+
+    @Override
+    public RoleEntity create(final String name, final List<String> permissions, final Boolean master) {
+        if (roleRepository.countByNameAndMasterTrue(name) > 0) {
+            throw new RoleAlreadyExistsException(name);
         }
+        final RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setName(name);
         setPermissions(roleEntity, permissions);
         setDefaultPermissions(roleEntity);
         roleEntity.setType(RoleTypeEnum.CUSTOM);
+        roleEntity.setMaster(master);
         return roleRepository.save(roleEntity);
     }
 
@@ -80,12 +89,12 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
-        RoleEntity existingRole = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+        RoleEntity existingRole = roleRepository.findByNameAndMasterTrue(name).orElseThrow(() -> new RoleNotFoundException(name));
 
         if (existingRole.getType() == RoleTypeEnum.SYSTEM) {
             throw new UnableToUpdateSystemRoleException();
         }
-        if (!name.equals(updatedRole.getName()) && roleRepository.findByName(updatedRole.getName()).isPresent()) {
+        if (!name.equals(updatedRole.getName()) && roleRepository.findByNameAndMasterTrue(updatedRole.getName()).isPresent()) {
             throw new RoleAlreadyExistsException(updatedRole.getName());
         }
 
@@ -95,17 +104,25 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public void delete(final String name) {
-        final RoleEntity role = roleRepository.findByName(name).orElseThrow(() -> new RoleNotFoundException(name));
+    public void deleteMasterRole(final String name) {
+        final RoleEntity masterRole = roleRepository.findByNameAndMasterTrue(name).orElseThrow(() -> new RoleNotFoundException(name));
 
-        if (role.getType() == RoleTypeEnum.SYSTEM) {
+        if (masterRole.getType() == RoleTypeEnum.SYSTEM) {
             throw new AttemptToDeleteSystemRoleException();
         }
         if (userService.calculateCountOfUsersWithOnlyOneRole(name) > 0) {
             throw new UnableToDeleteSingularRoleException();
         }
 
-        roleRepository.delete(role);
+        final List<RoleEntity> slaveRoles = roleRepository.findByNameAndMasterFalse(name);
+        slaveRoles.add(masterRole);
+
+        roleRepository.deleteAll(slaveRoles);
+    }
+
+    @Override
+    public void delete(final RoleEntity roleEntity) {
+        roleRepository.delete(roleEntity);
     }
 
 

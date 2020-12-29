@@ -128,7 +128,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<ResourceDTO> applyRole(final String name, final ResourceTypeEnum type,
             @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
         final ResourceEntity resourceEntity = resourceService
-                .applyRole(decodeBase64(name), type, applyRoleRequestDTO.getRoleName());
+                .applyRole(decodeBase64(name), type, applyRoleRequestDTO.getRoleName(),
+                        applyRoleRequestDTO.getPermissions());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 

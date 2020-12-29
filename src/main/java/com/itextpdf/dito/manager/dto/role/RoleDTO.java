@@ -1,15 +1,15 @@
 package com.itextpdf.dito.manager.dto.role;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
-import com.itextpdf.dito.manager.dto.user.UserDTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class RoleDTO {
     private Long id;
     private String name;
     private String type;
+    private Boolean master;
     @JsonProperty("users")
     private List<String> usersEmails;
     private List<PermissionDTO> permissions;
@@ -36,6 +36,14 @@ public class RoleDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Boolean getMaster() {
+        return master;
+    }
+
+    public void setMaster(Boolean master) {
+        this.master = master;
     }
 
     public List<PermissionDTO> getPermissions() {

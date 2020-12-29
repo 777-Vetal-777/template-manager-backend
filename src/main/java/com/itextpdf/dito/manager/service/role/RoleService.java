@@ -9,15 +9,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface RoleService {
-    RoleEntity get(String name);
+    RoleEntity getMasterRole(String name);
 
-    Page<RoleEntity> getByResource(Pageable pageable, ResourceEntity resource);
+    RoleEntity getSlaveRole(String name, ResourceEntity resourceEntity);
 
-    RoleEntity create(RoleEntity roleEntity, List<String> permissions);
+    Page<RoleEntity> getSlaveRolesByResource(Pageable pageable, ResourceEntity resource);
+
+    RoleEntity create(String name, List<String> permissions, Boolean master);
 
     Page<RoleEntity> list(Pageable pageable, RoleFilter filter, String searchParam);
 
     RoleEntity update(String roleName, RoleEntity updatedRole, List<String> permissions);
 
-    void delete(String name);
+    void deleteMasterRole(String name);
+
+    void delete(RoleEntity roleEntity);
 }

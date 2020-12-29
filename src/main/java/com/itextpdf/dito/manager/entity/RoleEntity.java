@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -40,6 +41,7 @@ public class RoleEntity {
 
     @Enumerated(EnumType.STRING)
     private RoleTypeEnum type;
+    private Boolean master;
 
     @ManyToMany(mappedBy = "appliedRoles")
     private Set<ResourceEntity> resources = new HashSet<>();
@@ -90,5 +92,13 @@ public class RoleEntity {
 
     public void setResources(Set<ResourceEntity> resources) {
         this.resources = resources;
+    }
+
+    public Boolean getMaster() {
+        return master;
+    }
+
+    public void setMaster(Boolean master) {
+        this.master = master;
     }
 }

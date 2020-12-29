@@ -83,7 +83,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         String password = userEntity.getPassword();
         userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         Set<RoleEntity> persistedRoles = roles.stream()
-                .map(role -> roleRepository.findByName(role).orElseThrow(() -> new RoleNotFoundException(role)))
+                .map(role -> roleRepository.findByNameAndMasterTrue(role).orElseThrow(() -> new RoleNotFoundException(role)))
                 .collect(Collectors.toSet());
         userEntity.setRoles(persistedRoles);
         UserEntity savedUser = userRepository.save(userEntity);
@@ -205,7 +205,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final List<RoleEntity> result = new ArrayList<>();
 
         for (final String role : roles) {
-            final RoleEntity roleEntity = roleRepository.findByName(role)
+            final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue(role)
                     .orElseThrow(() -> new RoleNotFoundException(role));
             result.add(roleEntity);
         }

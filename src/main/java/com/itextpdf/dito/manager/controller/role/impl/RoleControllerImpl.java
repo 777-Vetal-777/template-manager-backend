@@ -32,7 +32,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
     @Override
     public ResponseEntity<RoleDTO> create(@Valid final RoleCreateRequestDTO roleCreateRequestDTO) {
         final RoleEntity result = roleService
-                .create(roleMapper.map(roleCreateRequestDTO), roleCreateRequestDTO.getPermissions());
+                .create(roleCreateRequestDTO.getName(), roleCreateRequestDTO.getPermissions(), Boolean.TRUE);
         return new ResponseEntity<>(roleMapper.map(result), HttpStatus.CREATED);
     }
 
@@ -55,7 +55,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
 
     @Override
     public ResponseEntity<Void> delete(final String name) {
-        roleService.delete(decodeBase64(name));
+        roleService.deleteMasterRole(decodeBase64(name));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

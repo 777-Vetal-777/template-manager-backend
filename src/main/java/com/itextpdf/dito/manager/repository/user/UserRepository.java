@@ -65,7 +65,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             + "join u.roles r "
             + "where u.roles.size = 1 "
             + "and r.name = :roleName ")
-    Integer countOfUserWithOnlyOneRole(String roleName);
+    int countOfUserWithOnlyOneRole(String roleName);
 
     Optional<UserEntity> findByEmailAndActiveTrue(String email);
 

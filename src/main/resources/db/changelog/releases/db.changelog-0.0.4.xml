@@ -85,4 +85,36 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="008-add-buffer-name-column-to-role-table" author="Vadim_Sorokin">
+        <addColumn tableName="role">
+            <column name="buffer_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="009-copy-values-from-name-column-to-buffer-name-column-in-rol-table" author="Vadim_Sorokin">
+        <update tableName="role">
+            <column name="buffer_name" valueComputed="name"/>
+        </update>
+    </changeSet>
+
+    <changeSet id="010-drop-name-column-from-role-table" author="Vadim_Sorokin">
+        <dropColumn tableName="role" columnName="name"/>
+    </changeSet>
+
+    <changeSet id="011-rename-buffer-name-column-in-role-table" author="Vadim_Srookin">
+        <renameColumn tableName="role" oldColumnName="buffer_name" newColumnName="name"/>
+    </changeSet>
+
+    <changeSet id="012-add-notnull-constraint-to-name-column-in-role-table" author="Vadim_Sorokin">
+        <addNotNullConstraint tableName="role" columnName="name" constraintName="role_name_not_null_constraint"/>
+    </changeSet>
+
+    <changeSet id="013-add-master-column-in-role-table" author="Vadim_Sorokin">
+        <addColumn tableName="role">
+            <column name="master" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false" notNullConstraintName="role-master-not-null-constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

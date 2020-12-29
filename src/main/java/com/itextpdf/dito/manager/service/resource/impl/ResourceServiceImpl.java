@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.service.resource.impl;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
@@ -9,6 +10,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
@@ -105,8 +107,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             case IMAGE:
                 checkUserPermissions(
                         retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveSetOfRoleNamesFilteredByPermission(existingResourceEntity.getAppliedRoles(),
-                                PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE));
+                        existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
                 break;
         }
 
@@ -150,8 +151,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         switch (entity.getType()) {
             case IMAGE:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveSetOfRoleNamesFilteredByPermission(existingResource.getAppliedRoles(),
-                                PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE));
+                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
                 break;
         }
 
@@ -171,25 +171,53 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public ResourceEntity applyRole(final String name, final ResourceTypeEnum type, final String roleName) {
-        final ResourceEntity resourceEntity = getResource(name, type);
-        final RoleEntity roleEntity = roleService.get(roleName);
-        resourceEntity.getAppliedRoles().add(roleEntity);
+    public ResourceEntity applyRole(final String resourceName, final ResourceTypeEnum resourceType,
+            final String roleName,
+            final List<String> permissions) {
+        final ResourceEntity resourceEntity = getResource(resourceName, resourceType);
+
+        RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, resourceEntity);
+        if (slaveRoleEntity == null) {
+            // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
+            final RoleEntity masterRoleEntity = roleService.getMasterRole(roleName);
+
+            slaveRoleEntity = new RoleEntity();
+            slaveRoleEntity.setName(masterRoleEntity.getName());
+            slaveRoleEntity.setType(masterRoleEntity.getType());
+            slaveRoleEntity.setMaster(Boolean.FALSE);
+        } else {
+            slaveRoleEntity.getPermissions().clear();
+            resourceEntity.getAppliedRoles().remove(slaveRoleEntity);
+        }
+
+        for (final String permission : permissions) {
+            final PermissionEntity permissionEntity = permissionService.get(permission);
+            slaveRoleEntity.getPermissions().add(permissionEntity);
+        }
+        slaveRoleEntity.getResources().add(resourceEntity);
+
+        resourceEntity.getAppliedRoles().add(slaveRoleEntity);
         return resourceRepository.save(resourceEntity);
     }
 
     @Override
     public ResourceEntity detachRole(final String name, final ResourceTypeEnum type, final String roleName) {
         final ResourceEntity resourceEntity = getResource(name, type);
-        final RoleEntity roleEntity = roleService.get(roleName);
+        final RoleEntity roleEntity = roleService.getSlaveRole(roleName, resourceEntity);
+
+        if (roleEntity == null) {
+            throw new RoleNotFoundException(roleName);
+        }
+
         resourceEntity.getAppliedRoles().remove(roleEntity);
+        roleService.delete(roleEntity);
         return resourceRepository.save(resourceEntity);
     }
 
     @Override
-    public Page<RoleEntity> getRoles(Pageable pageable, String name, ResourceTypeEnum type) {
+    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final ResourceTypeEnum type) {
         final ResourceEntity resourceEntity = getResource(name, type);
-        return roleService.getByResource(pageable, resourceEntity);
+        return roleService.getSlaveRolesByResource(pageable, resourceEntity);
     }
 
     @Override
@@ -253,24 +281,22 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     private void checkUserPermissions(final Set<String> userRoleNames,
-            final Set<String> resourceAppliedRolesWithRequiredPermission) {
-        // if resource has attached custom roles, then lets check that user has required permission for an action.
-        if (!resourceAppliedRolesWithRequiredPermission.isEmpty()) {
+            final Set<RoleEntity> resourceAppliedRoles,
+            final String requiredPermission) {
+        if (!isUserAdmin(userRoleNames) && !resourceAppliedRoles.isEmpty()) {
 
-            // if user has role GLOBAL_ADMINISTRATOR or ADMINISTRATOR, then no need to check.
-            if (!isUserAdmin(userRoleNames)) {
-
-                boolean isPermissionRolePresented = false;
-                for (final String role : resourceAppliedRolesWithRequiredPermission) {
-                    if (userRoleNames.contains(role)) {
-                        isPermissionRolePresented = true;
-                        break;
-                    }
+            boolean isPermissionRolePresented = false;
+            final Set<String> resourceAppliedRolesWithRequiredPermission = retrieveSetOfRoleNamesFilteredByPermission(
+                    resourceAppliedRoles, requiredPermission);
+            for (final String role : resourceAppliedRolesWithRequiredPermission) {
+                if (userRoleNames.contains(role)) {
+                    isPermissionRolePresented = true;
+                    break;
                 }
+            }
 
-                if (!isPermissionRolePresented) {
-                    throw new ForbiddenOperationException();
-                }
+            if (!isPermissionRolePresented) {
+                throw new ForbiddenOperationException();
             }
         }
     }

@@ -160,7 +160,7 @@ public interface ResourceController {
     ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable, String name, ResourceTypeEnum type);
 
     @DeleteMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES)
-    @Operation(summary = "Remove role to a resource", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @Operation(summary = "Remove role from a resource", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> deleteRole(
             @Parameter(name = "name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
             @Parameter(name = "type", description = "Type of resource, image or font or stylesheet", required = true) @RequestParam ResourceTypeEnum type,

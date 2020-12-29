@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +19,7 @@ public interface ResourceService {
 
     ResourceEntity update(String name, ResourceEntity entity, String mail);
 
-    ResourceEntity applyRole(String name, ResourceTypeEnum type, String roleName);
+    ResourceEntity applyRole(String resourceName, ResourceTypeEnum resourceType, String roleName, List<String> permissions);
 
     ResourceEntity detachRole(String name, ResourceTypeEnum type, String roleName);
 
