@@ -7,7 +7,7 @@ public class VersionFilter {
     private String modifiedBy;
     private List<String> modifiedOn;
     private String comment;
-    private Boolean deployStatus;
+    private List<Boolean> deployed;
 
     public Long getVersion() {
         return version;
@@ -41,11 +41,11 @@ public class VersionFilter {
         this.comment = comment;
     }
 
-    public Boolean getDeployStatus() {
-        return deployStatus;
+    public List<Boolean> getDeployed() {
+        return deployed;
     }
 
-    public void setDeployStatus(Boolean deployStatus) {
-        this.deployStatus = deployStatus;
+    public void setDeployed(List<Boolean> deployed) {
+        this.deployed = deployed;
     }
 }
