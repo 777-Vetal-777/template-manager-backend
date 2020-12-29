@@ -29,7 +29,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             //filtering
             + "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or template.type in (:types)) "
-            + "and (:modifiedBy='' or LOWER(file.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(file.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.version between cast(:startDate as date) and cast(:endDate as date)) "
             + "and ((:dataCollectionName <> '' and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))"
             + "or (:dataCollectionName = '' and (dataCollection.name is null or  (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))))")
@@ -49,7 +49,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             //filtering
             + "((:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or template.type in (:types)) "
-            + "and (:modifiedBy='' or LOWER(file.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(file.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.version between cast(:startDate as date) and cast(:endDate as date)) "
             + "and ((:dataCollectionName <> '' and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))"
             + "or (:dataCollectionName = '' and (dataCollection.name is null or  (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%'))))))"
@@ -57,8 +57,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
             + "or LOWER(template.type) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.author.lastName) like CONCAT('%',:search,'%')) "
+            + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like CONCAT('%',:search,'%')) "
             + "or CAST(CAST(file.version as date) as string) like CONCAT('%',:search,'%') ")
     Page<TemplateEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
