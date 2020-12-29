@@ -24,6 +24,8 @@
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <javax.mail.version>1.4.7</javax.mail.version>
         <projectreactor.reactor-spring>1.0.1.RELEASE</projectreactor.reactor-spring>
+        <itext.sdk-java.version>1.5.3</itext.sdk-java.version>
+        <kotlin-stdlib.version>1.4.0</kotlin-stdlib.version>
 
         <license.report.path>${project.basedir}/license/generated-report.xml</license.report.path>
     </properties>
@@ -100,6 +102,17 @@
             <artifactId>reactor-spring</artifactId>
             <version>${projectreactor.reactor-spring}</version>
         </dependency>
+        <dependency>
+            <groupId>com.itextpdf.dito</groupId>
+            <artifactId>sdk-java</artifactId>
+            <version>${itext.sdk-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin-stdlib.version}</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!--TESTING-->
         <dependency>
@@ -125,6 +138,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>itext-repository</id>
+            <url>https://repo.itextsupport.com/dito</url>
+        </repository>
+    </repositories>
 
     <build>
         <finalName>template-manager</finalName>
