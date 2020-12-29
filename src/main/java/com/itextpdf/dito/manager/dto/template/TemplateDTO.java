@@ -13,7 +13,7 @@ public class TemplateDTO {
     private String dataCollection;
     @JsonProperty("modifiedBy")
     private String author;
-    @JsonProperty("editedOn")
+    @JsonProperty("modifiedOn")
     private Date lastUpdate;
 
     public String getName() {
