@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
@@ -249,8 +250,24 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate,
                 modifiedOnEndDate, searchParam.toLowerCase());
     }
+    
+    @Override
+	public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
+    	ResourceEntity deletingResourceEntity = getResource(name, type);
+		
+    	if (hasOutboundDependencies(deletingResourceEntity)) {
+    		throw new ResourceHasDependenciesException();
+    	}
+    	
+    	resourceRepository.delete(deletingResourceEntity);
+    	
+    	final ResourceLogEntity log = createResourceLogEntry(mail, deletingResourceEntity);
+        deletingResourceEntity.getResourceLogs().add(log);
 
-    private Pageable updateSort(Pageable pageable) {
+    	return deletingResourceEntity;
+	}
+
+	private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("modifiedBy")) {
@@ -319,4 +336,23 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 .map(RoleEntity::getName).collect(
                         Collectors.toSet());
     }
+
+	private ResourceLogEntity createResourceLogEntry(final String mail, ResourceEntity resourceEntity) {
+		final UserEntity userEntity = userService.findByEmail(mail);
+        return createResourceLogEntry(resourceEntity, userEntity);
+	}
+
+	private ResourceLogEntity createResourceLogEntry(final ResourceEntity resourceEntity, final UserEntity userEntity) {
+		final ResourceLogEntity log = new ResourceLogEntity();
+        log.setResource(resourceEntity);
+        log.setDate(new Date());
+        log.setAuthor(userEntity);
+		return log;
+	}
+	
+	private boolean hasOutboundDependencies(final ResourceEntity resourceEntity) {
+    	//TODO: DTM-710: add a check that resource has no outbound dependencies
+		return false;
+	}
+	
 }
