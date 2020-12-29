@@ -82,10 +82,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         resourceEntity.setCreatedOn(new Date());
         resourceEntity.setCreatedBy(userEntity);
 
-        final ResourceLogEntity logEntity = new ResourceLogEntity();
-        logEntity.setAuthor(userEntity);
-        logEntity.setDate(new Date());
-        logEntity.setResource(resourceEntity);
+        final ResourceLogEntity logEntity = createResourceLogEntry(resourceEntity, userEntity);
 
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
         fileEntity.setResource(resourceEntity);
@@ -115,11 +112,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 break;
         }
 
-        final Long oldVersion = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
-        final ResourceLogEntity logEntity = new ResourceLogEntity();
-        logEntity.setAuthor(userEntity);
-        logEntity.setDate(new Date());
-        logEntity.setResource(existingResourceEntity);
+        final Long oldVersion = resourceFileRepository
+                .findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
+        final ResourceLogEntity logEntity = createResourceLogEntry(existingResourceEntity, userEntity);
 
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
         fileEntity.setResource(existingResourceEntity);
@@ -166,10 +161,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
 
-        final ResourceLogEntity log = new ResourceLogEntity();
-        log.setResource(existingResource);
-        log.setDate(new Date());
-        log.setAuthor(userEntity);
+        final ResourceLogEntity log = createResourceLogEntry(existingResource, userEntity);
         existingResource.getResourceLogs().add(log);
 
         return resourceRepository.save(existingResource);
