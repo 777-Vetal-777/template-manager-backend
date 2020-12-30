@@ -78,7 +78,7 @@ pipeline {
             steps {
                 script{
                     env.IP=sh(script: "hostname -I | cut -d ' ' -f1", returnStdout: true).trim()
-                    sh """
+                    sh '''
                     docker container stop db || true
                     docker container stop clair || true
                     docker rm $(docker container ls -a --filter name=db -q) || true
@@ -90,7 +90,7 @@ pipeline {
                     wget -qO clair-scanner https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 && chmod +x clair-scanner
                     ./clair-scanner --ip=${IP} --clair http://${IP}:6060 ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
                     ./clair-scanner --ip=${IP} --clair http://${IP}:6060 ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-                    """
+                    '''
                 }
             }
         }
