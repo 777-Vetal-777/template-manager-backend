@@ -69,6 +69,10 @@ public class DataCollectionEntity {
         this.dataCollectionLog = dataCollectionLog;
     }
 
+    public DataCollectionLogEntity getLatestLogRecord() {
+        return dataCollectionLog.stream().findFirst().get();
+    }
+
     public String getDescription() {
         return description;
     }
@@ -115,6 +119,10 @@ public class DataCollectionEntity {
 
     public void setModifiedOn(Date modifiedOn) {
         this.modifiedOn = modifiedOn;
+    }
+
+    public UserEntity getModifiedBy() {
+        return getLatestLogRecord().getAuthor();
     }
 
     public UserEntity getAuthor() {
