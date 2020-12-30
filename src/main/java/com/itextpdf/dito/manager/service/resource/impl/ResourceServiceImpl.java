@@ -242,17 +242,17 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate,
                 modifiedOnEndDate, searchParam.toLowerCase());
     }
-    
+
     @Override
 	public ResourceEntity delete(final String name, final ResourceTypeEnum type) {
-    	ResourceEntity deletingResourceEntity = getResource(name, type);
-		
+    	final ResourceEntity deletingResourceEntity = getResource(name, type);
+
     	if (hasOutboundDependencies(deletingResourceEntity)) {
     		throw new ResourceHasDependenciesException();
     	}
-    	
+
     	resourceRepository.delete(deletingResourceEntity);
-    	
+
     	return deletingResourceEntity;
 	}
 
@@ -338,10 +338,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         log.setAuthor(userEntity);
 		return log;
 	}
-	
+
 	private boolean hasOutboundDependencies(final ResourceEntity resourceEntity) {
     	//TODO: DTM-710: add a check that resource has no outbound dependencies
 		return false;
 	}
-	
+
 }
