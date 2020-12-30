@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
-import java.util.Date;
-import java.util.List;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
+import java.util.Date;
+import java.util.List;
 
 @Entity(name = "instance")
 public class InstanceEntity {

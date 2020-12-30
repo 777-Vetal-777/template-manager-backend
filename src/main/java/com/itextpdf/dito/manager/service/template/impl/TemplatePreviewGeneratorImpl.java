@@ -1,10 +1,8 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.itextpdf.dito.manager.entity.TemplateEntity;
-import com.itextpdf.dito.manager.entity.TemplateFileEntity;
-import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
-import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.sdk.core.data.IExplicitTemplateData;

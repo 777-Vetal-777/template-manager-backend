@@ -14,6 +14,7 @@ import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,6 +35,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequestMapping(TemplateController.BASE_NAME)
 @Tag(name = "template", description = "templates API")
@@ -108,4 +111,17 @@ public interface TemplateController {
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
     ResponseEntity<byte[]> preview(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
+    @PostMapping(TEMPLATE_VERSION_ENDPOINT)
+    @Operation(summary = "Create new version of template", description = "Make a new version of a template: upload a new template file and a comment for the new version.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template new version saved successfully."),
+            @ApiResponse(responseCode = "400", description = "Template file exceeds the file limit."),
+            @ApiResponse(responseCode = "400", description = "The file cannot be read."),
+            @ApiResponse(responseCode = "400", description = "File extension not supported.")
+    })
+    ResponseEntity<TemplateDTO> create(Principal principal,
+                                       @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
+                                       @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
+                                       @Parameter(name = "template", description = "Template file", required = true, style = ParameterStyle.FORM) @RequestPart("template") MultipartFile templateFile);
 }

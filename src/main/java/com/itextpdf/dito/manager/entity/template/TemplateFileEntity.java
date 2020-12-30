@@ -1,6 +1,7 @@
-package com.itextpdf.dito.manager.entity;
+package com.itextpdf.dito.manager.entity.template;
 
-import java.util.Date;
+import com.itextpdf.dito.manager.entity.UserEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Entity
 @Table(name = "template_file")
@@ -21,14 +23,15 @@ public class TemplateFileEntity {
     private Long id;
     private byte[] data;
     private String comment;
-    @Column(insertable = false)
-    private Date version;
+    private Long version;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " author_id")
     private UserEntity author;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " template_id")
     private TemplateEntity template;
+    private Date createdOn;
+    private Date modifiedOn;
 
     public Long getId() {
         return id;
@@ -54,11 +57,11 @@ public class TemplateFileEntity {
         this.comment = comment;
     }
 
-    public Date getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Date version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 
@@ -76,5 +79,21 @@ public class TemplateFileEntity {
 
     public void setTemplate(TemplateEntity template) {
         this.template = template;
+    }
+
+    public Date getModifiedOn() {
+        return modifiedOn;
+    }
+
+    public void setModifiedOn(Date modifiedOn) {
+        this.modifiedOn = modifiedOn;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 }

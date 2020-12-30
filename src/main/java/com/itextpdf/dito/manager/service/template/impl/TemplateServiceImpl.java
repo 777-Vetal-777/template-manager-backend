@@ -1,32 +1,35 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.itextpdf.dito.manager.entity.TemplateEntity;
-import com.itextpdf.dito.manager.entity.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateLogRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -66,13 +69,25 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                     dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
                             () -> new DataCollectionNotFoundException(dataCollectionName)));
         }
+        final UserEntity author = userService.findByEmail(email);
+
+        final TemplateLogEntity logEntity = new TemplateLogEntity();
+        logEntity.setAuthor(author);
+        logEntity.setDate(new Date());
+        logEntity.setTemplate(templateEntity);
+
 
         final TemplateFileEntity templateFileEntity = new TemplateFileEntity();
-        templateFileEntity.setAuthor(userService.findByEmail(email));
-        templateFileEntity.setVersion(new Date());
+        templateFileEntity.setAuthor(author);
+        templateFileEntity.setVersion(1L);
         templateFileEntity.setData(templateLoader.load());
         templateFileEntity.setTemplate(templateEntity);
-        templateEntity.setFiles(Arrays.asList(templateFileEntity));
+        templateFileEntity.setAuthor(author);
+        templateFileEntity.setCreatedOn(new Date());
+        templateFileEntity.setModifiedOn(new Date());
+
+        templateEntity.setFiles(Collections.singletonList(templateFileEntity));
+        templateEntity.setTemplateLogs(Collections.singletonList(logEntity));
 
         return templateRepository.save(templateEntity);
     }
@@ -128,6 +143,31 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return templateRepository.save(existingTemplate);
     }
 
+    @Override
+    public TemplateEntity createNewVersion(final String name, final byte[] data, final String fileName, final String email, final String comment) {
+        final TemplateEntity existingTemplateEntity = findByName(name);
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        final Long oldVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId()).getVersion();
+        final TemplateLogEntity logEntity = new TemplateLogEntity();
+        logEntity.setAuthor(userEntity);
+        logEntity.setDate(new Date());
+        logEntity.setTemplate(existingTemplateEntity);
+
+        final TemplateFileEntity fileEntity = new TemplateFileEntity();
+        fileEntity.setTemplate(existingTemplateEntity);
+        fileEntity.setVersion(oldVersion + 1);
+        fileEntity.setData(data);
+        fileEntity.setComment(comment);
+        fileEntity.setAuthor(userEntity);
+        fileEntity.setCreatedOn(new Date());
+        fileEntity.setModifiedOn(new Date());
+
+        existingTemplateEntity.getFiles().add(fileEntity);
+        existingTemplateEntity.getTemplateLogs().add(logEntity);
+        return templateRepository.save(existingTemplateEntity);
+    }
+
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
             throw new TemplateAlreadyExistsException(templateName);
@@ -145,10 +185,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                         sortParam = new Sort.Order(sortParam.getDirection(), "dataCollection.name");
                     }
                     if (sortParam.getProperty().equals("modifiedBy")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "file.author.firstName");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.author.firstName");
                     }
                     if (sortParam.getProperty().equals("editedOn")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.date");
                     }
                     return sortParam;
                 })

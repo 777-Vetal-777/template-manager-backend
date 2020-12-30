@@ -1,6 +1,10 @@
-package com.itextpdf.dito.manager.entity;
+package com.itextpdf.dito.manager.entity.template;
 
-import java.util.List;
+import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import org.hibernate.annotations.JoinFormula;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,6 +19,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "template")
@@ -43,6 +49,32 @@ public class TemplateEntity {
     )
     @OrderBy("version DESC")
     private List<TemplateFileEntity> files;
+
+    @OneToMany(
+            mappedBy = "template",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @OrderBy("date DESC")
+    private Collection<TemplateLogEntity> templateLogs;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT log.id " +
+            "FROM manager.template_log log " +
+            "WHERE log.template_id = id and log.date=(" +
+            "select max(log.date) from manager.template_log log where log.template_id = id)" +
+            ")")
+    private TemplateLogEntity latestLogRecord;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT file.id " +
+            "FROM manager.template_file file " +
+            "WHERE file.template_id = id and file.version=(" +
+            "select max(file.version) from manager.template_file file where file.template_id = id)" +
+            ")")
+    private TemplateFileEntity latestFile;
 
     public Long getId() {
         return id;
@@ -98,5 +130,29 @@ public class TemplateEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Collection<TemplateLogEntity> getTemplateLogs() {
+        return templateLogs;
+    }
+
+    public void setTemplateLogs(Collection<TemplateLogEntity> templateLogs) {
+        this.templateLogs = templateLogs;
+    }
+
+    public TemplateLogEntity getLatestLogRecord() {
+        return latestLogRecord;
+    }
+
+    public void setLatestLogRecord(TemplateLogEntity latestLogRecord) {
+        this.latestLogRecord = latestLogRecord;
+    }
+
+    public TemplateFileEntity getLatestFile() {
+        return latestFile;
+    }
+
+    public void setLatestFile(TemplateFileEntity latestFile) {
+        this.latestFile = latestFile;
     }
 }

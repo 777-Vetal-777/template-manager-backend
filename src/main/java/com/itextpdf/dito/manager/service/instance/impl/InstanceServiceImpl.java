@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.service.instance.impl;
 
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
-import com.itextpdf.dito.manager.entity.TemplateEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
@@ -13,12 +13,6 @@ import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +20,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import javax.transaction.Transactional;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;

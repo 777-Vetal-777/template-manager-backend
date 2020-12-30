@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -134,9 +134,4 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    public void test_getVersions() throws Exception{
-        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, "name"))
-                .andExpect(status().isOk());
-    }
 }

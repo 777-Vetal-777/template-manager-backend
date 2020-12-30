@@ -2,17 +2,16 @@ package com.itextpdf.dito.manager.component.mapper.instance.impl;
 
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
-import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
-import com.itextpdf.dito.manager.entity.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 @Component
 public class InstanceMapperImpl implements InstanceMapper {

@@ -120,7 +120,8 @@
     <changeSet id="014-add-author-id-column-to-resource-file-table" author="Yaroslav_Maievskij">
         <addColumn tableName="resource_file">
             <column name="author_id" type="bigint">
-                <constraints nullable="false" notNullConstraintName="resource_file_author_id_not_null_constraint" foreignKeyName="fk_resource_file_to_user" references="user(id)"/>
+                <constraints nullable="false" notNullConstraintName="resource_file_author_id_not_null_constraint"
+                             foreignKeyName="fk_resource_file_to_user" references="user(id)"/>
             </column>
         </addColumn>
     </changeSet>
@@ -135,6 +136,62 @@
 
     <changeSet id="016-add-updated-on-column-to-resource-file-table" author="Yaroslav_Maievskij">
         <addColumn tableName="resource_file">
+            <column name="modified_on" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="017-add-template-log-table" author="Ivan_Semenov">
+        <createTable tableName="template_log">
+            <column name="id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_log_id_not_null_constraint"
+                             primaryKey="true" primaryKeyName="template_log_pk"/>
+            </column>
+            <column name="date" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="template_log_date_not_null_constraint"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_log_author_id_not_null_constraint"
+                             foreignKeyName="fk_template_log_to_user"
+                             references="user(id)"/>
+            </column>
+            <column name="template_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_log_template_id_not_null_constraint"
+                             foreignKeyName="fk_template_log_to_resource"
+                             references="template(id)"/>
+            </column>
+            <column name="comment" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="018-create-template-log-sequence" author="Ivan_Semenov">
+        <createSequence sequenceName="template_log_sequence"/>
+    </changeSet>
+
+    <!--change type of version column from date to long-->
+    <changeSet id="019-drop-version-column-in-template-file-table" author="Ivan_Semenov">
+        <dropColumn tableName="template_file">
+            <column name="version"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="020-add-version-column-in-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
+            <column name="version" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_file_version_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="021-add-created-on-column-to-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="template_file_created_on_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="022-add-modified-on-column-to-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
             <column name="modified_on" type="timestamp"/>
         </addColumn>
     </changeSet>

@@ -1,20 +1,25 @@
 package com.itextpdf.dito.manager.component.mapper.template.impl;
 
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
+import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
-import com.itextpdf.dito.manager.entity.TemplateEntity;
-import com.itextpdf.dito.manager.entity.TemplateFileEntity;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
@@ -23,14 +28,14 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateDTO result = new TemplateDTO();
         result.setName(entity.getName());
         result.setType(entity.getType());
-        if (entity.getFiles() != null) {
-            final TemplateFileEntity file = entity.getFiles().get(0);
-            result.setAuthor(new StringBuilder()
-                    .append(file.getAuthor().getFirstName())
-                    .append(" ")
-                    .append(file.getAuthor().getLastName())
-                    .toString());
-            result.setLastUpdate(file.getVersion());
+        final Collection<TemplateLogEntity> logs = entity.getTemplateLogs();
+        if (Objects.nonNull(logs) && !logs.isEmpty()) {
+            final TemplateLogEntity log = logs.stream().findFirst().get();
+            result.setLastUpdate(log.getDate());
+            final UserEntity updatedBy = log.getAuthor();
+            if (Objects.nonNull(updatedBy)) {
+                result.setAuthor(new StringBuilder(updatedBy.getFirstName()).append(" ").append(updatedBy.getLastName()).toString());
+            }
         }
         result.setDataCollection(Objects.nonNull(entity.getDataCollection())
                 ? entity.getDataCollection().getName()
@@ -51,22 +56,23 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateMetadataDTO result = new TemplateMetadataDTO();
         result.setName(entity.getName());
         final List<TemplateFileEntity> templateFiles = entity.getFiles();
+        final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
         if (!CollectionUtils.isEmpty(templateFiles)) {
-            final TemplateFileEntity lastFileVersion = templateFiles.get(0);
+            final TemplateLogEntity lastTemplateLog = templateLogs.get(0);
             result.setModifiedBy(new StringBuilder()
-                    .append(lastFileVersion.getAuthor().getFirstName())
+                    .append(lastTemplateLog.getAuthor().getFirstName())
                     .append(" ")
-                    .append(lastFileVersion.getAuthor().getLastName())
+                    .append(lastTemplateLog.getAuthor().getLastName())
                     .toString());
-            result.setModifiedOn(lastFileVersion.getVersion());
+            result.setModifiedOn(lastTemplateLog.getDate());
 
-            final TemplateFileEntity firstFileVersion = templateFiles.get(templateFiles.size() - 1);
+            final TemplateLogEntity firstTemplateLog = templateLogs.get(templateLogs.size() - 1);
             result.setCreatedBy(new StringBuilder()
-                    .append(firstFileVersion.getAuthor().getFirstName())
+                    .append(firstTemplateLog.getAuthor().getFirstName())
                     .append(" ")
-                    .append(firstFileVersion.getAuthor().getLastName())
+                    .append(firstTemplateLog.getAuthor().getLastName())
                     .toString());
-            result.setCreatedOn(firstFileVersion.getVersion());
+            result.setCreatedOn(firstTemplateLog.getDate());
         }
         result.setDescription(entity.getDescription());
         final DataCollectionEntity dataCollection = entity.getDataCollection();
@@ -89,6 +95,25 @@ public class TemplateMapperImpl implements TemplateMapper {
 
     @Override
     public Page<TemplateDTO> map(final Page<TemplateEntity> entities) {
+        return entities.map(this::map);
+    }
+
+    @Override
+    public TemplateVersionDTO map(final TemplateFileEntity entity) {
+        final TemplateVersionDTO version = new TemplateVersionDTO();
+        version.setVersion(entity.getVersion());
+        version.setComment(entity.getComment());
+        version.setModifiedOn(entity.getCreatedOn());
+
+        final UserEntity author = entity.getAuthor();
+        if (Objects.nonNull(author)) {
+            version.setModifiedBy(new StringBuilder(author.getFirstName()).append(" ").append(author.getLastName()).toString());
+        }
+        return version;
+    }
+
+    @Override
+    public Page<TemplateVersionDTO> mapVersions(final Page<TemplateFileEntity> entities) {
         return entities.map(this::map);
     }
 }
