@@ -81,6 +81,8 @@ pipeline {
                     sh """
                     docker container stop db || true
                     docker container stop clair || true
+                    docker rm $(docker container ls -a --filter name=db -q) || true
+                    docker rm $(docker container ls -a --filter name=clair -q) || true
                     docker run -d --name db arminc/clair-db
                     sleep 15 # wait for db to come up
                     docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan
@@ -111,6 +113,8 @@ pipeline {
                     docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1
                     docker container stop db || true
                     docker container stop clair || true
+                    docker rm $(docker container ls -a --filter name=db -q) || true
+                    docker rm $(docker container ls -a --filter name=clair -q) || true
                     '''
             }
         }
@@ -124,6 +128,19 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+            sh '''
+            docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1 || true
+            docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1 || true
+            docker container stop db >/dev/null 2>&1 || true
+            docker container stop clair >/dev/null 2>&1 || true
+            docker rm $(docker container ls -a --filter name=db -q) >/dev/null 2>&1 || true
+            docker rm $(docker container ls -a --filter name=clair -q) >/dev/null 2>&1 || true
+            '''
+            cleanWs()
         }
     }
 }
