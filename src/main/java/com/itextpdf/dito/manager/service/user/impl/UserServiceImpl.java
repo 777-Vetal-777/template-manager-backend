@@ -205,7 +205,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final List<RoleEntity> result = new ArrayList<>();
 
         for (final String role : roles) {
-            final RoleEntity roleEntity = roleRepository.findByName(role)
+            final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue(role)
                     .orElseThrow(() -> new RoleNotFoundException(role));
             result.add(roleEntity);
         }
