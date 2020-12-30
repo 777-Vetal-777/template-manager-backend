@@ -80,12 +80,10 @@ pipeline {
                     env.IP=sh(script: "hostname -I | cut -d ' ' -f1", returnStdout: true).trim()
                     sh '''
                     docker run -d --name db arminc/clair-db
-                    sleep 15 # wait for db to come up
-                    docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan
-                    sleep 1
+                    docker run -p 6060:6071 --link db:postgres -d --name clair arminc/clair-local-scan
                     wget -qO clair-scanner https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 && chmod +x clair-scanner
-                    ./clair-scanner --ip=${IP} --clair http://${IP}:6060 ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-                    ./clair-scanner --ip=${IP} --clair http://${IP}:6060 ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+                    ./clair-scanner --ip=${IP} --clair http://${IP}:6071 ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+                    ./clair-scanner --ip=${IP} --clair http://${IP}:6071 ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
                     '''
                 }
             }
