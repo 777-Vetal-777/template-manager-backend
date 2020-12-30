@@ -74,33 +74,18 @@ pipeline {
                 waitForQualityGate abortPipeline: false
             }
         }
-        stage ('Clair Server and Scanner Prepare') {
-            steps {
-                script{
-                    sh '''
-                    docker container stop postgres || true
-                    docker container stop clair-server || true
-                    docker network rm clair-network-itext || true
-                    docker rm $(docker container ls -a --filter name=postgres -q) || true
-                    docker rm $(docker container ls -a --filter name=clair-server -q) || true
-                    docker network create clair-network-itext || true
-                    docker create --name postgres --network clair-network-itext arminc/clair-db:latest
-                    docker create --name clair-server --network clair-network-itext --publish 6060:6060 arminc/clair-local-scan:latest
-                    docker container start postgres
-                    docker container start clair-server
-                    wget https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64
-                    chmod +x clair-scanner_linux_amd64
-                    '''
-                    env.IP=sh(script: "hostname -I | cut -d ' ' -f1", returnStdout: true).trim()
-                }
-            }
-        }
-        stage ('Clair Scan Frontend') {
+        stage ('Clair Scan') {
             steps {
                 script{
                     sh """
-                    ./clair-scanner_linux_amd64 --ip ${IP} --clair http://${IP}:6060 ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-                    ./clair-scanner_linux_amd64 --ip ${IP} --clair http://${IP}:6060 ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+                    docker run -d --name db arminc/clair-db
+                    sleep 15 # wait for db to come up
+                    docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan
+                    sleep 1
+                    DOCKER_GATEWAY=$(docker network inspect bridge --format "{{range .IPAM.Config}}{{.Gateway}}{{end}}")
+                    wget -qO clair-scanner https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 && chmod +x clair-scanner
+                    ./clair-scanner --ip="$DOCKER_GATEWAY" ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+                    ./clair-scanner --ip="$DOCKER_GATEWAY" ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
                     """
                 }
             }
@@ -122,11 +107,8 @@ pipeline {
                 sh '''
                     docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1
                     docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1
-                    docker container stop postgres || true
-                    docker container stop clair-server || true
-                    docker network rm clair-network-itext || true
-                    docker rm $(docker container ls -a --filter name=postgres -q) >/dev/null 2>&1
-                    docker rm $(docker container ls -a --filter name=clair-server -q) >/dev/null 2>&1
+                    docker container stop db || true
+                    docker container stop clair || true
                     '''
             }
         }
