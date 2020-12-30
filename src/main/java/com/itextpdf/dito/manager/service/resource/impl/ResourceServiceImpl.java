@@ -244,7 +244,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
     
     @Override
-	public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
+	public ResourceEntity delete(final String name, final ResourceTypeEnum type) {
     	ResourceEntity deletingResourceEntity = getResource(name, type);
 		
     	if (hasOutboundDependencies(deletingResourceEntity)) {
@@ -253,9 +253,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     	
     	resourceRepository.delete(deletingResourceEntity);
     	
-    	final ResourceLogEntity log = createResourceLogEntry(mail, deletingResourceEntity);
-        deletingResourceEntity.getResourceLogs().add(log);
-
     	return deletingResourceEntity;
 	}
 
