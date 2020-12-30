@@ -81,7 +81,9 @@ pipeline {
                     sh '''
                     docker network create stage-back-clair-network-itext || true
                     docker run -d --name db --network stage-back-clair-network-itext arminc/clair-db
+                    sleep 15
                     docker run -p 6060:6071 --link db:postgres -d --name clair --network stage-back-clair-network-itext arminc/clair-local-scan
+                    sleep 1
                     wget -qO clair-scanner https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 && chmod +x clair-scanner
                     ./clair-scanner --ip=${IP} --clair http://${IP}:6071 ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
                     ./clair-scanner --ip=${IP} --clair http://${IP}:6071 ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
