@@ -38,7 +38,7 @@ public class ResourceFileEntity {
     private Date createdOn;
     private Date modifiedOn;
 
-    @ManyToMany(mappedBy = "resources",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "resources")
     private Set<TemplateEntity> templates = new HashSet<>();
 
     public Set<TemplateEntity> getTemplates() {

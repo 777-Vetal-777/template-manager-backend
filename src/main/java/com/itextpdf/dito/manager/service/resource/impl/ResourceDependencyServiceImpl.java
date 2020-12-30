@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
+import static com.itextpdf.dito.manager.dto.dependency.DependencyType.IMAGE;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -39,8 +41,10 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     @Override
     public Page<ResourceDependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final DependencyFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType() == DependencyType.IMAGE) {
-            if (Objects.isNull(filter.getDirectionType()) || filter.getDirectionType() == DependencyDirectionType.HARD) {
+        final DependencyType dependencyType = filter.getDependencyType();
+        final DependencyDirectionType directionType = filter.getDirectionType();
+        if (Objects.isNull(dependencyType) || dependencyType == IMAGE) {
+            if (Objects.isNull(directionType) || directionType == HARD) {
                 final ResourceEntity resourceEntity = resourceService.getResource(name, type);
                 final Pageable pageWithSort = updateSort(pageable);
                 final Long version = getLongFromFilter(filter.getVersion());
