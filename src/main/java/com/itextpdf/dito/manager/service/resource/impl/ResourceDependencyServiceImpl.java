@@ -39,7 +39,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     @Override
     public Page<ResourceDependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final DependencyFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType() == DependencyType.TEMPLATE) {
+        if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType() == DependencyType.IMAGE) {
             if (Objects.isNull(filter.getDirectionType()) || filter.getDirectionType() == DependencyDirectionType.HARD) {
                 final ResourceEntity resourceEntity = resourceService.getResource(name, type);
                 final Pageable pageWithSort = updateSort(pageable);

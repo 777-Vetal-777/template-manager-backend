@@ -113,7 +113,7 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     @Override
-    public DependencyDTO map(ResourceDependencyModel model) {
+    public DependencyDTO map(final ResourceDependencyModel model) {
         final DependencyDTO dependencyDTO = new DependencyDTO();
         dependencyDTO.setActive(model.getActive());
         dependencyDTO.setName(model.getName());

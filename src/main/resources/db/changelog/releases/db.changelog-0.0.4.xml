@@ -196,13 +196,13 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="017-create-resource-file-template-table" author="Yaroslav_Maievskiy">
+    <changeSet id="023-create-resource-file-template-table" author="Yaroslav_Maievskiy">
         <createTable tableName="resource_file_template">
             <column name="template_id" type="bigint">
-                <constraints foreignKeyName="fk_resource-file-template_to_template" references="template(id)"/>
+                <constraints foreignKeyName="fk_resource_file_template_to_template" references="template(id)"/>
             </column>
             <column name="resource_file_id" type="bigint">
-                <constraints foreignKeyName="fk_resource-file-template_to_resource_file" references="resource_file(id)"/>
+                <constraints foreignKeyName="fk_resource_file_template_to_resource_file" references="resource_file(id)"/>
             </column>
         </createTable>
     </changeSet>

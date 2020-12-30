@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -37,8 +38,8 @@ public class ResourceFileEntity {
     private Date createdOn;
     private Date modifiedOn;
 
-    @ManyToMany(mappedBy = "resources",fetch = FetchType.EAGER)
-    private Set<TemplateEntity> templates;
+    @ManyToMany(mappedBy = "resources",fetch = FetchType.LAZY)
+    private Set<TemplateEntity> templates = new HashSet<>();
 
     public Set<TemplateEntity> getTemplates() {
         return templates;
