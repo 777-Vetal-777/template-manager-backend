@@ -27,4 +27,6 @@ public interface ResourceService {
 
     Page<ResourceEntity> list(Pageable pageable, ResourceFilter filter, String searchParam);
 
+    ResourceEntity getResource(String name, ResourceTypeEnum type);
+
 }

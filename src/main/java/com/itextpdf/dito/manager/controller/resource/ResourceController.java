@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
@@ -67,12 +68,12 @@ public interface ResourceController {
     @GetMapping(RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of resource by name.", description = "Get a list of resource versions using the resource name and resource type, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<ResourceDTO>> getVersions(Principal principal,
-            Pageable pageable,
-            @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true) @RequestParam(name = "type") ResourceTypeEnum type,
-            @ParameterObject VersionFilter versionFilter,
-            @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<ResourceFileDTO>> getVersions(Principal principal,
+                                                      Pageable pageable,
+                                                      @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                                      @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true) @RequestParam(name = "type") ResourceTypeEnum type,
+                                                      @ParameterObject VersionFilter versionFilter,
+                                                      @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(RESOURCE_VERSION_ENDPOINT)
     @Operation(summary = "Create new version of resource", description = "Make a new version of a resource: upload a new resource and a comment for the new version.",
@@ -84,10 +85,10 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
     ResponseEntity<ResourceDTO> create(Principal principal,
-            @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
-            @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
-            @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true, style = ParameterStyle.FORM) @RequestPart String type,
-            @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
+                                       @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
+                                       @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
+                                       @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true, style = ParameterStyle.FORM) @RequestPart String type,
+                                       @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @GetMapping(RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving resource dependencies page using sorting and filters.",

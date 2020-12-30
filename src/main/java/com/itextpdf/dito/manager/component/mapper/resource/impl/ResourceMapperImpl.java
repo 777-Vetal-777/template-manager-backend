@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.mapper.resource.impl;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
@@ -83,6 +84,26 @@ public class ResourceMapperImpl implements ResourceMapper {
 
     @Override
     public Page<ResourceDTO> map(final Page<ResourceEntity> entities) {
+        return entities.map(this::map);
+    }
+
+    @Override
+    public ResourceFileDTO map(final ResourceFileEntity entity) {
+        final ResourceFileDTO version = new ResourceFileDTO();
+        version.setVersion(entity.getVersion());
+        version.setComment(entity.getComment());
+        version.setDeployed(entity.getDeployed());
+        version.setModifiedOn(entity.getCreatedOn());
+
+        final UserEntity author = entity.getAuthor();
+        if (Objects.nonNull(author)) {
+            version.setModifiedBy(new StringBuilder(author.getFirstName()).append(" ").append(author.getLastName()).toString());
+        }
+        return version;
+    }
+
+    @Override
+    public Page<ResourceFileDTO> mapVersions(final Page<ResourceFileEntity> entities) {
         return entities.map(this::map);
     }
 }

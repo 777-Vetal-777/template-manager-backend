@@ -117,4 +117,26 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="014-add-author-id-column-to-resource-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="resource_file_author_id_not_null_constraint" foreignKeyName="fk_resource_file_to_user" references="user(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="015-add-created-on-column-to-resource-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="resource_file_created_on_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="016-add-updated-on-column-to-resource-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="modified_on" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

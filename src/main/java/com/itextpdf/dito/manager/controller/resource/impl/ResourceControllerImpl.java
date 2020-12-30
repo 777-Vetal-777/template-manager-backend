@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
@@ -26,6 +27,8 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import javax.validation.Valid;
+
+import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
     private final ResourceService resourceService;
+    private final ResourceVersionsService resourceVersionsService;
     private final ResourceMapper resourceMapper;
     private final RoleMapper roleMapper;
     private final List<String> supportedPictureExtensions;
@@ -48,20 +52,22 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
             @Value("${resources.pictures.size-limit}") final Long sizePictureLimit,
             final ResourceService resourceService,
+            final ResourceVersionsService resourceVersionsService,
             final ResourceMapper resourceMapper,
             final RoleMapper roleMapper) {
         this.supportedPictureExtensions = supportedPictureExtensions;
         this.sizePictureLimit = sizePictureLimit;
         this.resourceService = resourceService;
+        this.resourceVersionsService = resourceVersionsService;
         this.resourceMapper = resourceMapper;
         this.roleMapper = roleMapper;
     }
 
     @Override
-    public ResponseEntity<Page<ResourceDTO>> getVersions(final Principal principal, final Pageable pageable,
-            final String name, final ResourceTypeEnum type, final VersionFilter versionFilter,
-            final String searchParam) {
-        return null;
+    public ResponseEntity<Page<ResourceFileDTO>> getVersions(final Principal principal, final Pageable pageable, final String encodedName, final ResourceTypeEnum type, final VersionFilter filter, final String searchParam) {
+        final String decodedName = decodeBase64(encodedName);
+        final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService.list(pageable, decodedName, type, filter, searchParam));
+        return new ResponseEntity<>(versionsDTOs, HttpStatus.OK);
     }
 
     @Override
