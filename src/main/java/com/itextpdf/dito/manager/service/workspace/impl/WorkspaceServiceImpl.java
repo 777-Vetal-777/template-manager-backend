@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.exception.workspace.OnlyOneWorkspaceAllowedException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
 import com.itextpdf.dito.manager.repository.stage.StageRepository;
@@ -15,6 +16,8 @@ import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,8 +28,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
 
     public WorkspaceServiceImpl(final InstanceService instanceService, final StageService stageService,
-            final WorkspaceRepository workspaceRepository,
-            final StageRepository stageRepository) {
+                                final WorkspaceRepository workspaceRepository,
+                                final StageRepository stageRepository) {
         this.instanceService = instanceService;
         this.stageService = stageService;
         this.workspaceRepository = workspaceRepository;
@@ -95,11 +98,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity newPromotionPathEntity) {
+
+        Optional.ofNullable(newPromotionPathEntity)
+                .map(PromotionPathEntity::getStages)
+                .map(stages -> stages.get(0))
+                .map(StageEntity::getInstances)
+                .filter(instances -> instances.size() == 1)
+                .orElseThrow(WorkspaceHasNoDevelopmentStageException::new);
+
         final WorkspaceEntity workspaceEntity = get(workspace);
         final PromotionPathEntity oldPromotionPathEntity = workspaceEntity.getPromotionPath();
 
-        stageService.delete(oldPromotionPathEntity.getStages());
-        oldPromotionPathEntity.getStages().clear();
+        List<StageEntity> oldPromotionPathEntityStages = oldPromotionPathEntity.getStages();
+        stageService.delete(oldPromotionPathEntityStages);
+        oldPromotionPathEntityStages.clear();
 
         final List<StageEntity> newStages = fillStages(newPromotionPathEntity.getStages());
         oldPromotionPathEntity.addStages(newStages);
@@ -116,19 +128,25 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 
         for (int i = 0; i < thinStageEntities.size(); i++) {
-            final StageEntity filledStageEntity = new StageEntity();
-
             final StageEntity thinStageEntity = thinStageEntities.get(i);
-            filledStageEntity.setName(thinStageEntity.getName());
-            for (final InstanceEntity thinInstanceEntity : thinStageEntity.getInstances()) {
-                filledStageEntity.addInstance(instanceService.get(thinInstanceEntity.getName()));
-            }
-            filledStageEntity.setSequenceOrder(Integer.valueOf(i));
+
+            final StageEntity filledStageEntity = getFilledStageEntity(thinStageEntity, i);
 
             filledStageEntities.add(filledStageEntity);
         }
 
         return filledStageEntities;
+    }
+
+    private StageEntity getFilledStageEntity(StageEntity thinStageEntity, int i) {
+        final StageEntity filledStageEntity = new StageEntity();
+
+        filledStageEntity.setName(thinStageEntity.getName());
+        for (final InstanceEntity thinInstanceEntity : thinStageEntity.getInstances()) {
+            filledStageEntity.addInstance(instanceService.get(thinInstanceEntity.getName()));
+        }
+        filledStageEntity.setSequenceOrder(Integer.valueOf(i));
+        return filledStageEntity;
     }
 
     private void throwExceptionIfNameIsAlreadyInUse(final String workspaceName) {
