@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.entity.template;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
@@ -14,13 +15,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "template")
@@ -75,6 +80,21 @@ public class TemplateEntity {
             "select max(file.version) from manager.template_file file where file.template_id = id)" +
             ")")
     private TemplateFileEntity latestFile;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinTable(
+            name = "resource_file_template",
+            joinColumns = @JoinColumn(name = "template_id"),
+            inverseJoinColumns = @JoinColumn(name = "resource_file_id"))
+    private Set<ResourceFileEntity> resources = new HashSet<>();
+
+    public Set<ResourceFileEntity> getResources() {
+        return resources;
+    }
+
+    public void setResources(Set<ResourceFileEntity> resources) {
+        this.resources = resources;
+    }
 
     public Long getId() {
         return id;

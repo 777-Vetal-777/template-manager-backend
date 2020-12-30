@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.controller.template;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
-import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
@@ -81,7 +81,7 @@ public interface TemplateController {
     ResponseEntity<Page<DependencyDTO>> listDependencies(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             Pageable pageable,
-            @ParameterObject DependencyFilterDTO dependencyFilterDTO,
+            @ParameterObject DependencyFilter dependencyFilter,
             @Parameter(description = "Universal search string which filter dependencies names.")
             @RequestParam(name = "search", required = false) String searchParam);
 

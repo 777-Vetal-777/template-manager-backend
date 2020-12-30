@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity.resource;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,10 +9,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name = "resource_file")
@@ -33,6 +36,17 @@ public class ResourceFileEntity {
     private UserEntity author;
     private Date createdOn;
     private Date modifiedOn;
+
+    @ManyToMany(mappedBy = "resources",fetch = FetchType.EAGER)
+    private Set<TemplateEntity> templates;
+
+    public Set<TemplateEntity> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(Set<TemplateEntity> templates) {
+        this.templates = templates;
+    }
 
     public UserEntity getAuthor() {
         return author;

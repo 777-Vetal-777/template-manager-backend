@@ -2,6 +2,9 @@ package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
+import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
+import com.itextpdf.dito.manager.dto.dependency.DependencyType;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
@@ -12,6 +15,8 @@ import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 
 import java.util.Collection;
 import java.util.Objects;
+
+import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -104,6 +109,22 @@ public class ResourceMapperImpl implements ResourceMapper {
 
     @Override
     public Page<ResourceFileDTO> mapVersions(final Page<ResourceFileEntity> entities) {
+        return entities.map(this::map);
+    }
+
+    @Override
+    public DependencyDTO map(ResourceDependencyModel model) {
+        final DependencyDTO dependencyDTO = new DependencyDTO();
+        dependencyDTO.setActive(model.getActive());
+        dependencyDTO.setName(model.getName());
+        dependencyDTO.setVersion(model.getVersion());
+        dependencyDTO.setDependencyType(DependencyType.TEMPLATE);
+        dependencyDTO.setDirectionType(DependencyDirectionType.HARD);
+        return dependencyDTO;
+    }
+
+    @Override
+    public Page<DependencyDTO> mapDependencies(final Page<ResourceDependencyModel> entities) {
         return entities.map(this::map);
     }
 }

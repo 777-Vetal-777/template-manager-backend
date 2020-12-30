@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
-import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilterDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
@@ -20,11 +20,11 @@ import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitE
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 import javax.validation.Valid;
 
@@ -43,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
     private final ResourceService resourceService;
     private final ResourceVersionsService resourceVersionsService;
+    private final ResourceDependencyService resourceDependencyService;
     private final ResourceMapper resourceMapper;
     private final RoleMapper roleMapper;
     private final List<String> supportedPictureExtensions;
@@ -52,12 +53,14 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
             @Value("${resources.pictures.size-limit}") final Long sizePictureLimit,
             final ResourceService resourceService,
+            final ResourceDependencyService resourceDependencyService,
             final ResourceVersionsService resourceVersionsService,
             final ResourceMapper resourceMapper,
             final RoleMapper roleMapper) {
         this.supportedPictureExtensions = supportedPictureExtensions;
         this.sizePictureLimit = sizePictureLimit;
         this.resourceService = resourceService;
+        this.resourceDependencyService = resourceDependencyService;
         this.resourceVersionsService = resourceVersionsService;
         this.resourceMapper = resourceMapper;
         this.roleMapper = roleMapper;
@@ -84,14 +87,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<Page<DependencyDTO>> listDependencies(final Pageable pageable, final String name,
-            final DependencyFilterDTO dependencyFilterDTO, final String searchParam) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<List<DependencyDTO>> listDependencies(String name) {
-        return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+    public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final ResourceTypeEnum type, final DependencyFilter dependencyFilter, final String searchParam) {
+        final String decodedName = decodeBase64(resource);
+        final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService.list(pageable, decodedName, type, dependencyFilter,searchParam));
+        return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
 
 
-public class DependencyFilterDTO {
+public class DependencyFilter {
     private String name;
     private Long version;
     private DependencyType dependencyType;
