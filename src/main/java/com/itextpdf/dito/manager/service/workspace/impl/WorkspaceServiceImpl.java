@@ -109,7 +109,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         final WorkspaceEntity workspaceEntity = get(workspace);
         final PromotionPathEntity oldPromotionPathEntity = workspaceEntity.getPromotionPath();
 
-        List<StageEntity> oldPromotionPathEntityStages = oldPromotionPathEntity.getStages();
+        final List<StageEntity> oldPromotionPathEntityStages = oldPromotionPathEntity.getStages();
         stageService.delete(oldPromotionPathEntityStages);
         oldPromotionPathEntityStages.clear();
 
@@ -138,7 +138,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return filledStageEntities;
     }
 
-    private StageEntity getFilledStageEntity(StageEntity thinStageEntity, int i) {
+    private StageEntity getFilledStageEntity(final StageEntity thinStageEntity, final int i) {
         final StageEntity filledStageEntity = new StageEntity();
 
         filledStageEntity.setName(thinStageEntity.getName());
