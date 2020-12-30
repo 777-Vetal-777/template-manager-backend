@@ -74,23 +74,6 @@ pipeline {
                 waitForQualityGate abortPipeline: false
             }
         }
-        stage ('Clair Scan') {
-            steps {
-                script{
-                    env.IP=sh(script: "hostname -I | cut -d ' ' -f1", returnStdout: true).trim()
-                    sh '''
-                    docker network create stage-back-clair-network-itext || true
-                    docker run -d --name db --network stage-back-clair-network-itext arminc/clair-db
-                    sleep 15
-                    docker run -p 6060:6071 --link db:postgres -d --name clair --network stage-back-clair-network-itext arminc/clair-local-scan
-                    sleep 1
-                    wget -qO clair-scanner https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 && chmod +x clair-scanner
-                    ./clair-scanner --ip=${IP} --clair http://${IP}:6071 ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-                    ./clair-scanner --ip=${IP} --clair http://${IP}:6071 ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
-                    '''
-                }
-            }
-        }
         stage("Deploy image to nexus"){
             steps{
                 script{
@@ -101,6 +84,12 @@ pipeline {
                         dockerImageDB.push('latest')
                     }
                 }
+            }
+        }
+        stage("Remove unused docker image"){
+            steps{
+                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
+                sh '''docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
             }
         }
         stage("Deploy docker image to host"){
@@ -115,17 +104,8 @@ pipeline {
             }
         }
     }
-    post {
+            post {
         always {
-            sh '''
-            docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1 || true
-            docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1 || true
-            docker container stop db >/dev/null 2>&1 || true
-            docker container stop clair >/dev/null 2>&1 || true
-            docker rm $(docker container ls -a --filter name=db -q) >/dev/null 2>&1 || true
-            docker rm $(docker container ls -a --filter name=clair -q) >/dev/null 2>&1 || true
-            docker network rm stage-back-clair-network-itext || true
-            '''
             cleanWs()
         }
     }
