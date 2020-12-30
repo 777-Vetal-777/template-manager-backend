@@ -140,8 +140,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity get(final String name, final ResourceTypeEnum type) {
         final ResourceEntity resourceEntity = getResource(name, type);
         //specially made to reduce the load of files
-        ResourceFileEntity file = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(resourceEntity.getId());
-        ResourceLogEntity log = resourceLogRepository.findFirstByResource_IdOrderByDateDesc(resourceEntity.getId());
+        final ResourceFileEntity file = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(resourceEntity.getId());
+        final ResourceLogEntity log = resourceLogRepository.findFirstByResource_IdOrderByDateDesc(resourceEntity.getId());
         resourceEntity.setResourceFiles(Collections.singletonList(file));
         resourceEntity.setResourceLogs(log != null ? Collections.singletonList(log) : null);
         return resourceEntity;
