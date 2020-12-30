@@ -79,6 +79,8 @@ pipeline {
                 script{
                     env.IP=sh(script: "hostname -I | cut -d ' ' -f1", returnStdout: true).trim()
                     sh """
+                    docker container stop db || true
+                    docker container stop clair || true
                     docker run -d --name db arminc/clair-db
                     sleep 15 # wait for db to come up
                     docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan
