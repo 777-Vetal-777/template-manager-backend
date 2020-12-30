@@ -43,18 +43,18 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final DependencyType dependencyType = filter.getDependencyType();
         final DependencyDirectionType directionType = filter.getDirectionType();
-        if (Objects.isNull(dependencyType) || dependencyType == IMAGE) {
-            if (Objects.isNull(directionType) || directionType == HARD) {
-                final ResourceEntity resourceEntity = resourceService.getResource(name, type);
-                final Pageable pageWithSort = updateSort(pageable);
-                final Long version = getLongFromFilter(filter.getVersion());
-                final String depend = getStringFromFilter(filter.getName());
-                final Boolean deployed = filter.getActive();
+        if ((Objects.isNull(dependencyType) || dependencyType == IMAGE) &&
+                (Objects.isNull(directionType) || directionType == HARD)) {
+            final ResourceEntity resourceEntity = resourceService.getResource(name, type);
+            final Pageable pageWithSort = updateSort(pageable);
+            final Long version = getLongFromFilter(filter.getVersion());
+            final String depend = getStringFromFilter(filter.getName());
+            final Boolean deployed = filter.getActive();
 
-                return StringUtils.isEmpty(searchParam)
-                        ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)
-                        : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, deployed, searchParam);
-            }
+            return StringUtils.isEmpty(searchParam)
+                    ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)
+                    : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, deployed, searchParam);
+
         }
         return Page.empty();
     }
