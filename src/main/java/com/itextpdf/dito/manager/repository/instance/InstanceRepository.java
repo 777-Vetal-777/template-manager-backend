@@ -30,7 +30,8 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
     String SEARCH_CONDITION = "(LOWER(i.name) like CONCAT('%',:search,'%') "
             + " or LOWER(i.socket) like CONCAT('%',:search,'%') "
             + " or LOWER(i.stage.name) like CONCAT('%',:search,'%') "
-            + " or LOWER(CONCAT(i.createdBy.firstName, ' ', i.createdBy.lastName)) like CONCAT('%',:search,'%'))";
+            + " or LOWER(CONCAT(i.createdBy.firstName, ' ', i.createdBy.lastName)) like CONCAT('%',:search,'%')"
+            + " or LOWER(CAST(i.createdOn as string)) like CONCAT('%',:search,'%'))";
     Optional<InstanceEntity> findByName(String name);
 
     Page<InstanceEntity> findAll(Pageable pageable);
