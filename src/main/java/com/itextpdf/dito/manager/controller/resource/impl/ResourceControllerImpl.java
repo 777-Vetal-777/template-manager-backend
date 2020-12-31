@@ -30,6 +30,7 @@ import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
 import liquibase.util.file.FilenameUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,7 +71,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
         final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService
-                .list(pageable, decodedName, parseResourceType(type), filter, searchParam));
+                .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
         return new ResponseEntity<>(versionsDTOs, HttpStatus.OK);
     }
 
@@ -91,7 +92,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final String searchParam, final DependencyFilter dependencyFilter) {
         final String decodedName = decodeBase64(resource);
         final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService
-                .list(pageable, decodedName, parseResourceType(type), dependencyFilter, searchParam));
+                .list(pageable, decodedName, parseResourceTypeFromPath(type), dependencyFilter, searchParam));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
@@ -105,7 +106,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type) {
-        final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceType(type));
+        final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceTypeFromPath(type));
         return new ResponseEntity<>(resourceMapper.mapWithFile(entity), HttpStatus.OK);
     }
 
@@ -117,7 +118,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         byte[] data = getFileBytes(multipartFile);
 
         final ResourceEntity resourceEntity = resourceService
-                .create(name, parseResourceType(type), data, multipartFile.getOriginalFilename(), principal.getName());
+                .create(name, parseResourceType(type), data, multipartFile.getOriginalFilename(),
+                        principal.getName());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
     }
 
@@ -134,7 +136,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<ResourceDTO> applyRole(final String name, final String type,
             @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
         final ResourceEntity resourceEntity = resourceService
-                .applyRole(decodeBase64(name), parseResourceType(type),
+                .applyRole(decodeBase64(name), parseResourceTypeFromPath(type),
                         applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
@@ -144,7 +146,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name,
             final String type, RoleFilter filter) {
         final Page<RoleEntity> roleEntities = resourceService
-                .getRoles(pageable, decodeBase64(name), parseResourceType(type), filter);
+                .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter);
         return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
     }
 
@@ -152,13 +154,13 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<ResourceDTO> deleteRole(final String name, final String type,
             final String roleName) {
         final ResourceEntity resourceEntity = resourceService
-                .detachRole(decodeBase64(name), parseResourceType(type), decodeBase64(roleName));
+                .detachRole(decodeBase64(name), parseResourceTypeFromPath(type), decodeBase64(roleName));
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> delete(final String name, final String type) {
-        resourceService.delete(decodeBase64(name), parseResourceType(type));
+        resourceService.delete(decodeBase64(name), parseResourceTypeFromPath(type));
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
@@ -185,7 +187,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         }
     }
 
-    private ResourceTypeEnum parseResourceType(final String path) {
+    private ResourceTypeEnum parseResourceTypeFromPath(final String path) {
         final ResourceTypeEnum result = ResourceTypeEnum.getFromPluralName(path);
 
         if (result == null) {
@@ -193,5 +195,13 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         }
 
         return result;
+    }
+
+    private ResourceTypeEnum parseResourceType(final String resourceType) {
+        if (!EnumUtils.isValidEnum(ResourceTypeEnum.class, resourceType)) {
+            throw new NoSuchResourceTypeException(resourceType);
+        }
+
+        return ResourceTypeEnum.valueOf(resourceType);
     }
 }
