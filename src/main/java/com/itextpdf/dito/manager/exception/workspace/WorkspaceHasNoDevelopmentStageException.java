@@ -7,4 +7,8 @@ public class WorkspaceHasNoDevelopmentStageException extends RuntimeException {
     public WorkspaceHasNoDevelopmentStageException() {
         super(message);
     }
+
+    public WorkspaceHasNoDevelopmentStageException(String message) {
+        super(message);
+    }
 }
