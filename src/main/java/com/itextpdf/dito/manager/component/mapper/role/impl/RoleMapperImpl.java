@@ -51,6 +51,17 @@ public class RoleMapperImpl implements RoleMapper {
     }
 
     @Override
+    public RoleDTO mapWithoutUsers(RoleEntity entity) {
+        final RoleDTO dto = new RoleDTO();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setType(entity.getType().toString());
+        dto.setMaster(entity.getMaster());
+        dto.setPermissions(permissionMapper.map(entity.getPermissions()));
+        return dto;
+    }
+
+    @Override
     public Page<RoleDTO> map(final Page<RoleEntity> entities) {
         return entities.map(this::map);
     }
