@@ -5,16 +5,19 @@ public enum ResourceTypeEnum {
 
     public final String pluralName;
 
-    ResourceTypeEnum(String name) {
-        this.pluralName = name;
+    ResourceTypeEnum(final String pluralName) {
+        this.pluralName = pluralName;
     }
 
-    public static ResourceTypeEnum getEnum(String name) {
-        for (ResourceTypeEnum resourceType : values()) {
-            if (resourceType.pluralName.equals(name)) {
-                return resourceType;
+    public static ResourceTypeEnum getFromPluralName(final String pluralName) {
+        ResourceTypeEnum result = null;
+
+        for (final ResourceTypeEnum resourceType : values()) {
+            if (resourceType.pluralName.equals(pluralName)) {
+                result = resourceType;
             }
         }
-        return null;
+
+        return result;
     }
 }

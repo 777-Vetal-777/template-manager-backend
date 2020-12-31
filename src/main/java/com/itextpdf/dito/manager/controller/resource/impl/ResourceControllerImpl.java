@@ -23,15 +23,13 @@ import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
+import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
-
-import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
 import liquibase.util.file.FilenameUtils;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,62 +66,64 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<Page<ResourceFileDTO>> getVersions(final Principal principal, final Pageable pageable, final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
+    public ResponseEntity<Page<ResourceFileDTO>> getVersions(final Principal principal, final Pageable pageable,
+            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
-        final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService.list(pageable, decodedName, ResourceTypeEnum.getEnum(type), filter, searchParam));
+        final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService
+                .list(pageable, decodedName, parseResourceType(type), filter, searchParam));
         return new ResponseEntity<>(versionsDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
-                                              final String type, final MultipartFile file) {
-        final ResourceTypeEnum resourceTypeEnum = ResourceTypeEnum.getEnum(type);
+            final String type, final MultipartFile file) {
         checkFileExtensionIsSupported(file);
         checkFileSizeIsNotExceededLimit(file.getSize());
         final byte[] data = getFileBytes(file);
         final ResourceEntity resourceEntity = resourceService
-                .createNewVersion(name, resourceTypeEnum, data, file.getOriginalFilename(), principal.getName(),
+                .createNewVersion(name, parseResourceType(type), data, file.getOriginalFilename(), principal.getName(),
                         comment);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type, final String searchParam, final DependencyFilter dependencyFilter) {
+    public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
+            final String searchParam, final DependencyFilter dependencyFilter) {
         final String decodedName = decodeBase64(resource);
-        final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService.list(pageable, decodedName, ResourceTypeEnum.getEnum(type), dependencyFilter,searchParam));
+        final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService
+                .list(pageable, decodedName, parseResourceType(type), dependencyFilter, searchParam));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<ResourceDTO>> list(final Pageable pageable,
-                                                  final ResourceFilter filter,
-                                                  final String searchParam) {
+            final ResourceFilter filter,
+            final String searchParam) {
         final Page<ResourceDTO> dtos = resourceMapper.map(resourceService.list(pageable, filter, searchParam));
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type) {
-        final ResourceEntity entity = resourceService.get(decodeBase64(name), ResourceTypeEnum.getEnum(type));
+        final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceType(type));
         return new ResponseEntity<>(resourceMapper.mapWithFile(entity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
-                                              final MultipartFile multipartFile) {
-        final ResourceTypeEnum resourceTypeEnum = ResourceTypeEnum.getEnum(type);
+            final MultipartFile multipartFile) {
         checkFileExtensionIsSupported(multipartFile);
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         byte[] data = getFileBytes(multipartFile);
 
         final ResourceEntity resourceEntity = resourceService
-                .create(name, resourceTypeEnum, data, multipartFile.getOriginalFilename(), principal.getName());
+                .create(name, parseResourceType(type), data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> update(final String name, @Valid final ResourceUpdateRequestDTO updateRequestDTO,
-                                              final Principal principal) {
+            final Principal principal) {
         final ResourceEntity entity = resourceService
                 .update(decodeBase64(name), resourceMapper.map(updateRequestDTO), principal.getName());
         final ResourceDTO dto = resourceMapper.mapWithFile(entity);
@@ -132,39 +132,34 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> applyRole(final String name, final String type,
-                                                 @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+            @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
         final ResourceEntity resourceEntity = resourceService
-                .applyRole(decodeBase64(name), ResourceTypeEnum.getEnum(type), applyRoleRequestDTO.getRoleName(),
+                .applyRole(decodeBase64(name), parseResourceType(type),
+                        applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name,
-                                                  final String type,  RoleFilter filter) {
-        final Page<RoleEntity> roleEntities = resourceService.getRoles(pageable, decodeBase64(name), ResourceTypeEnum.getEnum(type), filter);
+            final String type, RoleFilter filter) {
+        final Page<RoleEntity> roleEntities = resourceService
+                .getRoles(pageable, decodeBase64(name), parseResourceType(type), filter);
         return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> deleteRole(final String name, final String type,
-                                                  final String roleName) {
+            final String roleName) {
         final ResourceEntity resourceEntity = resourceService
-                .detachRole(decodeBase64(name), ResourceTypeEnum.getEnum(type), decodeBase64(roleName));
+                .detachRole(decodeBase64(name), parseResourceType(type), decodeBase64(roleName));
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> delete(final String name, final String type) {
-        resourceService.delete(decodeBase64(name), ResourceTypeEnum.getEnum(type));
+        resourceService.delete(decodeBase64(name), parseResourceType(type));
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-
-    private ResourceTypeEnum getResourceType(final String type) {
-        if (!EnumUtils.isValidEnum(ResourceTypeEnum.class, type)) {
-            throw new NoSuchResourceTypeException(type);
-        }
-        return ResourceTypeEnum.valueOf(type);
     }
 
     private void checkFileSizeIsNotExceededLimit(final Long fileSize) {
@@ -188,5 +183,15 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         if (!supportedPictureExtensions.contains(resourceExtension)) {
             throw new ResourceExtensionNotSupportedException(resourceExtension);
         }
+    }
+
+    private ResourceTypeEnum parseResourceType(final String path) {
+        final ResourceTypeEnum result = ResourceTypeEnum.getFromPluralName(path);
+
+        if (result == null) {
+            throw new NoSuchResourceTypeException(path);
+        }
+
+        return result;
     }
 }
