@@ -133,23 +133,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         for (int i = 0; i < thinStageEntities.size(); i++) {
             final StageEntity thinStageEntity = thinStageEntities.get(i);
 
-            final StageEntity filledStageEntity = getFilledStageEntity(thinStageEntity, i);
+            final StageEntity filledStageEntity = getFilledStageEntity(thinStageEntity, promotionPathEntity, i);
 
-            filledStageEntity.setPromotionPath(promotionPathEntity);
             filledStageEntities.add(filledStageEntity);
         }
 
         return filledStageEntities;
     }
 
-    private StageEntity getFilledStageEntity(final StageEntity thinStageEntity, final int i) {
+    private StageEntity getFilledStageEntity(final StageEntity thinStageEntity, final PromotionPathEntity promotionPathEntity, final int i) {
         final StageEntity filledStageEntity = new StageEntity();
 
         filledStageEntity.setName(thinStageEntity.getName());
+        filledStageEntity.setPromotionPath(promotionPathEntity);
+        filledStageEntity.setSequenceOrder(Integer.valueOf(i));
         for (final InstanceEntity thinInstanceEntity : thinStageEntity.getInstances()) {
             filledStageEntity.addInstance(instanceService.get(thinInstanceEntity.getName()));
         }
-        filledStageEntity.setSequenceOrder(Integer.valueOf(i));
         return filledStageEntity;
     }
 
