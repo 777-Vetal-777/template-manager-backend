@@ -7,7 +7,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
-import com.itextpdf.dito.manager.exception.date.InvalidDateException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
@@ -234,7 +234,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final List<String> modifiedOnDateRange = filter.getModifiedOn();
         if (modifiedOnDateRange != null) {
             if (modifiedOnDateRange.size() != 2) {
-                throw new InvalidDateException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
             }
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);

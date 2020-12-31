@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
-import com.itextpdf.dito.manager.exception.date.InvalidDateException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
@@ -85,7 +85,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final List<String> createdOnDateRange = instanceFilter.getCreatedOn();
         if (createdOnDateRange != null) {
             if (createdOnDateRange.size() != 2) {
-                throw new InvalidDateException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
             }
             createdOnStartDate = getStartDateFromRange(createdOnDateRange);
             createdOnEndDate = getEndDateFromRange(createdOnDateRange);

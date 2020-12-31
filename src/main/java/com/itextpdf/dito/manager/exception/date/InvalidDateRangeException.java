@@ -1,9 +1,9 @@
 package com.itextpdf.dito.manager.exception.date;
 
-public class InvalidDateException extends RuntimeException {
+public class InvalidDateRangeException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public InvalidDateException(final String message) {
+    public InvalidDateRangeException(final String message) {
         super(message);
     }
 

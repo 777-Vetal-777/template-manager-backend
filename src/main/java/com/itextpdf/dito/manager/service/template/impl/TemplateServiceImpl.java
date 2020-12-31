@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
-import com.itextpdf.dito.manager.exception.date.InvalidDateException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
@@ -106,7 +106,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<String> editedOnDateRange = templateFilter.getEditedOn();
         if (editedOnDateRange != null) {
             if (editedOnDateRange.size() != 2) {
-                throw new InvalidDateException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
             }
             editedOnStartDate = getStartDateFromRange(editedOnDateRange);
             editedOnEndDate = getEndDateFromRange(editedOnDateRange);

@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.exception.date.InvalidDateException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
@@ -95,7 +95,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final List<String> modifiedOnDateRange = dataCollectionFilter.getModifiedOn();
         if (modifiedOnDateRange != null) {
             if (modifiedOnDateRange.size() != 2) {
-                throw new InvalidDateException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
             }
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
