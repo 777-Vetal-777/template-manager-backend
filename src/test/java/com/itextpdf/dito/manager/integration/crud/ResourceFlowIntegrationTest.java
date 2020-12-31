@@ -87,16 +87,9 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetDependencies() throws Exception {
-        final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
-        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     public void testGetDependenciesPageable() throws Exception {
         final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
-        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName))
-                .andExpect(status().isOk());
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName)
+                .param("type", ResourceTypeEnum.IMAGE.name())).andExpect(status().isNotFound());
     }
 }
