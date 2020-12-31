@@ -2,22 +2,9 @@ package com.itextpdf.dito.manager.entity;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import org.hibernate.annotations.JoinFormula;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +48,15 @@ public class DataCollectionEntity {
     @OrderBy("date DESC")
     private Collection<DataCollectionLogEntity> dataCollectionLog;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT log.id " +
+            "FROM manager.data_collection_log log " +
+            "WHERE log.data_collection_id = id and log.date=(" +
+            "select max(logLatest.date) from manager.data_collection_log logLatest where logLatest.data_collection_id = id)" +
+            ")")
+    private DataCollectionLogEntity lastDataCollectionLog;
+
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
         return dataCollectionLog;
     }
@@ -70,7 +66,7 @@ public class DataCollectionEntity {
     }
 
     public DataCollectionLogEntity getLatestLogRecord() {
-        return dataCollectionLog.stream().findFirst().get();
+        return lastDataCollectionLog;
     }
 
     public String getDescription() {
