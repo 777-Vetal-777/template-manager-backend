@@ -2,17 +2,7 @@ package com.itextpdf.dito.manager.entity;
 
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +19,7 @@ public class InstanceEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "id")
     private UserEntity createdBy;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "stage_id", referencedColumnName = "id")
     private StageEntity stage;
     @OneToMany(mappedBy = "instance")

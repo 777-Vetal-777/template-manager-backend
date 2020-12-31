@@ -13,12 +13,12 @@ import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.stage.StageService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
@@ -96,15 +96,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return get(workspace).getPromotionPath();
     }
 
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity newPromotionPathEntity) {
 
-        Optional.ofNullable(newPromotionPathEntity)
+        if (Optional.ofNullable(newPromotionPathEntity)
                 .map(PromotionPathEntity::getStages)
                 .map(stages -> stages.get(0))
                 .map(StageEntity::getInstances)
-                .filter(instances -> instances.size() == 1)
-                .orElseThrow(WorkspaceHasNoDevelopmentStageException::new);
+                .filter(instances -> instances.size() == 1).isEmpty()) {
+            throw new WorkspaceHasNoDevelopmentStageException();
+        }
 
         final WorkspaceEntity workspaceEntity = get(workspace);
         final PromotionPathEntity oldPromotionPathEntity = workspaceEntity.getPromotionPath();
@@ -113,7 +115,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         stageService.delete(oldPromotionPathEntityStages);
         oldPromotionPathEntityStages.clear();
 
-        final List<StageEntity> newStages = fillStages(newPromotionPathEntity.getStages());
+        final List<StageEntity> newStages = fillStages(newPromotionPathEntity.getStages(), oldPromotionPathEntity);
         oldPromotionPathEntity.addStages(newStages);
 
         return workspaceRepository.save(workspaceEntity).getPromotionPath();
@@ -124,7 +126,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.getStageNames(workspaceName);
     }
 
-    private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities) {
+    private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities, final PromotionPathEntity promotionPathEntity) {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 
         for (int i = 0; i < thinStageEntities.size(); i++) {
@@ -132,6 +134,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
             final StageEntity filledStageEntity = getFilledStageEntity(thinStageEntity, i);
 
+            filledStageEntity.setPromotionPath(promotionPathEntity);
             filledStageEntities.add(filledStageEntity);
         }
 
