@@ -105,7 +105,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 .map(stages -> stages.get(0))
                 .map(StageEntity::getInstances)
                 .filter(instances -> instances.size() == 1).isEmpty()) {
-            throw new WorkspaceHasNoDevelopmentStageException("Lowest stage have not met development stage requirements");
+            throw new WorkspaceHasNoDevelopmentStageException();
         }
 
         final WorkspaceEntity workspaceEntity = get(workspace);
