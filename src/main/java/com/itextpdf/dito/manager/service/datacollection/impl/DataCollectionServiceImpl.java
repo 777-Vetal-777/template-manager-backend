@@ -75,7 +75,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final UserEntity userEntity = userService.findByEmail(email);
         dataCollectionEntity.setAuthor(userEntity);
         DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
-        logDataCollectionUpdate(savedCollection);
+        logDataCollectionUpdate(savedCollection, userEntity);
 
         return savedCollection;
     }
@@ -140,7 +140,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         existingEntity.setModifiedOn(new Date());
         existingEntity.setDescription(updatedEntity.getDescription());
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
-        logDataCollectionUpdate(savedCollection);
+        logDataCollectionUpdate(savedCollection, userService.findByEmail(userEmail));
         return savedCollection;
     }
 
@@ -148,9 +148,9 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         return dataCollectionRepository.findByName(name).orElseThrow(() -> new DataCollectionNotFoundException(name));
     }
 
-    private void logDataCollectionUpdate(DataCollectionEntity collectionEntity) {
+    private void logDataCollectionUpdate(DataCollectionEntity collectionEntity, UserEntity userEntity) {
         final DataCollectionLogEntity logDataCollection = new DataCollectionLogEntity();
-        logDataCollection.setAuthor(collectionEntity.getAuthor());
+        logDataCollection.setAuthor(userEntity);
         logDataCollection.setDataCollection(collectionEntity);
         logDataCollection.setDate(new Date());
         dataCollectionLogRepository.save(logDataCollection);
