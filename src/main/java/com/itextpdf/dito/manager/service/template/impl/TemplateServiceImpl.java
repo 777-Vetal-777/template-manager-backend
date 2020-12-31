@@ -133,10 +133,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     public TemplateEntity update(final String name, final TemplateEntity updatedTemplateEntity, final String userEmail) {
-        throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
         final TemplateEntity existingTemplate = findByName(name);
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
             existingTemplate.setName(updatedTemplateEntity.getName());
+            throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
         }
         existingTemplate.setDescription(updatedTemplateEntity.getDescription());
         //TODO add logging version https://jira.itextsupport.com/browse/DTM-758
