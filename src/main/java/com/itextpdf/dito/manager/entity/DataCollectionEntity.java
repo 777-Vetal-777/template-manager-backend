@@ -51,9 +51,9 @@ public class DataCollectionEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
             "SELECT log.id " +
-            "FROM manager.data_collection_log log " +
+            "FROM {h-schema}data_collection_log log " +
             "WHERE log.data_collection_id = id and log.date=(" +
-            "select max(logLatest.date) from manager.data_collection_log logLatest where logLatest.data_collection_id = id)" +
+            "select max(logLatest.date) from {h-schema}data_collection_log logLatest where logLatest.data_collection_id = id)" +
             ")")
     private DataCollectionLogEntity lastDataCollectionLog;
 
