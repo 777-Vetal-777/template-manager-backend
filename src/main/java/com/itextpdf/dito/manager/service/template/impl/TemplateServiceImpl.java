@@ -5,13 +5,13 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
+import com.itextpdf.dito.manager.exception.date.InvalidDateException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
-import com.itextpdf.dito.manager.repository.template.TemplateLogRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -107,7 +106,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<String> editedOnDateRange = templateFilter.getEditedOn();
         if (editedOnDateRange != null) {
             if (editedOnDateRange.size() != 2) {
-                throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateException("Date range should contain two elements: start date and end date");
             }
             editedOnStartDate = getStartDateFromRange(editedOnDateRange);
             editedOnEndDate = getEndDateFromRange(editedOnDateRange);

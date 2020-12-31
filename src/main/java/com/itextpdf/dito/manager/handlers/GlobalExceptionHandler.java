@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.mail.MailingException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
@@ -64,6 +65,11 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponseDTO> maxUploadSizeExeededExceptionHandler(final MaxUploadSizeExceededException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<ErrorResponseDTO> invalidDateExceptionHandler(final InvalidDateException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }
