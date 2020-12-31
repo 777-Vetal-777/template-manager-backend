@@ -73,7 +73,7 @@ public interface ResourceController {
     ResponseEntity<Page<ResourceFileDTO>> getVersions(Principal principal,
                                                       Pageable pageable,
                                                       @Parameter(name = "resource-name", description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-                                                      @Parameter(name = "resource-type", description = "Resource type, e.g. image, font, style sheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+                                                      @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
                                                       @ParameterObject VersionFilter versionFilter,
                                                       @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
@@ -98,7 +98,7 @@ public interface ResourceController {
     @ApiResponse(responseCode = "200", description = "Information about one resource dependencies is prepared according to the specified conditions.")
     ResponseEntity<Page<DependencyDTO>> list(Pageable pageable,
                                              @Parameter(name = "resource-name", description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-                                             @Parameter(name = "resource-type", description = "Resource type, e.g. image, font, style sheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+                                             @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
                                              @Parameter(description = "Universal search string which filter dependencies names.")
                                              @RequestParam(name = "search", required = false) String searchParam,
                                              @ParameterObject DependencyFilter dependencyFilter);
@@ -108,7 +108,7 @@ public interface ResourceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> get(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "resource-type", description = "Type of resource, image or font or stylesheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
+            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
     @GetMapping
     @Operation(summary = "Get resource list", description = "Get available resources",
@@ -148,7 +148,7 @@ public interface ResourceController {
     @Operation(summary = "Add role to a resource", description = "Apply custom to a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> applyRole(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "resource-type", description = "Type of resource, image or font or stylesheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
             @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
 
 
@@ -156,14 +156,14 @@ public interface ResourceController {
     @Operation(summary = "Get resource's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable,
                                            @Parameter(name = "resource-name", description = "Encoded with base 64 name of resource") @PathVariable(RESOURCE_PATH_VARIABLE) String resourceName,
-                                           @Parameter(name = "resource-type", description = "Type of resource") @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+                                           @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets") @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
                                            @ParameterObject RoleFilter filter);
 
     @DeleteMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES)
     @Operation(summary = "Remove role from a resource", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> deleteRole(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "resource-type", description = "Type of resource, image or font or stylesheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
     @DeleteMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
@@ -176,6 +176,6 @@ public interface ResourceController {
     })
     ResponseEntity<Void> delete(
             @Parameter(name = "resource-name", description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "resource-type", description = "Resource type, e.g. image, font, style sheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
+            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
 }
