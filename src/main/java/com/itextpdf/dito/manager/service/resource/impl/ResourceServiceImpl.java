@@ -234,7 +234,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final List<String> modifiedOnDateRange = filter.getModifiedOn();
         if (modifiedOnDateRange != null) {
             if (modifiedOnDateRange.size() != 2) {
-                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException();
             }
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);

@@ -106,7 +106,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<String> editedOnDateRange = templateFilter.getEditedOn();
         if (editedOnDateRange != null) {
             if (editedOnDateRange.size() != 2) {
-                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException();
             }
             editedOnStartDate = getStartDateFromRange(editedOnDateRange);
             editedOnEndDate = getEndDateFromRange(editedOnDateRange);

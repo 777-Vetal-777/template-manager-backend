@@ -95,7 +95,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final List<String> modifiedOnDateRange = dataCollectionFilter.getModifiedOn();
         if (modifiedOnDateRange != null) {
             if (modifiedOnDateRange.size() != 2) {
-                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException();
             }
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);

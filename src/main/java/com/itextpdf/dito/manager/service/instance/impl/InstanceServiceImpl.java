@@ -85,7 +85,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final List<String> createdOnDateRange = instanceFilter.getCreatedOn();
         if (createdOnDateRange != null) {
             if (createdOnDateRange.size() != 2) {
-                throw new InvalidDateRangeException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException();
             }
             createdOnStartDate = getStartDateFromRange(createdOnDateRange);
             createdOnEndDate = getEndDateFromRange(createdOnDateRange);
