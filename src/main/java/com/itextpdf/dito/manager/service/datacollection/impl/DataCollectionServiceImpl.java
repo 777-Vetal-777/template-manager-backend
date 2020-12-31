@@ -138,7 +138,6 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
         existingEntity.setName(newName);
         existingEntity.setModifiedOn(new Date());
-        existingEntity.setAuthor(userService.findByEmail(userEmail));
         existingEntity.setDescription(updatedEntity.getDescription());
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
         logDataCollectionUpdate(savedCollection);
