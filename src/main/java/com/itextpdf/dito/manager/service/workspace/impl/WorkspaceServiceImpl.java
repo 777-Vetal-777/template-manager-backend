@@ -98,7 +98,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Transactional(rollbackOn = Exception.class)
     @Override
-    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = RuntimeException.class)
     public PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity newPromotionPathEntity) {
 
         if (Optional.ofNullable(newPromotionPathEntity)
