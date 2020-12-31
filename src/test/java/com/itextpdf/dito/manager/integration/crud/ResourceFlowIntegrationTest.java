@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,6 +39,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     public void test_create_get_update_delete() throws Exception {
         final MockMultipartFile file = new MockMultipartFile("resource", "any-name.png", "text/plain", "{\"file\":\"data\"}".getBytes());
         final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());

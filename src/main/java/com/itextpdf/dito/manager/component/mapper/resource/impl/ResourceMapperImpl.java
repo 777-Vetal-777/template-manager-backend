@@ -118,7 +118,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         dependencyDTO.setActive(model.getActive());
         dependencyDTO.setName(model.getName());
         dependencyDTO.setVersion(model.getVersion());
-        dependencyDTO.setDependencyType(DependencyType.TEMPLATE);
+        dependencyDTO.setDependencyType(DependencyType.IMAGE);
         dependencyDTO.setDirectionType(DependencyDirectionType.HARD);
         return dependencyDTO;
     }

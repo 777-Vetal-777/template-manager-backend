@@ -54,19 +54,19 @@ public interface ResourceController {
     String ROLE_PATH_VARIABLE = "role-name";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
     String RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE = "/{" + RESOURCE_TYPE_PATH_VARIABLE + "}";
-    String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE = RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE;
+    String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE;
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String RESOURCE_VERSION_ENDPOINT = "/versions";
     String RESOURCE_DEPENDENCIES_ENDPOINT = "/dependencies";
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
     String RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE =
-            RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_VERSION_ENDPOINT;
+            RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_VERSION_ENDPOINT;
     String RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE =
             RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT;
     String RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE =
-            RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT + PAGEABLE_ENDPOINT;
+            RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT + PAGEABLE_ENDPOINT;
     String RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE =
-            RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
+            RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
     String RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES =
             RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
 
@@ -75,8 +75,8 @@ public interface ResourceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<ResourceFileDTO>> getVersions(Principal principal,
                                                       Pageable pageable,
-                                                      @Parameter(name = "resource-name",description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-                                                      @Parameter(name = "resource-type", description = "Resource type, e.g. image, font, style sheet", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String type,
+                                                      @Parameter(name = "resource-name", description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                                      @Parameter(name = "resource-type", description = "Resource type, e.g. image, font, style sheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
                                                       @ParameterObject VersionFilter versionFilter,
                                                       @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
@@ -100,7 +100,7 @@ public interface ResourceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about one resource dependencies is prepared according to the specified conditions.")
     ResponseEntity<Page<DependencyDTO>> list(Pageable pageable,
-                                             @Parameter(name = "resource-name",description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                             @Parameter(name = "resource-name", description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
                                              @Parameter(name = "resource-type", description = "Resource type, e.g. image, font, style sheet", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
                                              @Parameter(description = "Universal search string which filter dependencies names.")
                                              @RequestParam(name = "search", required = false) String searchParam,

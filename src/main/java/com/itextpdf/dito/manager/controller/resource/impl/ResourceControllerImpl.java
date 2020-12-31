@@ -70,14 +70,14 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<Page<ResourceFileDTO>> getVersions(final Principal principal, final Pageable pageable, final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
-        final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService.list(pageable, decodedName, getResourceType(decodeBase64(type)), filter, searchParam));
+        final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService.list(pageable, decodedName, ResourceTypeEnum.getEnum(type), filter, searchParam));
         return new ResponseEntity<>(versionsDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
-            final String type, final MultipartFile file) {
-        final ResourceTypeEnum resourceTypeEnum = getResourceType(type);
+                                              final String type, final MultipartFile file) {
+        final ResourceTypeEnum resourceTypeEnum = ResourceTypeEnum.getEnum(type);
         checkFileExtensionIsSupported(file);
         checkFileSizeIsNotExceededLimit(file.getSize());
         final byte[] data = getFileBytes(file);
@@ -90,28 +90,28 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type, final String searchParam, final DependencyFilter dependencyFilter) {
         final String decodedName = decodeBase64(resource);
-        final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService.list(pageable, decodedName, getResourceType(decodeBase64(type)), dependencyFilter,searchParam));
+        final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService.list(pageable, decodedName, ResourceTypeEnum.getEnum(type), dependencyFilter,searchParam));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<ResourceDTO>> list(final Pageable pageable,
-            final ResourceFilter filter,
-            final String searchParam) {
+                                                  final ResourceFilter filter,
+                                                  final String searchParam) {
         final Page<ResourceDTO> dtos = resourceMapper.map(resourceService.list(pageable, filter, searchParam));
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type) {
-        final ResourceEntity entity = resourceService.get(decodeBase64(name), getResourceType(decodeBase64(type)));
+        final ResourceEntity entity = resourceService.get(decodeBase64(name), ResourceTypeEnum.getEnum(type));
         return new ResponseEntity<>(resourceMapper.mapWithFile(entity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
-            final MultipartFile multipartFile) {
-        final ResourceTypeEnum resourceTypeEnum = getResourceType(type);
+                                              final MultipartFile multipartFile) {
+        final ResourceTypeEnum resourceTypeEnum = ResourceTypeEnum.getEnum(type);
         checkFileExtensionIsSupported(multipartFile);
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         byte[] data = getFileBytes(multipartFile);
@@ -123,7 +123,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> update(final String name, @Valid final ResourceUpdateRequestDTO updateRequestDTO,
-            final Principal principal) {
+                                              final Principal principal) {
         final ResourceEntity entity = resourceService
                 .update(decodeBase64(name), resourceMapper.map(updateRequestDTO), principal.getName());
         final ResourceDTO dto = resourceMapper.mapWithFile(entity);
@@ -132,9 +132,9 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> applyRole(final String name, final String type,
-            @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+                                                 @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
         final ResourceEntity resourceEntity = resourceService
-                .applyRole(decodeBase64(name), getResourceType(decodeBase64(type)), applyRoleRequestDTO.getRoleName(),
+                .applyRole(decodeBase64(name), ResourceTypeEnum.getEnum(type), applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
@@ -142,21 +142,21 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name,
                                                   final String type,  RoleFilter filter) {
-        final Page<RoleEntity> roleEntities = resourceService.getRoles(pageable, decodeBase64(name), getResourceType(decodeBase64(type)), filter);
+        final Page<RoleEntity> roleEntities = resourceService.getRoles(pageable, decodeBase64(name), ResourceTypeEnum.getEnum(type), filter);
         return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> deleteRole(final String name, final String type,
-            final String roleName) {
+                                                  final String roleName) {
         final ResourceEntity resourceEntity = resourceService
-                .detachRole(decodeBase64(name), getResourceType(decodeBase64(type)), decodeBase64(roleName));
+                .detachRole(decodeBase64(name), ResourceTypeEnum.getEnum(type), decodeBase64(roleName));
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> delete(final String name, final String type) {
-    	resourceService.delete(decodeBase64(name), getResourceType(decodeBase64(type)));
+        resourceService.delete(decodeBase64(name), ResourceTypeEnum.getEnum(type));
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
