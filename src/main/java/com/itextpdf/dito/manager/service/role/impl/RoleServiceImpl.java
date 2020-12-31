@@ -56,8 +56,15 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> getSlaveRolesByResource(final Pageable pageable, final ResourceEntity resource) {
-        return roleRepository.findAllByResourcesAndMasterFalse(pageable, resource);
+    public Page<RoleEntity> getSlaveRolesByResource(final Pageable pageable, final RoleFilter roleFilter, final ResourceEntity resource) {
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+
+        final String name = getStringFromFilter(roleFilter.getName());
+        final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
+
+        final Pageable pageWithSort = updateSort(pageable);
+
+        return roleRepository.findAllByResourcesAndMasterFalse(pageWithSort, resource, name, roleTypeEnums);
     }
 
     @Override
@@ -163,6 +170,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("users")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "users.size");
+                    }
+                    if (sortParam.getProperty().equals("permissions")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "permissions.size");
                     }
                     return sortParam;
                 })

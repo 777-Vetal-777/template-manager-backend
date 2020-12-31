@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 
 import java.util.List;
+
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,7 +27,7 @@ public interface ResourceService {
 
     ResourceEntity detachRole(String name, ResourceTypeEnum type, String roleName);
 
-    Page<RoleEntity> getRoles(Pageable pageable, String name, ResourceTypeEnum type);
+    Page<RoleEntity> getRoles(Pageable pageable, String name, ResourceTypeEnum type, RoleFilter filter);
 
     Page<ResourceEntity> list(Pageable pageable, ResourceFilter filter, String searchParam);
 

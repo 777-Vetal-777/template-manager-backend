@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "users");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "users", "permissions");
 
     Optional<RoleEntity> findByNameAndMasterTrue(String name);
 
@@ -24,7 +24,16 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     RoleEntity findByNameAndMasterFalseAndResources(String name, ResourceEntity resourceEntity);
 
-    Page<RoleEntity> findAllByResourcesAndMasterFalse(Pageable pageable, ResourceEntity resourceEntity);
+    @Query(value = "select role from RoleEntity role"
+            + " left join role.permissions permission"
+            + " left join role.resources resource"
+            + " where resource = :resourceEntity"
+            + " and role.master = false"
+            + " and (COALESCE(:types) is null or role.type in (:types))"
+            + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
+            + " group by (role.id)")
+    Page<RoleEntity> findAllByResourcesAndMasterFalse(Pageable pageable, ResourceEntity resourceEntity, @Param("name") @Nullable String name,
+                                                      @Param("types") @Nullable List<RoleTypeEnum> types);
 
     void deleteByNameAndMasterFalseAndResources(String name, ResourceEntity resourceEntity);
 

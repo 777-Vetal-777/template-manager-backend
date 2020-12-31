@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesExcep
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
@@ -212,9 +213,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final ResourceTypeEnum type) {
-        final ResourceEntity resourceEntity = getResource(name, type);
-        return roleService.getSlaveRolesByResource(pageable, resourceEntity);
+    public Page<RoleEntity> getRoles(final Pageable pageable, final String resourceName, final ResourceTypeEnum type, final RoleFilter roleFilter) {
+        final ResourceEntity resourceEntity = getResource(resourceName, type);
+        return roleService.getSlaveRolesByResource(pageable, roleFilter, resourceEntity);
     }
 
     @Override

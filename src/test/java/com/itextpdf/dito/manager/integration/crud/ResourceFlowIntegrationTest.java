@@ -66,30 +66,32 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isConflict());
 
         //GET by name
-        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE,
-                Base64.getEncoder().encodeToString(NAME.getBytes()))
-                .param("type", ResourceTypeEnum.IMAGE.name()))
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                Base64.getEncoder().encodeToString(NAME.getBytes()),
+                Base64.getEncoder().encodeToString(TYPE.getBytes())))
                 .andExpect(status().isOk());
-        
+
         //DELETE by name
-        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE,
-                Base64.getEncoder().encodeToString(NAME.getBytes()))
+        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                Base64.getEncoder().encodeToString(NAME.getBytes()),
+                Base64.getEncoder().encodeToString(TYPE.getBytes()))
                 .param("type", ResourceTypeEnum.IMAGE.name()))
                 .andExpect(status().isAccepted());
 
         //repeat DELETE by name
-        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE,
-                Base64.getEncoder().encodeToString(NAME.getBytes()))
-                .param("type", ResourceTypeEnum.IMAGE.name()))
+        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                Base64.getEncoder().encodeToString(NAME.getBytes()),
+                Base64.getEncoder().encodeToString(TYPE.getBytes())))
                 .andExpect(status().isNotFound());
-        
-        
+
+
     }
 
     @Test
     public void testGetDependenciesPageable() throws Exception {
         final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
-        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName)
-                .param("type", ResourceTypeEnum.IMAGE.name())).andExpect(status().isNotFound());
+        final String encodedResourceType = Base64.getEncoder().encodeToString(TYPE.getBytes());
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName,encodedResourceType)
+        ).andExpect(status().isNotFound());
     }
 }

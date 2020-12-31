@@ -13,7 +13,7 @@ public interface RoleService {
 
     RoleEntity getSlaveRole(String name, ResourceEntity resourceEntity);
 
-    Page<RoleEntity> getSlaveRolesByResource(Pageable pageable, ResourceEntity resource);
+    Page<RoleEntity> getSlaveRolesByResource(Pageable pageable, RoleFilter filter, ResourceEntity resource);
 
     RoleEntity create(String name, List<String> permissions, Boolean master);
 
