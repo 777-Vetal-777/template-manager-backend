@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 public class ResourceUpdateRequestDTO {
     @NotBlank
     private String name;
-    @NotBlank
     private String description;
     @NotNull
     private ResourceTypeEnum type;
