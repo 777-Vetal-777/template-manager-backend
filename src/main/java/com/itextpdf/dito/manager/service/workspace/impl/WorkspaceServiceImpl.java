@@ -126,7 +126,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.getStageNames(workspaceName);
     }
 
-    private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities,final PromotionPathEntity promotionPathEntity) {
+    private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities, final PromotionPathEntity promotionPathEntity) {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 
         for (int i = 0; i < thinStageEntities.size(); i++) {
