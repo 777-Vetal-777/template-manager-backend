@@ -65,8 +65,12 @@ public class DataCollectionEntity {
         this.dataCollectionLog = dataCollectionLog;
     }
 
-    public DataCollectionLogEntity getLatestLogRecord() {
+    public DataCollectionLogEntity getLastDataCollectionLog() {
         return lastDataCollectionLog;
+    }
+
+    public void setLastDataCollectionLog(DataCollectionLogEntity lastDataCollectionLog) {
+        this.lastDataCollectionLog = lastDataCollectionLog;
     }
 
     public String getDescription() {
@@ -118,7 +122,7 @@ public class DataCollectionEntity {
     }
 
     public UserEntity getModifiedBy() {
-        return getLatestLogRecord().getAuthor();
+        return getLastDataCollectionLog().getAuthor();
     }
 
     public UserEntity getAuthor() {

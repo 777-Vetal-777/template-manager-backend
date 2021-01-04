@@ -149,11 +149,12 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         return dataCollectionRepository.findByName(name).orElseThrow(() -> new DataCollectionNotFoundException(name));
     }
 
-    private void logDataCollectionUpdate(DataCollectionEntity collectionEntity, UserEntity userEntity) {
+    private void logDataCollectionUpdate(final DataCollectionEntity collectionEntity, final UserEntity userEntity) {
         final DataCollectionLogEntity logDataCollection = new DataCollectionLogEntity();
         logDataCollection.setAuthor(userEntity);
         logDataCollection.setDataCollection(collectionEntity);
         logDataCollection.setDate(new Date());
+        collectionEntity.setLastDataCollectionLog(logDataCollection);
         dataCollectionLogRepository.save(logDataCollection);
     }
 
