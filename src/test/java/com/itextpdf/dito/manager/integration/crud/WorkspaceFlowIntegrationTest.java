@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -157,4 +158,23 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
     }
+
+    //@Test
+    void testGetPromotionPath() throws Exception {
+        final String base64EncodedName = Base64.getEncoder().encodeToString("workspace-test".getBytes());
+
+        WorkspaceCreateRequestDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
+                        WorkspaceCreateRequestDTO.class);
+        mockMvc.perform(post(WorkspaceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+
+        mockMvc.perform(get(WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)));
+
+    }
+
 }
