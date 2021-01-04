@@ -50,7 +50,7 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     @Override
     public ResponseEntity<Void> forget(final String name) {
         instanceService.forget(decodeBase64(name));
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
