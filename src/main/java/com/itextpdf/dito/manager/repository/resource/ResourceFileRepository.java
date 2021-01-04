@@ -103,4 +103,10 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                              @Param("type") @Nullable ResourceTypeEnum type,
                                              @Param("deployed") @Nullable Boolean deployed,
                                              @Param("search") @Nullable String search);
+
+        @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(templates.name, file.version, file.deployed) "
+                + "from ResourceFileEntity file "
+                + "join file.templates templates "
+                + "where file.resource.id =:id ")
+        List<ResourceDependencyModel> search(@Param("id") Long resourceId);
 }

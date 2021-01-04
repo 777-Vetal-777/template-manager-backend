@@ -9,6 +9,8 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface ResourceMapper {
     ResourceDTO map(ResourceEntity entity);
 
@@ -25,4 +27,6 @@ public interface ResourceMapper {
     DependencyDTO map(ResourceDependencyModel model);
 
     Page<DependencyDTO> mapDependencies(Page<ResourceDependencyModel> models);
+
+    List<DependencyDTO> map(List<ResourceDependencyModel> entities);
 }

@@ -59,6 +59,12 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
         return Page.empty();
     }
 
+    @Override
+    public List<ResourceDependencyModel> list(final String name, final ResourceTypeEnum type) {
+        final ResourceEntity resourceEntity = resourceService.getResource(name, type);
+        return resourceFileRepository.search(resourceEntity.getId());
+    }
+
     private Pageable updateSort(final Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {

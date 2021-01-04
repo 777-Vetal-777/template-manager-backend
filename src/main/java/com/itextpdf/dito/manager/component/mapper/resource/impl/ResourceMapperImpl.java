@@ -14,7 +14,9 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
 import org.springframework.data.domain.Page;
@@ -126,5 +128,10 @@ public class ResourceMapperImpl implements ResourceMapper {
     @Override
     public Page<DependencyDTO> mapDependencies(final Page<ResourceDependencyModel> entities) {
         return entities.map(this::map);
+    }
+
+    @Override
+    public List<DependencyDTO> map(final List<ResourceDependencyModel> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
     }
 }

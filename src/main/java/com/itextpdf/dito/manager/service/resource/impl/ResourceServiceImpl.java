@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
@@ -18,6 +19,7 @@ import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
@@ -33,6 +35,7 @@ import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,6 +54,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private final ResourceRepository resourceRepository;
     private final ResourceLogRepository resourceLogRepository;
     private final ResourceFileRepository resourceFileRepository;
+    private final TemplateRepository templateRepository;
     private final UserService userService;
     private final RoleService roleService;
     private final PermissionService permissionService;
@@ -59,12 +63,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             final ResourceRepository resourceRepository,
             final ResourceLogRepository resourceLogRepository,
             final ResourceFileRepository resourceFileRepository,
+            final TemplateRepository templateRepository,
             final UserService userService,
             final RoleService roleService,
             final PermissionService permissionService) {
         this.resourceRepository = resourceRepository;
         this.resourceLogRepository = resourceLogRepository;
         this.resourceFileRepository = resourceFileRepository;
+        this.templateRepository = templateRepository;
         this.userService = userService;
         this.roleService = roleService;
         this.permissionService = permissionService;
@@ -102,7 +108,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email, final String comment) {
+    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email, final String comment, final Boolean updateTemplate) {
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
@@ -114,8 +120,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 break;
         }
 
-        final Long oldVersion = resourceFileRepository
-                .findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
+        final Long oldVersion = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
         final ResourceLogEntity logEntity = createResourceLogEntry(existingResourceEntity, userEntity);
 
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
@@ -131,7 +136,18 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         existingResourceEntity.getResourceFiles().add(fileEntity);
         existingResourceEntity.getResourceLogs().add(logEntity);
-        return resourceRepository.save(existingResourceEntity);
+
+        final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
+        if (Objects.nonNull(updateTemplate) && updateTemplate) {
+            final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(updatedResourceEntity.getId());
+            templateEntities.forEach(t -> {
+                List<ResourceFileEntity> oldVersions = t.getResources().stream().filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId())).collect(Collectors.toList());
+                t.getResources().removeAll(oldVersions);
+                t.getResources().add(updatedResourceEntity.getLatestFile());
+            });
+            templateRepository.saveAll(templateEntities);
+        }
+        return updatedResourceEntity;
     }
 
     @Override

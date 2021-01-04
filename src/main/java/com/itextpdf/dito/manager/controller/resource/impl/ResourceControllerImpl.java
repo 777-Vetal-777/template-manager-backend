@@ -77,13 +77,12 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
-            final String type, final MultipartFile file) {
+            final String type, final MultipartFile file, final Boolean updateTemplate) {
         checkFileExtensionIsSupported(file);
         checkFileSizeIsNotExceededLimit(file.getSize());
         final byte[] data = getFileBytes(file);
         final ResourceEntity resourceEntity = resourceService
-                .createNewVersion(name, parseResourceType(type), data, file.getOriginalFilename(), principal.getName(),
-                        comment);
+                .createNewVersion(name, parseResourceType(type), data, file.getOriginalFilename(), principal.getName(), comment, updateTemplate);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
@@ -93,6 +92,14 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         final String decodedName = decodeBase64(resource);
         final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), dependencyFilter, searchParam));
+        return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<DependencyDTO>> list(final String name, final String type) {
+        final String decodedName = decodeBase64(name);
+        final ResourceTypeEnum typeEnum = parseResourceTypeFromPath(type);
+        final List<DependencyDTO> dependencyDTOs = resourceMapper.map(resourceDependencyService.list(decodedName, typeEnum));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 

@@ -71,4 +71,11 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query(value = "select template from TemplateEntity template "
             + "join template.files file ")
     Page<TemplateEntity> findAll(Pageable pageable);
+
+    @Query(value = "select template from TemplateEntity template "
+            + "left join template.resources versions "
+            + "left join versions.resource resource "
+            + "where resource.id = :resourceId "
+            + "group by template.id")
+    List<TemplateEntity> findTemplatesByResourceId(@Param("resourceId") Long resourceId);
 }

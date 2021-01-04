@@ -14,8 +14,7 @@ import org.springframework.data.domain.Pageable;
 public interface ResourceService {
     ResourceEntity create(String name, ResourceTypeEnum type, byte[] data, String fileName, String email);
 
-    ResourceEntity createNewVersion(String name, ResourceTypeEnum type, byte[] data, String fileName, String email,
-            String comment);
+    ResourceEntity createNewVersion(String name, ResourceTypeEnum type, byte[] data, String fileName, String email, String comment, Boolean updateTemplate);
 
     ResourceEntity get(String name, ResourceTypeEnum type);
 
