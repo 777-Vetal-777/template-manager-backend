@@ -2,9 +2,9 @@ package com.itextpdf.dito.manager.service.resource.impl;
 
 import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
-import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
@@ -18,11 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.IMAGE;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -39,17 +39,17 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     }
 
     @Override
-    public Page<ResourceDependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final DependencyFilter filter, final String searchParam) {
+    public Page<ResourceDependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final ResourceDependencyFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final DependencyType dependencyType = filter.getDependencyType();
-        final DependencyDirectionType directionType = filter.getDirectionType();
-        if ((Objects.isNull(dependencyType) || dependencyType == IMAGE) &&
-                (Objects.isNull(directionType) || directionType == HARD)) {
+        final List<DependencyType> dependenciesType = filter.getDependencyType();
+        final List<DependencyDirectionType> directionsType = filter.getDirectionType();
+        if ((dependenciesType.isEmpty() || dependenciesType.contains(IMAGE)) &&
+                (directionsType.isEmpty()) || directionsType.contains(HARD)) {
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
             final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
-            final Boolean deployed = filter.getActive();
+            final Boolean deployed = getBooleanMultiselectFromFilter(filter.getActive());
 
             return StringUtils.isEmpty(searchParam)
                     ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)

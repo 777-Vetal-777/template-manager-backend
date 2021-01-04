@@ -2,13 +2,13 @@ package com.itextpdf.dito.manager.controller.resource;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
-import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
+import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -90,7 +90,7 @@ public interface ResourceController {
                                        @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
                                        @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true, style = ParameterStyle.FORM) @RequestPart String type,
                                        @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource,
-                                       @Parameter(name = "updateTemplate", description = "Pointer to update the resource version in templates", style = ParameterStyle.FORM) @RequestPart("updateTemplate") Boolean updateTemplate);
+                                       @Parameter(name = "updateTemplate", description = "Pointer to update the resource version in templates. Content type must be aplication/json!.", style = ParameterStyle.FORM) @RequestPart("updateTemplate") Boolean updateTemplate);
 
     @GetMapping(RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving resource dependencies page using sorting and filters.",
@@ -101,7 +101,7 @@ public interface ResourceController {
                                              @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
                                              @Parameter(description = "Universal search string which filter dependencies names.")
                                              @RequestParam(name = "search", required = false) String searchParam,
-                                             @ParameterObject DependencyFilter dependencyFilter);
+                                             @ParameterObject ResourceDependencyFilter resourceDependencyFilter);
 
     @GetMapping(RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving list of information about resource dependencies.",

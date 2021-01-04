@@ -50,10 +50,10 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                 + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))"
                 + "and (:deployed=null or file.deployed IS :deployed) "
                 //search
-                + "and CAST(file.version as string) like CONCAT('%',:search,'%') "
+                + "and (CAST(file.version as string) like CONCAT('%',:search,'%') "
                 + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
                 + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
-                + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ")
+                + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%')) ")
         Page<ResourceFileEntity> search(Pageable pageable,
                                         @Param("id") Long resourceId,
                                         @Param("version") @Nullable Long version,
