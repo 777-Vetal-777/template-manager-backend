@@ -131,7 +131,7 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     @Override
-    public List<DependencyDTO> map(final List<ResourceDependencyModel> entities) {
-        return entities.stream().map(this::map).collect(Collectors.toList());
+    public List<DependencyDTO> map(final List<ResourceDependencyModel> models) {
+        return models.stream().map(this::map).collect(Collectors.toList());
     }
 }

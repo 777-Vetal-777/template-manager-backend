@@ -28,5 +28,5 @@ public interface ResourceMapper {
 
     Page<DependencyDTO> mapDependencies(Page<ResourceDependencyModel> models);
 
-    List<DependencyDTO> map(List<ResourceDependencyModel> entities);
+    List<DependencyDTO> map(List<ResourceDependencyModel> models);
 }
