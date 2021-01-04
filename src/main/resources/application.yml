@@ -42,4 +42,4 @@ resources:
   pictures:
     extensions:
       supported: bmp,ccit,gif,jpg,jpg2000,png,svg,wmf
-    size-limit: 1048576
+    size-limit: 67108864
