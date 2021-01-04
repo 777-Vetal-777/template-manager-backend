@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.controller.datacollection.DataCollectionControl
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
@@ -54,6 +56,16 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
                 .create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<DependencyDTO> list(String name) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<ResourceDTO> create(Principal principal, String name, String dataCollectionType, MultipartFile multipartFile, String comment) {
+        return null;
     }
 
     @Override
