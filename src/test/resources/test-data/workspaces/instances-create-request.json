@@ -1,0 +1,8 @@
+{
+  "instances":[
+    {
+      "name": "MY-DEV-INSTANCE",
+      "socket": "localhost:8080"
+    }
+  ]
+}
