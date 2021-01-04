@@ -124,10 +124,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         byte[] data = getFileBytes(multipartFile);
 
-        final ResourceEntity resourceEntity = resourceService
-                .create(name, parseResourceType(type), data, multipartFile.getOriginalFilename(),
-                        principal.getName());
-        return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
+        final ResourceEntity resourceEntity = resourceService.create(name, parseResourceType(type), data, multipartFile.getOriginalFilename(), principal.getName());
+        return new ResponseEntity<>(resourceMapper.mapWithFile(resourceEntity), HttpStatus.CREATED);
     }
 
     @Override
