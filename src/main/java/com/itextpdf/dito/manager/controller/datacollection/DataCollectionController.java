@@ -4,6 +4,8 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,6 +41,8 @@ public interface DataCollectionController {
     String BASE_NAME = MAJOR_VERSION + "/datacollections";
     String DATA_COLLECTION_PATH_VARIABLE = "name";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
+    String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
+    String DATA_COLLECTION_VERSIONS = "/versions";
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create data collection",
@@ -46,6 +50,26 @@ public interface DataCollectionController {
     ResponseEntity<DataCollectionDTO> create(@Parameter(description = "The datacollections name.", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                              @Parameter(description = "The datacollections type, ex. JSON..", required = true, style = ParameterStyle.FORM, schema = @Schema(implementation = DataCollectionType.class)) @RequestPart("type") String dataCollectionType,
                                              @Parameter(description = "Data collections file", required = true, style = ParameterStyle.FORM) @RequestPart("attachment") MultipartFile multipartFile, Principal principal);
+
+    @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of dependencies of one data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Information about one data collection dependencies is prepared according to the specified conditions.")
+    ResponseEntity<DependencyDTO> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
+
+    @PostMapping(DATA_COLLECTION_VERSIONS)
+    @Operation(summary = "Create new version of data collection", description = "Make a new version of a data collection: upload a new json and a comment for the new version.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Data collection version is created"),
+            @ApiResponse(responseCode = "400", description = "This file exceeds the file limit."),
+            @ApiResponse(responseCode = "400", description = "This file is not valid. Please try again"),
+            @ApiResponse(responseCode = "403", description = "You don't have permissions to create new version."),
+    })
+    ResponseEntity<ResourceDTO> create(Principal principal,
+                                       @Parameter(description = "The data collection name.", required = true, style = ParameterStyle.FORM) @RequestPart String name,
+                                       @Parameter(description = "The data collection type, ex. JSON..", required = true, style = ParameterStyle.FORM, schema = @Schema(implementation = DataCollectionType.class)) @RequestPart("type") String dataCollectionType,
+                                       @Parameter(description = "Data collections file", required = true, style = ParameterStyle.FORM) @RequestPart("attachment") MultipartFile multipartFile,
+                                       @Parameter(description = "Optional comment to the new data collection version", name = "comment", style = ParameterStyle.FORM) @RequestPart(required = false) String comment);
 
     @GetMapping
     @Operation(summary = "Get list of data collections",
