@@ -70,7 +70,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
         final String encodedSocketName = new String(Base64.getEncoder().encode(instanceEntity.getName().getBytes()));
 
         mockMvc.perform(delete(InstanceController.BASE_NAME + InstanceController.INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE, encodedSocketName))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test
