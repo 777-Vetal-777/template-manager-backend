@@ -5,25 +5,25 @@ import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
+import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Base64;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,24 +31,29 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private WorkspaceRepository workspaceRepository;
 
+    @Autowired
+    private InstanceRepository instanceRepository;
+
     @AfterEach
     public void teardown() {
         workspaceRepository.deleteAll();
+        instanceRepository.deleteAll();
     }
 
-    @Test
-    public void testCreateWorkspace() throws Exception {
-        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
-        InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
-        instanceDTO.setName("MY-DEV-INSTANCE");
-        instanceDTO.setSocket("localhost:8080");
-        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+    @BeforeEach
+    void tearUp() throws Exception {
+        InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper
+                .readValue(new File("src/test/resources/test-data/workspaces/instances-create-request.json"),
+                        InstancesRememberRequestDTO.class);
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
 
+    @Test
+    public void testCreateWorkspace() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
@@ -61,7 +66,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("language").value("ENG"))
                 .andExpect(jsonPath("timezone").value("America/Sao_Paulo"));
 
-        assertTrue(workspaceRepository.findById(1L).isPresent());
+        assertTrue(workspaceRepository.findAll().size() == 1);
     }
 
     @Test
@@ -159,22 +164,91 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     }
 
-    //@Test
+    @Test
     void testGetPromotionPath() throws Exception {
-        final String base64EncodedName = Base64.getEncoder().encodeToString("workspace-test".getBytes());
+        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
 
+        final String base64EncodedName = Base64.getEncoder().encodeToString(workspaceCreateRequestDTO.getName().getBytes());
+
+        mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
+                .andExpect(jsonPath("stages[0].name").value("Development"));
+    }
+
+    @Test
+    void testUpdatePromotionPath() throws Exception {
+        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
+
+        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
+        InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
+        instanceDTO.setName("test-name");
+        instanceDTO.setSocket("localhost:9999");
+        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        PromotionPathDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/workspaces/promotion-path-update-request.json"),
+                        PromotionPathDTO.class);
+
+        final String base64EncodedName = Base64.getEncoder().encodeToString(workspaceCreateRequestDTO.getName().getBytes());
+
+        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
+                .andExpect(jsonPath("stages[0].name").value("test-promotion-path"))
+                .andExpect(jsonPath("stages[0].instances[0].name").value("test-name"));
+    }
+
+    @Test
+    void testUpdatePromotionPathBadRequest() throws Exception {
+        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
+
+        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
+        InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
+        instanceDTO.setName("test-name");
+        instanceDTO.setSocket("localhost:9999");
+
+        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        final InstanceDTO myInstanceDTO = new InstanceDTO();
+        myInstanceDTO.setName("MY-DEV-INSTANCE");
+        myInstanceDTO.setSocket("localhost:8080");
+
+        PromotionPathDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/workspaces/promotion-path-update-request.json"),
+                        PromotionPathDTO.class);
+
+        request.getStages().get(0).getInstances().add(myInstanceDTO);
+
+        final String base64EncodedName = Base64.getEncoder().encodeToString(workspaceCreateRequestDTO.getName().getBytes());
+
+        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+    }
+
+    private WorkspaceCreateRequestDTO createTestWorkspace() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
+
         mockMvc.perform(post(WorkspaceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
-
-        mockMvc.perform(get(WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)));
-
+        return request;
     }
 
 }
