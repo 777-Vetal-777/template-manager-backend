@@ -19,6 +19,7 @@ import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupporte
 import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitException;
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
+import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
@@ -88,10 +89,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
-            final String searchParam, final DependencyFilter dependencyFilter) {
+            final String searchParam, final ResourceDependencyFilter filter) {
         final String decodedName = decodeBase64(resource);
         final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService
-                .list(pageable, decodedName, parseResourceTypeFromPath(type), dependencyFilter, searchParam));
+                .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
