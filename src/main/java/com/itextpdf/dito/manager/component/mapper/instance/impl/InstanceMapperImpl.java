@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
-import com.itextpdf.dito.manager.entity.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
