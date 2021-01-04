@@ -22,12 +22,13 @@ import java.util.Arrays;
 import java.util.Base64;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
+class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private WorkspaceRepository workspaceRepository;
 
@@ -53,7 +54,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateWorkspace() throws Exception {
+    void testCreateWorkspace() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
@@ -66,11 +67,11 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("language").value("ENG"))
                 .andExpect(jsonPath("timezone").value("America/Sao_Paulo"));
 
-        assertTrue(workspaceRepository.findAll().size() == 1);
+        assertEquals(1, workspaceRepository.findAll().size());
     }
 
     @Test
-    public void testCreateWorkspaceWithExistingName() throws Exception {
+    void testCreateWorkspaceWithExistingName() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
@@ -88,7 +89,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdateWorkspace() throws Exception {
+    void testUpdateWorkspace() throws Exception {
         final String INSTANCE_NAME = "MY-DEV-INSTANCE1";
         InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
         InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
@@ -127,7 +128,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetWorkspace() throws Exception {
+    void testGetWorkspace() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
@@ -147,7 +148,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetWorkspaceNotFound() throws Exception {
+    void testGetWorkspaceNotFound() throws Exception {
         final String base64EncodedName = Base64.getEncoder()
                 .encodeToString("fake-workspace".getBytes());
         mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
@@ -156,7 +157,7 @@ public class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_getStageNames() throws Exception {
+    void test_getStageNames() throws Exception {
         final String base64EncodedName = Base64.getEncoder()
                 .encodeToString("workspace-test".getBytes());
         mockMvc.perform(get(WorkspaceController.BASE_NAME + WorkspaceController.WORKSPACE_STAGES_ENDPOINT, base64EncodedName))
