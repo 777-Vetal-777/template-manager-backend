@@ -1,4 +1,4 @@
 {
   "name": "my-custom-role",
-  "permissions": ["E1_US1_LOG_IN_TO_THE_SYSTEM"]
+  "permissions": ["E6_US32_CREATE_NEW_DATA_COLLECTIONS_USING_JSON"]
 }

@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.integration.filtering;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
-import com.itextpdf.dito.manager.entity.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -76,7 +76,7 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
                 .param("editedOn", "01/01/1980"))
                 .andExpect(jsonPath("$.content", hasSize(0)));
         mockMvc.perform(get(TemplateController.BASE_NAME)
-                .param("type", "standard"))
+                .param("type", "STANDARD"))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].name", is(request.getName())));
         /*mockMvc.perform(get(TemplateController.BASE_NAME)

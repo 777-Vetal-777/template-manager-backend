@@ -1,18 +1,19 @@
 package com.itextpdf.dito.manager.dto.template;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class TemplateDTO {
     private String name;
     @JsonProperty("type")
-    private String type;
+    private TemplateTypeEnum type;
     @JsonProperty("dataCollection")
     private String dataCollection;
     @JsonProperty("modifiedBy")
     private String author;
-    @JsonProperty("editedOn")
+    @JsonProperty("modifiedOn")
     private Date lastUpdate;
 
     public String getName() {
@@ -23,11 +24,11 @@ public class TemplateDTO {
         this.name = name;
     }
 
-    public String getType() {
+    public TemplateTypeEnum getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TemplateTypeEnum type) {
         this.type = type;
     }
 

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RoleController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/roles";
+
     String ROLE_PATH_VARIABLE = "name";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
 

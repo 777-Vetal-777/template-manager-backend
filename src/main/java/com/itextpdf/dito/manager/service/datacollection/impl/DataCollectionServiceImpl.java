@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
@@ -13,6 +14,7 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRep
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.Date;
@@ -37,15 +39,18 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
     private final UserService userService;
+    private final TemplateService templateService;
     private final JsonValidator jsonValidator;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
                                      final UserService userService,
+                                     final TemplateService templateService,
                                      final DataCollectionLogRepository dataCollectionLogRepository,
                                      final JsonValidator jsonValidator) {
         this.dataCollectionRepository = dataCollectionRepository;
-        this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.userService = userService;
+        this.templateService = templateService;
+        this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.jsonValidator = jsonValidator;
     }
 
@@ -71,7 +76,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final UserEntity userEntity = userService.findByEmail(email);
         dataCollectionEntity.setAuthor(userEntity);
         DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
-        logDataCollectionUpdate(savedCollection);
+        logDataCollectionUpdate(savedCollection, userEntity);
 
         return savedCollection;
     }
@@ -90,7 +95,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final List<String> modifiedOnDateRange = dataCollectionFilter.getModifiedOn();
         if (modifiedOnDateRange != null) {
             if (modifiedOnDateRange.size() != 2) {
-                throw new IllegalArgumentException("Date range should contain two elements: start date and end date");
+                throw new InvalidDateRangeException();
             }
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
@@ -106,6 +111,11 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     @Override
     public DataCollectionEntity get(final String name) {
         return findByName(name);
+    }
+
+    @Override
+    public DataCollectionEntity getByTemplateName(final String templateName) {
+        return templateService.get(templateName).getDataCollection();
     }
 
     @Override
@@ -129,10 +139,9 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
         existingEntity.setName(newName);
         existingEntity.setModifiedOn(new Date());
-        existingEntity.setAuthor(userService.findByEmail(userEmail));
         existingEntity.setDescription(updatedEntity.getDescription());
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
-        logDataCollectionUpdate(savedCollection);
+        logDataCollectionUpdate(savedCollection, userService.findByEmail(userEmail));
         return savedCollection;
     }
 
@@ -140,9 +149,9 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         return dataCollectionRepository.findByName(name).orElseThrow(() -> new DataCollectionNotFoundException(name));
     }
 
-    private void logDataCollectionUpdate(DataCollectionEntity collectionEntity) {
+    private void logDataCollectionUpdate(DataCollectionEntity collectionEntity, UserEntity userEntity) {
         final DataCollectionLogEntity logDataCollection = new DataCollectionLogEntity();
-        logDataCollection.setAuthor(collectionEntity.getAuthor());
+        logDataCollection.setAuthor(userEntity);
         logDataCollection.setDataCollection(collectionEntity);
         logDataCollection.setDate(new Date());
         dataCollectionLogRepository.save(logDataCollection);

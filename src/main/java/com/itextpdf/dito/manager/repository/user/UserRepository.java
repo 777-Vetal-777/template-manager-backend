@@ -35,8 +35,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             //search
             + "and (LOWER(user.email) like CONCAT('%',:search,'%') "
             + "or LOWER(role.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(user.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(user.lastName) like CONCAT('%',:search,'%')) "
+            + "or LOWER(CONCAT(user.firstName, ' ',  user.lastName)) like CONCAT('%',:search,'%'))"
             + "group by user.id")
     Page<UserEntity> search(Pageable pageable,
                             @Param("email") @Nullable String email,
@@ -65,7 +64,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             + "join u.roles r "
             + "where u.roles.size = 1 "
             + "and r.name = :roleName ")
-    Integer countOfUserWithOnlyOneRole(String roleName);
+    int countOfUserWithOnlyOneRole(String roleName);
 
     Optional<UserEntity> findByEmailAndActiveTrue(String email);
 

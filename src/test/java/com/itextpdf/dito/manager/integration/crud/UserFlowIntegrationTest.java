@@ -17,7 +17,6 @@ import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -50,7 +49,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        RoleEntity role = roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow();
+        RoleEntity role = roleRepository.findByNameAndMasterTrue("GLOBAL_ADMINISTRATOR").orElseThrow();
         user1 = new UserEntity();
         user1.setEmail("user1@email.com");
         user1.setFirstName("Harry");

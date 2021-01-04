@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="001-add-description-column-to-template-table" author="Ivan_Semenov">
+        <addColumn tableName="template">
+            <column name="description" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="002-rename-available-for-custom-role-column-in-permission-table" author="Vadim_Srookin">
+        <renameColumn tableName="permission" oldColumnName="available_for_custom_role"
+                      newColumnName="optional_for_custom_role"/>
+    </changeSet>
+
+    <changeSet id="003-reset-values-in-optional-for-custom-role-column-in-permission-table" author="Vadim_Sorokin">
+        <update tableName="permission">
+            <column name="optional_for_custom_role" value="false"/>
+            <where>optional_for_custom_role=true</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="004-set-default-values-for-optional-for-custom-role-column-in-permission-table"
+               author="Vadim_Sorokin">
+        <update tableName="permission">
+            <column name="optional_for_custom_role" value="true"/>
+            <where>name in ('E6_US32_CREATE_NEW_DATA_COLLECTIONS_USING_JSON',
+                'E6_US34_EDIT_DATA_COLLECTION_METADATA',
+                'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON',
+                'E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION',
+                'E6_US38_DELETE_DATA_COLLECTION',
+                'E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE',
+                'E7_US47_EDIT_SAMPLE_METADATA',
+                'E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE',
+                'E7_US50_DELETE_DATA_SAMPLE',
+                'E8_US53_CREATE_NEW_RESOURCE_IMAGE',
+                'E8_US55_EDIT_RESOURCE_METADATA_IMAGE',
+                'E8_US56_CREATE_NEW_RESOURCE_FONT',
+                'E8_US58_EDIT_RESOURCE_METADATA_FONT',
+                'E8_US59_CREATE_NEW_RESOURCE_STYLESHEET',
+                'E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET',
+                'E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE',
+                'E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET',
+                'E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE',
+                'E8_US66_DELETE_RESOURCE_IMAGE',
+                'E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA',
+                'E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD',
+                'E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION',
+                'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD',
+                'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD',
+                'E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED',
+                'E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE',
+                'E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE',
+                'E9_US81_PREVIEW_TEMPLATE_STANDARD',
+                'E9_US24_EXPORT_TEMPLATE_DATA',
+                'E9_US25_IMPORT_TEMPLATE_DATA')
+            </where>
+        </update>
+    </changeSet>
+
+    <changeSet id="005-add-deployed-column-to-resource-file-table" author="Yaroslav_Maievskiy">
+        <addColumn tableName="resource_file">
+            <column name="deployed" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="006-add-notnull-constraint-to-deployed-column-in-resource-file-table" author="Yaroslav_Maievskiy">
+        <addNotNullConstraint tableName="resource_file" columnName="deployed"
+                              constraintName="resource_file_deployed_not_null_constraint"/>
+    </changeSet>
+
+    <changeSet id="007-add-resource-role-table" author="Vadim_Sorokin">
+        <createTable tableName="resource_role">
+            <column name="resource_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="resource_role_resource_id_not_null_constraint"
+                             foreignKeyName="fk_resource_role_to_resource" references="resource(id)"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="resource_role_role_id_not_null_constraint"
+                             foreignKeyName="fk_resource_role_to_role" references="role(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="008-add-buffer-name-column-to-role-table" author="Vadim_Sorokin">
+        <addColumn tableName="role">
+            <column name="buffer_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="009-copy-values-from-name-column-to-buffer-name-column-in-rol-table" author="Vadim_Sorokin">
+        <update tableName="role">
+            <column name="buffer_name" valueComputed="name"/>
+        </update>
+    </changeSet>
+
+    <changeSet id="010-drop-name-column-from-role-table" author="Vadim_Sorokin">
+        <dropColumn tableName="role" columnName="name"/>
+    </changeSet>
+
+    <changeSet id="011-rename-buffer-name-column-in-role-table" author="Vadim_Srookin">
+        <renameColumn tableName="role" oldColumnName="buffer_name" newColumnName="name"/>
+    </changeSet>
+
+    <changeSet id="012-add-notnull-constraint-to-name-column-in-role-table" author="Vadim_Sorokin">
+        <addNotNullConstraint tableName="role" columnName="name" constraintName="role_name_not_null_constraint"/>
+    </changeSet>
+
+    <changeSet id="013-add-master-column-in-role-table" author="Vadim_Sorokin">
+        <addColumn tableName="role">
+            <column name="master" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false" notNullConstraintName="role-master-not-null-constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="014-add-author-id-column-to-resource-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="resource_file_author_id_not_null_constraint"
+                             foreignKeyName="fk_resource_file_to_user" references="user(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="015-add-created-on-column-to-resource-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="resource_file_created_on_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="016-add-updated-on-column-to-resource-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="modified_on" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="017-add-template-log-table" author="Ivan_Semenov">
+        <createTable tableName="template_log">
+            <column name="id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_log_id_not_null_constraint"
+                             primaryKey="true" primaryKeyName="template_log_pk"/>
+            </column>
+            <column name="date" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="template_log_date_not_null_constraint"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_log_author_id_not_null_constraint"
+                             foreignKeyName="fk_template_log_to_user"
+                             references="user(id)"/>
+            </column>
+            <column name="template_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_log_template_id_not_null_constraint"
+                             foreignKeyName="fk_template_log_to_resource"
+                             references="template(id)"/>
+            </column>
+            <column name="comment" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="018-create-template-log-sequence" author="Ivan_Semenov">
+        <createSequence sequenceName="template_log_sequence"/>
+    </changeSet>
+
+    <!--change type of version column from date to long-->
+    <changeSet id="019-drop-version-column-in-template-file-table" author="Ivan_Semenov">
+        <dropColumn tableName="template_file">
+            <column name="version"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="020-add-version-column-in-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
+            <column name="version" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_file_version_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="021-add-created-on-column-to-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="template_file_created_on_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="022-add-modified-on-column-to-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
+            <column name="modified_on" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="023-create-resource-file-template-table" author="Yaroslav_Maievskiy">
+        <createTable tableName="resource_file_template">
+            <column name="template_id" type="bigint">
+                <constraints foreignKeyName="fk_resource_file_template_to_template" references="template(id)"/>
+            </column>
+            <column name="resource_file_id" type="bigint">
+                <constraints foreignKeyName="fk_resource_file_template_to_resource_file" references="resource_file(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

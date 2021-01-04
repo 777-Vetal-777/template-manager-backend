@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.exception.workspace.OnlyOneWorkspaceAllowedException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
 import com.itextpdf.dito.manager.repository.stage.StageRepository;
@@ -12,10 +13,12 @@ import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.stage.StageService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
@@ -25,8 +28,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
 
     public WorkspaceServiceImpl(final InstanceService instanceService, final StageService stageService,
-            final WorkspaceRepository workspaceRepository,
-            final StageRepository stageRepository) {
+                                final WorkspaceRepository workspaceRepository,
+                                final StageRepository stageRepository) {
         this.instanceService = instanceService;
         this.stageService = stageService;
         this.workspaceRepository = workspaceRepository;
@@ -93,37 +96,60 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return get(workspace).getPromotionPath();
     }
 
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity newPromotionPathEntity) {
+
+        if (Optional.ofNullable(newPromotionPathEntity)
+                .map(PromotionPathEntity::getStages)
+                .map(stages -> stages.get(0))
+                .map(StageEntity::getInstances)
+                .filter(instances -> instances.size() == 1).isEmpty()) {
+            throw new WorkspaceHasNoDevelopmentStageException();
+        }
+
         final WorkspaceEntity workspaceEntity = get(workspace);
         final PromotionPathEntity oldPromotionPathEntity = workspaceEntity.getPromotionPath();
 
-        stageService.delete(oldPromotionPathEntity.getStages());
-        oldPromotionPathEntity.getStages().clear();
+        final List<StageEntity> oldPromotionPathEntityStages = oldPromotionPathEntity.getStages();
+        stageService.delete(oldPromotionPathEntityStages);
+        oldPromotionPathEntityStages.clear();
 
-        final List<StageEntity> newStages = fillStages(newPromotionPathEntity.getStages());
+        final List<StageEntity> newStages = fillStages(newPromotionPathEntity.getStages(), oldPromotionPathEntity);
         oldPromotionPathEntity.addStages(newStages);
 
         return workspaceRepository.save(workspaceEntity).getPromotionPath();
     }
 
-    private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities) {
+    @Override
+    public List<String> getStageNames(final String workspaceName) {
+        return workspaceRepository.getStageNames(workspaceName);
+    }
+
+    private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities, final PromotionPathEntity promotionPathEntity) {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 
         for (int i = 0; i < thinStageEntities.size(); i++) {
-            final StageEntity filledStageEntity = new StageEntity();
-
             final StageEntity thinStageEntity = thinStageEntities.get(i);
-            filledStageEntity.setName(thinStageEntity.getName());
-            for (final InstanceEntity thinInstanceEntity : thinStageEntity.getInstances()) {
-                filledStageEntity.addInstance(instanceService.get(thinInstanceEntity.getName()));
-            }
-            filledStageEntity.setSequenceOrder(Integer.valueOf(i));
+
+            final StageEntity filledStageEntity = getFilledStageEntity(thinStageEntity, promotionPathEntity, i);
 
             filledStageEntities.add(filledStageEntity);
         }
 
         return filledStageEntities;
+    }
+
+    private StageEntity getFilledStageEntity(final StageEntity thinStageEntity, final PromotionPathEntity promotionPathEntity, final int i) {
+        final StageEntity filledStageEntity = new StageEntity();
+
+        filledStageEntity.setName(thinStageEntity.getName());
+        filledStageEntity.setPromotionPath(promotionPathEntity);
+        filledStageEntity.setSequenceOrder(Integer.valueOf(i));
+        for (final InstanceEntity thinInstanceEntity : thinStageEntity.getInstances()) {
+            filledStageEntity.addInstance(instanceService.get(thinInstanceEntity.getName()));
+        }
+        return filledStageEntity;
     }
 
     private void throwExceptionIfNameIsAlreadyInUse(final String workspaceName) {

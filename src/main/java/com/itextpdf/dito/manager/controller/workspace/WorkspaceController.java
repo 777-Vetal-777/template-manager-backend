@@ -34,6 +34,7 @@ public interface WorkspaceController {
     String WORKSPACE_PATH_VARIABLE = "name";
     String WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + WORKSPACE_PATH_VARIABLE + "}";
     String WORKSPACE_PROMOTION_PATH_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/promotion-path";
+    String WORKSPACE_STAGES_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/stages";
 
     @PostMapping
     @Operation(summary = "Create workspace", description = "Create new workspace",
@@ -71,4 +72,9 @@ public interface WorkspaceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<PromotionPathDTO> updatePromotionPath(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
             @Valid @RequestBody PromotionPathDTO promotionPathDTO);
+
+    @GetMapping(WORKSPACE_STAGES_ENDPOINT)
+    @Operation(summary = "List of stages for workspace", description = "Retrieve list of stage names for workspace",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<String>> getStageNames(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
 }

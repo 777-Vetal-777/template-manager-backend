@@ -42,80 +42,32 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="005-create-role-type-table" author="Vadim_Sorokin">
-        <createTable tableName="role_type">
-            <column name="id" type="bigint">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="role_type_pk"/>
-            </column>
-            <column name="name" type="varchar(255)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="006-create-role-type-sequence" author="Vadim_Sorokin">
-        <createSequence sequenceName="role_type_sequence"/>
-    </changeSet>
-
-    <changeSet id="007-insert-system-default-role-type" author="Vadim_Sorokin">
-        <insert tableName="role_type">
-            <column name="id" value="1"/>
-            <column name="name" value="SYSTEM"/>
-        </insert>
-    </changeSet>
-
-    <changeSet id="008-insert-custom-default-role-type" author="Vadim_Sorokin">
-        <insert tableName="role_type">
-            <column name="id" value="2"/>
-            <column name="name" value="CUSTOM"/>
-        </insert>
-    </changeSet>
-
-    <changeSet id="009-update-role-table" author="Vadim_Sorokin">
-        <addColumn tableName="role">
-            <column name="type_id" type="bigint">
-                <constraints foreignKeyName="fk_role_to_role_type" references="role_type(id)"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="010-add-role-type-to-roles" author="Vadim_Sorokin">
-        <update tableName="role">
-            <column name="type_id" value="1"/>
-            <where>name='GLOBAL_ADMINISTRATOR'</where>
-        </update>
-    </changeSet>
-
-    <changeSet id="011-update-role-table" author="Vadim_Sorokin">
-        <addNotNullConstraint tableName="role" columnName="type_id"/>
-    </changeSet>
-
-    <changeSet id="012-add-administrator-default-role" author="Vadim_Sorokin">
+    <changeSet id="005-add-administrator-default-role" author="Vadim_Sorokin">
         <insert tableName="role">
             <column name="id" value="2"/>
             <column name="name" value="ADMINISTRATOR"/>
-            <column name="type_id" value="1"/>
+            <column name="type" value="SYSTEM"/>
         </insert>
     </changeSet>
 
-    <changeSet id="013-add-template-designer-default-role" author="Vadim_Sorokin">
+    <changeSet id="006-add-template-designer-default-role" author="Vadim_Sorokin">
         <insert tableName="role">
             <column name="id" value="3"/>
             <column name="name" value="TEMPLATE_DESIGNER"/>
-            <column name="type_id" value="1"/>
+            <column name="type" value="SYSTEM"/>
         </insert>
     </changeSet>
 
     <include file="db.changelog-0.0.2-default-permissions.xml" relativeToChangelogFile="true"/>
 
-    <changeSet id="014-change-role-sequence-start-value" author="Ivan_Semenov">
+    <changeSet id="007-change-role-sequence-start-value" author="Ivan_Semenov">
         <dropSequence sequenceName="role_sequence"/>
         <!-- It starts from 4 because we have 3 built in SYSTEM roles. -->
         <createSequence sequenceName="role_sequence"
                         startValue="4"/>
     </changeSet>
 
-    <changeSet id="015-add-file-name-in-data-collection" author="Yaroslav_Maievskiy">
+    <changeSet id="008-add-file-name-in-data-collection" author="Yaroslav_Maievskiy">
         <addColumn tableName="data_collection">
             <column name="file_name" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -123,14 +75,14 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="016-add-description-to-data-collection" author="Yaroslav_Maievskiy">
+    <changeSet id="009-add-description-to-data-collection" author="Yaroslav_Maievskiy">
         <addColumn tableName="data_collection">
             <column name="description" type="varchar(255)">
             </column>
         </addColumn>
     </changeSet>
 
-    <changeSet id="017-data-collection-log--table" author="Yaroslav_Maievskiy">
+    <changeSet id="010-data-collection-log-table" author="Yaroslav_Maievskiy">
         <createTable tableName="data_collection_log">
             <column name="id" type="bigint">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="data_collection_log_pk"/>

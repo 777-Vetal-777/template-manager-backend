@@ -1,9 +1,13 @@
 package com.itextpdf.dito.manager.entity;
 
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,9 +39,12 @@ public class RoleEntity {
                     name = "permission_id"))
     private Set<PermissionEntity> permissions = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id")
-    private RoleTypeEntity type;
+    @Enumerated(EnumType.STRING)
+    private RoleTypeEnum type;
+    private Boolean master;
+
+    @ManyToMany(mappedBy = "appliedRoles")
+    private Set<ResourceEntity> resources = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -71,11 +78,27 @@ public class RoleEntity {
         this.permissions = permissions;
     }
 
-    public RoleTypeEntity getType() {
+    public RoleTypeEnum getType() {
         return type;
     }
 
-    public void setType(RoleTypeEntity type) {
+    public void setType(RoleTypeEnum type) {
         this.type = type;
+    }
+
+    public Set<ResourceEntity> getResources() {
+        return resources;
+    }
+
+    public void setResources(Set<ResourceEntity> resources) {
+        this.resources = resources;
+    }
+
+    public Boolean getMaster() {
+        return master;
+    }
+
+    public void setMaster(Boolean master) {
+        this.master = master;
     }
 }

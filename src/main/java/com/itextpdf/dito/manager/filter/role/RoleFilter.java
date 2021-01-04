@@ -1,12 +1,12 @@
 package com.itextpdf.dito.manager.filter.role;
 
-import com.itextpdf.dito.manager.entity.RoleType;
+import com.itextpdf.dito.manager.entity.RoleTypeEnum;
 
 import java.util.List;
 
 public class RoleFilter {
     private String name;
-    private List<RoleType> type;
+    private List<RoleTypeEnum> type;
 
     public String getName() {
         return name;
@@ -16,11 +16,11 @@ public class RoleFilter {
         this.name = name;
     }
 
-    public List<RoleType> getType() {
+    public List<RoleTypeEnum> getType() {
         return type;
     }
 
-    public void setType(List<RoleType> type) {
+    public void setType(List<RoleTypeEnum> type) {
         this.type = type;
     }
 }

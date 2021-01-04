@@ -1,6 +1,6 @@
 ditomanager:
   mailing:
-    enabled: true
+    enabled: false
 
 spring:
   datasource:

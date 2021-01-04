@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta data-dito-template-type="output">
+    <title>Invoice</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+         .col-md-12 {
+         float: none!important;
+         clear: both;
+         }
+      </style>
+    <style data-dito-internal-style="page-properties">@page{ margin-top: 62pt; margin-right: 36pt; margin-bottom: 36pt; margin-left: 36pt; }</style>
+</head>
+<body data-dito-element="subform" style="font-family:&quot;Noto Sans&quot;">
+<header data-dito-element="page-header" data-dito-page-margin-vertical-align="bottom" style="margin-right:10px" data-dito-editor-calculated-height="35px"><img src="resources/img/itext.png" alt="itext" data-dito-element="image" style="margin-right:0;margin-left:auto;display:block"></header>
+<div class="container" data-dito-element="subform">
+    <div data-dito-element="rich-text">
+        <h2>Invoice form</h2>
+    </div>
+    <form class="row" data-dito-element="subform">
+        <div class="form-group col-md-12" data-dito-element="field" data-dito-bind="first_name"><label for="first_name" class="col-form-label" data-dito-element="rich-text">First name</label><input type="text" class="form-control" name="first_name" id="first_name"></div>
+        <div class="form-group col-md-12" data-dito-element="field" data-dito-bind="last_name"><label for="last_name" class="col-form-label" data-dito-element="rich-text">Last name</label><input type="text" class="form-control" name="last_name" id="last_name"></div>
+        <div class="form-group col-md-12" data-dito-element="field" data-dito-bind="email"><label for="email" class="col-form-label" data-dito-element="rich-text">Email</label><input type="email" class="form-control" name="email" id="email"></div>
+        <div class="form-group col-md-12" data-dito-element="field" data-dito-bind="address"><label for="address" class="col-form-label" data-dito-element="rich-text">Address</label><textarea name="address" id="address" class="form-control" rows="3"></textarea></div>
+        <table class="table col-md-12" data-dito-element="table">
+            <colgroup>
+                <col>
+                <col>
+                <col>
+                <col>
+            </colgroup>
+            <thead data-dito-element="table-head" style="font-weight:bold">
+            <tr data-dito-element="table-row">
+                <th data-dito-element="table-cell" scope="col" style="font-weight:inherit">
+                    <div data-dito-element="rich-text">
+                        <div>Item</div>
+                    </div>
+                </th>
+                <th data-dito-element="table-cell" scope="col" style="font-weight:inherit">
+                    <div data-dito-element="rich-text">
+                        <div>Price</div>
+                    </div>
+                </th>
+                <th data-dito-element="table-cell" scope="col" style="font-weight:inherit">
+                    <div data-dito-element="rich-text">
+                        <div>Quantity</div>
+                    </div>
+                </th>
+                <th data-dito-element="table-cell" scope="col" style="font-weight:inherit">
+                    <div data-dito-element="rich-text">
+                        <div>Amount</div>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <tbody data-dito-element="table-body">
+            <tr data-dito-bind="items[*]" data-dito-name="items" data-dito-element="table-row">
+                <td data-dito-element="table-cell">
+                    <div data-dito-element="field" data-dito-name="item" data-dito-bind="item"><input type="text" class="form-control" name="item"></div>
+                </td>
+                <td data-dito-element="table-cell">
+                    <div data-dito-element="field" data-dito-name="price" data-dito-bind="price"><input type="text" class="form-control" name="price"></div>
+                </td>
+                <td data-dito-element="table-cell">
+                    <div data-dito-element="field" data-dito-name="quantity" data-dito-bind="quantity"><input type="text" class="form-control" name="quantity"></div>
+                </td>
+                <td data-dito-element="table-cell">
+                    <div data-dito-element="field" data-dito-name="amount" data-dito-calc="product(price, quantity)" data-dito-display-format="num('$#.########', 'en-us')"><input type="text" class="form-control" name="amount" disabled></div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="form-group col-md-3 pull-right" data-dito-element="field" data-dito-calc="sum(amount[*])" data-dito-display-format="num('$#.########', 'en-us')"><label for="total" class="col-form-label" data-dito-element="rich-text">Total</label><input type="text" name="total" id="total" class="form-control" disabled></div>
+    </form>
+</div>
+</body>
+</html>

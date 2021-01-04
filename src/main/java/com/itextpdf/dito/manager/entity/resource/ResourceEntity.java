@@ -1,13 +1,21 @@
 package com.itextpdf.dito.manager.entity.resource;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -50,6 +58,33 @@ public class ResourceEntity {
     )
     @OrderBy("date DESC")
     private Collection<ResourceLogEntity> resourceLogs;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT file.id " +
+            "FROM manager.resource_file file " +
+            "WHERE file.resource_id = id and file.version=(" +
+            "select max(file.version) from manager.resource_file file where file.resource_id = id)" +
+            ")")
+    private ResourceFileEntity latestFile;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT log.id " +
+            "FROM manager.resource_log log " +
+            "WHERE log.resource_id = id and log.date=(" +
+            "select max(log.date) from manager.resource_log log where log.resource_id = id)" +
+            ")")
+    private ResourceLogEntity latestLogRecord;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "resource_role",
+            joinColumns = @JoinColumn(
+                    name = "resource_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id"))
+    private Set<RoleEntity> appliedRoles = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -115,5 +150,27 @@ public class ResourceEntity {
         this.createdOn = createdOn;
     }
 
+    public ResourceLogEntity getLatestLogRecord() {
+        return latestLogRecord;
+    }
 
+    public void setLatestLogRecord(ResourceLogEntity latestLogRecord) {
+        this.latestLogRecord = latestLogRecord;
+    }
+
+    public ResourceFileEntity getLatestFile() {
+        return latestFile;
+    }
+
+    public void setLatestFile(ResourceFileEntity latestFile) {
+        this.latestFile = latestFile;
+    }
+
+    public Set<RoleEntity> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
+        this.appliedRoles = appliedRoles;
+    }
 }

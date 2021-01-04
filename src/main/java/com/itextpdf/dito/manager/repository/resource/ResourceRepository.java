@@ -19,22 +19,30 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedBy", "modifiedOn", "comment");
 
+    String SELECT_CLAUSE = "select resource from ResourceEntity resource ";
+
+    String FILTER_CONDITION = "((:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "
+            + "and (COALESCE(:types) is null or resource.type in (:types)) "
+            + "and (:comment='' or LOWER(resource.latestFile.comment) like LOWER(CONCAT('%',:comment,'%'))) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(resource.latestLogRecord.author.firstName, ' ', resource.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (cast(:startDate as date) is null or resource.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date))) ";
+
+    String SEARCH_CONDITION = "(LOWER(resource.name) like CONCAT('%',:search,'%') "
+            + "or LOWER(resource.latestFile.comment) like CONCAT('%',:search,'%') "
+            + "or LOWER(CONCAT(resource.latestLogRecord.author.firstName, ' ', resource.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
+            + "or CAST(CAST(resource.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
+
+
+    String PAGEABLE_FILTER_QUERY = SELECT_CLAUSE + " where " + FILTER_CONDITION;
+    String PAGEABLE_SEARCH_AND_FILTER_QUERY = PAGEABLE_FILTER_QUERY + " and" + SEARCH_CONDITION;
+
     Boolean existsByNameEqualsAndTypeEquals(String resourceName, ResourceTypeEnum type);
 
     Optional<ResourceEntity> findByNameAndType(String resourcesName, ResourceTypeEnum type);
 
     ResourceEntity findByName(String name);
 
-    @Query(value = "select resource from ResourceEntity resource "
-            + "join resource.resourceFiles files "
-            + "left join resource.resourceLogs logs "
-            + "where "
-            //filtering
-            + "(:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "
-            + "and (COALESCE(:types) is null or resource.type in (:types)) "
-            + "and (:comment='' or LOWER(files.comment) like LOWER(CONCAT('%',:comment,'%'))) "
-            + "and (:modifiedBy='' or LOWER(logs.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(logs.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (cast(:startDate as date) is null or logs.date between cast(:startDate as date) and cast(:endDate as date)) ")
+    @Query(value = PAGEABLE_FILTER_QUERY)
     Page<ResourceEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,
@@ -43,21 +51,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
                                 @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                 @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate);
 
-    @Query(value = "select resource from ResourceEntity resource "
-            + "join resource.resourceFiles files "
-            + "left join resource.resourceLogs logs "
-            + "where "
-            //filtering
-            + "(:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "
-            + "and (COALESCE(:types) is null or resource.type in (:types)) "
-            + "and (:comment='' or LOWER(files.comment) like LOWER(CONCAT('%',:comment,'%'))) "
-            + "and (:modifiedBy='' or LOWER(logs.author.firstName) like CONCAT('%',:modifiedBy,'%')  or LOWER(logs.author.lastName) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (cast(:startDate as date) is null or logs.date between cast(:startDate as date) and cast(:endDate as date)) "
-            //search
-            + "and (LOWER(resource.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(files.comment) like CONCAT('%',:search,'%') "
-            + "or LOWER(logs.author.firstName) like CONCAT('%',:search,'%') "
-            + "or LOWER(logs.author.lastName) like CONCAT('%',:search,'%')) ")
+    @Query(value = PAGEABLE_SEARCH_AND_FILTER_QUERY)
     Page<ResourceEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,

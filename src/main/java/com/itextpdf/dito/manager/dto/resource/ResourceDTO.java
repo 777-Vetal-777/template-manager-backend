@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.dto.resource;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.Set;
 
 public class ResourceDTO {
     private String name;
@@ -19,6 +21,16 @@ public class ResourceDTO {
     private Long version;
     private String fileName;
     private byte[] file;
+    private Boolean deployed;
+    private Set<RoleDTO> appliedRoles;
+
+    public Boolean getDeployed() {
+        return deployed;
+    }
+
+    public void setDeployed(Boolean deployed) {
+        this.deployed = deployed;
+    }
 
     public String getModifiedBy() {
         return modifiedBy;
@@ -114,6 +126,14 @@ public class ResourceDTO {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Set<RoleDTO> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
+        this.appliedRoles = appliedRoles;
     }
 
 }

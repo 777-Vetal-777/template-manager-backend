@@ -2,13 +2,14 @@ package com.itextpdf.dito.manager.component.mapper.role.impl;
 
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
-import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.Collections;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,8 @@ public class RoleMapperImpl implements RoleMapper {
         final RoleDTO dto = new RoleDTO();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
-        dto.setType(entity.getType().getName().toString());
+        dto.setType(entity.getType().toString());
+        dto.setMaster(entity.getMaster());
         dto.setUsersEmails(entity.getUsers() != null
                 ? entity.getUsers().stream().map(UserEntity::getEmail).collect(Collectors.toList())
                 : Collections.emptyList());
@@ -49,7 +51,23 @@ public class RoleMapperImpl implements RoleMapper {
     }
 
     @Override
+    public RoleDTO mapWithoutUsers(RoleEntity entity) {
+        final RoleDTO dto = new RoleDTO();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setType(entity.getType().toString());
+        dto.setMaster(entity.getMaster());
+        dto.setPermissions(permissionMapper.map(entity.getPermissions()));
+        return dto;
+    }
+
+    @Override
     public Page<RoleDTO> map(final Page<RoleEntity> entities) {
         return entities.map(this::map);
+    }
+
+    @Override
+    public Set<RoleDTO> map(Set<RoleEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toSet());
     }
 }

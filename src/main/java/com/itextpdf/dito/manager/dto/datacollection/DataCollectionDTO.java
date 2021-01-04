@@ -11,6 +11,10 @@ public class DataCollectionDTO {
     private String modifiedBy;
     private Date modifiedOn;
     private Date createdOn;
+    @JsonProperty("author.firstName")
+    private String authorFirstName;
+    @JsonProperty("author.lastName")
+    private String authorLastName;
     private String fileName;
     private String attachment;
 
@@ -77,4 +81,21 @@ public class DataCollectionDTO {
     public void setAttachment(String attachment) {
         this.attachment = attachment;
     }
+
+    public String getAuthorFirstName() {
+        return authorFirstName;
+    }
+
+    public void setAuthorFirstName(String authorFirstName) {
+        this.authorFirstName = authorFirstName;
+    }
+
+    public String getAuthorLastName() {
+        return authorLastName;
+    }
+
+    public void setAuthorLastName(String authorLastName) {
+        this.authorLastName = authorLastName;
+    }
+
 }

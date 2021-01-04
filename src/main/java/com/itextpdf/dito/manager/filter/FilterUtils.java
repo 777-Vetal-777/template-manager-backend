@@ -9,8 +9,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public final class FilterUtils {
+
+    public static Long getLongFromFilter(final Long value) {
+        return Objects.isNull(value)
+                ? 0
+                : value;
+    }
 
     public static String getStringFromFilter(final String value) {
         return StringUtils.isEmpty(value)

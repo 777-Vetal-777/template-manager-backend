@@ -1,9 +1,8 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
-import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.Set;
@@ -29,12 +27,6 @@ class UserServiceImplTest {
 
     @Mock
     RoleRepository roleRepository;
-
-    @Mock
-    PasswordEncoder encoder;
-
-    @Mock
-    UserMapper userMapper;
 
     @InjectMocks
     UserServiceImpl userService;
@@ -70,7 +62,7 @@ class UserServiceImplTest {
     void findByEmail_WhenUserDoesNotExist_ThenExceptionIsThrown() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.empty());
 
-        assertThrows(AbstractResourceNotFoundException.class,
+        assertThrows(UserNotFoundOrNotActiveException.class,
                 () -> userService.findByEmail(user.getEmail()));
     }
 
@@ -97,7 +89,7 @@ class UserServiceImplTest {
         updateRequest.setFirstName("");
         updateRequest.setLastName("");
 
-        assertThrows(AbstractResourceNotFoundException.class,
+        assertThrows(UserNotFoundOrNotActiveException.class,
                 () -> userService.updateUser(updateRequest, user.getEmail()));
     }
 }

@@ -71,4 +71,11 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<List<String>> getStageNames(final String workspaceName) {
+        final List<String> stageNames = workspaceService.getStageNames(decodeBase64(workspaceName));
+        return new ResponseEntity<>(stageNames, HttpStatus.OK);
+
+    }
 }

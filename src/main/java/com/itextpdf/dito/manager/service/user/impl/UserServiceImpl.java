@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
-import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -12,19 +11,13 @@ import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundException;
+import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.filter.user.UserFilter;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +28,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -44,25 +43,22 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final RoleRepository roleRepository;
     private final FailedLoginRepository failedLoginRepository;
     private final PasswordEncoder encoder;
-    private final UserMapper userMapper;
     private MailClient mailClient;
 
     public UserServiceImpl(final UserRepository userRepository,
                            final RoleRepository roleRepository,
                            final FailedLoginRepository failedLoginRepository,
-                           final PasswordEncoder encoder,
-                           final UserMapper userMapper) {
+                           final PasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
         this.encoder = encoder;
-        this.userMapper = userMapper;
     }
 
 
     @Override
     public UserEntity findByEmail(final String email) {
-        return userRepository.findByEmailAndActiveTrue(email).orElseThrow(() -> new UserNotFoundException(email));
+        return userRepository.findByEmailAndActiveTrue(email).orElseThrow(() -> new UserNotFoundOrNotActiveException(email));
     }
 
     @Override
@@ -87,7 +83,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         String password = userEntity.getPassword();
         userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         Set<RoleEntity> persistedRoles = roles.stream()
-                .map(role -> roleRepository.findByName(role).orElseThrow(() -> new RoleNotFoundException(role)))
+                .map(role -> roleRepository.findByNameAndMasterTrue(role).orElseThrow(() -> new RoleNotFoundException(role)))
                 .collect(Collectors.toSet());
         userEntity.setRoles(persistedRoles);
         UserEntity savedUser = userRepository.save(userEntity);
@@ -188,6 +184,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.saveAll(userEntities);
     }
 
+    @Override
+    public Integer calculateCountOfUsersWithOnlyOneRole(final String roleName) {
+        return userRepository.countOfUserWithOnlyOneRole(roleName);
+    }
+
     private List<UserEntity> retrieveUsers(final List<String> emails) {
         final List<UserEntity> result = new ArrayList<>();
 
@@ -204,7 +205,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final List<RoleEntity> result = new ArrayList<>();
 
         for (final String role : roles) {
-            final RoleEntity roleEntity = roleRepository.findByName(role)
+            final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue(role)
                     .orElseThrow(() -> new RoleNotFoundException(role));
             result.add(roleEntity);
         }
@@ -226,6 +227,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
+                    if (sortParam.getProperty().equals("active")) {
+                        //W/A for sorting: on FE false shows as NOT ACTIVE, TRUE as ACTIVE.
+                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.DESC, "active");
+                    }
                     if (sortParam.getProperty().equals("roles")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "roles.size");
                     }

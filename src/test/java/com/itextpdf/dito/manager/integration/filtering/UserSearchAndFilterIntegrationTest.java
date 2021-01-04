@@ -9,7 +9,6 @@ import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -42,8 +41,8 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
 
     @BeforeEach
     public void setup() {
-        RoleEntity role = roleRepository.findByName("GLOBAL_ADMINISTRATOR").orElseThrow();
-        RoleEntity role2 = roleRepository.findByName("TEMPLATE_DESIGNER").orElseThrow();
+        RoleEntity role = roleRepository.findByNameAndMasterTrue("GLOBAL_ADMINISTRATOR").orElseThrow();
+        RoleEntity role2 = roleRepository.findByNameAndMasterTrue("TEMPLATE_DESIGNER").orElseThrow();
         user1 = new UserEntity();
         user1.setEmail("user1@email.com");
         user1.setFirstName("Barry");
