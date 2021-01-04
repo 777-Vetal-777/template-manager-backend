@@ -145,7 +145,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
             if (permissionEntity == null) {
                 throw new PermissionNotFoundException(permissionName);
             } else if (!permissionEntity.getOptionalForCustomRole()) {
-                throw new PermissionCantBeAttachedToCustomRoleException();
+                throw new PermissionCantBeAttachedToCustomRoleException(permissionEntity.getName());
             } else {
                 role.getPermissions().add(permissionEntity);
             }
