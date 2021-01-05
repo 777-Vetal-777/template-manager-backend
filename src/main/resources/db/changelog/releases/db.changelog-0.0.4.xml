@@ -252,9 +252,9 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="028-data_collection_drop_columns" author="Sergey Nemets">
+    <!--changeSet id="028-data_collection_drop_columns" author="Sergey Nemets">
         <dropColumn tableName="data_collection" columnName="data"/>
         <dropColumn tableName="data_collection" columnName="file_name"/>
-    </changeSet>
+    </changeSet-->
 
 </databaseChangeLog>
