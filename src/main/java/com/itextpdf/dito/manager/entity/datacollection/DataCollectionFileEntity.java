@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.entity.datacollection;
 
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import javax.persistence.*;

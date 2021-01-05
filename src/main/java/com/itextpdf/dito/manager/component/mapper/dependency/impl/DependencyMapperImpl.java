@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 
 import org.springframework.stereotype.Component;
 
