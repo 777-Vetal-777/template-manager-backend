@@ -13,7 +13,7 @@ public class DataCollectionFileEntity {
     @SequenceGenerator(name = "dataCollectionFile_gen", sequenceName = "data_collection_file_sequence", allocationSize = 1)
     private Long Id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = " template_id")
+    @JoinColumn(name = " data_collection_id")
     private DataCollectionEntity dataCollection;
     private Long version;
     private String comment;
