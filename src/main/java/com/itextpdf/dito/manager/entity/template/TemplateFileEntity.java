@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.entity.template;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
