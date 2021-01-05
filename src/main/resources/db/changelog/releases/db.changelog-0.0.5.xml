@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="001-create-data_collection-file-table" author="Sergey Nemets">
+        <createTable tableName="data_collection_file">
+            <column name="id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_id_not_null_constraint"
+                             primaryKey="true" primaryKeyName="data_collection_file_pk"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_version_not_null_constraint"/>
+            </column>
+            <column name="data_collection_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_dcollection_id_not_null_constraint"
+                             foreignKeyName="fk_file_to_data_collection"
+                             references="data_collection(id)"/>
+            </column>
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_created_on_not_null_constraint"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_author_id_not_null_constraint"
+                             foreignKeyName="fk_data_collection_file_to_user"
+                             references="user(id)"/>
+            </column>
+            <column name="comment" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create_AK_data_collection-file" author="Sergey Nemets">
+        <addUniqueConstraint tableName="data_collection_file" columnNames="data_collection_id, version"/>
+    </changeSet>
+
+    <changeSet id="003-data_collection_file_sequence" author="Sergey Nemets">
+        <createSequence sequenceName="data_collection_file_sequence"/>
+    </changeSet>
+
+    <changeSet id="004-data_collection_file_add_data_columns" author="Sergey Nemets">
+        <addColumn tableName="data_collection_file">
+            <column name="data" type="${blob}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
