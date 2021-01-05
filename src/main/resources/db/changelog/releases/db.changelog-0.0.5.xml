@@ -42,10 +42,10 @@
     <changeSet id="004-data-collection-file-add-data-columns" author="Sergey_Nemets">
         <addColumn tableName="data_collection_file">
             <column name="data" type="${blob}">
-                <constraints nullable="false" notNullConstraintName="data_collection_file_data_is_not_null_constraint"/>
+                <constraints nullable="false" notNullConstraintName="data_collection_file_data_not_null_constraint"/>
             </column>
             <column name="file_name" type="varchar(255)">
-                <constraints nullable="false" notNullConstraintName="data_collection_file_file_name_is_not_null_constraint"/>
+                <constraints nullable="false" notNullConstraintName="data_collection_file_file_name_not_null_constraint"/>
             </column>
         </addColumn>
     </changeSet>
