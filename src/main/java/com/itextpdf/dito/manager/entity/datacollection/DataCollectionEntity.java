@@ -50,7 +50,6 @@ public class DataCollectionEntity {
     private Collection<DataCollectionLogEntity> dataCollectionLog;
 
     @OneToMany(mappedBy = "dataCollection",
-               fetch = FetchType.LAZY,
                cascade = CascadeType.ALL,
                orphanRemoval = true)
     @OrderBy("version DESC")
