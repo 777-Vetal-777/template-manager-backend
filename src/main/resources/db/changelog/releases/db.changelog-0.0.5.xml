@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="001-create-data_collection-file-table" author="Sergey Nemets">
+    <changeSet id="001-create-data-collection-file-table" author="Sergey Nemets">
         <createTable tableName="data_collection_file">
             <column name="id" type="bigint">
                 <constraints nullable="false" notNullConstraintName="data_collection_file_id_not_null_constraint"
@@ -31,21 +31,21 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="002-create_AK_data_collection-file" author="Sergey Nemets">
+    <changeSet id="002-create-AK-data-collection-file" author="Sergey Nemets">
         <addUniqueConstraint tableName="data_collection_file" columnNames="data_collection_id, version"/>
     </changeSet>
 
-    <changeSet id="003-data_collection_file_sequence" author="Sergey Nemets">
+    <changeSet id="003-data-collection-file-sequence" author="Sergey Nemets">
         <createSequence sequenceName="data_collection_file_sequence"/>
     </changeSet>
 
-    <changeSet id="004-data_collection_file_add_data_columns" author="Sergey Nemets">
+    <changeSet id="004-data-collection-file-add-data-columns" author="Sergey Nemets">
         <addColumn tableName="data_collection_file">
             <column name="data" type="${blob}">
-                <constraints nullable="false"/>
+                <constraints nullable="false" notNullConstraintName="data_collection_file_data_is_not_null_constraint"/>
             </column>
             <column name="file_name" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" notNullConstraintName="data_collection_file_file_name_is_not_null_constraint"/>
             </column>
         </addColumn>
     </changeSet>
