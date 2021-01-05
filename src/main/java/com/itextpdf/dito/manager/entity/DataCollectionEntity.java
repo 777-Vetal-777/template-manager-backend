@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.hibernate.annotations.JoinFormula;
 
@@ -48,6 +49,13 @@ public class DataCollectionEntity {
     @OrderBy("date DESC")
     private Collection<DataCollectionLogEntity> dataCollectionLog;
 
+    @OneToMany(mappedBy = "dataCollection",
+               fetch = FetchType.LAZY,
+               cascade = CascadeType.ALL,
+               orphanRemoval = true)
+    @OrderBy("version DESC")
+    private Collection<DataCollectionFileEntity> versions;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
             "SELECT log.id " +
@@ -56,6 +64,7 @@ public class DataCollectionEntity {
             "select max(logLatest.date) from {h-schema}data_collection_log logLatest where logLatest.data_collection_id = id)" +
             ")")
     private DataCollectionLogEntity lastDataCollectionLog;
+
 
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
         return dataCollectionLog;
@@ -155,5 +164,13 @@ public class DataCollectionEntity {
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
+    }
+
+    public Collection<DataCollectionFileEntity> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(Collection<DataCollectionFileEntity> versions) {
+        this.versions = versions;
     }
 }
