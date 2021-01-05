@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.service.datacollection;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import org.springframework.data.domain.Page;

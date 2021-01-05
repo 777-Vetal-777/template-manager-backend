@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
-import com.itextpdf.dito.manager.entity.DataCollectionLogEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;

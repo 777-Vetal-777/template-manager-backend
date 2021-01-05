@@ -9,7 +9,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;

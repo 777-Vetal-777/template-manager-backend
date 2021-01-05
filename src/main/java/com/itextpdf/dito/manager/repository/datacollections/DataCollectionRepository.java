@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.repository.datacollections;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

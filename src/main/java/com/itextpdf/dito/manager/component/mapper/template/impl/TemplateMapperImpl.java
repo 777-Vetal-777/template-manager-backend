@@ -1,14 +1,12 @@
 package com.itextpdf.dito.manager.component.mapper.template.impl;
 
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
-import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;

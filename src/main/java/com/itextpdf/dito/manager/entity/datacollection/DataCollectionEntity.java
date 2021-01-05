@@ -1,7 +1,7 @@
-package com.itextpdf.dito.manager.entity;
+package com.itextpdf.dito.manager.entity.datacollection;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.hibernate.annotations.JoinFormula;
 
