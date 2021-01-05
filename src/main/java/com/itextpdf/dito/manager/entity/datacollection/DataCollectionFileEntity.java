@@ -17,8 +17,8 @@ import java.util.Date;
 @Table(name = "data_collection_file")
 public class DataCollectionFileEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "dataCollectionFile_gen")
-    @SequenceGenerator(name = "dataCollectionFile_gen", sequenceName = "data_collection_file_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "data_collection_file_gen")
+    @SequenceGenerator(name = "data_collection_file_gen", sequenceName = "data_collection_file_sequence", allocationSize = 1)
     private Long Id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " data_collection_id")
