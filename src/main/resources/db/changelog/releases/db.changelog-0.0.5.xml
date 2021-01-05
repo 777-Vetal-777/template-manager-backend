@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="001-create-data-collection-file-table" author="Sergey Nemets">
+    <changeSet id="001-create-data-collection-file-table" author="Sergey_Nemets">
         <createTable tableName="data_collection_file">
             <column name="id" type="bigint">
                 <constraints nullable="false" notNullConstraintName="data_collection_file_id_not_null_constraint"
@@ -15,8 +15,8 @@
                 <constraints nullable="false" notNullConstraintName="data_collection_file_version_not_null_constraint"/>
             </column>
             <column name="data_collection_id" type="bigint">
-                <constraints nullable="false" notNullConstraintName="data_collection_file_dcollection_id_not_null_constraint"
-                             foreignKeyName="fk_file_to_data_collection"
+                <constraints nullable="false" notNullConstraintName="data_collection_file_data_collection_id_not_null_constraint"
+                             foreignKeyName="fk_data_collection_file_to_data_collection"
                              references="data_collection(id)"/>
             </column>
             <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
@@ -31,15 +31,15 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="002-create-AK-data-collection-file" author="Sergey Nemets">
-        <addUniqueConstraint tableName="data_collection_file" columnNames="data_collection_id, version"/>
+    <changeSet id="002-create-unique-index-data-collection-file" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="data_collection_file" columnNames="data_collection_id, version" constraintName="data_collection_file_ui"/>
     </changeSet>
 
-    <changeSet id="003-data-collection-file-sequence" author="Sergey Nemets">
+    <changeSet id="003-data-collection-file-sequence" author="Sergey_Nemets">
         <createSequence sequenceName="data_collection_file_sequence"/>
     </changeSet>
 
-    <changeSet id="004-data-collection-file-add-data-columns" author="Sergey Nemets">
+    <changeSet id="004-data-collection-file-add-data-columns" author="Sergey_Nemets">
         <addColumn tableName="data_collection_file">
             <column name="data" type="${blob}">
                 <constraints nullable="false" notNullConstraintName="data_collection_file_data_is_not_null_constraint"/>
