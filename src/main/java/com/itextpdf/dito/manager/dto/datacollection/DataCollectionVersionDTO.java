@@ -7,7 +7,7 @@ public class DataCollectionVersionDTO {
     private String modifiedBy;
     private Date modifiedOn;
     private String comment;
-    boolean deploymentStatus;
+    private boolean deploymentStatus;
 
     public Long getVersion() {
         return version;
