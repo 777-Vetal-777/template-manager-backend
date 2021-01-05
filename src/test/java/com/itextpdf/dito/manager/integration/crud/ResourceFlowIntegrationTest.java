@@ -147,7 +147,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(NAME.getBytes()))).andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("$.content[0].version").value(1))
-                .andExpect(jsonPath("$.content[0].modifiedBy").value(AUTHOR_NAME))
+                .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
                 .andExpect(jsonPath("$.content[0].deployed").value(false))
