@@ -44,26 +44,28 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     @Override
     public Page<ResourceDependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final ResourceDependencyFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        Page<ResourceDependencyModel> searchResult = Page.empty();
         final List<DependencyType> dependenciesType = filter.getDependencyType();
         final List<DependencyDirectionType> directionsType = filter.getDirectionType();
-        final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
-        if ((Objects.isNull(dependenciesType) || dependenciesType.contains(IMAGE)) && (Objects.isNull(directionsType) || directionsType.contains(HARD))) {
+        if ((Objects.isNull(dependenciesType) || dependenciesType.contains(IMAGE)) &&
+                (Objects.isNull(directionsType) || directionsType.contains(HARD))) {
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
             final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
             final Boolean deployed = getBooleanMultiselectFromFilter(filter.getActive());
-
-            if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) ||  IMAGE_RESOURCE_TYPE.contains(searchParam.toLowerCase()))) {
-                return resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed);
+            final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
+            //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD
+            if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) || IMAGE_RESOURCE_TYPE.contains(searchParam.toLowerCase()))) {
+                searchResult = resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed);
+            } else {
+                searchResult = isSearchEmpty
+                        ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)
+                        : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, deployed, searchParam);
             }
-            //TODO Redo getting the status from the instance to which the template depends. Now there is no binding of the instance to the template.
-            return isSearchEmpty
-                    ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)
-                    : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, deployed, searchParam);
-
         }
-        return Page.empty();
+        //TODO Redo getting the status from the instance to which the template depends. Now there is no binding of the instance to the template.
+        return searchResult;
     }
 
     @Override
