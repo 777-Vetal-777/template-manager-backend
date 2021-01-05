@@ -3,10 +3,12 @@ package com.itextpdf.dito.manager.controller.datacollection;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
+import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
@@ -43,6 +45,7 @@ public interface DataCollectionController {
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
     String DATA_COLLECTION_VERSIONS = "/versions";
+    String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_COLLECTION_VERSIONS;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create data collection",
@@ -98,4 +101,13 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "404", description = "Data collection not found", content = @Content),
     })
     ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name);
+
+    @GetMapping(DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get a list of versions of data collection by name", description = "Get a list of data collection versions using the data collection name, sorting and filters.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<DataCollectionVersionDTO>> getVersions(Pageable pageable,
+                                                               @Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name,
+                                                               @ParameterObject VersionFilter versionFilter,
+                                                               @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+
 }

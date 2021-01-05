@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
@@ -13,6 +14,7 @@ import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFil
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
+import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.Page;
@@ -97,4 +99,15 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         dataCollectionService.delete(decodeBase64(name));
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<Page<DataCollectionVersionDTO>> getVersions(final Pageable pageable,
+                                                                      final String name,
+                                                                      final VersionFilter versionFilter,
+                                                                      final String searchParam) {
+        //TODO: DTM-985 business layer development
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
 }
