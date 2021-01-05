@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
@@ -28,6 +29,8 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class ResourceDependencyServiceImpl extends AbstractService implements ResourceDependencyService {
+    private static final String HARD_DEPENDENCY = "hard";
+    private static final String IMAGE_RESOURCE_TYPE = "image";
     private final ResourceService resourceService;
     private final ResourceFileRepository resourceFileRepository;
 
@@ -43,15 +46,19 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final List<DependencyType> dependenciesType = filter.getDependencyType();
         final List<DependencyDirectionType> directionsType = filter.getDirectionType();
-        if ((dependenciesType.isEmpty() || dependenciesType.contains(IMAGE)) &&
-                (directionsType.isEmpty()) || directionsType.contains(HARD)) {
+        final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
+        if ((Objects.isNull(dependenciesType) || dependenciesType.contains(IMAGE)) && (Objects.isNull(directionsType) || directionsType.contains(HARD))) {
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
             final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
             final Boolean deployed = getBooleanMultiselectFromFilter(filter.getActive());
 
-            return StringUtils.isEmpty(searchParam)
+            if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) ||  IMAGE_RESOURCE_TYPE.contains(searchParam.toLowerCase()))) {
+                return resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed);
+            }
+            //TODO Redo getting the status from the instance to which the template depends. Now there is no binding of the instance to the template.
+            return isSearchEmpty
                     ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)
                     : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, deployed, searchParam);
 
