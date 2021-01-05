@@ -7,7 +7,7 @@ public class DataCollectionVersionDTO {
     private String modifiedBy;
     private Date modifiedOn;
     private String comment;
-    private boolean deploymentStatus;
+    private Boolean deploymentStatus;
 
     public Long getVersion() {
         return version;
@@ -41,11 +41,11 @@ public class DataCollectionVersionDTO {
         this.comment = comment;
     }
 
-    public boolean isDeploymentStatus() {
+    public Boolean isDeploymentStatus() {
         return deploymentStatus;
     }
 
-    public void setDeploymentStatus(boolean deploymentStatus) {
+    public void setDeploymentStatus(Boolean deploymentStatus) {
         this.deploymentStatus = deploymentStatus;
     }
 }
