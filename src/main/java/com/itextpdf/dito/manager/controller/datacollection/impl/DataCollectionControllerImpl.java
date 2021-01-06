@@ -10,11 +10,13 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.Page;
@@ -32,11 +34,14 @@ import java.security.Principal;
 public class DataCollectionControllerImpl extends AbstractController implements DataCollectionController {
     private final DataCollectionService dataCollectionService;
     private final DataCollectionMapper dataCollectionMapper;
+    private final DataCollectionFileService dataCollectionFileService;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
-                                        final DataCollectionMapper dataCollectionMapper) {
+                                        final DataCollectionMapper dataCollectionMapper,
+                                        final DataCollectionFileService dataCollectionFileService) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
+        this.dataCollectionFileService = dataCollectionFileService;
     }
 
     @Override
@@ -105,9 +110,9 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                                                       final String name,
                                                                       final VersionFilter versionFilter,
                                                                       final String searchParam) {
-        //TODO: DTM-985 business layer development
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        final String dataCollectionName = decodeBase64(name);
+        final Page<DataCollectionFileEntity> dataCollectionVersionEntities = dataCollectionFileService.list(pageable, dataCollectionName, versionFilter, searchParam);
+        return new ResponseEntity<>(dataCollectionMapper.mapVersions(dataCollectionVersionEntities), HttpStatus.OK);
     }
-
 
 }

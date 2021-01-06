@@ -18,7 +18,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.itextpdf.dito.manager.filter.FilterUtils.*;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class DataCollectionsFileServiceImpl extends AbstractService implements DataCollectionFileService {
@@ -26,14 +29,14 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
     private final DataCollectionService dataCollectionService;
     private final DataCollectionFileRepository dataCollectionFileRepository;
 
-    public DataCollectionsFileServiceImpl(DataCollectionService dataCollectionService,
-                                          DataCollectionFileRepository dataCollectionFileRepository) {
+    public DataCollectionsFileServiceImpl(final DataCollectionService dataCollectionService,
+                                          final DataCollectionFileRepository dataCollectionFileRepository) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionFileRepository = dataCollectionFileRepository;
     }
 
     @Override
-    public Page<DataCollectionFileEntity> list(Pageable pageable, String name, VersionFilter filter, String searchParam) {
+    public Page<DataCollectionFileEntity> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final DataCollectionEntity dataCollection = dataCollectionService.get(name);
 
