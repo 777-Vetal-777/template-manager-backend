@@ -77,13 +77,12 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
-            final String type, final MultipartFile file, final Boolean updateTemplate) {
+    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment, final String type, final MultipartFile file) {
         checkFileExtensionIsSupported(file);
         checkFileSizeIsNotExceededLimit(file.getSize());
         final byte[] data = getFileBytes(file);
         final ResourceEntity resourceEntity = resourceService
-                .createNewVersion(name, parseResourceType(type), data, file.getOriginalFilename(), principal.getName(), comment, updateTemplate);
+                .createNewVersion(name, parseResourceType(type), data, file.getOriginalFilename(), principal.getName(), comment);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 

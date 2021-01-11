@@ -35,7 +35,6 @@ import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -108,7 +107,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email, final String comment, final Boolean updateTemplate) {
+    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email, final String comment) {
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
@@ -138,15 +137,13 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         existingResourceEntity.getResourceLogs().add(logEntity);
 
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
-        if (Objects.nonNull(updateTemplate) && updateTemplate) {
-            final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(updatedResourceEntity.getId());
-            templateEntities.forEach(t -> {
-                List<ResourceFileEntity> oldVersions = t.getResources().stream().filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId())).collect(Collectors.toList());
-                t.getResources().removeAll(oldVersions);
-                t.getResources().add(updatedResourceEntity.getLatestFile());
-            });
-            templateRepository.saveAll(templateEntities);
-        }
+        final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(updatedResourceEntity.getId());
+        templateEntities.forEach(t -> {
+            List<ResourceFileEntity> oldVersions = t.getResources().stream().filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId())).collect(Collectors.toList());
+            t.getResources().removeAll(oldVersions);
+            t.getResources().add(updatedResourceEntity.getLatestFile());
+        });
+        templateRepository.saveAll(templateEntities);
         return updatedResourceEntity;
     }
 
