@@ -161,23 +161,24 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public TemplateEntity createNewVersion(final String name, final byte[] data, final String fileName, final String email, final String comment) {
+    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment) {
         final TemplateEntity existingTemplateEntity = findByName(name);
         final UserEntity userEntity = userService.findByEmail(email);
 
         final Long oldVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId()).getVersion();
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
-        final TemplateFileEntity fileEntity = new TemplateFileEntity();
-        fileEntity.setTemplate(existingTemplateEntity);
-        fileEntity.setVersion(oldVersion + 1);
-        fileEntity.setData(data);
-        fileEntity.setComment(comment);
-        fileEntity.setAuthor(userEntity);
-        fileEntity.setCreatedOn(new Date());
-        fileEntity.setModifiedOn(new Date());
-
-        existingTemplateEntity.getFiles().add(fileEntity);
+        if (data != null) {
+            final TemplateFileEntity fileEntity = new TemplateFileEntity();
+            fileEntity.setTemplate(existingTemplateEntity);
+            fileEntity.setVersion(oldVersion + 1);
+            fileEntity.setData(data);
+            fileEntity.setComment(comment);
+            fileEntity.setAuthor(userEntity);
+            fileEntity.setCreatedOn(new Date());
+            fileEntity.setModifiedOn(new Date());
+            existingTemplateEntity.getFiles().add(fileEntity);
+        }
         existingTemplateEntity.getTemplateLogs().add(logEntity);
         return templateRepository.save(existingTemplateEntity);
     }

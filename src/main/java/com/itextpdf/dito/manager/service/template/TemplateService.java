@@ -15,5 +15,5 @@ public interface TemplateService {
 
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
 
-    TemplateEntity createNewVersion(String name, byte[] data, String fileName, String email, String comment);
+    TemplateEntity createNewVersion(String name, byte[] data, String email, String comment);
 }
