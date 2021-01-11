@@ -23,10 +23,11 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
     Boolean existsByName(String name);
 
     @Query(value = "select dc from DataCollectionEntity dc "
+            + "join dc.lastDataCollectionLog lastlog "
             + "where "
             //filtering
             + "(:name='' or LOWER(dc.name) like CONCAT('%',:name,'%')) "
-            + "and (:modifiedBy='' or LOWER(CONCAT(dc.author.firstName, ' ',dc.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(lastlog.author.firstName, ' ',lastlog.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or dc.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (COALESCE(:types) is null or dc.type in (:types))")
     Page<DataCollectionEntity> filter(Pageable pageable,
@@ -37,10 +38,11 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
                                       @Param("types") @Nullable List<DataCollectionType> types);
 
     @Query(value = "select dc from DataCollectionEntity dc "
+            + "join dc.lastDataCollectionLog lastlog "
             + "where "
             //filtering
             + "(:name='' or LOWER(dc.name) like CONCAT('%',:name,'%')) "
-            + "and (:modifiedBy='' or LOWER(CONCAT(dc.author.firstName, ' ', dc.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(lastlog.author.firstName, ' ', lastlog.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or dc.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (COALESCE(:types) is null or dc.type in (:types)) "
             //search
