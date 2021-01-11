@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
 import java.util.List;
@@ -37,6 +38,10 @@ public class InstanceMapperImpl implements InstanceMapper {
         if (templateEntities != null && !templateEntities.isEmpty()) {
             instanceDTO.setTemplates(templateEntities.stream().map(templateEntity -> templateEntity.getName())
                     .collect(Collectors.toList()));
+        }
+        final StageEntity stageEntity = entity.getStage();
+        if (stageEntity != null) {
+            instanceDTO.setStage(stageEntity.getName());
         }
         return instanceDTO;
     }
