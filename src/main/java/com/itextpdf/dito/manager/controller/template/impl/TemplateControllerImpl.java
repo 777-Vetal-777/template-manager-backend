@@ -30,6 +30,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -50,10 +51,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateVersionsService templateVersionsService;
 
     public TemplateControllerImpl(final TemplateService templateService,
-            final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionService dataCollectionService,
-            final TemplateMapper templateMapper,
-            final DependencyMapper dependencyMapper,
-            final TemplateVersionsService templateVersionsService) {
+                                  final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionService dataCollectionService,
+                                  final TemplateMapper templateMapper,
+                                  final DependencyMapper dependencyMapper,
+                                  final TemplateVersionsService templateVersionsService) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
         this.dataCollectionService = dataCollectionService;
@@ -64,7 +65,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> create(@Valid final TemplateCreateRequestDTO templateCreateRequestDTO,
-            final Principal principal) {
+                                              final Principal principal) {
         final TemplateEntity templateEntity = templateService
                 .create(templateCreateRequestDTO.getName(), templateCreateRequestDTO.getType(),
                         templateCreateRequestDTO.getDataCollectionName(), principal.getName());
@@ -73,8 +74,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<Page<TemplateDTO>> listTemplateTypes(final Pageable pageable,
-            final TemplateFilter templateFilter,
-            final String searchParam) {
+                                                               final TemplateFilter templateFilter,
+                                                               final String searchParam) {
         return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable, templateFilter, searchParam)),
                 HttpStatus.OK);
     }
@@ -86,9 +87,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependencies(final String name,
-            final Pageable pageable,
-            final DependencyFilter dependencyFilter,
-            final String searchParam) {
+                                                                final Pageable pageable,
+                                                                final DependencyFilter dependencyFilter,
+                                                                final String searchParam) {
         final List<DependencyDTO> dependencies = new ArrayList<>();
 
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
@@ -108,7 +109,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateMetadataDTO> update(final String name,
-            final TemplateUpdateRequestDTO templateUpdateRequestDTO, final Principal principal) {
+                                                      final TemplateUpdateRequestDTO templateUpdateRequestDTO, final Principal principal) {
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateService
                 .update(decodeBase64(name), templateMapper.map(templateUpdateRequestDTO), principal.getName())),
                 HttpStatus.OK);
@@ -116,7 +117,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<Page<TemplateVersionDTO>> getVersions(final Pageable pageable, final String name,
-            final VersionFilter versionFilter, final String searchParam) {
+                                                                final VersionFilter versionFilter, final String searchParam) {
 
         return new ResponseEntity<>(templateMapper
                 .mapVersions(templateVersionsService.list(pageable, decodeBase64(name), versionFilter, searchParam)),
@@ -138,12 +139,12 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> create(final Principal principal,
-            final String name,
-            final String comment,
-            final MultipartFile templateFile) {
-        final byte[] data = getFileBytes(templateFile);
+                                              final String name,
+                                              final String comment,
+                                              final MultipartFile templateFile) {
+        final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService
-                .createNewVersion(name, data, templateFile.getOriginalFilename(), principal.getName(),
+                .createNewVersion(name, data, principal.getName(),
                         comment);
         return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.OK);
     }
