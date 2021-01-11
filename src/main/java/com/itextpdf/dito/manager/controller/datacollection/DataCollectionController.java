@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
@@ -135,5 +136,13 @@ public interface DataCollectionController {
     ResponseEntity<DataCollectionDTO> deleteRole(
             @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
+
+    @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable")
+    @Operation(summary = "Get list of data collection dependencies",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<DependencyDTO>> listDependencies(Pageable pageable,
+                                                         @Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name,
+                                                         @ParameterObject DataCollectionDependencyFilter filter,
+                                                         @RequestParam(name = "search", required = false) String searchParam);
 
 }
