@@ -5,8 +5,8 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
-import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -70,10 +71,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
         final UserEntity author = userService.findByEmail(email);
 
-        final TemplateLogEntity logEntity = new TemplateLogEntity();
-        logEntity.setAuthor(author);
-        logEntity.setDate(new Date());
-        logEntity.setTemplate(templateEntity);
+        final TemplateLogEntity logEntity = createLogEntity(templateEntity, author);
 
 
         final TemplateFileEntity templateFileEntity = new TemplateFileEntity();
@@ -89,6 +87,20 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateEntity.setTemplateLogs(Collections.singletonList(logEntity));
 
         return templateRepository.save(templateEntity);
+    }
+
+    private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final String email) {
+        final UserEntity author = userService.findByEmail(email);
+
+        return createLogEntity(templateEntity, author);
+    }
+
+    private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final UserEntity author) {
+        final TemplateLogEntity logEntity = new TemplateLogEntity();
+        logEntity.setAuthor(author);
+        logEntity.setDate(new Date());
+        logEntity.setTemplate(templateEntity);
+        return logEntity;
     }
 
     @Override
@@ -138,6 +150,12 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
         }
         existingTemplate.setDescription(updatedTemplateEntity.getDescription());
+
+        final TemplateLogEntity logEntity = createLogEntity(existingTemplate, userEmail);
+        final Collection<TemplateLogEntity> templateLogs = existingTemplate.getTemplateLogs();
+        templateLogs.add(logEntity);
+        existingTemplate.setTemplateLogs(templateLogs);
+
         //TODO add logging version https://jira.itextsupport.com/browse/DTM-758
         return templateRepository.save(existingTemplate);
     }
@@ -148,10 +166,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final UserEntity userEntity = userService.findByEmail(email);
 
         final Long oldVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId()).getVersion();
-        final TemplateLogEntity logEntity = new TemplateLogEntity();
-        logEntity.setAuthor(userEntity);
-        logEntity.setDate(new Date());
-        logEntity.setTemplate(existingTemplateEntity);
+        final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
         final TemplateFileEntity fileEntity = new TemplateFileEntity();
         fileEntity.setTemplate(existingTemplateEntity);
