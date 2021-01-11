@@ -76,7 +76,7 @@ public interface ResourceController {
                                                       @ParameterObject VersionFilter versionFilter,
                                                       @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
-    @PostMapping(RESOURCE_VERSION_ENDPOINT)
+    @PostMapping(path = RESOURCE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create new version of resource", description = "Make a new version of a resource: upload a new resource and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -89,8 +89,7 @@ public interface ResourceController {
                                        @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
                                        @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true, style = ParameterStyle.FORM) @RequestPart String type,
-                                       @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource,
-                                       @Parameter(name = "updateTemplate", description = "Pointer to update the resource version in templates. Content type must be aplication/json!.", style = ParameterStyle.FORM) @RequestPart("updateTemplate") Boolean updateTemplate);
+                                       @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @GetMapping(RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving resource dependencies page using sorting and filters.",
