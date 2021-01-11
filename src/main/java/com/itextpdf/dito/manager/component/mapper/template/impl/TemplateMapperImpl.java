@@ -26,14 +26,30 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateDTO result = new TemplateDTO();
         result.setName(entity.getName());
         result.setType(entity.getType());
-        final Collection<TemplateLogEntity> logs = entity.getTemplateLogs();
-        if (Objects.nonNull(logs) && !logs.isEmpty()) {
-            final TemplateLogEntity log = logs.stream().findFirst().get();
-            result.setLastUpdate(log.getDate());
-            final UserEntity updatedBy = log.getAuthor();
-            if (Objects.nonNull(updatedBy)) {
-                result.setAuthor(new StringBuilder(updatedBy.getFirstName()).append(" ").append(updatedBy.getLastName()).toString());
-            }
+        final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
+        if (!CollectionUtils.isEmpty(templateLogs)) {
+            final TemplateLogEntity lastTemplateLog = templateLogs.get(0);
+            result.setAuthor(new StringBuilder()
+                    .append(lastTemplateLog.getAuthor().getFirstName())
+                    .append(" ")
+                    .append(lastTemplateLog.getAuthor().getLastName())
+                    .toString());
+            result.setLastUpdate(lastTemplateLog.getDate());
+
+            final TemplateLogEntity firstTemplateLog = templateLogs.get(templateLogs.size() - 1);
+            result.setCreatedBy(new StringBuilder()
+                    .append(firstTemplateLog.getAuthor().getFirstName())
+                    .append(" ")
+                    .append(firstTemplateLog.getAuthor().getLastName())
+                    .toString());
+            result.setCreatedOn(firstTemplateLog.getDate());
+            result.setComment(lastTemplateLog.getComment());
+        }
+        final Collection<TemplateFileEntity> files = entity.getFiles();
+        if (Objects.nonNull(files) && !files.isEmpty()) {
+            final TemplateFileEntity fileEntity = files.stream().findFirst().get();
+            result.setVersion(fileEntity.getVersion());
+            result.setComment(fileEntity.getComment());
         }
         result.setDataCollection(Objects.nonNull(entity.getDataCollection())
                 ? entity.getDataCollection().getName()
