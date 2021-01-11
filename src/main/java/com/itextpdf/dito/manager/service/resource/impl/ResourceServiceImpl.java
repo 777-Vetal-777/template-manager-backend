@@ -139,7 +139,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
         final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(updatedResourceEntity.getId());
         templateEntities.forEach(t -> {
-            List<ResourceFileEntity> oldVersions = t.getResources().stream().filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId())).collect(Collectors.toList());
+            final List<ResourceFileEntity> oldVersions = t.getResources().stream().filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId())).collect(Collectors.toList());
             t.getResources().removeAll(oldVersions);
             t.getResources().add(updatedResourceEntity.getLatestFile());
         });
