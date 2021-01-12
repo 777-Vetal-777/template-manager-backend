@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
+import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
@@ -9,12 +10,17 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
@@ -35,12 +41,15 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataCollectionService dataCollectionService;
     private final DataCollectionMapper dataCollectionMapper;
     private final DataCollectionFileService dataCollectionFileService;
+    private final RoleMapper roleMapper;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
                                         final DataCollectionMapper dataCollectionMapper,
+                                        final RoleMapper roleMapper,
                                         final DataCollectionFileService dataCollectionFileService) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
+        this.roleMapper = roleMapper;
         this.dataCollectionFileService = dataCollectionFileService;
     }
 
@@ -115,4 +124,27 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         return new ResponseEntity<>(dataCollectionMapper.mapVersions(dataCollectionVersionEntities), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name, final RoleFilter filter) {
+        final Page<RoleEntity> roleEntities = dataCollectionService
+                .getRoles(pageable, decodeBase64(name), filter);
+        return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<DataCollectionDTO> applyRole(final String name,
+                                                       @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService
+                .applyRole(decodeBase64(name), applyRoleRequestDTO.getRoleName(),
+                        applyRoleRequestDTO.getPermissions());
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<DataCollectionDTO> deleteRole(final String name, final String roleName) {
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService
+                .detachRole(decodeBase64(name), decodeBase64(roleName));
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
+
+    }
 }

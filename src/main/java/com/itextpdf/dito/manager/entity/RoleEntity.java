@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.entity;
 
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 
 import java.util.HashSet;
@@ -45,6 +46,9 @@ public class RoleEntity {
 
     @ManyToMany(mappedBy = "appliedRoles")
     private Set<ResourceEntity> resources = new HashSet<>();
+
+    @ManyToMany(mappedBy = "appliedRoles")
+    private Set<DataCollectionEntity> dataCollections = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -100,5 +104,13 @@ public class RoleEntity {
 
     public void setMaster(Boolean master) {
         this.master = master;
+    }
+
+    public Set<DataCollectionEntity> getDataCollections() {
+        return dataCollections;
+    }
+
+    public void setDataCollections(Set<DataCollectionEntity> dataCollections) {
+        this.dataCollections = dataCollections;
     }
 }

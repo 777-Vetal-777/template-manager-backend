@@ -2,10 +2,12 @@ package com.itextpdf.dito.manager.repository.role;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,6 +26,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     RoleEntity findByNameAndMasterFalseAndResources(String name, ResourceEntity resourceEntity);
 
+    RoleEntity findByNameAndMasterFalseAndDataCollections(String name, DataCollectionEntity dataCollectionEntity);
+
     @Query(value = "select role from RoleEntity role"
             + " left join role.permissions permission"
             + " left join role.resources resource"
@@ -34,6 +38,17 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + " group by (role.id)")
     Page<RoleEntity> findAllByResourcesAndMasterFalse(Pageable pageable, ResourceEntity resourceEntity, @Param("name") @Nullable String name,
                                                       @Param("types") @Nullable List<RoleTypeEnum> types);
+
+    @Query(value = "select role from RoleEntity  role"
+            + " left join role.dataCollections dataCollection"
+            + " left join role.permissions permission"
+            + " where dataCollection = :dataCollection"
+            + " and role.master = false"
+            + " and(:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
+            + " group by (role.id)")
+    Page<RoleEntity> findAllByDataCollectionsAndMasterFalse(Pageable pageable, @Param("dataCollection") DataCollectionEntity dataCollectionEntity,
+                                                            @Param("name") String name);
+
 
     void deleteByNameAndMasterFalseAndResources(String name, ResourceEntity resourceEntity);
 
@@ -48,8 +63,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + "and role.master = true "
             + "group by (role.id, role.type)")
     Page<RoleEntity> filter(Pageable pageable,
-            @Param("name") @Nullable String name,
-            @Param("types") @Nullable List<RoleTypeEnum> types);
+                            @Param("name") @Nullable String name,
+                            @Param("types") @Nullable List<RoleTypeEnum> types);
 
     @Query(value = "select role from RoleEntity role "
             + "left join role.users user "
@@ -64,7 +79,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + "and (COALESCE(:types) is null or role.type in (:types)) "
             + "group by (role.id, role.type)")
     Page<RoleEntity> search(Pageable pageable,
-            @Param("name") @Nullable String name,
-            @Param("types") @Nullable List<RoleTypeEnum> types,
-            @Param("search") String search);
+                            @Param("name") @Nullable String name,
+                            @Param("types") @Nullable List<RoleTypeEnum> types,
+                            @Param("search") String search);
+
 }

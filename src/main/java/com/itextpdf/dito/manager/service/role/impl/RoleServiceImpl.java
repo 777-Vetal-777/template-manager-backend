@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.role.impl;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
 import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
@@ -20,13 +21,14 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.management.relation.Role;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Component
@@ -38,8 +40,8 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private final PermissionService permissionService;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-            final UserService userService,
-            final PermissionService permissionService) {
+                           final UserService userService,
+                           final PermissionService permissionService) {
         this.roleRepository = roleRepository;
         this.userService = userService;
         this.permissionService = permissionService;
@@ -56,6 +58,11 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
+    public RoleEntity getSlaveRole(final String name, final DataCollectionEntity dataCollectionEntity) {
+        return roleRepository.findByNameAndMasterFalseAndDataCollections(name, dataCollectionEntity);
+    }
+
+    @Override
     public Page<RoleEntity> getSlaveRolesByResource(final Pageable pageable, final RoleFilter roleFilter, final ResourceEntity resource) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
@@ -63,8 +70,16 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
 
         final Pageable pageWithSort = updateSort(pageable);
-
         return roleRepository.findAllByResourcesAndMasterFalse(pageWithSort, resource, name, roleTypeEnums);
+    }
+
+    @Override
+    public Page<RoleEntity> getSlaveRolesByDataCollection(final Pageable pageable, final RoleFilter filter, final DataCollectionEntity dataCollection) {
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final String name = getStringFromFilter(filter.getName());
+        final Pageable pageWithSort = updateSort(pageable);
+
+        return roleRepository.findAllByDataCollectionsAndMasterFalse(pageWithSort, dataCollection, name);
     }
 
     @Override

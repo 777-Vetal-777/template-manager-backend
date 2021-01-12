@@ -7,7 +7,10 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,11 +44,16 @@ import java.security.Principal;
 public interface DataCollectionController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/datacollections";
-    String DATA_COLLECTION_PATH_VARIABLE = "name";
+    String DATA_COLLECTION_PATH_VARIABLE = "data-collection-name";
+    String ROLE_PATH_VARIABLE = "role-name";
+    String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
     String DATA_COLLECTION_VERSIONS = "/versions";
+    String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
     String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_COLLECTION_VERSIONS;
+    String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
+    String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES = DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create data collection",
@@ -83,12 +91,12 @@ public interface DataCollectionController {
     @GetMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
     @Operation(summary = "Get data collection", description = "Get data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<DataCollectionDTO> get(@Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name);
+    ResponseEntity<DataCollectionDTO> get(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
     @PatchMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
     @Operation(summary = "Update data collection", description = "Update data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<DataCollectionDTO> update(@Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name,
+    ResponseEntity<DataCollectionDTO> update(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
                                              @RequestBody DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
                                              Principal principal);
 
@@ -100,14 +108,32 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "409", description = "File with this name already exists", content = @Content),
             @ApiResponse(responseCode = "404", description = "Data collection not found", content = @Content),
     })
-    ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name);
+    ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
     @GetMapping(DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of data collection by name", description = "Get a list of data collection versions using the data collection name, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DataCollectionVersionDTO>> getVersions(Pageable pageable,
-                                                               @Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name,
+                                                               @Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
                                                                @ParameterObject VersionFilter versionFilter,
                                                                @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+
+    @GetMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE)
+    @Operation(summary = "Get resource's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable,
+                                           @Parameter(name = "data_collection-name", description = "Encoded with base 64 name of dataCollection") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
+                                           @ParameterObject RoleFilter filter);
+
+    @PostMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE)
+    @Operation(summary = "Add role to a dataCollection", description = "Apply custom to a dataCollection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<DataCollectionDTO> applyRole(
+            @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
+            @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
+
+    @DeleteMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES)
+    @Operation(summary = "Remove role from a dataCollection", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<DataCollectionDTO> deleteRole(
+            @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
+            @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
 }
