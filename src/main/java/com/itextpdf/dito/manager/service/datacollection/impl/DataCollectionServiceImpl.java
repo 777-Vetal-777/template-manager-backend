@@ -133,6 +133,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
         existingDataCollectionEntity.setModifiedOn(new Date());
         existingDataCollectionEntity.getVersions().add(fileEntity);
+        existingDataCollectionEntity.setLatestVersion(fileEntity);
         existingDataCollectionEntity.getDataCollectionLog().add(logEntity);
 
         final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.save(existingDataCollectionEntity);
