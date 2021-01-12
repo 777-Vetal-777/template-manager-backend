@@ -48,7 +48,7 @@ public interface TemplateController {
     String BASE_NAME = MAJOR_VERSION + "/templates";
 
     String TEMPLATE_TYPES_ENDPOINT = "/types";
-    String TEMPLATE_PATH_VARIABLE = "template-name";
+    String TEMPLATE_PATH_VARIABLE = "name";
     String ROLE_PATH_VARIABLE = "role-name";
     String TEMPLATE_VERSION_ENDPOINT = "/versions";
     String PAGEABLE_ENDPOINT = "/pageable";
