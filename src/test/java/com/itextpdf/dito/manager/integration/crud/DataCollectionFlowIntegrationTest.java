@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.controller.datacollection.DataCollectionControl
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.Base64;
 
+import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_COLLECTION_VERSIONS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -35,10 +37,51 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     private DataCollectionRepository dataCollectionRepository;
     @Autowired
     private DataCollectionLogRepository dataCollectionLogRepository;
+    @Autowired
+    private DataCollectionFileRepository dataCollectionFileRepository;
 
     @AfterEach
     public void clearDb() {
         dataCollectionRepository.deleteAll();
+    }
+
+    @Test
+    public void shouldCreateNewVersionOfDataCollection() throws Exception {
+        //CREATE NEW DATA COLLECTION
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", TYPE.getBytes());
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
+        final URI newVersionURI = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME+DATA_COLLECTION_VERSIONS).build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(jsonPath("version").value(1))
+                .andExpect(jsonPath("type").value("JSON"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty())
+                .andExpect(jsonPath("fileName").value(file.getOriginalFilename()))
+                .andExpect(jsonPath("createdOn").isNotEmpty());
+
+        assertTrue(dataCollectionRepository.existsByName(NAME));
+        //CREATE NEW VERSION
+        mockMvc.perform(MockMvcRequestBuilders.multipart(newVersionURI)
+                .file(name)
+                .file(type)
+                .file(file)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(jsonPath("version").value(2))
+                .andExpect(jsonPath("type").value("JSON"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty())
+                .andExpect(jsonPath("fileName").value(file.getOriginalFilename()))
+                .andExpect(jsonPath("createdOn").isNotEmpty());
     }
 
     @Test
