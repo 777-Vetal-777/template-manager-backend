@@ -23,7 +23,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Query(value = "select template from TemplateEntity template "
             + "join template.files file "
-            + "join template.dataCollectionFile dataCollectionFile "
+            + "left join template.dataCollectionFile dataCollectionFile "
             + "left join dataCollectionFile.dataCollection dataCollection "
             + "where "
             //filtering
@@ -44,7 +44,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Query(value = "select template from TemplateEntity template "
             + "join template.files file "
-            + "join template.dataCollectionFile dataCollectionFile "
+            + "left join template.dataCollectionFile dataCollectionFile "
             + "left join dataCollectionFile.dataCollection dataCollection "
             + "where "
             //filtering
