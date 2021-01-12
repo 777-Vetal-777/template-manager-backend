@@ -23,7 +23,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.security.Principal;
+import java.util.List;
+
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,8 +50,12 @@ public interface TemplateController {
     String TEMPLATE_TYPES_ENDPOINT = "/types";
     String TEMPLATE_PATH_VARIABLE = "name";
     String TEMPLATE_VERSION_ENDPOINT = "/versions";
+    String PAGEABLE_ENDPOINT = "/pageable";
+
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
+    //Dependencies
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
+    String TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
     String TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE =
             TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_VERSION_ENDPOINT;
     String TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/preview";
@@ -77,10 +84,17 @@ public interface TemplateController {
     ResponseEntity<TemplateTypeEnum[]> listTemplateTypes();
 
     @GetMapping(TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get dependencies list", description = "Retrieving list of information about template dependencies",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Information about template dependencies")
+    ResponseEntity<List<DependencyDTO>> listDependencies(
+            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+
+    @GetMapping(TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get dependencies list", description = "Retrieving list of information about dependencies using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about dependencies is prepared according to the specified conditions.")
-    ResponseEntity<Page<DependencyDTO>> listDependencies(
+    ResponseEntity<Page<DependencyDTO>> listDependenciesPageable(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             Pageable pageable,
             @ParameterObject DependencyFilter dependencyFilter,

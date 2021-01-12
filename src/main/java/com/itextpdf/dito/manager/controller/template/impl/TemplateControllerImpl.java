@@ -86,7 +86,20 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<Page<DependencyDTO>> listDependencies(final String name,
+    public ResponseEntity<List<DependencyDTO>> listDependencies(final String name) {
+        final List<DependencyDTO> dependencies = new ArrayList<>();
+
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService
+                .getByTemplateName(decodeBase64(name));
+        if (dataCollectionEntity != null) {
+            dependencies.add(dependencyMapper.map(dataCollectionEntity));
+        }
+
+        return new ResponseEntity<>(dependencies, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Page<DependencyDTO>> listDependenciesPageable(final String name,
                                                                 final Pageable pageable,
                                                                 final DependencyFilter dependencyFilter,
                                                                 final String searchParam) {
