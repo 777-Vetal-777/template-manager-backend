@@ -14,13 +14,14 @@ import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
-import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.model.template.TemplateDependencyModel;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateVersionsService;
@@ -45,19 +46,19 @@ import java.util.List;
 public class TemplateControllerImpl extends AbstractController implements TemplateController {
     private final TemplateService templateService;
     private final TemplatePreviewGenerator templatePreviewGenerator;
-    private final DataCollectionService dataCollectionService;
+    private final DataCollectionFileService dataCollectionFileService;
     private final TemplateMapper templateMapper;
     private final DependencyMapper dependencyMapper;
     private final TemplateVersionsService templateVersionsService;
 
     public TemplateControllerImpl(final TemplateService templateService,
-                                  final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionService dataCollectionService,
+                                  final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionFileService dataCollectionFileService,
                                   final TemplateMapper templateMapper,
                                   final DependencyMapper dependencyMapper,
                                   final TemplateVersionsService templateVersionsService) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
-        this.dataCollectionService = dataCollectionService;
+        this.dataCollectionFileService = dataCollectionFileService;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
         this.templateVersionsService = templateVersionsService;
@@ -89,10 +90,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<List<DependencyDTO>> listDependencies(final String name) {
         final List<DependencyDTO> dependencies = new ArrayList<>();
 
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService
+        final DataCollectionFileEntity dataCollectionFileEntity = dataCollectionFileService
                 .getByTemplateName(decodeBase64(name));
-        if (dataCollectionEntity != null) {
-            dependencies.add(dependencyMapper.map(dataCollectionEntity));
+        if (dataCollectionFileEntity != null) {
+            dependencies.add(dependencyMapper.map(new TemplateDependencyModel(dataCollectionFileEntity)));
         }
 
         return new ResponseEntity<>(dependencies, HttpStatus.OK);
@@ -105,10 +106,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                                                 final String searchParam) {
         final List<DependencyDTO> dependencies = new ArrayList<>();
 
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService
+        final DataCollectionFileEntity dataCollectionFileEntity = dataCollectionFileService
                 .getByTemplateName(decodeBase64(name));
-        if (dataCollectionEntity != null) {
-            dependencies.add(dependencyMapper.map(dataCollectionEntity));
+        if (dataCollectionFileEntity != null) {
+            dependencies.add(dependencyMapper.map(new TemplateDependencyModel(dataCollectionFileEntity)));
         }
 
         return new ResponseEntity<>(new PageImpl<>(dependencies), HttpStatus.OK);

@@ -10,7 +10,7 @@ public class DataCollectionDependencyFilter {
     private String dependencyName;
     private Long version;
     private List<DependencyType> dependencyType;
-    private List<Boolean> active;
+    private String stageName;
     private List<DependencyDirectionType> directionType;
 
     public String getDependencyName() {
@@ -37,12 +37,12 @@ public class DataCollectionDependencyFilter {
         this.dependencyType = dependencyType;
     }
 
-    public List<Boolean> getActive() {
-        return active;
+    public String getStageName() {
+        return stageName;
     }
 
-    public void setActive(List<Boolean> active) {
-        this.active = active;
+    public void setStageName(String stageName) {
+        this.stageName = stageName;
     }
 
     public List<DependencyDirectionType> getDirectionType() {

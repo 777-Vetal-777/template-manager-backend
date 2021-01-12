@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.resource.impl;
 
+import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -24,11 +25,6 @@ import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
-import javax.validation.Valid;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,12 +35,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
+
 @RestController
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
     private final ResourceService resourceService;
     private final ResourceVersionsService resourceVersionsService;
     private final ResourceDependencyService resourceDependencyService;
     private final ResourceMapper resourceMapper;
+    private final DependencyMapper dependencyMapper;
     private final RoleMapper roleMapper;
     private final List<String> supportedPictureExtensions;
     private final Long sizePictureLimit;
@@ -56,7 +58,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final ResourceDependencyService resourceDependencyService,
             final ResourceVersionsService resourceVersionsService,
             final ResourceMapper resourceMapper,
-            final RoleMapper roleMapper) {
+            final RoleMapper roleMapper,
+            final DependencyMapper dependencyMapper) {
         this.supportedPictureExtensions = supportedPictureExtensions;
         this.sizePictureLimit = sizePictureLimit;
         this.resourceService = resourceService;
@@ -64,6 +67,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourceVersionsService = resourceVersionsService;
         this.resourceMapper = resourceMapper;
         this.roleMapper = roleMapper;
+        this.dependencyMapper = dependencyMapper;
     }
 
     @Override
@@ -89,7 +93,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
             final String searchParam, final ResourceDependencyFilter filter) {
         final String decodedName = decodeBase64(resource);
-        final Page<DependencyDTO> dependencyDTOs = resourceMapper.mapDependencies(resourceDependencyService
+        final Page<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
@@ -98,7 +102,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<List<DependencyDTO>> list(final String name, final String type) {
         final String decodedName = decodeBase64(name);
         final ResourceTypeEnum typeEnum = parseResourceTypeFromPath(type);
-        final List<DependencyDTO> dependencyDTOs = resourceMapper.map(resourceDependencyService.list(decodedName, typeEnum));
+        final List<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService.list(decodedName, typeEnum));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 

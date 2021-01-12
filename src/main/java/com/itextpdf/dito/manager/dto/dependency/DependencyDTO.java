@@ -1,12 +1,15 @@
 package com.itextpdf.dito.manager.dto.dependency;
 
-public class DependencyDTO {
+import com.itextpdf.dito.manager.model.dependency.DependencyModel;
+
+public class DependencyDTO implements DependencyModel {
     private String name;
     private Long version;
     private DependencyType dependencyType;
-    private Boolean active;
+    private String stage;
     private DependencyDirectionType directionType;
 
+    @Override
     public String getName() {
         return name;
     }
@@ -15,6 +18,7 @@ public class DependencyDTO {
         this.name = name;
     }
 
+    @Override
     public Long getVersion() {
         return version;
     }
@@ -23,22 +27,25 @@ public class DependencyDTO {
         this.version = version;
     }
 
+    @Override
     public DependencyType getDependencyType() {
         return dependencyType;
+    }
+
+    @Override
+    public String getStage() {
+        return stage;
     }
 
     public void setDependencyType(DependencyType dependencyType) {
         this.dependencyType = dependencyType;
     }
 
-    public Boolean getActive() {
-        return active;
+    public void setStage(String stage) {
+        this.stage=stage;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
+    @Override
     public DependencyDirectionType getDirectionType() {
         return directionType;
     }

@@ -2,9 +2,9 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
@@ -13,11 +13,10 @@ import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyE
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionHasDependenciesException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
-import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
+import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
-import com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -108,12 +107,6 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
          logDataCollectionUpdate(savedCollection, userEntity);
 
         return savedCollection;
-    }
-
-    @Override
-    public List<DataCollectionDependencyModel> list(final String name) {
-        final DataCollectionEntity existingDataCollection = findByName(name);
-        return dataCollectionRepository.searchDependencyOfDataCollection(existingDataCollection.getId());
     }
 
     @Override
@@ -301,7 +294,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     private boolean hasOutboundDependencies(final Long dataCollectionId) {
-        return !dataCollectionRepository.searchDependencyOfDataCollection(dataCollectionId).isEmpty();
+        return !dataCollectionFileRepository.searchDependencyOfDataCollection(dataCollectionId).isEmpty();
     }
 
     @Override

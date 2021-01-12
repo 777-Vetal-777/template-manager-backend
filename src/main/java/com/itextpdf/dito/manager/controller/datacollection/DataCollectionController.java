@@ -50,6 +50,7 @@ public interface DataCollectionController {
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
+    String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable";
     String DATA_COLLECTION_VERSIONS = "/versions";
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
     String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_COLLECTION_VERSIONS;
@@ -137,11 +138,11 @@ public interface DataCollectionController {
             @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
-    @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable")
+    @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE)
     @Operation(summary = "Get list of data collection dependencies",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DependencyDTO>> listDependencies(Pageable pageable,
-                                                         @Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name,
+                                                         @Parameter(description = "Data collections name encoded with base64.") @PathVariable("data-collection-name") String name,
                                                          @ParameterObject DataCollectionDependencyFilter filter,
                                                          @RequestParam(name = "search", required = false) String searchParam);
 

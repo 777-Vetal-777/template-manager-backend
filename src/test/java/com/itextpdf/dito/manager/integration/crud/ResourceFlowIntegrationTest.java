@@ -314,12 +314,12 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].name").value(existingTemplate.getName()))
                 .andExpect(jsonPath("$[0].version").value(1))
                 .andExpect(jsonPath("$[0].dependencyType").value(TYPE))
-                .andExpect(jsonPath("$[0].active").value(false))
+                .andExpect(jsonPath("$[0].stage").isEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()))
                 .andExpect(jsonPath("$[1].name").value(existingTemplate.getName()))
                 .andExpect(jsonPath("$[1].version").value(2))
                 .andExpect(jsonPath("$[1].dependencyType").value(TYPE))
-                .andExpect(jsonPath("$[1].active").value(false))
+                .andExpect(jsonPath("$[1].stage").isEmpty())
                 .andExpect(jsonPath("$[1].directionType").value(HARD.toString()));
     }
 }
