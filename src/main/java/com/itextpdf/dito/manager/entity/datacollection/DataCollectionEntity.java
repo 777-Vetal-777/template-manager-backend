@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity.datacollection;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.hibernate.annotations.JoinFormula;
@@ -15,6 +16,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -22,7 +25,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "data_collection")
@@ -64,8 +69,8 @@ public class DataCollectionEntity {
     private Collection<DataCollectionLogEntity> dataCollectionLog;
 
     @OneToMany(mappedBy = "dataCollection",
-               cascade = CascadeType.ALL,
-               orphanRemoval = true)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @OrderBy("version DESC")
     private Collection<DataCollectionFileEntity> versions;
 
@@ -77,6 +82,15 @@ public class DataCollectionEntity {
             "select max(logLatest.date) from {h-schema}data_collection_log logLatest where logLatest.data_collection_id = id)" +
             ")")
     private DataCollectionLogEntity lastDataCollectionLog;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "data_collection_role",
+            joinColumns = @JoinColumn(
+                    name = "data_collection_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id"))
+    private Set<RoleEntity> appliedRoles = new HashSet<>();
 
 
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
@@ -185,5 +199,13 @@ public class DataCollectionEntity {
 
     public void setVersions(Collection<DataCollectionFileEntity> versions) {
         this.versions = versions;
+    }
+
+    public Set<RoleEntity> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
+        this.appliedRoles = appliedRoles;
     }
 }

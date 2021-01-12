@@ -2,6 +2,8 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.entity.PermissionEntity;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -9,11 +11,15 @@ import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
+import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.permission.PermissionService;
+import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
@@ -41,17 +47,23 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final UserService userService;
     private final TemplateService templateService;
     private final JsonValidator jsonValidator;
+    private final RoleService roleService;
+    private final PermissionService permissionService;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
                                      final UserService userService,
                                      final TemplateService templateService,
                                      final DataCollectionLogRepository dataCollectionLogRepository,
-                                     final JsonValidator jsonValidator) {
+                                     final JsonValidator jsonValidator,
+                                     final RoleService roleService,
+                                     final PermissionService permissionService) {
         this.dataCollectionRepository = dataCollectionRepository;
         this.userService = userService;
         this.templateService = templateService;
         this.dataCollectionLogRepository = dataCollectionLogRepository;
         this.jsonValidator = jsonValidator;
+        this.roleService = roleService;
+        this.permissionService = permissionService;
     }
 
     @Override
@@ -143,6 +155,56 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
         logDataCollectionUpdate(savedCollection, userService.findByEmail(userEmail));
         return savedCollection;
+    }
+
+    @Override
+    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final RoleFilter filter) {
+        final DataCollectionEntity dataCollectionEntity = findByName(name);
+        return roleService.getSlaveRolesByDataCollection(pageable, filter, dataCollectionEntity);
+    }
+
+    @Override
+    public DataCollectionEntity applyRole(final String dataCollectionName, final String roleName, final List<String> permissions) {
+        final DataCollectionEntity dataCollectionEntity = findByName(dataCollectionName);
+
+        RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, dataCollectionEntity);
+        if (slaveRoleEntity == null) {
+            // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
+            final RoleEntity masterRoleEntity = roleService.getMasterRole(roleName);
+
+            slaveRoleEntity = new RoleEntity();
+            slaveRoleEntity.setName(masterRoleEntity.getName());
+            slaveRoleEntity.setType(masterRoleEntity.getType());
+            slaveRoleEntity.setMaster(Boolean.FALSE);
+        } else {
+            slaveRoleEntity.getPermissions().clear();
+            dataCollectionEntity.getAppliedRoles().remove(slaveRoleEntity);
+        }
+
+        for (final String permission : permissions) {
+            final PermissionEntity permissionEntity = permissionService.get(permission);
+            slaveRoleEntity.getPermissions().add(permissionEntity);
+        }
+        slaveRoleEntity.getDataCollections().add(dataCollectionEntity);
+
+        dataCollectionEntity.getAppliedRoles().add(slaveRoleEntity);
+        return dataCollectionRepository.save(dataCollectionEntity);
+
+    }
+
+    @Override
+    public DataCollectionEntity detachRole(final String name, final String roleName) {
+        final DataCollectionEntity dataCollectionEntity = findByName(name);
+        final RoleEntity roleEntity = roleService.getSlaveRole(roleName, dataCollectionEntity);
+
+        if (roleEntity == null) {
+            throw new RoleNotFoundException(roleName);
+        }
+
+        dataCollectionEntity.getAppliedRoles().remove(roleEntity);
+        roleService.delete(roleEntity);
+        return dataCollectionRepository.save(dataCollectionEntity);
+
     }
 
     private DataCollectionEntity findByName(final String name) {
