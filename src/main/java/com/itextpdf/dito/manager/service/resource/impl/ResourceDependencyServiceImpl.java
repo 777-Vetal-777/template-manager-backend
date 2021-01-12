@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyType;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
-import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
+import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
@@ -42,9 +42,9 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     }
 
     @Override
-    public Page<ResourceDependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final ResourceDependencyFilter filter, final String searchParam) {
+    public Page<DependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final ResourceDependencyFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        Page<ResourceDependencyModel> searchResult = Page.empty();
+        Page<DependencyModel> searchResult = Page.empty();
         final List<DependencyType> dependenciesType = filter.getDependencyType();
         final List<DependencyDirectionType> directionsType = filter.getDirectionType();
         if ((Objects.isNull(dependenciesType) || dependenciesType.contains(IMAGE)) &&
@@ -69,7 +69,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     }
 
     @Override
-    public List<ResourceDependencyModel> list(final String name, final ResourceTypeEnum type) {
+    public List<DependencyModel> list(final String name, final ResourceTypeEnum type) {
         final ResourceEntity resourceEntity = resourceService.getResource(name, type);
         return resourceFileRepository.search(resourceEntity.getId());
     }

@@ -2,9 +2,6 @@ package com.itextpdf.dito.manager.repository.datacollections;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-import com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel;
-import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
-import org.hibernate.annotations.JoinFormula;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -61,11 +58,4 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
                                       @Param("types") @Nullable List<DataCollectionType> types,
                                       @Param("search") String searchParam);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel(template.name, file.version, stage.sequenceOrder) "
-            + "from TemplateEntity template "
-            + "join template.dataCollectionFile file "
-            + "left join template.instance instance "
-            + "left join instance.stage stage "
-            + "where file.dataCollection.id =:id ")
-    List<DataCollectionDependencyModel> searchDependencyOfDataCollection(@Param("id") Long datacollectionId);
 }

@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRe
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,11 +29,14 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
 
     private final DataCollectionService dataCollectionService;
     private final DataCollectionFileRepository dataCollectionFileRepository;
+    private final TemplateService templateService;
 
     public DataCollectionsFileServiceImpl(final DataCollectionService dataCollectionService,
-                                          final DataCollectionFileRepository dataCollectionFileRepository) {
+                                          final DataCollectionFileRepository dataCollectionFileRepository,
+                                          final TemplateService templateService) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionFileRepository = dataCollectionFileRepository;
+        this.templateService = templateService;
     }
 
     @Override
@@ -84,6 +88,11 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
     @Override
     protected List<String> getSupportedSortFields() {
         return DataCollectionFileRepository.SUPPORTED_SORT_FIELDS;
+    }
+
+    @Override
+    public DataCollectionFileEntity getByTemplateName(final String name) {
+        return templateService.get(name).getDataCollectionFile();
     }
 
 }
