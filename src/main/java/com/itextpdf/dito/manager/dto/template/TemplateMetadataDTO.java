@@ -11,7 +11,15 @@ public class TemplateMetadataDTO{
     private String modifiedBy;
     private Date modifiedOn;
     private String description;
-    //TODO add versions when https://jira.itextsupport.com/browse/DTM-365 is implemented
+    private Long version;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
     public String getName() {
         return name;
