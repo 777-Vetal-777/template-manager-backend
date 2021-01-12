@@ -8,6 +8,7 @@ public class TemplateMetadataDTO{
     private String dataCollection;
     private String createdBy;
     private Date createdOn;
+    private Long version;
     private String modifiedBy;
     private Date modifiedOn;
     private String description;
@@ -67,5 +68,13 @@ public class TemplateMetadataDTO{
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

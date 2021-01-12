@@ -71,6 +71,11 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setName(entity.getName());
         final List<TemplateFileEntity> templateFiles = entity.getFiles();
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
+        final Collection<TemplateFileEntity> files = entity.getFiles();
+        if (Objects.nonNull(files) && !files.isEmpty()) {
+            final TemplateFileEntity fileEntity = files.stream().findFirst().get();
+            result.setVersion(fileEntity.getVersion());
+        }
         if (!CollectionUtils.isEmpty(templateFiles)) {
             final TemplateLogEntity lastTemplateLog = templateLogs.get(0);
             result.setModifiedBy(new StringBuilder()
