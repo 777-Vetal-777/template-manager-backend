@@ -105,11 +105,11 @@ public interface DataCollectionController {
     @Operation(summary = "Delete data collection", description = "Delete data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted data collection", content = @Content),
-            @ApiResponse(responseCode = "409", description = "File with this name already exists", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Data collection is deleted", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Data collection has dependencies and cannot be removed", content = @Content),
             @ApiResponse(responseCode = "404", description = "Data collection not found", content = @Content),
     })
-    ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
+    ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable("name") String name);
 
     @GetMapping(DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of data collection by name", description = "Get a list of data collection versions using the data collection name, sorting and filters.",
