@@ -16,7 +16,25 @@ public class DataCollectionDTO {
     @JsonProperty("author.lastName")
     private String authorLastName;
     private String fileName;
+    private String comment;
+    private Long version;
     private String attachment;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     public String getDescription() {
         return description;

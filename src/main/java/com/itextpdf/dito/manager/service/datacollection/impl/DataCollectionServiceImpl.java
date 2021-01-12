@@ -2,32 +2,31 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
-import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,15 +34,23 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static java.util.Collections.singleton;
 
 @Service
 public class DataCollectionServiceImpl extends AbstractService implements DataCollectionService {
 
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
+    private final DataCollectionFileRepository dataCollectionFileRepository;
+    private final TemplateRepository templateRepository;
     private final UserService userService;
     private final TemplateService templateService;
     private final JsonValidator jsonValidator;
@@ -51,6 +58,8 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final PermissionService permissionService;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
+                                     final DataCollectionFileRepository dataCollectionFileRepository,
+                                     final TemplateRepository templateRepository,
                                      final UserService userService,
                                      final TemplateService templateService,
                                      final DataCollectionLogRepository dataCollectionLogRepository,
@@ -58,6 +67,8 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                                      final RoleService roleService,
                                      final PermissionService permissionService) {
         this.dataCollectionRepository = dataCollectionRepository;
+        this.dataCollectionFileRepository = dataCollectionFileRepository;
+        this.templateRepository = templateRepository;
         this.userService = userService;
         this.templateService = templateService;
         this.dataCollectionLogRepository = dataCollectionLogRepository;
@@ -67,30 +78,73 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     @Override
-    public DataCollectionEntity create(final String name, final DataCollectionType type, final byte[] data,
-                                       final String fileName,
-                                       final String email) {
+    public DataCollectionEntity create(final String name, final DataCollectionType type, final byte[] data, final String fileName, final String email) {
         if (dataCollectionRepository.existsByName(name)) {
             throw new DataCollectionAlreadyExistsException(name);
         }
+        checkJsonIsValid(data);
 
-        if (!jsonValidator.isValid(data)) {
-            throw new InvalidDataCollectionException();
-        }
+        final UserEntity userEntity = userService.findByEmail(email);
 
         final DataCollectionEntity dataCollectionEntity = new DataCollectionEntity();
         dataCollectionEntity.setName(name);
         dataCollectionEntity.setType(type);
-        dataCollectionEntity.setData(data);
         dataCollectionEntity.setModifiedOn(new Date());
         dataCollectionEntity.setCreatedOn(new Date());
-        dataCollectionEntity.setFileName(fileName);
-        final UserEntity userEntity = userService.findByEmail(email);
         dataCollectionEntity.setAuthor(userEntity);
+
+        final DataCollectionFileEntity dataCollectionFileEntity = new DataCollectionFileEntity();
+        dataCollectionFileEntity.setData(data);
+        dataCollectionFileEntity.setFileName(fileName);
+        dataCollectionFileEntity.setAuthor(userEntity);
+        dataCollectionFileEntity.setCreatedOn(new Date());
+        dataCollectionFileEntity.setVersion(1L);
+        dataCollectionFileEntity.setDataCollection(dataCollectionEntity);
+        dataCollectionEntity.setVersions(singleton(dataCollectionFileEntity));
+        dataCollectionEntity.setLatestVersion(dataCollectionFileEntity);
+
         DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
-        logDataCollectionUpdate(savedCollection, userEntity);
+         logDataCollectionUpdate(savedCollection, userEntity);
 
         return savedCollection;
+    }
+
+    @Override
+    public List<DataCollectionDependencyModel> list(final String name) {
+        final DataCollectionEntity existingDataCollection = findByName(name);
+        return dataCollectionRepository.searchDependencyOfDataCollection(existingDataCollection.getId());
+    }
+
+    @Override
+    public DataCollectionEntity createNewVersion(final String name, final DataCollectionType type, final byte[] data, final String fileName, final String email, final String comment) {
+        checkJsonIsValid(data);
+        final DataCollectionEntity existingDataCollectionEntity = findByName(name);
+        final UserEntity userEntity = userService.findByEmail(email);
+        final Long oldVersion = dataCollectionFileRepository.findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
+        final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity, userEntity);
+        final DataCollectionFileEntity fileEntity = new DataCollectionFileEntity();
+        fileEntity.setDataCollection(existingDataCollectionEntity);
+        fileEntity.setVersion(oldVersion + 1);
+        fileEntity.setData(data);
+        fileEntity.setFileName(fileName);
+        fileEntity.setCreatedOn(new Date());
+        fileEntity.setAuthor(userEntity);
+
+        existingDataCollectionEntity.setModifiedOn(new Date());
+        existingDataCollectionEntity.getVersions().add(fileEntity);
+        existingDataCollectionEntity.getDataCollectionLog().add(logEntity);
+
+        final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.save(existingDataCollectionEntity);
+        final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByDataCollectionId(existingDataCollectionEntity.getId());
+        templateEntities.forEach(t -> t.setDataCollectionFile(dataCollectionEntity.getLatestVersion()));
+        templateRepository.saveAll(templateEntities);
+        return dataCollectionEntity;
+    }
+
+    private void checkJsonIsValid(final byte[] data) {
+        if (!jsonValidator.isValid(data)) {
+            throw new InvalidDataCollectionException();
+        }
     }
 
     @Override
@@ -127,7 +181,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public DataCollectionEntity getByTemplateName(final String templateName) {
-        return templateService.get(templateName).getDataCollection();
+        return templateService.get(templateName).getDataCollectionFile().getDataCollection();
     }
 
     @Override
@@ -142,9 +196,6 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                                        final String userEmail) {
         final DataCollectionEntity existingEntity = findByName(name);
         existingEntity.setType(updatedEntity.getType());
-        if (updatedEntity.getData() != null) {
-            existingEntity.setData(updatedEntity.getData());
-        }
         final String newName = updatedEntity.getName();
         if (!name.equals(newName) && dataCollectionRepository.existsByName(newName)) {
             throw new DataCollectionAlreadyExistsException(newName);
@@ -209,6 +260,15 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     private DataCollectionEntity findByName(final String name) {
         return dataCollectionRepository.findByName(name).orElseThrow(() -> new DataCollectionNotFoundException(name));
+    }
+
+    private DataCollectionLogEntity createDataCollectionLogEntry(final DataCollectionEntity collectionEntity, final UserEntity userEntity) {
+        final DataCollectionLogEntity logDataCollection = new DataCollectionLogEntity();
+        logDataCollection.setAuthor(userEntity);
+        logDataCollection.setDataCollection(collectionEntity);
+        logDataCollection.setDate(new Date());
+        collectionEntity.setLastDataCollectionLog(logDataCollection);
+        return logDataCollection;
     }
 
     private void logDataCollectionUpdate(final DataCollectionEntity collectionEntity, final UserEntity userEntity) {

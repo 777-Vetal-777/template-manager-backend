@@ -12,15 +12,14 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
+import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import com.itextpdf.dito.manager.model.resource.ResourceDependencyModel;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceMapperImpl implements ResourceMapper {

@@ -4,12 +4,20 @@ import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionM
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-
+import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.SOFT;
+import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
@@ -31,17 +39,41 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setModifiedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
         dto.setModifiedOn(entity.getModifiedOn());
         dto.setCreatedOn(entity.getCreatedOn());
-        dto.setFileName(entity.getFileName());
         dto.setAuthorFirstName(entity.getAuthor().getFirstName());
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setDescription(entity.getDescription());
-        dto.setAttachment(new String(entity.getData()));
+        final DataCollectionFileEntity file = entity.getLatestVersion();
+        dto.setVersion(file.getVersion());
+        dto.setAttachment(new String(file.getData()));
+        dto.setComment(file.getComment());
+        dto.setFileName(file.getFileName());
         return dto;
     }
 
     @Override
     public Page<DataCollectionDTO> map(final Page<DataCollectionEntity> entities) {
         return entities.map(this::map);
+    }
+
+    @Override
+    public DependencyDTO map(final DataCollectionDependencyModel model) {
+        final DependencyDTO dependencyDTO = new DependencyDTO();
+        dependencyDTO.setVersion(model.getVersion());
+        dependencyDTO.setName(model.getName());
+        dependencyDTO.setDirectionType(SOFT);
+        dependencyDTO.setDependencyType(TEMPLATE);
+        dependencyDTO.setActive(Objects.nonNull(model.getOrder()) && !Objects.equals(model.getOrder(), 0));
+        return dependencyDTO;
+    }
+
+    @Override
+    public List<DependencyDTO> map(final List<DataCollectionDependencyModel> models) {
+        return models.stream().map(this::map).collect(Collectors.toList());
+    }
+    
+    @Override
+    public Page<DataCollectionVersionDTO> mapVersions(final Page<DataCollectionFileEntity> entities) {
+        return entities.map(this::mapVersion);
     }
 
     public DataCollectionVersionDTO mapVersion(final DataCollectionFileEntity entity) {
@@ -56,10 +88,5 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setDeploymentStatus(false);
 
         return dto;
-    }
-
-    @Override
-    public Page<DataCollectionVersionDTO> mapVersions(final Page<DataCollectionFileEntity> entities) {
-        return entities.map(this::mapVersion);
     }
 }

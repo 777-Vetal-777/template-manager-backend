@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.entity.template;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import org.hibernate.annotations.JoinFormula;
 
@@ -40,8 +41,8 @@ public class TemplateEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = " data_collection_id")
-    private DataCollectionEntity dataCollection;
+    @JoinColumn(name = "data_collection_file_id")
+    private DataCollectionFileEntity dataCollectionFile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instance_id", referencedColumnName = "id")
@@ -128,12 +129,12 @@ public class TemplateEntity {
         this.files = files;
     }
 
-    public DataCollectionEntity getDataCollection() {
-        return dataCollection;
+    public DataCollectionFileEntity getDataCollectionFile() {
+        return dataCollectionFile;
     }
 
-    public void setDataCollection(DataCollectionEntity dataCollection) {
-        this.dataCollection = dataCollection;
+    public void setDataCollectionFile(DataCollectionFileEntity dataCollectionFile) {
+        this.dataCollectionFile = dataCollectionFile;
     }
 
     public InstanceEntity getInstance() {

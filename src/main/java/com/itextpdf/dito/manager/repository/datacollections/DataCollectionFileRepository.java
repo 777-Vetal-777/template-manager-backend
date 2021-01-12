@@ -1,15 +1,14 @@
 package com.itextpdf.dito.manager.repository.datacollections;
 
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
@@ -29,7 +28,6 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
             + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
             + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ";
-
 
     DataCollectionFileEntity findFirstByDataCollection_IdOrderByVersionDesc(Long id);
 

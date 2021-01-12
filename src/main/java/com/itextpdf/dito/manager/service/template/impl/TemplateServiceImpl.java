@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
@@ -14,6 +15,7 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionReposi
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -64,11 +66,12 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateName);
         templateEntity.setType(templateTypeEnum);
+
         if (!StringUtils.isEmpty(dataCollectionName)) {
-            templateEntity.setDataCollection(
-                    dataCollectionRepository.findByName(dataCollectionName).orElseThrow(
-                            () -> new DataCollectionNotFoundException(dataCollectionName)));
+            final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(dataCollectionName).orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionName));
+            templateEntity.setDataCollectionFile(dataCollectionEntity.getLatestVersion());
         }
+
         final UserEntity author = userService.findByEmail(email);
 
         final TemplateLogEntity logEntity = createLogEntity(templateEntity, author);
@@ -104,7 +107,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public Page<TemplateEntity> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam) {
+    public Page<TemplateEntity> getAll(final Pageable pageable, final TemplateFilter templateFilter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);

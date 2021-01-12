@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 public class DataCollectionControllerImpl extends AbstractController implements DataCollectionController {
@@ -55,33 +56,25 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> create(final String name, final String dataCollectionType, final MultipartFile multipartFile, final Principal principal) {
-        if (multipartFile.isEmpty()) {
-            throw new EmptyDataCollectionFileException();
-        }
-        if (!EnumUtils.isValidEnum(DataCollectionType.class, dataCollectionType)) {
-            throw new NoSuchDataCollectionTypeException(dataCollectionType);
-        }
-        final DataCollectionType collectionType = DataCollectionType.valueOf(dataCollectionType);
-
-        byte[] data;
-        try {
-            data = multipartFile.getBytes();
-        } catch (IOException e) {
-            throw new UnreadableDataCollectionException(multipartFile.getOriginalFilename());
-        }
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService
-                .create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
+        final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
+        final byte[] data = getBytesFromMultipart(multipartFile);
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<DependencyDTO> list(String name) {
-        return null;
+    public ResponseEntity<List<DependencyDTO>> list(final String name) {
+        final String decodedName = decodeBase64(name);
+        final List<DependencyDTO> dependencyDTOs = dataCollectionMapper.map(dataCollectionService.list(decodedName));
+        return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> create(Principal principal, String name, String dataCollectionType, MultipartFile multipartFile, String comment) {
-        return null;
+    public ResponseEntity<DataCollectionDTO> create(final Principal principal, final String name, final String dataCollectionType, final MultipartFile multipartFile, final String comment) {
+        final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
+        final byte[] data = getBytesFromMultipart(multipartFile);
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.createNewVersion(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName(), comment);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
     }
 
     @Override
@@ -101,9 +94,8 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataCollectionDTO> update(final String name,
                                                     final @Valid DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
                                                     final Principal principal) {
-        final DataCollectionEntity entity = dataCollectionService
-                .update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),
-                        principal.getName());
+        final DataCollectionEntity entity = dataCollectionService.update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),
+                principal.getName());
 
         return new ResponseEntity<>(dataCollectionMapper.map(entity), HttpStatus.OK);
     }
@@ -124,6 +116,25 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         return new ResponseEntity<>(dataCollectionMapper.mapVersions(dataCollectionVersionEntities), HttpStatus.OK);
     }
 
+    private byte[] getBytesFromMultipart(final MultipartFile multipartFile) {
+        if (multipartFile.isEmpty()) {
+            throw new EmptyDataCollectionFileException();
+        }
+        byte[] data;
+        try {
+            data = multipartFile.getBytes();
+        } catch (IOException e) {
+            throw new UnreadableDataCollectionException(multipartFile.getOriginalFilename());
+        }
+        return data;
+    }
+
+    private DataCollectionType getDataCollectionTypeFromPath(final String dataCollectionType) {
+        if (!EnumUtils.isValidEnum(DataCollectionType.class, dataCollectionType)) {
+            throw new NoSuchDataCollectionTypeException(dataCollectionType);
+        }
+        return DataCollectionType.valueOf(dataCollectionType);
+    }
     @Override
     public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name, final RoleFilter filter) {
         final Page<RoleEntity> roleEntities = dataCollectionService

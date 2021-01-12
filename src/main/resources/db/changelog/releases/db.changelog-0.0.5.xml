@@ -45,7 +45,8 @@
                 <constraints nullable="false" notNullConstraintName="data_collection_file_data_not_null_constraint"/>
             </column>
             <column name="file_name" type="varchar(255)">
-                <constraints nullable="false" notNullConstraintName="data_collection_file_file_name_not_null_constraint"/>
+                <constraints nullable="false"
+                             notNullConstraintName="data_collection_file_file_name_not_null_constraint"/>
             </column>
         </addColumn>
     </changeSet>
@@ -61,6 +62,36 @@
                              foreignKeyName="fk_data_collection_role_to_role" references="role(id)"/>
             </column>
         </createTable>
+    </changeSet>
+
+    <changeSet id="006-drop-fk-between-data-collection-and-template-tables" author="Yaroslav_Maievskij">
+        <dropForeignKeyConstraint baseTableName="template" constraintName="fk_template_to_data_collection"/>
+    </changeSet>
+
+    <changeSet id="007-drop-data-collection-id-column-from-template-table" author="Yaroslav_Maievskij">
+        <dropColumn tableName="template">
+            <column name="data_collection_id"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="008-drop-data-column-from-data-collection-table" author="Yaroslav_Maievskij">
+        <dropColumn tableName="data_collection">
+            <column name="data"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="009-drop-file-name-column-from-data-collection-table" author="Yaroslav_Maievskij">
+        <dropColumn tableName="data_collection">
+            <column name="file_name"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="010-add-data-collection-file-id-column-to-template-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="template">
+            <column name="data_collection_file_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="fk_template_to_data_collection_file" references="data_collection_file(id)"/>
+            </column>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

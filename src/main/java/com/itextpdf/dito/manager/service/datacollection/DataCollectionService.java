@@ -3,17 +3,19 @@ package com.itextpdf.dito.manager.service.datacollection;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface DataCollectionService {
-    DataCollectionEntity create(String name, DataCollectionType type, byte[] data, String fileName,
-                                String email);
+    DataCollectionEntity create(String name, DataCollectionType type, byte[] data, String fileName, String email);
+
+    DataCollectionEntity createNewVersion(String name, DataCollectionType type, byte[] data, String fileName, String email, String comment);
 
     Page<DataCollectionEntity> list(Pageable pageable, DataCollectionFilter filter, String searchParam);
 
@@ -24,6 +26,8 @@ public interface DataCollectionService {
     void delete(String name);
 
     DataCollectionEntity update(String name, DataCollectionEntity entity, String userEmail);
+
+    List<DataCollectionDependencyModel> list(final String name);
 
     Page<RoleEntity> getRoles(Pageable pageable, String name, RoleFilter filter);
 

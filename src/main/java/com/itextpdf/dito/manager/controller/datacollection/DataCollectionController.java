@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @RequestMapping(DataCollectionController.BASE_NAME)
 @Tag(name = "data collection", description = "data collection API")
@@ -65,9 +66,9 @@ public interface DataCollectionController {
     @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of dependencies of one data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about one data collection dependencies is prepared according to the specified conditions.")
-    ResponseEntity<DependencyDTO> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
+    ResponseEntity<List<DependencyDTO>> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
-    @PostMapping(DATA_COLLECTION_VERSIONS)
+    @PostMapping(path = DATA_COLLECTION_VERSIONS ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create new version of data collection", description = "Make a new version of a data collection: upload a new json and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -76,7 +77,7 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "400", description = "This file is not valid. Please try again"),
             @ApiResponse(responseCode = "403", description = "You don't have permissions to create new version."),
     })
-    ResponseEntity<ResourceDTO> create(Principal principal,
+    ResponseEntity<DataCollectionDTO> create(Principal principal,
                                        @Parameter(description = "The data collection name.", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(description = "The data collection type, ex. JSON..", required = true, style = ParameterStyle.FORM, schema = @Schema(implementation = DataCollectionType.class)) @RequestPart("type") String dataCollectionType,
                                        @Parameter(description = "Data collections file", required = true, style = ParameterStyle.FORM) @RequestPart("attachment") MultipartFile multipartFile,
