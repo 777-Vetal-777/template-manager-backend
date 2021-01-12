@@ -122,7 +122,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateMetadataDTO> update(final String name,
-                                                      final TemplateUpdateRequestDTO templateUpdateRequestDTO, final Principal principal) {
+                                                      @Valid final TemplateUpdateRequestDTO templateUpdateRequestDTO, final Principal principal) {
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateService
                 .update(decodeBase64(name), templateMapper.map(templateUpdateRequestDTO), principal.getName())),
                 HttpStatus.OK);
