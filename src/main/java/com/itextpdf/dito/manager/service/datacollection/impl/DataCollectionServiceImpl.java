@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionHasDependenciesException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
@@ -186,6 +187,12 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public void delete(final String name) {
+        final DataCollectionEntity deletingDataCollection = findByName(name);
+
+        if(hasOutboundDependencies(deletingDataCollection.getId())){
+            throw new DataCollectionHasDependenciesException();
+        }
+
         dataCollectionRepository.delete(findByName(name));
     }
 
@@ -290,6 +297,10 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
+    }
+
+    private boolean hasOutboundDependencies(final Long dataCollectionId) {
+        return !dataCollectionRepository.searchDependencyOfDataCollection(dataCollectionId).isEmpty();
     }
 
     @Override

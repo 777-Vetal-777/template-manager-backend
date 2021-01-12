@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionHasDependenciesException;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
@@ -26,9 +27,13 @@ public class DataCollectionExceptionHandler extends AbstractExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(EmptyDataCollectionFileException.class)
     public ResponseEntity<ErrorResponseDTO> fileUploadExceptionHandler(final EmptyDataCollectionFileException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataCollectionHasDependenciesException.class)
+    public ResponseEntity<ErrorResponseDTO> dataCollectionHasDependenciesExceptionHandler(final DataCollectionHasDependenciesException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }
