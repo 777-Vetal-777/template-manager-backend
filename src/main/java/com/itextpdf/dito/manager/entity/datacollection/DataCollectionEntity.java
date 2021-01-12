@@ -3,7 +3,6 @@ package com.itextpdf.dito.manager.entity.datacollection;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
@@ -39,10 +38,6 @@ public class DataCollectionEntity {
 
     private String name;
 
-    private byte[] data;
-
-    private String fileName;
-
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -57,8 +52,13 @@ public class DataCollectionEntity {
     @JoinColumn(name = " author_id", referencedColumnName = "id")
     private UserEntity author;
 
-    @OneToMany(mappedBy = "dataCollection")
-    private List<TemplateEntity> templates;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT file.id " +
+            "FROM manager.data_collection_file file " +
+            "WHERE file.data_collection_id = id and file.version=(" +
+            "select max(file.version) from manager.data_collection_file file where file.data_collection_id = id))")
+    private DataCollectionFileEntity latestVersion;
 
     @OneToMany(
             mappedBy = "dataCollection",
@@ -92,13 +92,20 @@ public class DataCollectionEntity {
                     name = "role_id"))
     private Set<RoleEntity> appliedRoles = new HashSet<>();
 
-
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
         return dataCollectionLog;
     }
 
     public void setDataCollectionLog(Collection<DataCollectionLogEntity> dataCollectionLog) {
         this.dataCollectionLog = dataCollectionLog;
+    }
+
+    public DataCollectionFileEntity getLatestVersion() {
+        return latestVersion;
+    }
+
+    public void setLatestVersion(DataCollectionFileEntity latestVersion) {
+        this.latestVersion = latestVersion;
     }
 
     public DataCollectionLogEntity getLastDataCollectionLog() {
@@ -115,14 +122,6 @@ public class DataCollectionEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public Long getId() {
@@ -167,22 +166,6 @@ public class DataCollectionEntity {
 
     public void setAuthor(UserEntity author) {
         this.author = author;
-    }
-
-    public List<TemplateEntity> getTemplates() {
-        return templates;
-    }
-
-    public void setTemplates(List<TemplateEntity> templates) {
-        this.templates = templates;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] file) {
-        this.data = file;
     }
 
     public Date getCreatedOn() {

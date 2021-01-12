@@ -23,7 +23,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Query(value = "select template from TemplateEntity template "
             + "join template.files file "
-            + "left join template.dataCollection dataCollection "
+            + "join template.dataCollectionFile dataCollectionFile "
+            + "left join dataCollectionFile.dataCollection dataCollection "
             + "where "
             //filtering
             + "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
@@ -43,7 +44,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Query(value = "select template from TemplateEntity template "
             + "join template.files file "
-            + "left join template.dataCollection dataCollection "
+            + "join template.dataCollectionFile dataCollectionFile "
+            + "left join dataCollectionFile.dataCollection dataCollection "
             + "where "
             //filtering
             + "((:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
@@ -78,4 +80,11 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "where resource.id = :resourceId "
             + "group by template.id")
     List<TemplateEntity> findTemplatesByResourceId(@Param("resourceId") Long resourceId);
+
+    @Query(value = "select template from TemplateEntity template "
+            + "left join template.dataCollectionFile version "
+            + "left join version.dataCollection datacollection "
+            + "where datacollection.id = :dataCollectionId "
+            + "group by template.id")
+    List<TemplateEntity> findTemplatesByDataCollectionId(@Param("dataCollectionId") Long dataCollectionId);
 }

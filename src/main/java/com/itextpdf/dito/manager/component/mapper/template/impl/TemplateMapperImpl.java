@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
@@ -51,9 +52,12 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
         }
-        result.setDataCollection(Objects.nonNull(entity.getDataCollection())
-                ? entity.getDataCollection().getName()
-                : null);
+        final DataCollectionFileEntity dataCollectionFileEntity = entity.getDataCollectionFile();
+        if (Objects.nonNull(dataCollectionFileEntity)){
+            final DataCollectionEntity dataCollectionEntity = dataCollectionFileEntity.getDataCollection();
+            result.setDataCollection(Objects.nonNull(dataCollectionEntity) ? dataCollectionEntity.getName() : null);
+        }
+
         return result;
     }
 
@@ -71,11 +75,6 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setName(entity.getName());
         final List<TemplateFileEntity> templateFiles = entity.getFiles();
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
-        final Collection<TemplateFileEntity> files = entity.getFiles();
-        if (Objects.nonNull(files) && !files.isEmpty()) {
-            final TemplateFileEntity fileEntity = files.stream().findFirst().get();
-            result.setVersion(fileEntity.getVersion());
-        }
         if (!CollectionUtils.isEmpty(templateFiles)) {
             final TemplateLogEntity lastTemplateLog = templateLogs.get(0);
             result.setModifiedBy(new StringBuilder()
@@ -94,9 +93,9 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setCreatedOn(firstTemplateLog.getDate());
         }
         result.setDescription(entity.getDescription());
-        final DataCollectionEntity dataCollection = entity.getDataCollection();
-        result.setDataCollection(Objects.nonNull(dataCollection)
-                ? dataCollection.getName()
+        final DataCollectionFileEntity dataCollectionFileEntity = entity.getDataCollectionFile();
+        result.setDataCollection(Objects.nonNull(dataCollectionFileEntity)
+                ? dataCollectionFileEntity.getDataCollection().getName()
                 : null);
         return result;
     }

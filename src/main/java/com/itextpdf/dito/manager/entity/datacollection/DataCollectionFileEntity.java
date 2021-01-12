@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity.datacollection;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,9 +10,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "data_collection_file")
@@ -21,16 +24,18 @@ public class DataCollectionFileEntity {
     @SequenceGenerator(name = "data_collection_file_gen", sequenceName = "data_collection_file_sequence", allocationSize = 1)
     private Long Id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = " data_collection_id")
+    @JoinColumn(name = "data_collection_id")
     private DataCollectionEntity dataCollection;
     private Long version;
     private String comment;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = " author_id")
+    @JoinColumn(name = "author_id")
     private UserEntity author;
     private Date createdOn;
     private byte[] data;
     private String fileName;
+    @OneToMany(mappedBy = "dataCollectionFile")
+    private List<TemplateEntity> templates;
 
     public Date getCreatedOn() {
         return createdOn;

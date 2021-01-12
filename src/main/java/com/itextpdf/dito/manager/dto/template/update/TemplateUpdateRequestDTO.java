@@ -1,9 +1,6 @@
 package com.itextpdf.dito.manager.dto.template.update;
 
-import javax.validation.constraints.NotBlank;
-
 public class TemplateUpdateRequestDTO {
-    @NotBlank
     String name;
     String description;
 
