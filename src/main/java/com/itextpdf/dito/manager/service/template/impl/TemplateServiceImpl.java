@@ -171,17 +171,20 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final Long oldVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId()).getVersion();
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
+        //Imitation of new file upload (which will be performed from Editor)
+        final TemplateFileEntity fileEntity = new TemplateFileEntity();
+        fileEntity.setTemplate(existingTemplateEntity);
+        fileEntity.setVersion(oldVersion + 1);
+        fileEntity.setComment(comment);
+        fileEntity.setAuthor(userEntity);
+        fileEntity.setCreatedOn(new Date());
+        fileEntity.setModifiedOn(new Date());
         if (data != null) {
-            final TemplateFileEntity fileEntity = new TemplateFileEntity();
-            fileEntity.setTemplate(existingTemplateEntity);
-            fileEntity.setVersion(oldVersion + 1);
             fileEntity.setData(data);
-            fileEntity.setComment(comment);
-            fileEntity.setAuthor(userEntity);
-            fileEntity.setCreatedOn(new Date());
-            fileEntity.setModifiedOn(new Date());
-            existingTemplateEntity.getFiles().add(fileEntity);
+        } else {
+            fileEntity.setData(templateLoader.load());
         }
+        existingTemplateEntity.getFiles().add(fileEntity);
         existingTemplateEntity.getTemplateLogs().add(logEntity);
         return templateRepository.save(existingTemplateEntity);
     }
