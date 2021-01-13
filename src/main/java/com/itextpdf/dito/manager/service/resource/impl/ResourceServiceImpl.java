@@ -10,8 +10,8 @@ import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
+import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
@@ -25,19 +25,19 @@ import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.user.UserService;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -49,6 +49,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE = "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE";
     private static final String PERMISSION_NAME_FOR_ROLLBACK_IMAGE = "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE";
     private static final String PERMISSION_NAME_FOR_DELETE_IMAGE = "E8_US66_DELETE_RESOURCE_IMAGE";
+    private static final List<String> AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES = Arrays.asList(
+            PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE,
+            PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE,
+            PERMISSION_NAME_FOR_ROLLBACK_IMAGE,
+            PERMISSION_NAME_FOR_DELETE_IMAGE);
 
     private final ResourceRepository resourceRepository;
     private final ResourceLogRepository resourceLogRepository;
@@ -76,8 +81,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public ResourceEntity create(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email) {
-        if (resourceRepository.existsByNameEqualsAndTypeEquals(name, type)) {
+    public ResourceEntity create(final String name, final ResourceTypeEnum type, final byte[] data,
+            final String fileName, final String email) {
+        final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(name, type);
+        if (resourceExists) {
             throw new ResourceAlreadyExistsException(name);
         }
 
@@ -107,19 +114,19 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data, final String fileName, final String email, final String comment) {
+    public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data,
+            final String fileName, final String email, final String comment) {
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
-        switch (type) {
-            case IMAGE:
-                checkUserPermissions(
-                        retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
-                break;
+        if (ResourceTypeEnum.IMAGE.equals(type)) {
+            checkUserPermissions(
+                    retrieveSetOfRoleNames(userEntity.getRoles()),
+                    existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
         }
 
-        final Long oldVersion = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
+        final Long oldVersion = resourceFileRepository
+                .findFirstByResource_IdOrderByVersionDesc(existingResourceEntity.getId()).getVersion();
         final ResourceLogEntity logEntity = createResourceLogEntry(existingResourceEntity, userEntity);
 
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
@@ -137,9 +144,12 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         existingResourceEntity.getResourceLogs().add(logEntity);
 
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
-        final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(updatedResourceEntity.getId());
+        final List<TemplateEntity> templateEntities = templateRepository
+                .findTemplatesByResourceId(updatedResourceEntity.getId());
         templateEntities.forEach(t -> {
-            final List<ResourceFileEntity> oldVersions = t.getResources().stream().filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId())).collect(Collectors.toList());
+            final List<ResourceFileEntity> oldVersions = t.getResources().stream()
+                    .filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId()))
+                    .collect(Collectors.toList());
             t.getResources().removeAll(oldVersions);
             t.getResources().add(updatedResourceEntity.getLatestFile());
         });
@@ -151,8 +161,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity get(final String name, final ResourceTypeEnum type) {
         final ResourceEntity resourceEntity = getResource(name, type);
         //specially made to reduce the load of files
-        final ResourceFileEntity file = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(resourceEntity.getId());
-        final ResourceLogEntity log = resourceLogRepository.findFirstByResource_IdOrderByDateDesc(resourceEntity.getId());
+        final ResourceFileEntity file = resourceFileRepository
+                .findFirstByResource_IdOrderByVersionDesc(resourceEntity.getId());
+        final ResourceLogEntity log = resourceLogRepository
+                .findFirstByResource_IdOrderByDateDesc(resourceEntity.getId());
         resourceEntity.setResourceFiles(Collections.singletonList(file));
         resourceEntity.setResourceLogs(log != null ? Collections.singletonList(log) : null);
         return resourceEntity;
@@ -163,15 +175,13 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final ResourceEntity existingResource = getResource(name, entity.getType());
         final UserEntity userEntity = userService.findByEmail(mail);
 
-        switch (entity.getType()) {
-            case IMAGE:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
-                break;
+        if (ResourceTypeEnum.IMAGE.equals(entity.getType())) {
+            checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                    existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
         }
 
         if (!existingResource.getName().equals(entity.getName())) {
-            throwExceptionIfResourceExist(entity);
+            throwExceptionIfResourceExists(entity);
         }
         existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
@@ -184,8 +194,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceEntity applyRole(final String resourceName, final ResourceTypeEnum resourceType,
-                                    final String roleName,
-                                    final List<String> permissions) {
+            final String roleName,
+            final List<String> permissions) {
+        checkIfPermissionsAllowedForResourceType(permissions, resourceType);
+
         final ResourceEntity resourceEntity = getResource(resourceName, resourceType);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, resourceEntity);
@@ -212,6 +224,22 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return resourceRepository.save(resourceEntity);
     }
 
+    private void checkIfPermissionsAllowedForResourceType(final List<String> permissions,
+            final ResourceTypeEnum resourceTypeEnum) {
+        if (ResourceTypeEnum.IMAGE.equals(resourceTypeEnum)) {
+            throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES);
+        }
+    }
+
+    private void throwExceptionIfPermissionIsNotPresented(final List<String> permissions,
+            final List<String> allowedPermissions) {
+        for (final String permission : permissions) {
+            if (!allowedPermissions.contains(permission)) {
+                throw new PermissionIsNotAllowedForResourceTypeException(permission);
+            }
+        }
+    }
+
     @Override
     public ResourceEntity detachRole(final String name, final ResourceTypeEnum type, final String roleName) {
         final ResourceEntity resourceEntity = getResource(name, type);
@@ -227,7 +255,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public Page<RoleEntity> getRoles(final Pageable pageable, final String resourceName, final ResourceTypeEnum type, final RoleFilter roleFilter) {
+    public Page<RoleEntity> getRoles(final Pageable pageable, final String resourceName, final ResourceTypeEnum type,
+            final RoleFilter roleFilter) {
         final ResourceEntity resourceEntity = getResource(resourceName, type);
         return roleService.getSlaveRolesByResource(pageable, roleFilter, resourceEntity);
     }
@@ -253,25 +282,22 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
         return StringUtils.isEmpty(searchParam)
-                ? resourceRepository.filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
+                ? resourceRepository
+                .filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
                 : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate,
-                modifiedOnEndDate, searchParam.toLowerCase());
+                        modifiedOnEndDate, searchParam.toLowerCase());
     }
 
     @Override
-	public ResourceEntity delete(final String name, final ResourceTypeEnum type) {
-    	final ResourceEntity deletingResourceEntity = getResource(name, type);
+    public ResourceEntity delete(final String name, final ResourceTypeEnum type) {
+        final ResourceEntity deletingResourceEntity = getResource(name, type);
 
-    	if (hasOutboundDependencies(deletingResourceEntity)) {
-    		throw new ResourceHasDependenciesException();
-    	}
+        resourceRepository.delete(deletingResourceEntity);
 
-    	resourceRepository.delete(deletingResourceEntity);
+        return deletingResourceEntity;
+    }
 
-    	return deletingResourceEntity;
-	}
-
-	private Pageable updateSort(Pageable pageable) {
+    private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("modifiedBy")) {
@@ -289,8 +315,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
-    private void throwExceptionIfResourceExist(final ResourceEntity entity) {
-        if (resourceRepository.existsByNameEqualsAndTypeEquals(entity.getName(), entity.getType())) {
+    private void throwExceptionIfResourceExists(final ResourceEntity entity) {
+        final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(entity.getName(), entity.getType());
+        if (resourceExists) {
             throw new ResourceAlreadyExistsException(entity.getName());
         }
     }
@@ -306,8 +333,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     private void checkUserPermissions(final Set<String> userRoleNames,
-                                      final Set<RoleEntity> resourceAppliedRoles,
-                                      final String requiredPermission) {
+            final Set<RoleEntity> resourceAppliedRoles,
+            final String requiredPermission) {
         if (!isUserAdmin(userRoleNames) && !resourceAppliedRoles.isEmpty()) {
 
             boolean isPermissionRolePresented = false;
@@ -334,29 +361,20 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return roleEntities.stream().map(RoleEntity::getName).collect(Collectors.toSet());
     }
 
-    private Set<String> retrieveSetOfRoleNamesFilteredByPermission(final Set<RoleEntity> roleEntities, final String permission) {
+    private Set<String> retrieveSetOfRoleNamesFilteredByPermission(final Set<RoleEntity> roleEntities,
+            final String permission) {
         return roleEntities.stream().filter(roleEntity -> roleEntity.getPermissions().stream()
                 .anyMatch(permissionEntity -> permissionEntity.getName().equals(permission)))
                 .map(RoleEntity::getName).collect(
                         Collectors.toSet());
     }
 
-	private ResourceLogEntity createResourceLogEntry(final String mail, ResourceEntity resourceEntity) {
-		final UserEntity userEntity = userService.findByEmail(mail);
-        return createResourceLogEntry(resourceEntity, userEntity);
-	}
-
-	private ResourceLogEntity createResourceLogEntry(final ResourceEntity resourceEntity, final UserEntity userEntity) {
-		final ResourceLogEntity log = new ResourceLogEntity();
+    private ResourceLogEntity createResourceLogEntry(final ResourceEntity resourceEntity, final UserEntity userEntity) {
+        final ResourceLogEntity log = new ResourceLogEntity();
         log.setResource(resourceEntity);
         log.setDate(new Date());
         log.setAuthor(userEntity);
-		return log;
-	}
-
-	private boolean hasOutboundDependencies(final ResourceEntity resourceEntity) {
-    	//TODO: DTM-710: add a check that resource has no outbound dependencies
-		return false;
-	}
+        return log;
+    }
 
 }
