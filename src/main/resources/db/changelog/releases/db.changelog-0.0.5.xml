@@ -94,4 +94,17 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="011-add-template-role-table" author="Ivan_Semenov">
+        <createTable tableName="template_role">
+            <column name="template_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_role_template_id_not_null_constraint"
+                             foreignKeyName="fk_template_role_to_template" references="template(id)"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_role_role_id_not_null_constraint"
+                             foreignKeyName="fk_template_role_to_role" references="role(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

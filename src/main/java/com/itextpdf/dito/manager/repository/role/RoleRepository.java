@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import java.util.List;
 import java.util.Optional;
 
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,6 +29,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     RoleEntity findByNameAndMasterFalseAndDataCollections(String name, DataCollectionEntity dataCollectionEntity);
 
+    RoleEntity findByNameAndMasterFalseAndTemplates(String name, TemplateEntity templateEntity);
+
     @Query(value = "select role from RoleEntity role"
             + " left join role.permissions permission"
             + " left join role.resources resource"
@@ -38,6 +41,15 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + " group by (role.id)")
     Page<RoleEntity> findAllByResourcesAndMasterFalse(Pageable pageable, ResourceEntity resourceEntity, @Param("name") @Nullable String name,
                                                       @Param("types") @Nullable List<RoleTypeEnum> types);
+
+    @Query(value = "select role from RoleEntity role"
+            + " left join role.templates template"
+            + " left join role.permissions permissions"
+            + " where template = :templateEntity"
+            + " and role.master = false"
+            + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
+            + " group by (role.id)")
+    Page<RoleEntity> findAllByTemplatesAndMasterFalse(Pageable pageable, TemplateEntity templateEntity, @Param("name") @Nullable String name);
 
     @Query(value = "select role from RoleEntity  role"
             + " left join role.dataCollections dataCollection"

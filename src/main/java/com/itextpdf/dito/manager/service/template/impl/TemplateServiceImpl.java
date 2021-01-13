@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
+import com.itextpdf.dito.manager.entity.PermissionEntity;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
@@ -8,14 +10,18 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
+import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
+import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.permission.PermissionService;
+import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -44,17 +50,23 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final UserService userService;
     private final TemplateLoader templateLoader;
     private final DataCollectionRepository dataCollectionRepository;
+    private final RoleService roleService;
+    private final PermissionService permissionService;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
                                final UserService userService,
                                final TemplateLoader templateLoader,
-                               final DataCollectionRepository dataCollectionRepository) {
+                               final DataCollectionRepository dataCollectionRepository,
+                               final RoleService roleService,
+                               final PermissionService permissionService) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
         this.templateLoader = templateLoader;
         this.dataCollectionRepository = dataCollectionRepository;
+        this.roleService = roleService;
+        this.permissionService = permissionService;
     }
 
     @Override
@@ -187,6 +199,54 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         existingTemplateEntity.getFiles().add(fileEntity);
         existingTemplateEntity.getTemplateLogs().add(logEntity);
         return templateRepository.save(existingTemplateEntity);
+    }
+
+    @Override
+    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter) {
+        final TemplateEntity templateEntity = findByName(name);
+        return roleService.getSlaveRolesByTemplate(pageable, filter, templateEntity);
+    }
+
+    @Override
+    public TemplateEntity applyRole(final String templateName, final String roleName, final List<String> permissions) {
+        final TemplateEntity templateEntity = findByName(templateName);
+
+        RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, templateEntity);
+        if (slaveRoleEntity == null) {
+            // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
+            final RoleEntity masterRoleEntity = roleService.getMasterRole(roleName);
+
+            slaveRoleEntity = new RoleEntity();
+            slaveRoleEntity.setName(masterRoleEntity.getName());
+            slaveRoleEntity.setType(masterRoleEntity.getType());
+            slaveRoleEntity.setMaster(Boolean.FALSE);
+        } else {
+            slaveRoleEntity.getPermissions().clear();
+            templateEntity.getAppliedRoles().remove(slaveRoleEntity);
+        }
+
+        for (final String permission : permissions) {
+            final PermissionEntity permissionEntity = permissionService.get(permission);
+            slaveRoleEntity.getPermissions().add(permissionEntity);
+        }
+        slaveRoleEntity.getTemplates().add(templateEntity);
+
+        templateEntity.getAppliedRoles().add(slaveRoleEntity);
+        return templateRepository.save(templateEntity);
+    }
+
+    @Override
+    public TemplateEntity detachRole(final String templateName, final String roleName) {
+        final TemplateEntity templateEntity = findByName(templateName);
+        final RoleEntity roleEntity = roleService.getSlaveRole(roleName, templateEntity);
+
+        if (roleEntity == null) {
+            throw new RoleNotFoundException(roleName);
+        }
+
+        templateEntity.getAppliedRoles().remove(roleEntity);
+        roleService.delete(roleEntity);
+        return templateRepository.save(templateEntity);
     }
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {

@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
 import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
@@ -13,6 +14,7 @@ import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
@@ -143,10 +145,23 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
+    public RoleEntity getSlaveRole(final String name, final TemplateEntity templateEntity) {
+        return roleRepository.findByNameAndMasterFalseAndTemplates(name, templateEntity);
+    }
+
+    @Override
+    public Page<RoleEntity> getSlaveRolesByTemplate(final Pageable pageable, final TemplatePermissionFilter filter, final TemplateEntity templateEntity) {
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+        final String name = getStringFromFilter(filter.getName());
+        final Pageable pageWithSort = updateSort(pageable);
+
+        return roleRepository.findAllByTemplatesAndMasterFalse(pageWithSort, templateEntity, name);
+    }
+
+    @Override
     public void delete(final RoleEntity roleEntity) {
         roleRepository.delete(roleEntity);
     }
-
 
     @Override
     protected List<String> getSupportedSortFields() {
