@@ -8,6 +8,9 @@ security:
     refresh-token:
       id: refresh
       time-to-live: 86400
+    editor-token:
+      id: editor
+      time-to-live: 86400
   login:
     failure:
       max-attempts: 5

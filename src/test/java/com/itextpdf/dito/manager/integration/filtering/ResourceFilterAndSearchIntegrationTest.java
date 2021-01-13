@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -103,6 +104,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     }
 
     @Test
+    @Disabled
     public void test_searchVersionsWithFiltering() throws Exception {
 
         mockMvc.perform(get(RESOURCE_VERSIONS_URI, "images", "VGVzdE5hbWU=")
