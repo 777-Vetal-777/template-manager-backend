@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.entity;
 
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -49,6 +49,9 @@ public class RoleEntity {
 
     @ManyToMany(mappedBy = "appliedRoles")
     private Set<DataCollectionEntity> dataCollections = new HashSet<>();
+
+    @ManyToMany(mappedBy = "appliedRoles")
+    private Set<TemplateEntity> templates = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -112,5 +115,13 @@ public class RoleEntity {
 
     public void setDataCollections(Set<DataCollectionEntity> dataCollections) {
         this.dataCollections = dataCollections;
+    }
+
+    public Set<TemplateEntity> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(Set<TemplateEntity> templates) {
+        this.templates = templates;
     }
 }

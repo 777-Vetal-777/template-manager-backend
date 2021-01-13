@@ -62,7 +62,6 @@ public interface TemplateController {
     String TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/preview";
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/roles";
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/{" + ROLE_PATH_VARIABLE + "}";
-    String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_PAGEABLE = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/pageable";
 
     @PostMapping
     @Operation(summary = "Create template", description = "Create new template",
@@ -122,9 +121,9 @@ public interface TemplateController {
     @Operation(summary = "Get a list of versions of template by name.", description = "Get a list of template versions using the template name and template type, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplateVersionDTO>> getVersions(Pageable pageable,
-            @Parameter(description = "Encoded with base64 resource name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-            @ParameterObject VersionFilter versionFilter,
-            @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+                                                         @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                         @ParameterObject VersionFilter versionFilter,
+                                                         @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get template preview", description = "Get generated template PDF preview",
@@ -149,12 +148,6 @@ public interface TemplateController {
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<List<RoleDTO>> getRoles(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-                                           @ParameterObject TemplatePermissionFilter templatePermissionFilter,
-                                           @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
-
-    @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_PAGEABLE)
-    @Operation(summary = "Get template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable,
                                            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
                                            @ParameterObject TemplatePermissionFilter templatePermissionFilter,
@@ -166,7 +159,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Role applied to template successfully."),
             @ApiResponse(responseCode = "401", description = "Template is not found in repository")
     })
-    ResponseEntity<RoleDTO> applyRole(
+    ResponseEntity<TemplateMetadataDTO> applyRole(
             @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
 
@@ -176,7 +169,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Role detached from template successfully."),
             @ApiResponse(responseCode = "401", description = "Role or template are not found in repository")
     })
-    ResponseEntity<Void> deleteRole(
+    ResponseEntity<TemplateMetadataDTO> deleteRole(
             @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 

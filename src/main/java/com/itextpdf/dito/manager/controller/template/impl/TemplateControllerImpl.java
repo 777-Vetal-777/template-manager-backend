@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.template.impl;
 
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
@@ -13,6 +14,7 @@ import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
@@ -50,18 +52,21 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateMapper templateMapper;
     private final DependencyMapper dependencyMapper;
     private final TemplateVersionsService templateVersionsService;
+    private final RoleMapper roleMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
                                   final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionFileService dataCollectionFileService,
                                   final TemplateMapper templateMapper,
                                   final DependencyMapper dependencyMapper,
-                                  final TemplateVersionsService templateVersionsService) {
+                                  final TemplateVersionsService templateVersionsService,
+                                  final RoleMapper roleMapper) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
         this.dataCollectionFileService = dataCollectionFileService;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
         this.templateVersionsService = templateVersionsService;
+        this.roleMapper = roleMapper;
     }
 
     @Override
@@ -164,23 +169,25 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<List<RoleDTO>> getRoles(String name, TemplatePermissionFilter filter, String search) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
+    public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
+        final Page<RoleEntity> roleEntities = templateService
+                .getRoles(pageable, decodeBase64(name), filter);
+        return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter, String search) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
+    public ResponseEntity<TemplateMetadataDTO> applyRole(final String name, final ApplyRoleRequestDTO applyRoleRequestDTO) {
+        final TemplateEntity templateEntity = templateService
+                .applyRole(decodeBase64(name), applyRoleRequestDTO.getRoleName(),
+                        applyRoleRequestDTO.getPermissions());
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<RoleDTO> applyRole(String name, ApplyRoleRequestDTO applyRoleRequestDTO) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteRole(String name, String roleName) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
+    public ResponseEntity<TemplateMetadataDTO> deleteRole(final String name, final String roleName) {
+        final TemplateEntity templateEntity = templateService
+                .detachRole(decodeBase64(name), decodeBase64(roleName));
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
     }
 
     private byte[] getFileBytes(final MultipartFile file) {

@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.entity.template;
 
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -89,6 +90,15 @@ public class TemplateEntity {
             inverseJoinColumns = @JoinColumn(name = "resource_file_id"))
     private Set<ResourceFileEntity> resources = new HashSet<>();
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "template_role",
+            joinColumns = @JoinColumn(
+                    name = "template_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "role_id"))
+    private Set<RoleEntity> appliedRoles = new HashSet<>();
+
     public Set<ResourceFileEntity> getResources() {
         return resources;
     }
@@ -175,5 +185,13 @@ public class TemplateEntity {
 
     public void setLatestFile(TemplateFileEntity latestFile) {
         this.latestFile = latestFile;
+    }
+
+    public Set<RoleEntity> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
+        this.appliedRoles = appliedRoles;
     }
 }
