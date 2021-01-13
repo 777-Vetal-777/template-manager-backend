@@ -24,10 +24,10 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
             + "and (cast(:startDate as date) is null or file.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))";
 
-    String SEARCH_CONDITION = "CAST(file.version as string) like CONCAT('%',:search,'%') "
+    String SEARCH_CONDITION = "( CAST(file.version as string) like CONCAT('%',:search,'%') "
             + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
-            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ";
+            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') )";
 
     DataCollectionFileEntity findFirstByDataCollection_IdOrderByVersionDesc(Long id);
 
