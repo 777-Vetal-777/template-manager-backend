@@ -23,13 +23,23 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static com.itextpdf.dito.manager.controller.user.UserController.*;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
+import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.UPDATE_USERS_ROLES_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACTIVATION_ENDPOINT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -192,6 +202,20 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andReturn();
 
         UserDTO response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserDTO.class);
+
+        assertEquals(request.getFirstName(), response.getFirstName());
+        assertEquals(request.getLastName(), response.getLastName());
+
+        //to revert default admin name and not affect other tests
+        request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-restore-default-request.json"), UserUpdateRequestDTO.class);
+        mvcResult = mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserDTO.class);
 
         assertEquals(request.getFirstName(), response.getFirstName());
         assertEquals(request.getLastName(), response.getLastName());
