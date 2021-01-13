@@ -19,20 +19,26 @@ import java.util.Optional;
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "editedOn");
 
-    Optional<TemplateEntity> findByName(String name);
-
-    @Query(value = "select template from TemplateEntity template "
-            + "join template.files file "
+    String TEMPLATE_TABLE_SELECT_CLAUSE = "select template from TemplateEntity template "
             + "left join template.dataCollectionFile dataCollectionFile "
-            + "left join dataCollectionFile.dataCollection dataCollection "
-            + "where "
-            //filtering
-            + "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
+            + "left join dataCollectionFile.dataCollection dataCollection ";
+
+    String FILTER_CONDITION = "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or template.type in (:types)) "
-            + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or template.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date)) "
             + "and ((:dataCollectionName <> '' and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))"
-            + "or (:dataCollectionName = '' and (dataCollection.name is null or  (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))))")
+            + "or (:dataCollectionName = '' and (dataCollection.name is null or  (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))))";
+
+    String SEARCH_CONDITION = "(LOWER(template.name) like CONCAT('%',:search,'%') "
+            + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
+            + "or LOWER(template.type) like CONCAT('%',:search,'%') "
+            + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
+            + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
+
+    Optional<TemplateEntity> findByName(String name);
+
+    @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + " where " + FILTER_CONDITION)
     Page<TemplateEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("modifiedBy") @Nullable String modifiedBy,
@@ -42,24 +48,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                 @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate);
 
 
-    @Query(value = "select template from TemplateEntity template "
-            + "join template.files file "
-            + "left join template.dataCollectionFile dataCollectionFile "
-            + "left join dataCollectionFile.dataCollection dataCollection "
-            + "where "
-            //filtering
-            + "((:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
-            + "and (COALESCE(:types) is null or template.type in (:types)) "
-            + "and (:modifiedBy='' or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (cast(:startDate as date) is null or template.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and ((:dataCollectionName <> '' and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))"
-            + "or (:dataCollectionName = '' and (dataCollection.name is null or  (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%'))))))"
-            //search
-            + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(template.type) like CONCAT('%',:search,'%') "
-            + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
-            + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ")
+    @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION + " and " + SEARCH_CONDITION)
     Page<TemplateEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("modifiedBy") @Nullable String modifiedBy,
