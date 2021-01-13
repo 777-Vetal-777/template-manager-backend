@@ -21,7 +21,7 @@ public abstract class JwtTokenBuilder implements TokenBuilder {
     }
 
     @Override
-    public String build(String subject) {
+    public String build(final String subject) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
