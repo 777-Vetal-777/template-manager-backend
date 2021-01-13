@@ -123,6 +123,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         fileEntity.setFileName(fileName);
         fileEntity.setCreatedOn(new Date());
         fileEntity.setAuthor(userEntity);
+        fileEntity.setComment(comment);
 
         existingDataCollectionEntity.setModifiedOn(new Date());
         existingDataCollectionEntity.getVersions().add(fileEntity);
