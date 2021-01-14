@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,11 +46,12 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
         final Long version = getLongFromFilter(filter.getVersion());
         final String depend = getStringFromFilter(filter.getDependencyName());
         final String stageName = getStringFromFilter(filter.getStageName());
+        final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d ->  d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
         final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
         if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType().contains(DependencyType.TEMPLATE)) {
             searchResult = isSearchEmpty
-                    ? dataCollectionFileRepository.filter(pageWithSort, dataCollectionEntity.getId(), depend, version, stageName)
-                    : dataCollectionFileRepository.search(pageWithSort, dataCollectionEntity.getId(), depend, version, stageName, searchParam);
+                    ? dataCollectionFileRepository.filter(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stageName)
+                    : dataCollectionFileRepository.search(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stageName, searchParam);
         }
         return searchResult;
 
