@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class TemplatePermissionDTO {
 
     private String name;
+    private String type;
     @JsonProperty("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD")
     private Boolean editMetadataPermission;
     @JsonProperty("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD")
@@ -15,6 +16,14 @@ public class TemplatePermissionDTO {
     private Boolean previewTemplatePermission;
     @JsonProperty("E9_US24_EXPORT_TEMPLATE_DATA")
     private Boolean exportTemplatePermission;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getName() {
         return name;

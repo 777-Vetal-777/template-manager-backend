@@ -15,7 +15,7 @@ import java.util.List;
 public interface TemplatePermissionRepository extends JpaRepository<TemplateEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA");
 
-    String SELECT_FIELDS_CLAUSE = "select name, "
+    String SELECT_FIELDS_CLAUSE = "select name, type,"
             + " E9_US75_EDIT_TEMPLATE_METADATA_STANDARD, "
             + " E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD, "
             + " E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE, "
@@ -25,7 +25,7 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
 
     String SELECT_COUNT_CLAUSE = "select count(*) from ";
 
-    String SUBQUERY_CLAUSE = "(select r.name, "
+    String SUBQUERY_CLAUSE = "(select r.name, max(r.type) as type,"
             + " max(case when p.name = 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD' then 'true' else 'false' end) as E9_US75_EDIT_TEMPLATE_METADATA_STANDARD, "
             + " max(case when p.name = 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD' then 'true' else 'false' end) as E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD, "
             + " max(case when p.name = 'E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE' then 'true' else 'false' end) as E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE, "
