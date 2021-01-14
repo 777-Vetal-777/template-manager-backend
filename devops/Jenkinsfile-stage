@@ -21,7 +21,6 @@ pipeline {
         WORKING_ENV = "stage"
         dockerCredentials="docker-stage-itext"
         SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
-        env_file = "itext_env_prod"
     }
     agent{
         label "master"
@@ -74,7 +73,9 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            sh "docker-compose --env-file ${env_file} --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
+                            withCredentials(credentialsId: 'itext_env_prod', variable: 'env_file'){
+                                sh "docker-compose --env-file ${env_file} --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
+                            }
                         }
                     }
                 }
