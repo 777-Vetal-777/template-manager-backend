@@ -21,30 +21,7 @@ pipeline {
         WORKING_ENV = "prod"
         dockerCredentials="docker-demo-itext"
         SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
-        
-        // === ENV FOR DEPLOY ===
-        GF_FRONTEND_APP_BASE_URL='frontend'
-        DITO_MANAGER_FRONTEND_APP_BASE_URL='frontend'
-        SPRING_PROFILES_ACTIVE='prod'
-        DITO_MANAGER_JWT_PRIVATE_KEY='pEBNLmtEX657LTgwgTR624GLy5qES3bH'
-        DITO_MANAGER_ACCESS_TOKEN_TIME_TO_LIVE='1800'
-        DITO_MANAGER_REFRESH_TOKEN_TIME_TO_LIVE='86400'
-        DITO_MANAGER_MAXIMUM_FAILED_LOGIN_ATTEMPTS='5'
-        DITO_MANAGER_CORS_ALLOWED_PATHS='/**'
-        DITO_MANAGER_CORS_ALLOWED_ORIGINS='*'
-        DITO_MANAGER_CORS_ALLOWED_METHODS='*'
-        DITO_MANAGER_DATABASE_URL='db:5432'
-        DITO_MANAGER_DATABASE_NAME='dito'
-        DITO_MANAGER_DATABASE_USERNAME='postgres'
-        DITO_MANAGER_DATABASE_PASSWORD='1111'
-        DITO_MANAGER_MAILING_ENABLE='true'
-        DITO_MANAGER_SMTP_HOST='smtp.gmail.com'
-        DITO_MANAGER_SMTP_PORT='587'
-        DITO_MANAGER_SMTP_USERNAME='vadzim.sarokin.tech.acc@gmail.com'
-        DITO_MANAGER_SMTP_PASSWORD='abDeQgrgX99xaK5h'
-        DITO_MANAGER_SMTP_AUTH='true'
-        DITO_MANAGER_SMTP_TLS_ENABLE='true'
-        //=== END ====
+        ENV_FILE = "itext_env_prod"
     }
     agent{
         label "master"
@@ -97,7 +74,9 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            sh "docker-compose --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
+                            withCredentials([file(credentialsId: ENV_FILE, variable: 'FILE')]){
+                                sh "docker-compose --env-file ${FILE} --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
+                            }
                         }
                     }
                 }
