@@ -3,6 +3,8 @@ package com.itextpdf.dito.manager.component.mapper.permission.impl;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -48,6 +51,30 @@ public class PermissionMapperImpl implements PermissionMapper {
     public Page<PermissionDTO> map(final Page<PermissionEntity> entities) {
         return entities.map(this::map);
     }
+
+    @Override
+    public List<TemplatePermissionDTO> mapTemplatePermissions(final List<TemplatePermissionsModel> entities) {
+        return entities.stream().map(this::mapTemplatePermission).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TemplatePermissionDTO> mapTemplatePermissions(final Page<TemplatePermissionsModel> entities) {
+        return entities.map(this::mapTemplatePermission);
+    }
+
+    private TemplatePermissionDTO mapTemplatePermission(final TemplatePermissionsModel entity) {
+        final TemplatePermissionDTO templatePermissionDTO = new TemplatePermissionDTO();
+
+        templatePermissionDTO.setName(entity.getName());
+        templatePermissionDTO.setExportTemplatePermission(entity.getE9_US24_EXPORT_TEMPLATE_DATA());
+        templatePermissionDTO.setPreviewTemplatePermission(entity.getE9_US81_PREVIEW_TEMPLATE_STANDARD());
+        templatePermissionDTO.setRollbackPermission(entity.getE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE());
+        templatePermissionDTO.setEditMetadataPermission(entity.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD());
+        templatePermissionDTO.setCreateNewVersionPermission(entity.getE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD());
+
+        return templatePermissionDTO;
+    }
+
 
     @Override
     public Page<RoleDTO> mapDataCollectionPermissions(final Page<DataCollectionPermissionsModel> entities) {

@@ -33,14 +33,14 @@ public class DataCollectionPermissionServiceImpl extends AbstractService impleme
     @Override
     public Page<DataCollectionPermissionsModel> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter, final String search) {
         final List<String> roleNameFilter = filter.getRoleName();
-        final String editDataCollectionMetadata = FilterUtils.getStringMultiselectFromFilter(filter.getEditDataCollectionMetadata());
-        final String createNewVersionOfDataCollection = FilterUtils.getStringMultiselectFromFilter(filter.getCreateNewVersionOfDataCollection());
-        final String rollbackOfTheDataCollection = FilterUtils.getStringMultiselectFromFilter(filter.getRollbackOfTheDataCollection());
-        final String deleteDataCollection = FilterUtils.getStringMultiselectFromFilter(filter.getDeleteDataCollection());
-        final String createNewDataSample = FilterUtils.getStringMultiselectFromFilter(filter.getCreateNewDataSample());
-        final String editSampleMetadata = FilterUtils.getStringMultiselectFromFilter(filter.getEditSampleMetadata());
-        final String createNewVersionOfDataSample = FilterUtils.getStringMultiselectFromFilter(filter.getCreateNewVersionOfDataSample());
-        final String deleteDataSample = FilterUtils.getStringMultiselectFromFilter(filter.getDeleteDataSample());
+        final String editDataCollectionMetadata = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditDataCollectionMetadata());
+        final String createNewVersionOfDataCollection = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionOfDataCollection());
+        final String rollbackOfTheDataCollection = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackOfTheDataCollection());
+        final String deleteDataCollection = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteDataCollection());
+        final String createNewDataSample = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewDataSample());
+        final String editSampleMetadata = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditSampleMetadata());
+        final String createNewVersionOfDataSample = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionOfDataSample());
+        final String deleteDataSample = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteDataSample());
 
         return StringUtils.isEmpty(search)
                 ? dataCollectionPermissionsRepository.filterPermissions(pageable, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample)

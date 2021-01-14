@@ -29,7 +29,7 @@ public final class FilterUtils {
         return (values == null || values.size() > 1) ? null : values.get(0);
     }
 
-    public static String getStringMultiselectFromFilter(final List<Boolean> values) {
+    public static String getStringFromMultiselectBooleanFilter(final List<Boolean> values) {
         return (values != null && values.size() == 1) ? values.get(0).toString() : "";
     }
 

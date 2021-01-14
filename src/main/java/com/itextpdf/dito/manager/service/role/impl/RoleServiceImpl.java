@@ -21,17 +21,15 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -153,8 +151,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public Page<RoleEntity> getSlaveRolesByTemplate(final Pageable pageable, final TemplatePermissionFilter filter, final TemplateEntity templateEntity) {
+        //TODO: method is not used in project. Should be it removed later?
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String name = getStringFromFilter(filter.getName());
+        final String name = getStringFromFilter(filter.getRoleName().get(0));
         final Pageable pageWithSort = updateSort(pageable);
 
         return roleRepository.findAllByTemplatesAndMasterFalse(pageWithSort, templateEntity, name);
