@@ -44,7 +44,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
             + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ";
 
     String SEARCH_DEPENDENCIES_CONDITION = "( LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or file.version like CONCAT('%',:search,'%') "
+            + "or cast(file.version as text) like CONCAT('%',:search,'%') "
             + "or 'template' like CONCAT('%',:search,'%') "
             + "or 'soft' like CONCAT('%',:search,'%') "
             + "or stage.name like CONCAT('%',:search,'%') )";
