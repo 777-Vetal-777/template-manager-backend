@@ -41,6 +41,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
     String FILTERING_DEPENDENCIES_CONDITION = " file.dataCollection.id = :id "
             + "and (:dependencyName='' or LOWER(template.name) like CONCAT('%',:dependencyName,'%')) "
             + "and (:version=0l or file.version=:version) "
+            + "and (CONCAT(:direction) is null or 'soft' in (:direction)) "
             + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ";
 
     String SEARCH_DEPENDENCIES_CONDITION = "( LOWER(template.name) like CONCAT('%',:search,'%') "
@@ -75,6 +76,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                  @Param("id") Long resourceId,
                                  @Param("dependencyName") @Nullable String dependencyName,
                                  @Param("version") @Nullable Long version,
+                                 @Param("direction") @Nullable List<String> direction,
                                  @Param("stage") @Nullable String stageName);
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + FILTERING_DEPENDENCIES_CONDITION + " and " + SEARCH_DEPENDENCIES_CONDITION)
@@ -82,6 +84,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                  @Param("id") Long resourceId,
                                  @Param("dependencyName") @Nullable String dependencyName,
                                  @Param("version") @Nullable Long version,
+                                 @Param("direction") @Nullable List<String> direction,
                                  @Param("stage") @Nullable String stageName,
                                  @Param("search") @Nullable String search);
 
