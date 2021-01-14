@@ -21,7 +21,7 @@ pipeline {
         WORKING_ENV = "stage"
         dockerCredentials = "docker-stage-itext"
         SCM_URL = "https://git.itextsupport.com/scm/dito/template-manager-backend.git"
-        ENV_FILE = "itext_env_prod"
+        ENV_FILE = "itext_env_stage"
     }
     agent{
         label "master"
