@@ -29,6 +29,10 @@ public final class FilterUtils {
         return (values == null || values.size() > 1) ? null : values.get(0);
     }
 
+    public static String getStringMultiselectFromFilter(final List<Boolean> values) {
+        return (values != null && values.size() == 1) ? values.get(0).toString() : "";
+    }
+
     public static Date getStartDateFromRange(final List<String> dates) {
         return getDateFromFilter(dates.get(0));
     }
@@ -49,7 +53,7 @@ public final class FilterUtils {
         return result;
     }
 
-    private static Date addDayToDate(final Date date){
+    private static Date addDayToDate(final Date date) {
         final Calendar c = Calendar.getInstance();
         c.setTime(date);
         c.add(Calendar.DATE, 1);

@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -76,9 +78,9 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> getSlaveRolesByDataCollection(final Pageable pageable, final RoleFilter filter, final DataCollectionEntity dataCollection) {
+    public Page<RoleEntity> getSlaveRolesByDataCollection(final Pageable pageable, final DataCollectionPermissionFilter filter, final DataCollectionEntity dataCollection) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String name = getStringFromFilter(filter.getName());
+        final String name = filter.getRoleName() != null ? filter.getRoleName().get(0) : null;
         final Pageable pageWithSort = updateSort(pageable);
 
         return roleRepository.findAllByDataCollectionsAndMasterFalse(pageWithSort, dataCollection, name);

@@ -10,7 +10,7 @@ import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
-import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -124,7 +124,8 @@ public interface DataCollectionController {
     @Operation(summary = "Get resource's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable,
                                            @Parameter(name = "data_collection-name", description = "Encoded with base 64 name of dataCollection") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
-                                           @ParameterObject RoleFilter filter);
+                                           @ParameterObject DataCollectionPermissionFilter filter,
+                                           @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE)
     @Operation(summary = "Add role to a dataCollection", description = "Apply custom to a dataCollection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
