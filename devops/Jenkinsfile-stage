@@ -17,10 +17,11 @@ pipeline {
         registryHost = "https://nexus-docker.andersenlab.dev"
         REGISTRY = "nexus-docker.andersenlab.dev"
         registryCredentials = "nexus_andersen"
-        hostIP="10.10.15.109"
+        hostIP = "10.10.15.109"
         WORKING_ENV = "stage"
-        dockerCredentials="docker-stage-itext"
-        SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
+        dockerCredentials = "docker-stage-itext"
+        SCM_URL = "https://git.itextsupport.com/scm/dito/template-manager-backend.git"
+        ENV_FILE = "itext_env_prod"
     }
     agent{
         label "master"
@@ -73,7 +74,7 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            withCredentials([file(credentialsId: 'itext_env_prod', variable: 'FILE')]){
+                            withCredentials([file(credentialsId: 'ENV_FILE', variable: 'FILE')]){
                                 sh "docker-compose --env-file ${FILE} --file ${WORKSPACE}/devops/docker-compose.yml up --force-recreate -d"
                             }
                         }
