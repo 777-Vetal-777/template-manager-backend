@@ -34,3 +34,7 @@ services:
     container_name: db
     restart: always
     image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+    environment:
+      - POSTGRES_USER=${DITO_MANAGER_DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DITO_MANAGER_DATABASE_PASSWORD}
+      - POSTGRES_DB=${DITO_MANAGER_DATABASE_NAME}
