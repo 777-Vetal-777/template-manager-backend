@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.permission;
 
+import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
@@ -23,7 +24,7 @@ public interface PermissionMapper {
 
     Page<PermissionDTO> map(Page<PermissionEntity> entities);
 
-    Page<RoleDTO> mapDataCollectionPermissions(Page<DataCollectionPermissionsModel> entities);
+    Page<DataCollectionPermissionDTO> mapDataCollectionPermissions(Page<DataCollectionPermissionsModel> entities);
 
     List<TemplatePermissionDTO> mapTemplatePermissions(List<TemplatePermissionsModel> entities);
 
