@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.repository.template;
 
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -76,4 +77,5 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "where datacollection.id = :dataCollectionId "
             + "group by template.id")
     List<TemplateEntity> findTemplatesByDataCollectionId(@Param("dataCollectionId") Long dataCollectionId);
+
 }

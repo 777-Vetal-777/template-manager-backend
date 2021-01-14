@@ -4,9 +4,9 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
@@ -61,6 +61,7 @@ public interface TemplateController {
             TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_VERSION_ENDPOINT;
     String TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/preview";
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/roles";
+    String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_PAGEABLE = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/{" + ROLE_PATH_VARIABLE + "}";
 
     @PostMapping
@@ -71,14 +72,14 @@ public interface TemplateController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or template already exists", content = @Content)})
     ResponseEntity<TemplateDTO> create(@RequestBody TemplateCreateRequestDTO templateCreateRequestDTO,
-            Principal principal);
+                                       Principal principal);
 
     @GetMapping
     @Operation(summary = "Get template list", description = "Get templates",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplateDTO>> listTemplateTypes(Pageable pageable,
-            @ParameterObject TemplateFilter templateFilter,
-            @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam);
+                                                        @ParameterObject TemplateFilter templateFilter,
+                                                        @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_TYPES_ENDPOINT)
     @Operation(summary = "Get template type list", description = "Get all template types",
@@ -142,20 +143,26 @@ public interface TemplateController {
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
     ResponseEntity<TemplateDTO> create(Principal principal,
-            @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
-            @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
-            @Parameter(name = "template", description = "Template file", required = false, style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
+                                       @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
+                                       @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
+                                       @Parameter(name = "template", description = "Template file", required = false, style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get list of template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<TemplatePermissionDTO>> getRoles(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                         @ParameterObject TemplatePermissionFilter templatePermissionFilter,
+                                                         @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+
+    @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_PAGEABLE)
     @Operation(summary = "Get template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable,
-                                           @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-                                           @ParameterObject TemplatePermissionFilter templatePermissionFilter,
-                                           @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<TemplatePermissionDTO>> getRoles(Pageable pageable,
+                                                         @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                         @ParameterObject TemplatePermissionFilter templatePermissionFilter,
+                                                         @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Add/update role to a template", description = "Apply custom role to a template", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Role applied to template successfully."),
             @ApiResponse(responseCode = "401", description = "Template is not found in repository")
     })
@@ -165,7 +172,7 @@ public interface TemplateController {
 
     @DeleteMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME)
     @Operation(summary = "Remove role from a template", description = "Detach custom role from a template", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Role detached from template successfully."),
             @ApiResponse(responseCode = "401", description = "Role or template are not found in repository")
     })

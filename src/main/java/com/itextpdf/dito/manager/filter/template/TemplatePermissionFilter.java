@@ -3,19 +3,19 @@ package com.itextpdf.dito.manager.filter.template;
 import java.util.List;
 
 public class TemplatePermissionFilter {
-    private String name;
+    private List<String> roleName;
     private List<Boolean> editTemplateMetadata;
     private List<Boolean> createNewTemplateVersion;
     private List<Boolean> rollbackVersion;
     private List<Boolean> previewTemplate;
     private List<Boolean> exportTemplate;
 
-    public String getName() {
-        return name;
+    public List<String> getRoleName() {
+        return roleName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoleName(List<String> roleName) {
+        this.roleName = roleName;
     }
 
     public List<Boolean> getEditTemplateMetadata() {

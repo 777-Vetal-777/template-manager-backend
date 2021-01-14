@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.template.impl;
 
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -8,13 +9,12 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
@@ -23,7 +23,9 @@ import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.template.TemplateDependencyModel;
+import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
+import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
 import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateVersionsService;
@@ -52,6 +54,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateMapper templateMapper;
     private final DependencyMapper dependencyMapper;
     private final TemplateVersionsService templateVersionsService;
+    private final TemplatePermissionService templatePermissionService;
+    private final PermissionMapper permissionMapper;
     private final RoleMapper roleMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
@@ -59,6 +63,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplateMapper templateMapper,
                                   final DependencyMapper dependencyMapper,
                                   final TemplateVersionsService templateVersionsService,
+                                  final TemplatePermissionService templatePermissionService,
+                                  final PermissionMapper permissionMapper,
                                   final RoleMapper roleMapper) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
@@ -66,6 +72,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
         this.templateVersionsService = templateVersionsService;
+        this.templatePermissionService = templatePermissionService;
+        this.permissionMapper = permissionMapper;
         this.roleMapper = roleMapper;
     }
 
@@ -106,9 +114,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependenciesPageable(final String name,
-                                                                final Pageable pageable,
-                                                                final DependencyFilter dependencyFilter,
-                                                                final String searchParam) {
+                                                                        final Pageable pageable,
+                                                                        final DependencyFilter dependencyFilter,
+                                                                        final String searchParam) {
         final List<DependencyDTO> dependencies = new ArrayList<>();
 
         final DataCollectionFileEntity dataCollectionFileEntity = dataCollectionFileService
@@ -169,10 +177,15 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
-        final Page<RoleEntity> roleEntities = templateService
-                .getRoles(pageable, decodeBase64(name), filter);
-        return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
+    public ResponseEntity<List<TemplatePermissionDTO>> getRoles(final String name, final TemplatePermissionFilter filter, final String search) {
+        final List<TemplatePermissionsModel> entities = templatePermissionService.getRoles(decodeBase64(name), filter, search);
+        return new ResponseEntity<>(permissionMapper.mapTemplatePermissions(entities), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Page<TemplatePermissionDTO>> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
+        final Page<TemplatePermissionsModel> entities = templatePermissionService.getRoles(pageable, decodeBase64(name), filter, search);
+        return new ResponseEntity<>(permissionMapper.mapTemplatePermissions(entities), HttpStatus.OK);
     }
 
     @Override
