@@ -32,7 +32,7 @@ public class DataCollectionPermissionServiceImpl extends AbstractService impleme
 
     @Override
     public Page<DataCollectionPermissionsModel> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter, final String search) {
-        final List<String> roleNameFilter = filter.getRoleName();
+        final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getRoleName());
         final String editDataCollectionMetadata = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditDataCollectionMetadata());
         final String createNewVersionOfDataCollection = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionOfDataCollection());
         final String rollbackOfTheDataCollection = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackOfTheDataCollection());

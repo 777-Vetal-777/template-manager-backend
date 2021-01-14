@@ -1,101 +1,104 @@
 package com.itextpdf.dito.manager.dto.permission;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DataCollectionPermissionDTO {
-    private String roleName;
-    private String E6_US34_EDIT_DATA_COLLECTION_METADATA;
-    private String E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON;
-    private String E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION;
-    private String E6_US38_DELETE_DATA_COLLECTION;
-    private String E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE;
-    private String E7_US47_EDIT_SAMPLE_METADATA;
-    private String E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE;
-    private String E7_US50_DELETE_DATA_SAMPLE;
+    private String name;
+    private String type;
+    @JsonProperty("E6_US34_EDIT_DATA_COLLECTION_METADATA")
+    private Boolean editDataCollectionMetadata;
+    @JsonProperty("E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON")
+    private Boolean createNewVersionOfDataCollectionUsingJson;
+    @JsonProperty("E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION")
+    private Boolean rollBackDataCollection;
+    @JsonProperty("E6_US38_DELETE_DATA_COLLECTION")
+    private Boolean deleteDataCollection;
+    @JsonProperty("E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE")
+    private Boolean createNewDataSampleBasedOnJsonFile;
+    @JsonProperty("E7_US47_EDIT_SAMPLE_METADATA")
+    private Boolean editSampleMetadata;
+    @JsonProperty("E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE")
+    private Boolean createNewVersionOfDataSample;
+    @JsonProperty("E7_US50_DELETE_DATA_SAMPLE")
+    private Boolean deleteDataSample;
 
-    public DataCollectionPermissionDTO(String roleName, String e6_US34_EDIT_DATA_COLLECTION_METADATA, String e6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON, String e6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION, String e6_US38_DELETE_DATA_COLLECTION, String e7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE,
-                                       String e7_US47_EDIT_SAMPLE_METADATA, String e7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE, String e7_US50_DELETE_DATA_SAMPLE) {
-        this.roleName = roleName;
-        E6_US34_EDIT_DATA_COLLECTION_METADATA = e6_US34_EDIT_DATA_COLLECTION_METADATA;
-        E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON = e6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON;
-        E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION = e6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION;
-        E6_US38_DELETE_DATA_COLLECTION = e6_US38_DELETE_DATA_COLLECTION;
-        E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE = e7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE;
-        E7_US47_EDIT_SAMPLE_METADATA = e7_US47_EDIT_SAMPLE_METADATA;
-        E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE = e7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE;
-        E7_US50_DELETE_DATA_SAMPLE = e7_US50_DELETE_DATA_SAMPLE;
+    public String getName() {
+        return name;
     }
 
-    public DataCollectionPermissionDTO() {
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getRoleName() {
-        return roleName;
+    public String getType() {
+        return type;
     }
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getE6_US34_EDIT_DATA_COLLECTION_METADATA() {
-        return E6_US34_EDIT_DATA_COLLECTION_METADATA;
+    public Boolean getEditDataCollectionMetadata() {
+        return editDataCollectionMetadata;
     }
 
-    public void setE6_US34_EDIT_DATA_COLLECTION_METADATA(String e6_US34_EDIT_DATA_COLLECTION_METADATA) {
-        E6_US34_EDIT_DATA_COLLECTION_METADATA = e6_US34_EDIT_DATA_COLLECTION_METADATA;
+    public void setEditDataCollectionMetadata(Boolean editDataCollectionMetadata) {
+        this.editDataCollectionMetadata = editDataCollectionMetadata;
     }
 
-    public String getE6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON() {
-        return E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON;
+    public Boolean getCreateNewVersionOfDataCollectionUsingJson() {
+        return createNewVersionOfDataCollectionUsingJson;
     }
 
-    public void setE6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON(String e6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON) {
-        E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON = e6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON;
+    public void setCreateNewVersionOfDataCollectionUsingJson(Boolean createNewVersionOfDataCollectionUsingJson) {
+        this.createNewVersionOfDataCollectionUsingJson = createNewVersionOfDataCollectionUsingJson;
     }
 
-    public String getE6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION() {
-        return E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION;
+    public Boolean getRollBackDataCollection() {
+        return rollBackDataCollection;
     }
 
-    public void setE6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION(String e6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION) {
-        E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION = e6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION;
+    public void setRollBackDataCollection(Boolean rollBackDataCollection) {
+        this.rollBackDataCollection = rollBackDataCollection;
     }
 
-    public String getE6_US38_DELETE_DATA_COLLECTION() {
-        return E6_US38_DELETE_DATA_COLLECTION;
+    public Boolean getDeleteDataCollection() {
+        return deleteDataCollection;
     }
 
-    public void setE6_US38_DELETE_DATA_COLLECTION(String e6_US38_DELETE_DATA_COLLECTION) {
-        E6_US38_DELETE_DATA_COLLECTION = e6_US38_DELETE_DATA_COLLECTION;
+    public void setDeleteDataCollection(Boolean deleteDataCollection) {
+        this.deleteDataCollection = deleteDataCollection;
     }
 
-    public String getE7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE() {
-        return E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE;
+    public Boolean getCreateNewDataSampleBasedOnJsonFile() {
+        return createNewDataSampleBasedOnJsonFile;
     }
 
-    public void setE7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE(String e7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE) {
-        E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE = e7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE;
+    public void setCreateNewDataSampleBasedOnJsonFile(Boolean createNewDataSampleBasedOnJsonFile) {
+        this.createNewDataSampleBasedOnJsonFile = createNewDataSampleBasedOnJsonFile;
     }
 
-    public String getE7_US47_EDIT_SAMPLE_METADATA() {
-        return E7_US47_EDIT_SAMPLE_METADATA;
+    public Boolean getEditSampleMetadata() {
+        return editSampleMetadata;
     }
 
-    public void setE7_US47_EDIT_SAMPLE_METADATA(String e7_US47_EDIT_SAMPLE_METADATA) {
-        E7_US47_EDIT_SAMPLE_METADATA = e7_US47_EDIT_SAMPLE_METADATA;
+    public void setEditSampleMetadata(Boolean editSampleMetadata) {
+        this.editSampleMetadata = editSampleMetadata;
     }
 
-    public String getE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE() {
-        return E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE;
+    public Boolean getCreateNewVersionOfDataSample() {
+        return createNewVersionOfDataSample;
     }
 
-    public void setE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE(String e7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE) {
-        E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE = e7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE;
+    public void setCreateNewVersionOfDataSample(Boolean createNewVersionOfDataSample) {
+        this.createNewVersionOfDataSample = createNewVersionOfDataSample;
     }
 
-    public String getE7_US50_DELETE_DATA_SAMPLE() {
-        return E7_US50_DELETE_DATA_SAMPLE;
+    public Boolean getDeleteDataSample() {
+        return deleteDataSample;
     }
 
-    public void setE7_US50_DELETE_DATA_SAMPLE(String e7_US50_DELETE_DATA_SAMPLE) {
-        E7_US50_DELETE_DATA_SAMPLE = e7_US50_DELETE_DATA_SAMPLE;
+    public void setDeleteDataSample(Boolean deleteDataSample) {
+        this.deleteDataSample = deleteDataSample;
     }
 }

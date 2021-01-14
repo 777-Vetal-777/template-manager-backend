@@ -4,7 +4,6 @@ import com.itextpdf.dito.manager.filter.FilterUtils;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.repository.template.TemplatePermissionRepository;
-import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 import static com.itextpdf.dito.manager.repository.template.TemplatePermissionRepository.SUPPORTED_SORT_FIELDS;
 
 @Service
@@ -38,7 +36,7 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
     public Page<TemplatePermissionsModel> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
-        final List<String> roleNameFilter = filter.getRoleName();
+        final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getRoleName());
         final String editTemplateMetadataFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditTemplateMetadata());
         final String createNewTemplateVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersion());
         final String rollbackVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersion());
