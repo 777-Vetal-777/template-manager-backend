@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public interface RoleService {
 
     Page<RoleEntity> getSlaveRolesByResource(Pageable pageable, RoleFilter filter, ResourceEntity resource);
 
-    Page<RoleEntity> getSlaveRolesByDataCollection(Pageable pageable, RoleFilter filter, DataCollectionEntity dataCollection);
+    Page<RoleEntity> getSlaveRolesByDataCollection(Pageable pageable, DataCollectionPermissionFilter filter, DataCollectionEntity dataCollection);
 
     Page<RoleEntity> getSlaveRolesByTemplate(Pageable pageable, TemplatePermissionFilter filter, TemplateEntity templateEntity);
 

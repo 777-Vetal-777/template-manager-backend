@@ -16,7 +16,7 @@ import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionE
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
-import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -211,7 +211,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     @Override
-    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final RoleFilter filter) {
+    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter) {
         final DataCollectionEntity dataCollectionEntity = findByName(name);
         return roleService.getSlaveRolesByDataCollection(pageable, filter, dataCollectionEntity);
     }

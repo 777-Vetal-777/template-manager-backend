@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.controller.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
@@ -12,7 +13,6 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
-import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
@@ -20,11 +20,13 @@ import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTy
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
-import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionDependencyService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermissionService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.data.domain.Page;
@@ -46,20 +48,23 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataCollectionFileService dataCollectionFileService;
     private final DataCollectionDependencyService dataCollectionDependencyService;
     private final DependencyMapper dependencyMapper;
-    private final RoleMapper roleMapper;
+    private final PermissionMapper permissionMapper;
+    private final DataCollectionPermissionService dataCollectionPermissionService;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
                                         final DataCollectionMapper dataCollectionMapper,
                                         final DataCollectionFileService dataCollectionFileService,
                                         final DataCollectionDependencyService dataCollectionDependencyService,
                                         final DependencyMapper dependencyMapper,
-                                        final RoleMapper roleMapper) {
+                                        final PermissionMapper permissionMapper,
+                                        final DataCollectionPermissionService dataCollectionPermissionService) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
-        this.roleMapper = roleMapper;
         this.dependencyMapper = dependencyMapper;
         this.dataCollectionFileService = dataCollectionFileService;
         this.dataCollectionDependencyService = dataCollectionDependencyService;
+        this.permissionMapper = permissionMapper;
+        this.dataCollectionPermissionService = dataCollectionPermissionService;
     }
 
     @Override
@@ -73,7 +78,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     @Override
     public ResponseEntity<List<DependencyDTO>> list(final String name) {
         final String decodedName = decodeBase64(name);
-        final List<DependencyDTO> dependencyDTOs =  dependencyMapper.map(dataCollectionDependencyService.list(decodedName));
+        final List<DependencyDTO> dependencyDTOs = dependencyMapper.map(dataCollectionDependencyService.list(decodedName));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
@@ -143,6 +148,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         }
         return DataCollectionType.valueOf(dataCollectionType);
     }
+
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependencies(final Pageable pageable,
                                                                 final String name,
@@ -154,10 +160,10 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name, final RoleFilter filter) {
-        final Page<RoleEntity> roleEntities = dataCollectionService
-                .getRoles(pageable, decodeBase64(name), filter);
-        return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
+    public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter, final String searchParam) {
+        final Page<DataCollectionPermissionsModel> roleEntities = dataCollectionPermissionService
+                .getRoles(pageable, decodeBase64(name), filter, searchParam);
+        return new ResponseEntity<>(permissionMapper.mapDataCollectionPermissions(roleEntities), HttpStatus.OK);
     }
 
     @Override
