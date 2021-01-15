@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.mapper.permission.impl;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
+import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.itextpdf.dito.manager.model.resource.ResourcePermissionModel;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
 import org.springframework.data.domain.Page;
@@ -78,6 +80,23 @@ public class PermissionMapperImpl implements PermissionMapper {
     @Override
     public Page<DataCollectionPermissionDTO> mapDataCollectionPermissions(final Page<DataCollectionPermissionsModel> entities) {
         return entities.map(this::mapDataCollectionPermission);
+    }
+
+    @Override
+    public Page<ResourcePermissionDTO> mapResourcePermissions(final Page<ResourcePermissionModel> entities) {
+        return entities.map(this::mapResourcePermission);
+    }
+
+    private ResourcePermissionDTO mapResourcePermission(final ResourcePermissionModel entity) {
+        final ResourcePermissionDTO permissionDTO = new ResourcePermissionDTO();
+        permissionDTO.setName(entity.getName());
+        permissionDTO.setType(entity.getType());
+        permissionDTO.setDeleteResourceImage(entity.getE8_US66_DELETE_RESOURCE_IMAGE());
+        permissionDTO.setEditResourceMetadataImage(entity.getE8_US55_EDIT_RESOURCE_METADATA_IMAGE());
+        permissionDTO.setRollBackResourceImage(entity.getE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE());
+        permissionDTO.setCreateNewVersionResourceImage(entity.getE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE());
+
+        return permissionDTO;
     }
 
     private DataCollectionPermissionDTO mapDataCollectionPermission(final DataCollectionPermissionsModel entity) {

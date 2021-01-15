@@ -1,34 +1,38 @@
 package com.itextpdf.dito.manager.controller.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
-import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupportedException;
 import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitException;
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
+import com.itextpdf.dito.manager.filter.resource.ResourcePermissionFilter;
 import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.model.resource.ResourcePermissionModel;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
+import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +53,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final DependencyMapper dependencyMapper;
     private final RoleMapper roleMapper;
     private final List<String> supportedPictureExtensions;
+    private final ResourcePermissionService resourcePermissionService;
+    private final PermissionMapper permissionMapper;
     private final Long sizePictureLimit;
 
     public ResourceControllerImpl(
@@ -59,6 +65,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final ResourceVersionsService resourceVersionsService,
             final ResourceMapper resourceMapper,
             final RoleMapper roleMapper,
+            final ResourcePermissionService resourcePermissionService,
+            final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper) {
         this.supportedPictureExtensions = supportedPictureExtensions;
         this.sizePictureLimit = sizePictureLimit;
@@ -68,6 +76,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourceMapper = resourceMapper;
         this.roleMapper = roleMapper;
         this.dependencyMapper = dependencyMapper;
+        this.resourcePermissionService = resourcePermissionService;
+        this.permissionMapper = permissionMapper;
     }
 
     @Override
@@ -151,11 +161,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<Page<RoleDTO>> getRoles(final Pageable pageable, final String name,
-            final String type, RoleFilter filter) {
-        final Page<RoleEntity> roleEntities = resourceService
-                .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter);
-        return new ResponseEntity<>(roleMapper.map(roleEntities), HttpStatus.OK);
+    public ResponseEntity<Page<ResourcePermissionDTO>> getRoles(final Pageable pageable, final String name, final String type, final ResourcePermissionFilter filter, final String search) {
+        final Page<ResourcePermissionModel> resourcePermissions = resourcePermissionService
+                .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter, search);
+        return new ResponseEntity<>(permissionMapper.mapResourcePermissions(resourcePermissions), HttpStatus.OK);
     }
 
     @Override
