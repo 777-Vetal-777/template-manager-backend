@@ -13,9 +13,9 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionFileSizeExceedLimitException;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
@@ -30,6 +30,7 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileServic
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermissionService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.apache.commons.lang3.EnumUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DependencyMapper dependencyMapper;
     private final PermissionMapper permissionMapper;
     private final DataCollectionPermissionService dataCollectionPermissionService;
+    private final Long sizeJsonLimit;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
                                         final DataCollectionMapper dataCollectionMapper,
@@ -58,7 +60,9 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataCollectionDependencyService dataCollectionDependencyService,
                                         final DependencyMapper dependencyMapper,
                                         final PermissionMapper permissionMapper,
-                                        final DataCollectionPermissionService dataCollectionPermissionService) {
+                                        final DataCollectionPermissionService dataCollectionPermissionService,
+                                        @Value("${data-collection.json.size-limit}")
+                                        final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
         this.dependencyMapper = dependencyMapper;
@@ -66,6 +70,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.dataCollectionDependencyService = dataCollectionDependencyService;
         this.permissionMapper = permissionMapper;
         this.dataCollectionPermissionService = dataCollectionPermissionService;
+        this.sizeJsonLimit = sizeJsonLimit;
     }
 
     @Override
@@ -87,6 +92,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataCollectionDTO> create(final Principal principal, final String name, final String dataCollectionType, final MultipartFile multipartFile, final String comment) {
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
+        checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.createNewVersion(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName(), comment);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
     }
@@ -183,4 +189,11 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
 
     }
+
+    private void checkFileSizeIsNotExceededLimit(final Long fileSize) {
+        if (fileSize > sizeJsonLimit) {
+            throw new DataCollectionFileSizeExceedLimitException(fileSize);
+        }
+    }
+
 }

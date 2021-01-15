@@ -46,3 +46,8 @@ resources:
     extensions:
       supported: bmp,ccit,gif,jpg,jpg2000,png,svg,wmf
     size-limit: 67108864
+
+
+data-collection:
+  json:
+      size-limit: 67108864
