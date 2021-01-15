@@ -31,6 +31,7 @@ public class TemplateFileEntity {
     private TemplateEntity template;
     private Date createdOn;
     private Date modifiedOn;
+    private Boolean deployed;
 
     public Long getId() {
         return id;
@@ -94,5 +95,13 @@ public class TemplateFileEntity {
 
     public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
+    }
+
+    public Boolean getDeployed() {
+        return deployed;
+    }
+
+    public void setDeployed(Boolean deployed) {
+        this.deployed = deployed;
     }
 }

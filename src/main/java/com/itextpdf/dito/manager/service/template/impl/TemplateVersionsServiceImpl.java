@@ -47,6 +47,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
         final Long version = getLongFromFilter(filter.getVersion());
         final String modifiedBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
+        final Boolean deployed = getBooleanMultiselectFromFilter(filter.getDeployed());
 
         Date modifiedOnStartDate = null;
         Date modifiedOnEndDate = null;
@@ -59,8 +60,8 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
         return StringUtils.isEmpty(searchParam)
-                ? templateFileRepository.filter(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment)
-                : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, searchParam);
+                ? templateFileRepository.filter(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, deployed)
+                : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, deployed, searchParam);
     }
 
     private Pageable updateSort(final Pageable pageable) {
