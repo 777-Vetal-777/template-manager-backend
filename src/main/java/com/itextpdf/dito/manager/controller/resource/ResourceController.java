@@ -2,12 +2,14 @@ package com.itextpdf.dito.manager.controller.resource;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
+import com.itextpdf.dito.manager.filter.resource.ResourcePermissionFilter;
 import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
@@ -160,10 +162,11 @@ public interface ResourceController {
 
     @GetMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE)
     @Operation(summary = "Get resource's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<RoleDTO>> getRoles(Pageable pageable,
-                                           @Parameter(name = "resource-name", description = "Encoded with base 64 name of resource") @PathVariable(RESOURCE_PATH_VARIABLE) String resourceName,
-                                           @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets") @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
-                                           @ParameterObject RoleFilter filter);
+    ResponseEntity<Page<ResourcePermissionDTO>> getRoles(Pageable pageable,
+                                                         @Parameter(name = "resource-name", description = "Encoded with base 64 name of resource") @PathVariable(RESOURCE_PATH_VARIABLE) String resourceName,
+                                                         @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets") @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+                                                         @ParameterObject ResourcePermissionFilter filter,
+                                                         @RequestParam(name = "search", required = false) String searchParam);
 
     @DeleteMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES)
     @Operation(summary = "Remove role from a resource", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

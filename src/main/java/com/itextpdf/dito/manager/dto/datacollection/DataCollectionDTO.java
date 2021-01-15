@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.dto.datacollection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 
 import java.util.Date;
+import java.util.Set;
 
 public class DataCollectionDTO {
     private String name;
@@ -19,6 +21,8 @@ public class DataCollectionDTO {
     private String comment;
     private Long version;
     private String attachment;
+
+    private Set<RoleDTO> appliedRoles;
 
     public Long getVersion() {
         return version;
@@ -116,4 +120,11 @@ public class DataCollectionDTO {
         this.authorLastName = authorLastName;
     }
 
+    public Set<RoleDTO> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
+        this.appliedRoles = appliedRoles;
+    }
 }

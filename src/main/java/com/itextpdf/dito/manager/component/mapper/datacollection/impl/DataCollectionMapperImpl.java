@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.mapper.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
+import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
@@ -12,6 +13,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
+
+    private final RoleMapper roleMapper;
+
+    public DataCollectionMapperImpl(final RoleMapper roleMapper) {
+        this.roleMapper = roleMapper;
+    }
+
     @Override
     public DataCollectionEntity map(DataCollectionUpdateRequestDTO dto) {
         final DataCollectionEntity entity = new DataCollectionEntity();
@@ -38,6 +46,7 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setAttachment(new String(file.getData()));
         dto.setComment(file.getComment());
         dto.setFileName(file.getFileName());
+        dto.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         return dto;
     }
 
