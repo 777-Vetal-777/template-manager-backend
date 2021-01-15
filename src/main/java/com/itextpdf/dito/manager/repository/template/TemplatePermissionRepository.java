@@ -50,27 +50,6 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
     String SEARCH_CONDITION = " and LOWER(name) like CONCAT('%',:search,'%')";
 
     @Query(value = SELECT_FIELDS_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION,
-            nativeQuery = true)
-    List<TemplatePermissionsModel> filter(@Param("name") String templateName,
-                                          @Param("role_name") List<String> roleName,
-                                          @Param("edit_template") String editTemplate,
-                                          @Param("new_version_template") String newVersionTemplate,
-                                          @Param("rollback_template") String rollBack,
-                                          @Param("preview_template") String preview,
-                                          @Param("export_template") String export);
-
-    @Query(value = SELECT_FIELDS_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION,
-            nativeQuery = true)
-    List<TemplatePermissionsModel> search(@Param("name") String templateName,
-                                          @Param("role_name") List<String> roleName,
-                                          @Param("edit_template") String editTemplate,
-                                          @Param("new_version_template") String newVersionTemplate,
-                                          @Param("rollback_template") String rollBack,
-                                          @Param("preview_template") String preview,
-                                          @Param("export_template") String export,
-                                          @Param("search") String searchParam);
-
-    @Query(value = SELECT_FIELDS_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION,
             countQuery = SELECT_COUNT_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION,
             nativeQuery = true)
     Page<TemplatePermissionsModel> filter(Pageable pageable,

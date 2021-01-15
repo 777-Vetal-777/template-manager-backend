@@ -171,4 +171,12 @@
         <addPrimaryKey tableName="template_file_instance" columnNames="template_file_id, instance_id" constraintName="template_file_instance_pk"/>
     </changeSet>
 
+    <changeSet id="020-update-name-in-permission-table"
+               author="Ivan_Semenov">
+        <update tableName="permission">
+            <column name="name" value="E9_US83_MANAGE_TEMPLATE_PERMISSIONS"/>
+            <where>name='E9_US84_MANAGE_TEMPLATE_PERMISSIONS'</where>
+        </update>
+    </changeSet>
+    
 </databaseChangeLog>
