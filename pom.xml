@@ -176,6 +176,7 @@
                         <exclude>**/*manager/dto/</exclude>
                         <exclude>**/*manager/entity/</exclude>
                         <exclude>**/*manager/exception/</exclude>
+                        <exclude>**/*manager/filter/</exclude>
                         <exclude>**/TemplateManagerApplication.class</exclude>
                     </excludes>
                 </configuration>
