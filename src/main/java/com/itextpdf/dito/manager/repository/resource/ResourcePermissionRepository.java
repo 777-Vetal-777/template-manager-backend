@@ -35,10 +35,10 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             " max(case when permission.name = 'E8_US55_EDIT_RESOURCE_METADATA_IMAGE' then 'true' else 'false' end) as E8_US55_EDIT_RESOURCE_METADATA_IMAGE," +
             " max(case when permission.name = 'E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE' then 'true' else 'false' end) as E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE" +
             " from manager.role role" +
-            " join {h-schema}role_permission on role.id = role_permission.role_id " +
-            " join {h-schema}permission on role_permission.permission_id = permission.id" +
-            " left join {h-schema}resource_role rr on role.id = rr.role_id" +
-            " left join {h-schema}resource resource on rr.resource_id = resource.id" +
+            " left join {h-schema}role_permission on role.id = role_permission.role_id " +
+            " left join {h-schema}permission on role_permission.permission_id = permission.id" +
+            " join {h-schema}resource_role rr on role.id = rr.role_id" +
+            " join {h-schema}resource resource on rr.resource_id = resource.id" +
             " where resource.id = :resourceId" +
             " and role.master = false" +
             " group by role.name) as resourcePermissions" +
