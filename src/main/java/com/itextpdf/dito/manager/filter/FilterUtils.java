@@ -25,12 +25,11 @@ public final class FilterUtils {
                 ? ""
                 : value.toLowerCase();
     }
+
     public static List<String> getListStringsFromFilter(final List<String> values){
-        if(values==null){
-           return new ArrayList<>();
-        }else {
-            return values;
-        }
+        return Objects.isNull(values)
+                ? new ArrayList<>()
+                : values;
     }
 
     public static Boolean getBooleanMultiselectFromFilter(final List<Boolean> values) {
