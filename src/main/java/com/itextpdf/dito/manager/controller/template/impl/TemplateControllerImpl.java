@@ -177,12 +177,6 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<List<TemplatePermissionDTO>> getRoles(final String name, final TemplatePermissionFilter filter, final String search) {
-        final List<TemplatePermissionsModel> entities = templatePermissionService.getRoles(decodeBase64(name), filter, search);
-        return new ResponseEntity<>(permissionMapper.mapTemplatePermissions(entities), HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<Page<TemplatePermissionDTO>> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
         final Page<TemplatePermissionsModel> entities = templatePermissionService.getRoles(pageable, decodeBase64(name), filter, search);
         return new ResponseEntity<>(permissionMapper.mapTemplatePermissions(entities), HttpStatus.OK);

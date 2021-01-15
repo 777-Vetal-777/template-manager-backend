@@ -50,20 +50,6 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
                 : templatePermissionRepository.search(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionFilter, rollbackVersionFilter, previewTemplateFilter, exportTemplateFilter, search.toLowerCase());
     }
 
-    @Override
-    public List<TemplatePermissionsModel> getRoles(final String name, final TemplatePermissionFilter filter, String search) {
-        final List<String> roleNameFilter = filter.getRoleName();
-        final String editTemplateMetadataFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditTemplateMetadata());
-        final String createNewTemplateVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersion());
-        final String rollbackVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersion());
-        final String previewTemplateFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getPreviewTemplate());
-        final String exportTemplateFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getExportTemplate());
-
-        return StringUtils.isEmpty(search)
-                ? templatePermissionRepository.filter(name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionFilter, rollbackVersionFilter, previewTemplateFilter, exportTemplateFilter)
-                : templatePermissionRepository.search(name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionFilter, rollbackVersionFilter, previewTemplateFilter, exportTemplateFilter, search.toLowerCase());
-    }
-
     private Pageable updateSort(final Pageable pageable) {
         final Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {

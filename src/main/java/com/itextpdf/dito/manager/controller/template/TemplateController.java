@@ -61,7 +61,6 @@ public interface TemplateController {
             TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_VERSION_ENDPOINT;
     String TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/preview";
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/roles";
-    String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_PAGEABLE = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/{" + ROLE_PATH_VARIABLE + "}";
 
     @PostMapping
@@ -148,12 +147,6 @@ public interface TemplateController {
                                        @Parameter(name = "template", description = "Template file", required = false, style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
-    @Operation(summary = "Get list of template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<List<TemplatePermissionDTO>> getRoles(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-                                                         @ParameterObject TemplatePermissionFilter templatePermissionFilter,
-                                                         @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
-
-    @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_PAGEABLE)
     @Operation(summary = "Get template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplatePermissionDTO>> getRoles(Pageable pageable,
                                                          @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
