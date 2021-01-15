@@ -31,12 +31,11 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
             + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
             + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') )";
 
-    String SELECT_DEPENDENCIES_CLAUSE = "select new com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel(template.name, file.version, stage.name) "
+    String SELECT_DEPENDENCIES_CLAUSE = "select new com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel(template.name, lastTemplateFile.version, stage.name) "
             + "from TemplateEntity template "
-            + "join template.files templateFiles "
             + "join template.latestFile lastTemplateFile "
             + "left join lastTemplateFile.dataCollectionFile file "
-            + "left join templateFiles.instance instance "
+            + "left join lastTemplateFile.instance instance "
             + "left join instance.stage stage "
             + "where ";
 
