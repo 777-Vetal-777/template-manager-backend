@@ -5,11 +5,17 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.Objects;
 
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
@@ -43,10 +49,20 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setDescription(entity.getDescription());
         final DataCollectionFileEntity file = entity.getLatestVersion();
         dto.setVersion(file.getVersion());
-        dto.setAttachment(new String(file.getData()));
         dto.setComment(file.getComment());
         dto.setFileName(file.getFileName());
         dto.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        return dto;
+    }
+
+    @Override
+    public DataCollectionDTO mapWithFile(final DataCollectionEntity entity) {
+        final DataCollectionDTO dto = map(entity);
+        final Collection<DataCollectionFileEntity> files = entity.getVersions();
+        if (Objects.nonNull(files) && !files.isEmpty()) {
+            final DataCollectionFileEntity fileEntity = files.stream().findFirst().get();
+            dto.setAttachment(new String(fileEntity.getData()));
+        }
         return dto;
     }
 

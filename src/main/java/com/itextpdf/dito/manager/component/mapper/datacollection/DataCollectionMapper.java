@@ -12,6 +12,8 @@ public interface DataCollectionMapper {
 
     DataCollectionDTO map(DataCollectionEntity entity);
 
+    DataCollectionDTO mapWithFile(final DataCollectionEntity entity);
+
     Page<DataCollectionDTO> map(Page<DataCollectionEntity> entities);
 
     Page<DataCollectionVersionDTO> mapVersions(Page<DataCollectionFileEntity> entities);
