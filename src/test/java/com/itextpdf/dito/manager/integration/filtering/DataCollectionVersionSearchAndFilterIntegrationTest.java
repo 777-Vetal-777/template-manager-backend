@@ -34,7 +34,7 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
 
     @AfterEach
     public void clearDb() {
-        dataCollectionService.delete(DATACOLLECTION_NAME);
+        dataCollectionService.delete(DATACOLLECTION_NAME, "admin@email.com");
     }
 
     @Test
