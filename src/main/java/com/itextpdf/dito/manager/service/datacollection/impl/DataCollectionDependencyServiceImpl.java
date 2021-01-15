@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -60,17 +61,18 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
 
     private Pageable updateSort(final Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
-                .map(sortParam -> {
-                    if (sortParam.getProperty().equals("name")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "name");
+                .flatMap(sortParam -> {
+                    //no need to sort by these fields
+                    if ("dependencyType".equals(sortParam.getProperty()) || "directionType".equals(sortParam.getProperty())) {
+                        return Stream.empty();
                     }
-                    if (sortParam.getProperty().equals("version")) {
+                    if ("version".equals(sortParam.getProperty())) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
                     }
-                    if (sortParam.getProperty().equals("stage")) {
+                    if ("stage".equals(sortParam.getProperty())) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
                     }
-                    return sortParam;
+                    return Stream.of(sortParam);
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
