@@ -27,7 +27,7 @@ public interface TemplateService {
 
     Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);
 
-    TemplateEntity applyRole(String templateName, String roleName, List<String> permissions);
+    TemplateEntity applyRole(String templateName, String roleName, List<String> permissions, String email);
 
-    TemplateEntity detachRole(String templateName, String roleName);
+    TemplateEntity detachRole(String templateName, String roleName, String email);
 }

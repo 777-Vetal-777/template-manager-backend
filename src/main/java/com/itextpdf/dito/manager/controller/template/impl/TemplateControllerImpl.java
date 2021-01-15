@@ -183,17 +183,17 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<TemplateMetadataDTO> applyRole(final String name, final ApplyRoleRequestDTO applyRoleRequestDTO) {
+    public ResponseEntity<TemplateMetadataDTO> applyRole(final Principal principal, final String name, final ApplyRoleRequestDTO applyRoleRequestDTO) {
         final TemplateEntity templateEntity = templateService
                 .applyRole(decodeBase64(name), applyRoleRequestDTO.getRoleName(),
-                        applyRoleRequestDTO.getPermissions());
+                        applyRoleRequestDTO.getPermissions(), principal.getName());
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<TemplateMetadataDTO> deleteRole(final String name, final String roleName) {
+    public ResponseEntity<TemplateMetadataDTO> deleteRole(final Principal principal, final String name, final String roleName) {
         final TemplateEntity templateEntity = templateService
-                .detachRole(decodeBase64(name), decodeBase64(roleName));
+                .detachRole(decodeBase64(name), decodeBase64(roleName), principal.getName());
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
     }
 
