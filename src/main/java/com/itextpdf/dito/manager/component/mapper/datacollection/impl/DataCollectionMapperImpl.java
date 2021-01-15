@@ -47,10 +47,6 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setAuthorFirstName(entity.getAuthor().getFirstName());
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setDescription(entity.getDescription());
-        final DataCollectionFileEntity file = entity.getLatestVersion();
-        dto.setVersion(file.getVersion());
-        dto.setComment(file.getComment());
-        dto.setFileName(file.getFileName());
         dto.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         return dto;
     }
@@ -58,11 +54,11 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
     @Override
     public DataCollectionDTO mapWithFile(final DataCollectionEntity entity) {
         final DataCollectionDTO dto = map(entity);
-        final Collection<DataCollectionFileEntity> files = entity.getVersions();
-        if (Objects.nonNull(files) && !files.isEmpty()) {
-            final DataCollectionFileEntity fileEntity = files.stream().findFirst().get();
-            dto.setAttachment(new String(fileEntity.getData()));
-        }
+        final DataCollectionFileEntity latestVersion = entity.getLatestVersion();
+        dto.setAttachment(new String(latestVersion.getData()));
+        dto.setVersion(latestVersion.getVersion());
+        dto.setComment(latestVersion.getComment());
+        dto.setFileName(latestVersion.getFileName());
         return dto;
     }
 

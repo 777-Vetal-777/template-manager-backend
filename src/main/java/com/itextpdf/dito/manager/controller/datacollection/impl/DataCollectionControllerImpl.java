@@ -77,6 +77,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataCollectionDTO> create(final String name, final String dataCollectionType, final MultipartFile multipartFile, final Principal principal) {
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
+        checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
     }
@@ -107,7 +108,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> get(final String name) {
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionService.get(decodeBase64(name))), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionService.get(decodeBase64(name))), HttpStatus.OK);
     }
 
     @Override
