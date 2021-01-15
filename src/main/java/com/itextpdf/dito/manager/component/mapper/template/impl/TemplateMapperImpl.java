@@ -127,6 +127,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         version.setVersion(entity.getVersion());
         version.setComment(entity.getComment());
         version.setModifiedOn(entity.getCreatedOn());
+        version.setDeploymentStatus(entity.getDeployed());
 
         final UserEntity author = entity.getAuthor();
         if (Objects.nonNull(author)) {

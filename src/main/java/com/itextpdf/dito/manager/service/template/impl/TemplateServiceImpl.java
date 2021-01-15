@@ -92,6 +92,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity templateFileEntity = new TemplateFileEntity();
         templateFileEntity.setAuthor(author);
         templateFileEntity.setVersion(1L);
+        templateFileEntity.setDeployed(false);
         templateFileEntity.setData(templateLoader.load());
         templateFileEntity.setTemplate(templateEntity);
         templateFileEntity.setAuthor(author);
@@ -190,6 +191,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         fileEntity.setComment(comment);
         fileEntity.setAuthor(userEntity);
         fileEntity.setCreatedOn(new Date());
+        fileEntity.setDeployed(false);
         fileEntity.setModifiedOn(new Date());
         if (data != null) {
             fileEntity.setData(data);

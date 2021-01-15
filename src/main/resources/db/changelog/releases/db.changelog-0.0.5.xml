@@ -107,4 +107,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="012-add-deployed-column-to-template-file-table" author="Ivan_Semenov">
+        <addColumn tableName="template_file">
+            <column name="deployed" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
