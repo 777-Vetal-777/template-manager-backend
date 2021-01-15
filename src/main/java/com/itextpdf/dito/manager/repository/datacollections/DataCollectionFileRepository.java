@@ -17,6 +17,7 @@ import java.util.List;
 @Repository
 public interface DataCollectionFileRepository extends JpaRepository<DataCollectionFileEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment", "deploymentStatus");
+    List<String> SUPPORTED_VERSION_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment");
     List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
 
     String SELECT_CLAUSE = "select file from DataCollectionFileEntity file where file.dataCollection.id = :id and ";
