@@ -34,8 +34,8 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
             + "  from {h-schema}template "
             + "  join {h-schema}template_role t on template.id = t.template_id "
             + "  join {h-schema}role r on r.id = t.role_id and r.master = false "
-            + "  join {h-schema}role_permission rp on rp.role_id = r.id "
-            + "  join {h-schema}permission p on p.id = rp.permission_id "
+            + "  left join {h-schema}role_permission rp on rp.role_id = r.id "
+            + "  left join {h-schema}permission p on p.id = rp.permission_id "
             + " where template.name = :name "
             + " group by r.name) as rolesTable "
             + "where ";
