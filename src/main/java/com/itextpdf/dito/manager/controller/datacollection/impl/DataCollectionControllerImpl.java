@@ -78,7 +78,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final byte[] data = getBytesFromMultipart(multipartFile);
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.createNewVersion(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName(), comment);
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.CREATED);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final DataCollectionEntity entity = dataCollectionService.update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),
                 principal.getName());
 
-        return new ResponseEntity<>(dataCollectionMapper.map(entity), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(entity), HttpStatus.OK);
     }
 
     @Override
