@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.entity.resource;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -38,15 +39,15 @@ public class ResourceFileEntity {
     private Date createdOn;
     private Date modifiedOn;
 
-    @ManyToMany(mappedBy = "resources")
-    private Set<TemplateEntity> templates = new HashSet<>();
+    @ManyToMany(mappedBy = "resourceFiles")
+    private Set<TemplateFileEntity> templateFiles = new HashSet<>();
 
-    public Set<TemplateEntity> getTemplates() {
-        return templates;
+    public Set<TemplateFileEntity> getTemplateFiles() {
+        return templateFiles;
     }
 
-    public void setTemplates(Set<TemplateEntity> templates) {
-        this.templates = templates;
+    public void setTemplateFiles(Set<TemplateFileEntity> templateFiles) {
+        this.templateFiles = templateFiles;
     }
 
     public UserEntity getAuthor() {

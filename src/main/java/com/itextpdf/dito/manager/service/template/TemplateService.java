@@ -2,7 +2,9 @@ package com.itextpdf.dito.manager.service.template;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,8 @@ public interface TemplateService {
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
 
     TemplateEntity createNewVersion(String name, byte[] data, String email, String comment);
+
+    TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
     Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);
 

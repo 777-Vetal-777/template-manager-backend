@@ -2,17 +2,16 @@ package com.itextpdf.dito.manager.component.mapper.instance.impl;
 
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
-import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 @Component
 public class InstanceMapperImpl implements InstanceMapper {
@@ -34,10 +33,10 @@ public class InstanceMapperImpl implements InstanceMapper {
                 .append(entity.getCreatedBy().getLastName())
                 .toString());
         instanceDTO.setCreatedOn(entity.getCreatedOn());
-        final List<TemplateEntity> templateEntities = entity.getTemplates();
-        if (templateEntities != null && !templateEntities.isEmpty()) {
-            instanceDTO.setTemplates(templateEntities.stream().map(templateEntity -> templateEntity.getName())
-                    .collect(Collectors.toList()));
+        final List<TemplateFileEntity> templateFileEntities = entity.getTemplateFile();
+        if (templateFileEntities != null && !templateFileEntities.isEmpty()) {
+            instanceDTO.setTemplates(templateFileEntities.stream().map(templateEntity -> templateEntity.getTemplate().getName())
+                    .distinct().collect(Collectors.toList()));
         }
         final StageEntity stageEntity = entity.getStage();
         if (stageEntity != null) {

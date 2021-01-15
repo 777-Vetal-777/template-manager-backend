@@ -113,4 +113,62 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="013-drop-fk-between-data-collection-and-template-tables" author="Yaroslav_Maievskij">
+        <dropForeignKeyConstraint baseTableName="template" constraintName="fk_template_to_data_collection_file"/>
+    </changeSet>
+
+    <changeSet id="014-drop-data-collection-file-id-column-from-template-table" author="Yaroslav_Maievskij">
+        <dropColumn tableName="template">
+            <column name="data_collection_file_id"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="015-add-data-collection-file-id-column-to-template-file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="template_file">
+            <column name="data_collection_file_id" type="bigint">
+                <constraints foreignKeyName="fk_template_file_to_data_collection_file" references="data_collection_file(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="016-create-resource-file-template-file-table" author="Sergey_Nemets">
+        <createTable tableName="resource_file_template_file">
+            <column name="resource_file_id" type="bigint">
+                <constraints nullable="false"
+                             notNullConstraintName="resource_file_template_file_resource_file_id_not_null_constraint"
+                             foreignKeyName="fk_resource_file_template_file_to_resource_file"
+                             references="resource_file(id)"/>
+            </column>
+            <column name="template_file_id" type="bigint">
+                <constraints nullable="false"
+                             notNullConstraintName="resource_file_template_file_template_file_id_not_null_constraint"
+                             foreignKeyName="fk_resource_file_template_file_to_template_file"
+                             references="template_file(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="resource_file_id, template_file_id" constraintName="resource_file_template_file_pk" tableName="resource_file_template_file"/>
+    </changeSet>
+
+    <changeSet id="017-drop-resource-file-template-table" author="Yaroslav_Maievskij">
+        <dropTable tableName="resource_file_template"/>
+    </changeSet>
+
+    <changeSet id="018-drop-column-instance-id-from-template-table" author="Sergey_Nemets">
+        <dropColumn tableName="template" columnName="instance_id"/>
+    </changeSet>
+
+    <changeSet id="019-create-table-template-file-instance" author="Sergey_Nemets">
+        <createTable tableName="template_file_instance">
+            <column name="template_file_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_file_instance_template_file_id_not_null_constraint"
+                foreignKeyName="fk_template_file_instance_to_template_file" references="template_file(id)"/>
+            </column>
+            <column name="instance_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_file_instance_instance_id_not_null_constraint"
+                             foreignKeyName="fk_template_file_instance_to_instance" references="instance(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="template_file_instance" columnNames="template_file_id, instance_id" constraintName="template_file_instance_pk"/>
+    </changeSet>
+
 </databaseChangeLog>

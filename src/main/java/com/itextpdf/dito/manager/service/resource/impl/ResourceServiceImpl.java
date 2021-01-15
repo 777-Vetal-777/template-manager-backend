@@ -24,12 +24,15 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
@@ -38,6 +41,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import javax.transaction.Transactional;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -59,6 +65,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private final ResourceLogRepository resourceLogRepository;
     private final ResourceFileRepository resourceFileRepository;
     private final TemplateRepository templateRepository;
+    private final TemplateService templateService;
     private final UserService userService;
     private final RoleService roleService;
     private final PermissionService permissionService;
@@ -70,7 +77,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             final TemplateRepository templateRepository,
             final UserService userService,
             final RoleService roleService,
-            final PermissionService permissionService) {
+            final PermissionService permissionService,
+            final TemplateService templateService) {
         this.resourceRepository = resourceRepository;
         this.resourceLogRepository = resourceLogRepository;
         this.resourceFileRepository = resourceFileRepository;
@@ -78,6 +86,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         this.userService = userService;
         this.roleService = roleService;
         this.permissionService = permissionService;
+        this.templateService = templateService;
     }
 
     @Override
@@ -114,15 +123,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data,
             final String fileName, final String email, final String comment) {
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
         if (ResourceTypeEnum.IMAGE.equals(type)) {
-            checkUserPermissions(
-                    retrieveSetOfRoleNames(userEntity.getRoles()),
-                    existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
+            checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
         }
 
         final Long oldVersion = resourceFileRepository
@@ -142,18 +150,21 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         existingResourceEntity.getResourceFiles().add(fileEntity);
         existingResourceEntity.getResourceLogs().add(logEntity);
+        existingResourceEntity.setLatestFile(fileEntity);
 
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
-        final List<TemplateEntity> templateEntities = templateRepository
-                .findTemplatesByResourceId(updatedResourceEntity.getId());
-        templateEntities.forEach(t -> {
-            final List<ResourceFileEntity> oldVersions = t.getResources().stream()
-                    .filter(version -> version.getResource().getId().equals(updatedResourceEntity.getId()))
-                    .collect(Collectors.toList());
-            t.getResources().removeAll(oldVersions);
-            t.getResources().add(updatedResourceEntity.getLatestFile());
-        });
-        templateRepository.saveAll(templateEntities);
+
+        final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(existingResourceEntity.getId());
+        if (Objects.nonNull(templateEntities)) {
+            templateEntities.forEach(t -> {
+                final TemplateEntity extendedTemplateEntity = templateService.createNewVersionAsCopy(t.getLatestFile(), userEntity, "");
+                final Set<ResourceFileEntity> resourceFiles = extendedTemplateEntity.getLatestFile().getResourceFiles();
+                resourceFiles.removeAll(existingResourceEntity.getResourceFiles());
+                resourceFiles.add(fileEntity);
+            });
+            templateRepository.saveAll(templateEntities);
+        }
+
         return updatedResourceEntity;
     }
 

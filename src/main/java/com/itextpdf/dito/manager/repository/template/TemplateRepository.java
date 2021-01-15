@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.repository.template;
 
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +22,9 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "editedOn");
 
     String TEMPLATE_TABLE_SELECT_CLAUSE = "select template from TemplateEntity template "
-            + "left join template.dataCollectionFile dataCollectionFile "
-            + "left join dataCollectionFile.dataCollection dataCollection ";
+            + "left join template.latestFile templateFile "
+            + "left join templateFile.dataCollectionFile dataCollectionFile "
+            + "left join dataCollectionFile.dataCollection dataCollection  ";
 
     String FILTER_CONDITION = "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or template.type in (:types)) "
@@ -48,7 +50,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                 @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                 @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate);
 
-
     @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION + " and " + SEARCH_CONDITION)
     Page<TemplateEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
@@ -65,17 +66,26 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     Page<TemplateEntity> findAll(Pageable pageable);
 
     @Query(value = "select template from TemplateEntity template "
-            + "left join template.resources versions "
-            + "left join versions.resource resource "
-            + "where resource.id = :resourceId "
+            + "left join template.files files "
+            + "left join files.resourceFiles resourceFiles "
+            + "where resourceFiles.resource.id = :resourceId "
             + "group by template.id")
     List<TemplateEntity> findTemplatesByResourceId(@Param("resourceId") Long resourceId);
 
     @Query(value = "select template from TemplateEntity template "
-            + "left join template.dataCollectionFile version "
-            + "left join version.dataCollection datacollection "
-            + "where datacollection.id = :dataCollectionId "
+            + "left join template.latestFile latestTemplateFile "
+            + "left join latestTemplateFile.dataCollectionFile collectionFile "
+            + "left join collectionFile.dataCollection collection "
+            + "where collection.id = :dataCollectionId "
             + "group by template.id")
     List<TemplateEntity> findTemplatesByDataCollectionId(@Param("dataCollectionId") Long dataCollectionId);
+
+    @Query(value = "select latestTemplateFile from TemplateEntity template "
+            + "left join template.latestFile latestTemplateFile "
+            + "left join latestTemplateFile.dataCollectionFile collectionFile "
+            + "left join collectionFile.dataCollection collection "
+            + "where collection.id = :dataCollectionId "
+            + "group by latestTemplateFile.id")
+    List<TemplateFileEntity> findTemplatesFilesByDataCollectionId(@Param("dataCollectionId") Long dataCollectionId);
 
 }

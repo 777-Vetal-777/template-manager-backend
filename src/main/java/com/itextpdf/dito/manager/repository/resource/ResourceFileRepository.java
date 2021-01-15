@@ -64,13 +64,14 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                     @Param("deployed") @Nullable Boolean deployed,
                                     @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(templates.name, file.version, file.deployed) "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, file.deployed) "
             + "from ResourceFileEntity file "
-            + "join file.templates templates "
+            + "join file.templateFiles templateFiles "
+            + "join templateFiles.template template "
             + "where "
             //filtering
             + "file.resource.id = :id "
-            + "and (:depend='' or LOWER(templates.name) like CONCAT('%',:depend,'%')) "
+            + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
             + "and (:version=0l or file.version is null or file.version=:version) "
             + "and (:type is null or file.resource.type = :type) "
             + "and (:deployed=null or file.deployed IS :deployed) ")
@@ -81,18 +82,19 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("type") @Nullable ResourceTypeEnum type,
                                  @Param("deployed") @Nullable Boolean deployed);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(templates.name, file.version, file.deployed) "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, file.deployed) "
             + "from ResourceFileEntity file "
-            + "join file.templates templates "
+            + "join file.templateFiles templateFiles "
+            + "join templateFiles.template template "
             + "where "
             //filtering
             + "file.resource.id = :id "
-            + "and (:depend='' or LOWER(templates.name) like CONCAT('%',:depend,'%')) "
+            + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
             + "and (:version=0l or file.version is null or file.version=:version) "
             + "and (:type is null or file.resource.type = :type) "
             + "and (:deployed=null or file.deployed IS :deployed) "
             //search
-            + "and LOWER(templates.name) like CONCAT('%',:search,'%') "
+            + "and LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or CAST(file.version as string) like CONCAT('%',:search,'%') "
             + "or LOWER(CAST(file.resource.type as string)) like CONCAT('%',:search,'%') "
             + "or (LOWER(file.resource.type) like CONCAT('%',:search,'%')) ")
@@ -104,9 +106,10 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("deployed") @Nullable Boolean deployed,
                                  @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(templates.name, file.version, file.deployed) "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, file.deployed) "
             + "from ResourceFileEntity file "
-            + "join file.templates templates "
-            + "where file.resource.id =:id ")
+            + "join file.templateFiles templateFiles "
+            + "join templateFiles.template template "
+            + "where file.resource.id = :id ")
     List<DependencyModel> search(@Param("id") Long resourceId);
 }

@@ -58,7 +58,6 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
 
     }
 
-
     private Pageable updateSort(final Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .flatMap(sortParam -> {
