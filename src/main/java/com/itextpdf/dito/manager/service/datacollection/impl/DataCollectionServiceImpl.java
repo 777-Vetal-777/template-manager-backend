@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionHasDependenciesException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
@@ -20,6 +21,7 @@ import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionF
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
@@ -27,18 +29,19 @@ import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -50,6 +53,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
     private final DataCollectionFileRepository dataCollectionFileRepository;
+    private final TemplateFileRepository templateFileRepository;
     private final TemplateRepository templateRepository;
     private final UserService userService;
     private final TemplateService templateService;
@@ -58,17 +62,19 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final PermissionService permissionService;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
-                                     final DataCollectionFileRepository dataCollectionFileRepository,
-                                     final TemplateRepository templateRepository,
-                                     final UserService userService,
-                                     final TemplateService templateService,
-                                     final DataCollectionLogRepository dataCollectionLogRepository,
-                                     final JsonValidator jsonValidator,
-                                     final RoleService roleService,
-                                     final PermissionService permissionService) {
+            final DataCollectionFileRepository dataCollectionFileRepository,
+            final TemplateFileRepository templateFileRepository,
+            final TemplateRepository templateRepository,
+            final UserService userService,
+            final TemplateService templateService,
+            final DataCollectionLogRepository dataCollectionLogRepository,
+            final JsonValidator jsonValidator,
+            final RoleService roleService,
+            final PermissionService permissionService) {
         this.dataCollectionRepository = dataCollectionRepository;
         this.dataCollectionFileRepository = dataCollectionFileRepository;
         this.templateRepository = templateRepository;
+        this.templateFileRepository = templateFileRepository;
         this.userService = userService;
         this.templateService = templateService;
         this.dataCollectionLogRepository = dataCollectionLogRepository;
@@ -104,18 +110,22 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         dataCollectionEntity.setLatestVersion(dataCollectionFileEntity);
 
         DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
-         logDataCollectionUpdate(savedCollection, userEntity);
+        logDataCollectionUpdate(savedCollection, userEntity);
 
         return savedCollection;
     }
 
     @Override
-    public DataCollectionEntity createNewVersion(final String name, final DataCollectionType type, final byte[] data, final String fileName, final String email, final String comment) {
+    @Transactional(rollbackOn = Exception.class)
+    public DataCollectionEntity createNewVersion(final String name, final DataCollectionType type, final byte[] data,
+            final String fileName, final String email, final String comment) {
         checkJsonIsValid(data);
         final DataCollectionEntity existingDataCollectionEntity = findByName(name);
         final UserEntity userEntity = userService.findByEmail(email);
-        final Long oldVersion = dataCollectionFileRepository.findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
-        final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity, userEntity);
+        final Long oldVersion = dataCollectionFileRepository
+                .findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
+        final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity,
+                userEntity);
         final DataCollectionFileEntity fileEntity = new DataCollectionFileEntity();
         fileEntity.setDataCollection(existingDataCollectionEntity);
         fileEntity.setVersion(oldVersion + 1);
@@ -131,9 +141,16 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         existingDataCollectionEntity.getDataCollectionLog().add(logEntity);
 
         final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.save(existingDataCollectionEntity);
-        final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByDataCollectionId(existingDataCollectionEntity.getId());
-        templateEntities.forEach(t -> t.setDataCollectionFile(dataCollectionEntity.getLatestVersion()));
-        templateRepository.saveAll(templateEntities);
+        final List<TemplateFileEntity> templateEntities = templateRepository.findTemplatesFilesByDataCollectionId(existingDataCollectionEntity.getId());
+        if (Objects.nonNull(templateEntities)) {
+            final List<TemplateFileEntity> newFiles = new LinkedList<>();
+            templateEntities.forEach(t -> {
+                final TemplateEntity extendedTemplateEntity = templateService.createNewVersionAsCopy(t, userEntity, "");
+                extendedTemplateEntity.getLatestFile().setDataCollectionFile(dataCollectionEntity.getLatestVersion());
+                newFiles.add(extendedTemplateEntity.getLatestFile());
+            });
+            templateFileRepository.saveAll(newFiles);
+        }
         return dataCollectionEntity;
     }
 
@@ -144,8 +161,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     @Override
-    public Page<DataCollectionEntity> list(final Pageable pageable, final DataCollectionFilter dataCollectionFilter,
-                                           final String searchParam) {
+    public Page<DataCollectionEntity> list(final Pageable pageable, final DataCollectionFilter dataCollectionFilter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -177,14 +193,15 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public DataCollectionEntity getByTemplateName(final String templateName) {
-        return templateService.get(templateName).getDataCollectionFile().getDataCollection();
+        final TemplateEntity existingTemplate = templateService.get(templateName);
+        return existingTemplate.getLatestFile().getDataCollectionFile().getDataCollection();
     }
 
     @Override
     public void delete(final String name) {
         final DataCollectionEntity deletingDataCollection = findByName(name);
 
-        if(hasOutboundDependencies(deletingDataCollection.getId())){
+        if (hasOutboundDependencies(deletingDataCollection.getId())) {
             throw new DataCollectionHasDependenciesException();
         }
 

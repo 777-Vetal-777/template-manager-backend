@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.entity.datacollection;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,7 +35,7 @@ public class DataCollectionFileEntity {
     private byte[] data;
     private String fileName;
     @OneToMany(mappedBy = "dataCollectionFile")
-    private List<TemplateEntity> templates;
+    private List<TemplateFileEntity> templateFiles;
 
     public Date getCreatedOn() {
         return createdOn;

@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.entity;
 
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,8 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import java.util.Date;
@@ -33,8 +33,8 @@ public class InstanceEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "stage_id", referencedColumnName = "id")
     private StageEntity stage;
-    @OneToMany(mappedBy = "instance")
-    private List<TemplateEntity> templates;
+    @ManyToMany(mappedBy = "instance")
+    private List<TemplateFileEntity> templateFile;
 
     @PrePersist
     public void onPrePersist() {
@@ -89,11 +89,11 @@ public class InstanceEntity {
         this.stage = stage;
     }
 
-    public List<TemplateEntity> getTemplates() {
-        return templates;
+    public List<TemplateFileEntity> getTemplateFile() {
+        return templateFile;
     }
 
-    public void setTemplates(List<TemplateEntity> templates) {
-        this.templates = templates;
+    public void setTemplateFile(List<TemplateFileEntity> templateFile) {
+        this.templateFile = templateFile;
     }
 }

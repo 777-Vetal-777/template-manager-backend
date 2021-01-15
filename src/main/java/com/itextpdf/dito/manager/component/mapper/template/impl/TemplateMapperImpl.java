@@ -5,23 +5,24 @@ import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
+    private TemplateLogEntity firstTemplateLog;
+
     @Override
     public TemplateDTO map(final TemplateEntity entity) {
         final TemplateDTO result = new TemplateDTO();
@@ -52,12 +53,11 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
         }
-        final DataCollectionFileEntity dataCollectionFileEntity = entity.getDataCollectionFile();
-        if (Objects.nonNull(dataCollectionFileEntity)){
-            final DataCollectionEntity dataCollectionEntity = dataCollectionFileEntity.getDataCollection();
-            result.setDataCollection(Objects.nonNull(dataCollectionEntity) ? dataCollectionEntity.getName() : null);
+        final TemplateFileEntity latestFile = entity.getLatestFile();
+        if (Objects.nonNull(latestFile)) {
+            final DataCollectionFileEntity dataCollectionFileEntity = latestFile.getDataCollectionFile();
+            result.setDataCollection(Objects.nonNull(dataCollectionFileEntity) ? dataCollectionFileEntity.getDataCollection().getName() : null);
         }
-
         return result;
     }
 
@@ -98,7 +98,8 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setCreatedOn(firstTemplateLog.getDate());
         }
         result.setDescription(entity.getDescription());
-        final DataCollectionFileEntity dataCollectionFileEntity = entity.getDataCollectionFile();
+        final TemplateFileEntity templateFileEntity = entity.getLatestFile();
+        final DataCollectionFileEntity dataCollectionFileEntity = templateFileEntity.getDataCollectionFile();
         result.setDataCollection(Objects.nonNull(dataCollectionFileEntity)
                 ? dataCollectionFileEntity.getDataCollection().getName()
                 : null);
@@ -131,7 +132,8 @@ public class TemplateMapperImpl implements TemplateMapper {
 
         final UserEntity author = entity.getAuthor();
         if (Objects.nonNull(author)) {
-            version.setModifiedBy(new StringBuilder(author.getFirstName()).append(" ").append(author.getLastName()).toString());
+            version.setModifiedBy(
+                    new StringBuilder(author.getFirstName()).append(" ").append(author.getLastName()).toString());
         }
         return version;
     }

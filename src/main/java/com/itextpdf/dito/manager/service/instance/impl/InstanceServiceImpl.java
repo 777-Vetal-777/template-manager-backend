@@ -3,7 +3,7 @@ package com.itextpdf.dito.manager.service.instance.impl;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
@@ -106,8 +106,8 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
             throw new InstanceUsedInPromotionPathException();
         }
 
-        final List<TemplateEntity> templateEntities = instanceEntity.getTemplates();
-        if (templateEntities != null && !templateEntities.isEmpty()) {
+        final List<TemplateFileEntity> templateFileEntities = instanceEntity.getTemplateFile();
+        if (templateFileEntities != null && !templateFileEntities.isEmpty()) {
             throw new InstanceHasAttachedTemplateException();
         }
 

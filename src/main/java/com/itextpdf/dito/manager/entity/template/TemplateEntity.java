@@ -41,13 +41,6 @@ public class TemplateEntity {
     private TemplateTypeEnum type;
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "data_collection_file_id")
-    private DataCollectionFileEntity dataCollectionFile;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instance_id", referencedColumnName = "id")
-    private InstanceEntity instance;
 
     @OneToMany(
             mappedBy = "template",
@@ -83,13 +76,6 @@ public class TemplateEntity {
             ")")
     private TemplateFileEntity latestFile;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinTable(
-            name = "resource_file_template",
-            joinColumns = @JoinColumn(name = "template_id"),
-            inverseJoinColumns = @JoinColumn(name = "resource_file_id"))
-    private Set<ResourceFileEntity> resources = new HashSet<>();
-
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "template_role",
@@ -98,14 +84,6 @@ public class TemplateEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id"))
     private Set<RoleEntity> appliedRoles = new HashSet<>();
-
-    public Set<ResourceFileEntity> getResources() {
-        return resources;
-    }
-
-    public void setResources(Set<ResourceFileEntity> resources) {
-        this.resources = resources;
-    }
 
     public Long getId() {
         return id;
@@ -137,22 +115,6 @@ public class TemplateEntity {
 
     public void setFiles(List<TemplateFileEntity> files) {
         this.files = files;
-    }
-
-    public DataCollectionFileEntity getDataCollectionFile() {
-        return dataCollectionFile;
-    }
-
-    public void setDataCollectionFile(DataCollectionFileEntity dataCollectionFile) {
-        this.dataCollectionFile = dataCollectionFile;
-    }
-
-    public InstanceEntity getInstance() {
-        return instance;
-    }
-
-    public void setInstance(InstanceEntity instance) {
-        this.instance = instance;
     }
 
     public String getDescription() {

@@ -33,8 +33,10 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
 
     String SELECT_DEPENDENCIES_CLAUSE = "select new com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel(template.name, file.version, stage.name) "
             + "from TemplateEntity template "
-            + "join template.dataCollectionFile file "
-            + "left join template.instance instance "
+            + "join template.files templateFiles "
+            + "join template.latestFile lastTemplateFile "
+            + "left join lastTemplateFile.dataCollectionFile file "
+            + "left join templateFiles.instance instance "
             + "left join instance.stage stage "
             + "where ";
 
@@ -73,7 +75,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + FILTERING_DEPENDENCIES_CONDITION)
     Page<DependencyModel> filter(Pageable pageable,
-                                 @Param("id") Long resourceId,
+                                 @Param("id") Long dataCollectionId,
                                  @Param("dependencyName") @Nullable String dependencyName,
                                  @Param("version") @Nullable Long version,
                                  @Param("direction") @Nullable List<String> direction,
@@ -81,7 +83,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + FILTERING_DEPENDENCIES_CONDITION + " and " + SEARCH_DEPENDENCIES_CONDITION)
     Page<DependencyModel> search(Pageable pageable,
-                                 @Param("id") Long resourceId,
+                                 @Param("id") Long dataCollectionId,
                                  @Param("dependencyName") @Nullable String dependencyName,
                                  @Param("version") @Nullable Long version,
                                  @Param("direction") @Nullable List<String> direction,
@@ -89,5 +91,5 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                  @Param("search") @Nullable String search);
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + "file.dataCollection.id =:id ")
-    List<DependencyModel> searchDependencyOfDataCollection(@Param("id") Long datacollectionId);
+    List<DependencyModel> searchDependencyOfDataCollection(@Param("id") Long dataCollectionId);
 }

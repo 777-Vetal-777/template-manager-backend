@@ -1,17 +1,25 @@
 package com.itextpdf.dito.manager.entity.template;
 
+import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "template_file")
@@ -33,8 +41,35 @@ public class TemplateFileEntity {
     private Date modifiedOn;
     private Boolean deployed;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "data_collection_file_id")
+    private DataCollectionFileEntity dataCollectionFile;
+
+    @ManyToMany(cascade = CascadeType.MERGE)
+    @JoinTable(
+            name = "resource_file_template_file",
+            joinColumns = @JoinColumn(name = "template_file_id"),
+            inverseJoinColumns = @JoinColumn(name = "resource_file_id"))
+    private Set<ResourceFileEntity> resourceFiles = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.MERGE)
+    @JoinTable(
+            name = "template_file_instance",
+            joinColumns = @JoinColumn(name = "template_file_id"),
+            inverseJoinColumns = @JoinColumn(name = "instance_id"))
+    private Set<InstanceEntity> instance = new HashSet<>();
+
     public Long getId() {
         return id;
+    }
+
+    public DataCollectionFileEntity getDataCollectionFile() {
+        return dataCollectionFile;
+    }
+
+    public void setDataCollectionFile(
+            DataCollectionFileEntity dataCollectionFile) {
+        this.dataCollectionFile = dataCollectionFile;
     }
 
     public void setId(Long id) {
@@ -97,6 +132,22 @@ public class TemplateFileEntity {
         this.createdOn = createdOn;
     }
 
+    public Set<ResourceFileEntity> getResourceFiles() {
+        return resourceFiles;
+    }
+
+    public void setResourceFiles(Set<ResourceFileEntity> resourceFiles) {
+        this.resourceFiles = resourceFiles;
+    }
+
+    public Set<InstanceEntity> getInstance() {
+        return instance;
+    }
+
+    public void setInstance(Set<InstanceEntity> instance) {
+        this.instance = instance;
+    }
+
     public Boolean getDeployed() {
         return deployed;
     }
@@ -104,4 +155,5 @@ public class TemplateFileEntity {
     public void setDeployed(Boolean deployed) {
         this.deployed = deployed;
     }
+
 }

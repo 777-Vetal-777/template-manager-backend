@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
+import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -16,15 +17,16 @@ import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
-import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 public class TemplateServiceImpl extends AbstractService implements TemplateService {
     private final TemplateFileRepository templateFileRepository;
     private final TemplateRepository templateRepository;
+    private final InstanceRepository instanceRepository;
     private final UserService userService;
     private final TemplateLoader templateLoader;
     private final DataCollectionRepository dataCollectionRepository;
@@ -59,7 +62,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final TemplateLoader templateLoader,
                                final DataCollectionRepository dataCollectionRepository,
                                final RoleService roleService,
-                               final PermissionService permissionService) {
+                               final PermissionService permissionService,
+                               final InstanceRepository instanceRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -67,6 +71,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.dataCollectionRepository = dataCollectionRepository;
         this.roleService = roleService;
         this.permissionService = permissionService;
+        this.instanceRepository = instanceRepository;
     }
 
     @Override
@@ -79,15 +84,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateEntity.setName(templateName);
         templateEntity.setType(templateTypeEnum);
 
-        if (!StringUtils.isEmpty(dataCollectionName)) {
-            final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(dataCollectionName).orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionName));
-            templateEntity.setDataCollectionFile(dataCollectionEntity.getLatestVersion());
-        }
-
         final UserEntity author = userService.findByEmail(email);
-
         final TemplateLogEntity logEntity = createLogEntity(templateEntity, author);
-
 
         final TemplateFileEntity templateFileEntity = new TemplateFileEntity();
         templateFileEntity.setAuthor(author);
@@ -99,8 +97,17 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateFileEntity.setCreatedOn(new Date());
         templateFileEntity.setModifiedOn(new Date());
 
+        if (!StringUtils.isEmpty(dataCollectionName)) {
+            final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(dataCollectionName).orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionName));
+            templateFileEntity.setDataCollectionFile(dataCollectionEntity.getLatestVersion());
+        }
+
         templateEntity.setFiles(Collections.singletonList(templateFileEntity));
+        templateEntity.setLatestFile(templateFileEntity);
         templateEntity.setTemplateLogs(Collections.singletonList(logEntity));
+
+        final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
+        templateFileEntity.getInstance().addAll(developerStageInstances);
 
         return templateRepository.save(templateEntity);
     }
@@ -181,26 +188,65 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity existingTemplateEntity = findByName(name);
         final UserEntity userEntity = userService.findByEmail(email);
 
-        final Long oldVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId()).getVersion();
+        final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
+        final Long oldVersion = oldTemplateFileVersion.getVersion();
+
+        return createNewVersion(existingTemplateEntity,  oldTemplateFileVersion, userEntity, data, comment, oldVersion + 1);
+    }
+
+    @Override
+    public TemplateEntity createNewVersionAsCopy(final TemplateFileEntity fileEntityToCopy,
+                                                 final UserEntity userEntity,
+                                                 final String comment) {
+        final TemplateEntity existingTemplateEntity = fileEntityToCopy.getTemplate();
+
+        final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
+        final Long oldVersion = oldTemplateFileVersion.getVersion();
+
+        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), comment, oldVersion + 1);
+    }
+
+    private TemplateEntity createNewVersion(final TemplateEntity existingTemplateEntity,
+                                            final TemplateFileEntity fileEntityToCopyDependencies,
+                                            final UserEntity userEntity,
+                                            final byte[] data,
+                                            final String comment,
+                                            final Long newVersion) {
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
+        final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, newVersion, fileEntityToCopyDependencies);
+        existingTemplateEntity.getFiles().add(fileEntity);
+        existingTemplateEntity.getTemplateLogs().add(logEntity);
+
+        final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
+        fileEntity.getInstance().addAll(developerStageInstances);
+
+        return templateRepository.save(existingTemplateEntity);
+    }
+
+    private TemplateFileEntity createTemplateFileEntity(final byte[] data,
+                                                        final String comment,
+                                                        final TemplateEntity existingTemplateEntity,
+                                                        final UserEntity userEntity,
+                                                        final Long versionNumber,
+                                                        final TemplateFileEntity entityToCopyDependencies) {
         //Imitation of new file upload (which will be performed from Editor)
         final TemplateFileEntity fileEntity = new TemplateFileEntity();
         fileEntity.setTemplate(existingTemplateEntity);
-        fileEntity.setVersion(oldVersion + 1);
+        fileEntity.setVersion(versionNumber);
         fileEntity.setComment(comment);
         fileEntity.setAuthor(userEntity);
         fileEntity.setCreatedOn(new Date());
         fileEntity.setDeployed(false);
         fileEntity.setModifiedOn(new Date());
+        fileEntity.setDataCollectionFile(entityToCopyDependencies.getDataCollectionFile());
+        fileEntity.getResourceFiles().addAll(entityToCopyDependencies.getResourceFiles());
         if (data != null) {
             fileEntity.setData(data);
         } else {
             fileEntity.setData(templateLoader.load());
         }
-        existingTemplateEntity.getFiles().add(fileEntity);
-        existingTemplateEntity.getTemplateLogs().add(logEntity);
-        return templateRepository.save(existingTemplateEntity);
+        return fileEntity;
     }
 
     @Override

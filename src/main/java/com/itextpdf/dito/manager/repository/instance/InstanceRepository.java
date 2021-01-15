@@ -56,4 +56,10 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
                                 @Param("search") String searchParam);
 
     void deleteByName(String name);
+
+    @Query("select i "
+            + " from instance i "
+            + " left join i.stage stage "
+            + " where stage.sequenceOrder is not null and stage.sequenceOrder = 0")
+    List<InstanceEntity> getInstancesOnDevStage();
 }
