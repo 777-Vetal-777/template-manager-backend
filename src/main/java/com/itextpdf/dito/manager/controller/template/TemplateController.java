@@ -159,7 +159,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Role applied to template successfully."),
             @ApiResponse(responseCode = "401", description = "Template is not found in repository")
     })
-    ResponseEntity<TemplateMetadataDTO> applyRole(
+    ResponseEntity<TemplateMetadataDTO> applyRole(Principal principal,
             @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
 
@@ -169,7 +169,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Role detached from template successfully."),
             @ApiResponse(responseCode = "401", description = "Role or template are not found in repository")
     })
-    ResponseEntity<TemplateMetadataDTO> deleteRole(
+    ResponseEntity<TemplateMetadataDTO> deleteRole(Principal principal,
             @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
