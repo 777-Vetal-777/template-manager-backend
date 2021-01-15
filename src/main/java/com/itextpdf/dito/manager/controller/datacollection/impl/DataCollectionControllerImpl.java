@@ -122,8 +122,8 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<Void> delete(final String name) {
-        dataCollectionService.delete(decodeBase64(name));
+    public ResponseEntity<Void> delete(final String name, final Principal principal) {
+        dataCollectionService.delete(decodeBase64(name), principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

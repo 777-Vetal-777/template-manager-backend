@@ -110,7 +110,7 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "409", description = "Data collection has dependencies and cannot be removed", content = @Content),
             @ApiResponse(responseCode = "404", description = "Data collection not found", content = @Content),
     })
-    ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(name = DATA_COLLECTION_PATH_VARIABLE) String name);
+    ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(name = DATA_COLLECTION_PATH_VARIABLE) String name, Principal principal);
 
     @GetMapping(DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of data collection by name", description = "Get a list of data collection versions using the data collection name, sorting and filters.",

@@ -33,7 +33,7 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
 
     @AfterEach
     public void clearDb() {
-        dataCollectionService.delete("data-collection-test");
+        dataCollectionService.delete("data-collection-test", "admin@email.com");
     }
 
     @Test

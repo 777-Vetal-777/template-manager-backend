@@ -21,7 +21,7 @@ public interface DataCollectionService {
 
     DataCollectionEntity getByTemplateName(String name);
 
-    void delete(String name);
+    void delete(String name, String userEmail);
 
     DataCollectionEntity update(String name, DataCollectionEntity entity, String userEmail);
 
