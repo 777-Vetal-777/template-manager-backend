@@ -37,8 +37,8 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             " from manager.role role" +
             " join {h-schema}role_permission on role.id = role_permission.role_id " +
             " join {h-schema}permission on role_permission.permission_id = permission.id" +
-            " join {h-schema}resource_role rr on role.id = rr.role_id" +
-            " join {h-schema}resource resource on rr.resource_id = resource.id" +
+            " left join {h-schema}resource_role rr on role.id = rr.role_id" +
+            " left join {h-schema}resource resource on rr.resource_id = resource.id" +
             " where resource.id = :resourceId" +
             " and role.master = false" +
             " group by role.name) as resourcePermissions" +

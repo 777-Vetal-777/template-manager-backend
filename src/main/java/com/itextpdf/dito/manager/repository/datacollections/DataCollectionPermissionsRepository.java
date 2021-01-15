@@ -50,8 +50,8 @@ public interface DataCollectionPermissionsRepository extends JpaRepository<DataC
             + "  from {h-schema}data_collection "
             + "  join {h-schema}data_collection_role dcr on data_collection.id = dcr.data_collection_id "
             + "  join {h-schema}role r on r.id = dcr.role_id and r.master = false "
-            + "  join {h-schema}role_permission rp on rp.role_id = r.id "
-            + "  join {h-schema}permission p on p.id = rp.permission_id "
+            + "  left join {h-schema}role_permission rp on rp.role_id = r.id "
+            + "  left join {h-schema}permission p on p.id = rp.permission_id "
             + " where data_collection.name = :name "
             + " group by r.name) as rolesTable "
             + "where ";
