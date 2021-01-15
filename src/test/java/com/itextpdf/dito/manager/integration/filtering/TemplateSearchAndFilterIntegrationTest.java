@@ -52,7 +52,7 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
     public void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
-        dataCollectionService.delete("data-collection-test");
+        dataCollectionService.delete("data-collection-test", "admin@email.com");
     }
 
     @Test

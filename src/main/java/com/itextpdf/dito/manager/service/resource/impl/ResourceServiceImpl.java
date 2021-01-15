@@ -343,43 +343,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return ResourceRepository.SUPPORTED_SORT_FIELDS;
     }
 
-    private void checkUserPermissions(final Set<String> userRoleNames,
-            final Set<RoleEntity> resourceAppliedRoles,
-            final String requiredPermission) {
-        if (!isUserAdmin(userRoleNames) && !resourceAppliedRoles.isEmpty()) {
-
-            boolean isPermissionRolePresented = false;
-            final Set<String> resourceAppliedRolesWithRequiredPermission = retrieveSetOfRoleNamesFilteredByPermission(
-                    resourceAppliedRoles, requiredPermission);
-            for (final String role : resourceAppliedRolesWithRequiredPermission) {
-                if (userRoleNames.contains(role)) {
-                    isPermissionRolePresented = true;
-                    break;
-                }
-            }
-
-            if (!isPermissionRolePresented) {
-                throw new ForbiddenOperationException();
-            }
-        }
-    }
-
-    private boolean isUserAdmin(final Set<String> userRoleNames) {
-        return userRoleNames.contains("GLOBAL_ADMINISTRATOR") || userRoleNames.contains("ADMINISTRATOR");
-    }
-
-    private Set<String> retrieveSetOfRoleNames(final Set<RoleEntity> roleEntities) {
-        return roleEntities.stream().map(RoleEntity::getName).collect(Collectors.toSet());
-    }
-
-    private Set<String> retrieveSetOfRoleNamesFilteredByPermission(final Set<RoleEntity> roleEntities,
-            final String permission) {
-        return roleEntities.stream().filter(roleEntity -> roleEntity.getPermissions().stream()
-                .anyMatch(permissionEntity -> permissionEntity.getName().equals(permission)))
-                .map(RoleEntity::getName).collect(
-                        Collectors.toSet());
-    }
-
     private ResourceLogEntity createResourceLogEntry(final ResourceEntity resourceEntity, final UserEntity userEntity) {
         final ResourceLogEntity log = new ResourceLogEntity();
         log.setResource(resourceEntity);
