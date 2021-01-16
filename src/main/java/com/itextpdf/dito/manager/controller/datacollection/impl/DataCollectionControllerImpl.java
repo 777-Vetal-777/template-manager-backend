@@ -211,7 +211,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 		final String fileName = dataSampleCreateRequestDTO.getFileName();
 		final String data = dataSampleCreateRequestDTO.getSample();
 		final String comment = dataSampleCreateRequestDTO.getComment();
-		final DataSampleEntity dataSampleEntity = dataCollectionService.create(dataCollectionName, dataSampleName, fileName, data, comment, principal.getName());
+		final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
 		return new ResponseEntity<>(dataSampleMapper.map(dataSampleEntity), HttpStatus.CREATED);
 	}
 
