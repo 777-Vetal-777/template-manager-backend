@@ -78,7 +78,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public Page<RoleEntity> getSlaveRolesByDataCollection(final Pageable pageable, final DataCollectionPermissionFilter filter, final DataCollectionEntity dataCollection) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String name = filter.getRoleName() != null ? filter.getRoleName().get(0) : null;
+        final String name = filter.getName() != null ? filter.getName().get(0) : null;
         final Pageable pageWithSort = updateSort(pageable);
 
         return roleRepository.findAllByDataCollectionsAndMasterFalse(pageWithSort, dataCollection, name);
@@ -153,7 +153,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     public Page<RoleEntity> getSlaveRolesByTemplate(final Pageable pageable, final TemplatePermissionFilter filter, final TemplateEntity templateEntity) {
         //TODO: method is not used in project. Should be it removed later?
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String name = getStringFromFilter(filter.getRoleName().get(0));
+        final String name = getStringFromFilter(filter.getName().get(0));
         final Pageable pageWithSort = updateSort(pageable);
 
         return roleRepository.findAllByTemplatesAndMasterFalse(pageWithSort, templateEntity, name);
