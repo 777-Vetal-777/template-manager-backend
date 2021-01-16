@@ -1,6 +1,9 @@
 package com.itextpdf.dito.manager.dto.template;
 
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
+
 import java.util.Date;
+import java.util.Set;
 
 public class TemplateMetadataDTO{
 
@@ -12,6 +15,11 @@ public class TemplateMetadataDTO{
     private Date modifiedOn;
     private String description;
     private Long version;
+    private Set<RoleDTO> appliedRoles;
+
+    public Set<RoleDTO> getAppliedRoles() { return appliedRoles; }
+
+    public void setAppliedRoles(Set<RoleDTO> appliedRoles) { this.appliedRoles = appliedRoles; }
 
     public Long getVersion() {
         return version;
