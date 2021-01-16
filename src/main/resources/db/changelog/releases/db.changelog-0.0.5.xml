@@ -195,7 +195,7 @@
             </column>
            <column name="data_collection_id" type="bigint">
                 <constraints nullable="false" notNullConstraintName="data_sample_data_collection_id_not_null_constraint"
-                             foreignKeyName="fk_data_sample_data_to_data_collection"
+                             foreignKeyName="fk_data_sample_to_data_collection"
                              references="data_collection(id)"/>
             </column>
             <column name="modified_on" type="timestamp" defaultValueComputed="current_timestamp">
