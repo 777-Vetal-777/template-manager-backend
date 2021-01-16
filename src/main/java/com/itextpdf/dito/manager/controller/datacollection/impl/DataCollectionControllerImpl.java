@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
+import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -9,11 +10,14 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
+import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionFileSizeExceedLimitException;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
@@ -50,6 +54,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataCollectionDependencyService dataCollectionDependencyService;
     private final DependencyMapper dependencyMapper;
     private final PermissionMapper permissionMapper;
+    private final DataSampleMapper dataSampleMapper;
     private final DataCollectionPermissionService dataCollectionPermissionService;
     private final Long sizeJsonLimit;
 
@@ -59,6 +64,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataCollectionDependencyService dataCollectionDependencyService,
                                         final DependencyMapper dependencyMapper,
                                         final PermissionMapper permissionMapper,
+                                        final DataSampleMapper dataSampleMapper,
                                         final DataCollectionPermissionService dataCollectionPermissionService,
                                         @Value("${data-collection.json.size-limit}")
                                         final Long sizeJsonLimit) {
@@ -68,6 +74,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.dataCollectionFileService = dataCollectionFileService;
         this.dataCollectionDependencyService = dataCollectionDependencyService;
         this.permissionMapper = permissionMapper;
+        this.dataSampleMapper = dataSampleMapper;
         this.dataCollectionPermissionService = dataCollectionPermissionService;
         this.sizeJsonLimit = sizeJsonLimit;
     }
@@ -195,5 +202,16 @@ public class DataCollectionControllerImpl extends AbstractController implements 
             throw new DataCollectionFileSizeExceedLimitException(fileSize);
         }
     }
+    
+    @Override
+	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+		final String dataSampleName = dataSampleCreateRequestDTO.getName();
+		final String fileName = dataSampleCreateRequestDTO.getFileName();
+		final String data = dataSampleCreateRequestDTO.getSample();
+		final String comment = dataSampleCreateRequestDTO.getComment();
+		final DataSampleEntity dataSampleEntity = dataCollectionService.create(dataCollectionName, dataSampleName, fileName, data, comment, principal.getName());
+		return new ResponseEntity<>(dataSampleMapper.map(dataSampleEntity), HttpStatus.CREATED);
+	}
+
 
 }
