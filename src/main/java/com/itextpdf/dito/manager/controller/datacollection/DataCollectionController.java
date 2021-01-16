@@ -5,6 +5,8 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
+import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
@@ -50,6 +52,7 @@ public interface DataCollectionController {
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
+    String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/datasample";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable";
     String DATA_COLLECTION_VERSIONS = "/versions";
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
@@ -146,5 +149,16 @@ public interface DataCollectionController {
                                                          @Parameter(description = "Data collections name encoded with base64.") @PathVariable("data-collection-name") String name,
                                                          @ParameterObject DataCollectionDependencyFilter filter,
                                                          @RequestParam(name = "search", required = false) String searchParam);
+   
+	@PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Success! File is uploaded", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
+			@ApiResponse(responseCode = "409", description = "Invalid input or datasample already exists", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid data sample structure", content = @Content)})
+	ResponseEntity<DataSampleDTO> create(
+										@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+										@RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
 }

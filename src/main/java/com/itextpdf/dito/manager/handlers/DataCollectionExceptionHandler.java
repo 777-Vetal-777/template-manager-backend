@@ -7,7 +7,6 @@ import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFil
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 
-import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

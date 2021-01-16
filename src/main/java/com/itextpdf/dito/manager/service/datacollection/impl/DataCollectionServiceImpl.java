@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionLogEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
@@ -25,6 +26,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -69,6 +71,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     private final JsonValidator jsonValidator;
     private final RoleService roleService;
     private final PermissionService permissionService;
+    private final DataSampleService dataSampleService;
 
     public DataCollectionServiceImpl(final DataCollectionRepository dataCollectionRepository,
             final DataCollectionFileRepository dataCollectionFileRepository,
@@ -79,6 +82,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
             final DataCollectionLogRepository dataCollectionLogRepository,
             final JsonValidator jsonValidator,
             final RoleService roleService,
+            final DataSampleService dataSampleService,
             final PermissionService permissionService) {
         this.dataCollectionRepository = dataCollectionRepository;
         this.dataCollectionFileRepository = dataCollectionFileRepository;
@@ -90,6 +94,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         this.jsonValidator = jsonValidator;
         this.roleService = roleService;
         this.permissionService = permissionService;
+        this.dataSampleService = dataSampleService;
     }
 
     @Override
@@ -336,4 +341,12 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     protected List<String> getSupportedSortFields() {
         return DataCollectionRepository.SUPPORTED_SORT_FIELDS;
     }
+    
+    @Override
+	public DataSampleEntity create(final String dataCollectionName, final String name, final String fileName, final String sample, final String comment, final String email) {
+		//TODO CHECK IS DATA SAMPLE WITH SAME NAME EXIST
+        final DataCollectionEntity dataCollectionEntity = get(dataCollectionName);
+
+		return dataSampleService.create(dataCollectionEntity, name, fileName, sample, comment, email);
+	}
 }

@@ -178,5 +178,42 @@
             <where>name='E9_US84_MANAGE_TEMPLATE_PERMISSIONS'</where>
         </update>
     </changeSet>
-    
+
+    <changeSet id="021-create-data-sample-table" author="Yaroslav_Maievskij">
+        <createTable tableName="data_sample">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="data_sample_pk"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+             <column name="file_name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="data" type="${blob}">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_data_not_null_constraint"/>
+            </column>
+           <column name="data_collection_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_collection_file_data_collection_id_not_null_constraint"
+                             foreignKeyName="fk_data_collection_file_to_data_collection"
+                             references="data_collection(id)"/>
+            </column>
+            <column name="modified_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+             <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_data_collection_to_user" references="user(id)"/>
+            </column>
+            <column name="comment" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="022-create-data-sample-sequence" author="Yaroslav_Maievskij">
+        <createSequence sequenceName="data_sample_sequence"/>
+    </changeSet>
 </databaseChangeLog>
