@@ -3,9 +3,9 @@ package com.itextpdf.dito.manager.repository.template;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
-import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
@@ -38,6 +38,38 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "or LOWER(template.type) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
             + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
+
+    String DEPENDENCY_QUERY = "select version, name, directionType, dependencyType, stage from (select max(file.version) as version, max(resource.name) as name, 'SOFT' as directionType, 'IMAGE' as dependencyType,  max(stage.name) as stage" +
+            " from {h-schema}template as template" +
+            " join {h-schema}template_file as file on file.template_id = template.id" +
+            " join {h-schema}template_file_instance as tfi on tfi.template_file_id = file.id" +
+            " join {h-schema}instance as instance on tfi.instance_id = instance.id" +
+            " join {h-schema}stage as stage on instance.stage_id = stage.id" +
+            " join {h-schema}resource_file_template_file as rftf on rftf.template_file_id = file.id" +
+            " join {h-schema}resource as resource on rftf.resource_file_id = resource.id" +
+            " where template.id = :id" +
+            " group by resource.name" +
+            " union" +
+            " select max(dfile.version) as version, max(data.name) as name, 'HARD' as directionType, 'DATA_COLLECTION' as dependencyType, max(stage.name) as stage" +
+            " from {h-schema}template as template" +
+            " join {h-schema}template_file as tfile on tfile.template_id = template.id" +
+            " join {h-schema}data_collection_file as dfile on tfile.data_collection_file_id = dfile.id" +
+            " join {h-schema}data_collection as data on dfile.data_collection_id = data.id" +
+            " join {h-schema}template_file_instance as tfi on tfi.template_file_id = tfile.id" +
+            " join {h-schema}instance as instance on tfi.instance_id = instance.id" +
+            " join {h-schema}stage stage on instance.stage_id = stage.id" +
+            " where template.id = :id group by data.name) as dependency";
+
+    String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
+            " and (:version = 0 or version is null or version=:version) " +
+            " and (:directionType='' or LOWER(directionType) like LOWER(CONCAT('%',:directionType,'%')))" +
+            " and (COALESCE(:dependencyTypes) is null or dependencyType in (:dependencyTypes)))";
+
+    String FILTER_AND_SEARCH_DEPENDENCIES = DEPENDENCY_QUERY + FILTER_DEPENDENCIES + " and (name like CONCAT('%',:search,'%')) " +
+            " or (LOWER(directionType) like CONCAT('%',:search,'%'))" +
+            " or (CAST(version as VARCHAR(10)) like CONCAT('%',:search,'%'))" +
+            " or (LOWER(dependencyTypes) like CONCAT('%',:search,'%'))" +
+            " or (LOWER(stage) like CONCAT('%',:search,'%'))";
 
     Optional<TemplateEntity> findByName(String name);
 
@@ -88,4 +120,26 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "group by latestTemplateFile.id")
     List<TemplateFileEntity> findTemplatesFilesByDataCollectionId(@Param("dataCollectionId") Long dataCollectionId);
 
+    @Query(value = DEPENDENCY_QUERY + FILTER_DEPENDENCIES
+            , nativeQuery = true)
+    Page<DependencyModel> filter(Pageable pageable,
+                                 @Param("id") Long templateId,
+                                 @Param("depend") String depend,
+                                 @Param("version") Long version,
+                                 @Param("directionType") String directionType,
+                                 @Param("dependencyTypes") List<String> dependencyType);
+
+
+    @Query(value = FILTER_AND_SEARCH_DEPENDENCIES,
+            nativeQuery = true)
+    Page<DependencyModel> search(Pageable pageable,
+                                 @Param("id") Long templateId,
+                                 @Param("depend") String depend,
+                                 @Param("version") Long version,
+                                 @Param("directionType") String directionType,
+                                 @Param("dependencyTypes") List<String> dependencyType,
+                                 @Param("search") String search);
+
+    @Query(value = DEPENDENCY_QUERY, nativeQuery = true)
+    List<DependencyModel> list(@Param("id") Long templateId);
 }
