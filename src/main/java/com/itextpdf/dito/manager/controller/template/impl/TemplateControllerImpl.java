@@ -7,7 +7,6 @@ import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
-import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
@@ -16,13 +15,13 @@ import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
+import com.itextpdf.dito.manager.filter.template.TemplateDependencyFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
-import com.itextpdf.dito.manager.model.template.TemplateDependencyModel;
+import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
@@ -30,7 +29,6 @@ import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateVersionsService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,7 +41,6 @@ import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -57,6 +54,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplatePermissionService templatePermissionService;
     private final PermissionMapper permissionMapper;
     private final RoleMapper roleMapper;
+    private final TemplateDependencyService templateDependencyService;
 
     public TemplateControllerImpl(final TemplateService templateService,
                                   final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionFileService dataCollectionFileService,
@@ -65,6 +63,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplateVersionsService templateVersionsService,
                                   final TemplatePermissionService templatePermissionService,
                                   final PermissionMapper permissionMapper,
+                                  final TemplateDependencyService templateDependencyService,
                                   final RoleMapper roleMapper) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
@@ -75,6 +74,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templatePermissionService = templatePermissionService;
         this.permissionMapper = permissionMapper;
         this.roleMapper = roleMapper;
+        this.templateDependencyService = templateDependencyService;
     }
 
     @Override
@@ -101,31 +101,17 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<List<DependencyDTO>> listDependencies(final String name) {
-        final List<DependencyDTO> dependencies = new ArrayList<>();
-
-        final DataCollectionFileEntity dataCollectionFileEntity = dataCollectionFileService
-                .getByTemplateName(decodeBase64(name));
-        if (dataCollectionFileEntity != null) {
-            dependencies.add(dependencyMapper.map(new TemplateDependencyModel(dataCollectionFileEntity)));
-        }
-
-        return new ResponseEntity<>(dependencies, HttpStatus.OK);
+        return new ResponseEntity<>(dependencyMapper.map(templateDependencyService
+                .list(name)), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependenciesPageable(final String name,
                                                                         final Pageable pageable,
-                                                                        final DependencyFilter dependencyFilter,
+                                                                        final TemplateDependencyFilter dependencyFilter,
                                                                         final String searchParam) {
-        final List<DependencyDTO> dependencies = new ArrayList<>();
-
-        final DataCollectionFileEntity dataCollectionFileEntity = dataCollectionFileService
-                .getByTemplateName(decodeBase64(name));
-        if (dataCollectionFileEntity != null) {
-            dependencies.add(dependencyMapper.map(new TemplateDependencyModel(dataCollectionFileEntity)));
-        }
-
-        return new ResponseEntity<>(new PageImpl<>(dependencies), HttpStatus.OK);
+        return new ResponseEntity<>(dependencyMapper.map(templateDependencyService
+                .list(pageable, name, dependencyFilter, searchParam)), HttpStatus.OK);
     }
 
     @Override

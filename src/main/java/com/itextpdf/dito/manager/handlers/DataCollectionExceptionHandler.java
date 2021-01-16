@@ -35,7 +35,7 @@ public class DataCollectionExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(DataCollectionHasDependenciesException.class)
     public ResponseEntity<ErrorResponseDTO> dataCollectionHasDependenciesExceptionHandler(final DataCollectionHasDependenciesException ex) {
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(ex, HttpStatus.CONFLICT);
     }
     @ExceptionHandler(DataCollectionFileSizeExceedLimitException.class)
     public ResponseEntity<ErrorResponseDTO> dataCollectionFileSizeExceedLimitExceptionHandler(
