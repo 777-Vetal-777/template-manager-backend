@@ -10,10 +10,10 @@ import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -22,15 +22,13 @@ import java.util.List;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
-@Component
+@Service
 public class TemplateDependencyServiceImpl extends AbstractController implements TemplateDependencyService {
 
     private final TemplateService templateService;
-
     private final TemplateRepository templateRepository;
 
-    @Autowired
-    public TemplateDependencyServiceImpl(TemplateService templateService, TemplateRepository templateRepository) {
+    public TemplateDependencyServiceImpl(final TemplateService templateService, final TemplateRepository templateRepository) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
     }
@@ -50,18 +48,16 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
     }
 
     @Override
-    public List<DependencyModel> list(String name) {
+    public List<DependencyModel> list(final String name) {
         final String templateName = decodeBase64(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
         return templateRepository.list(templateEntity.getId());
-
-
     }
 
     private List<String> getDependencyAsString(final List<DependencyType> list) {
         final List<String> listStrings = new ArrayList<>();
         if (list != null) {
-            for (DependencyType dependencyType : list) {
+            for (final DependencyType dependencyType : list) {
                 listStrings.add(dependencyType.toString());
             }
         }
