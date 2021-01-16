@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.template.impl;
 
+import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
@@ -15,13 +16,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
-    private TemplateLogEntity firstTemplateLog;
+    private final RoleMapper roleMapper;
+
+    public TemplateMapperImpl(final RoleMapper roleMapper) {
+        this.roleMapper = roleMapper;
+    }
 
     @Override
     public TemplateDTO map(final TemplateEntity entity) {
@@ -103,6 +109,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setDataCollection(Objects.nonNull(dataCollectionFileEntity)
                 ? dataCollectionFileEntity.getDataCollection().getName()
                 : null);
+        result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         return result;
     }
 
