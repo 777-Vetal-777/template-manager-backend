@@ -45,7 +45,7 @@ resources:
   pictures:
     extensions:
       supported: bmp,ccit,gif,jpg,jpg2000,png,svg,wmf
-    size-limit: 67108864
+    size-limit: 8388608
 
 
 data-collection:
