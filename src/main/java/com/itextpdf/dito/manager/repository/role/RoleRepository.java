@@ -82,9 +82,9 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + "left join role.users user "
             + "where  "
             //search
-            + "(LOWER(user.email) like  LOWER(CONCAT('%',:search,'%')) "
+            + "((LOWER(user.email) like  LOWER(CONCAT('%',:search,'%')) "
             + " or LOWER(role.type) like  LOWER(CONCAT('%',:search,'%')) "
-            + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%')) "
+            + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%'))) "
             + " and role.master = true)"
             //filtering
             + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%')) "
