@@ -38,6 +38,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -96,6 +97,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
+    @PreAuthorize("hasAuthority('E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
     public ResponseEntity<DataCollectionDTO> create(final Principal principal, final String name, final String dataCollectionType, final MultipartFile multipartFile, final String comment) {
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
