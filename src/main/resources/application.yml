@@ -50,4 +50,4 @@ resources:
 
 data-collection:
   json:
-      size-limit: 67108864
+      size-limit: 8388608
