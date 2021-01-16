@@ -48,7 +48,7 @@ public interface TemplateController {
     String BASE_NAME = MAJOR_VERSION + "/templates";
 
     String TEMPLATE_TYPES_ENDPOINT = "/types";
-    String TEMPLATE_PATH_VARIABLE = "name";
+    String TEMPLATE_PATH_VARIABLE = "template-name";
     String ROLE_PATH_VARIABLE = "role-name";
     String TEMPLATE_VERSION_ENDPOINT = "/versions";
     String PAGEABLE_ENDPOINT = "/pageable";
@@ -107,13 +107,13 @@ public interface TemplateController {
     @Operation(summary = "Get template metadata", description = "Get template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> get(
-            @Parameter(description = "Template name encoded with base64.") @PathVariable("name") String name);
+            @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @PatchMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Update template metadata", description = "Update template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> update(
-            @Parameter(description = "Template name encoded with base64.") @PathVariable("name") String name,
+            @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @RequestBody TemplateUpdateRequestDTO templateUpdateRequestDTO,
             Principal principal);
 

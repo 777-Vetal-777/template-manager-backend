@@ -36,7 +36,7 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
     public Page<TemplatePermissionsModel> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
-        final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getRoleName());
+        final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getName());
         final String editTemplateMetadataFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditTemplateMetadata());
         final String createNewTemplateVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersion());
         final String rollbackVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersion());

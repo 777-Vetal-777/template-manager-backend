@@ -4,7 +4,7 @@ import java.util.List;
 
 public class DataCollectionPermissionFilter {
 
-    private List<String> roleName;
+    private List<String> name;
     private List<Boolean> editDataCollectionMetadata;
     private List<Boolean> createNewVersionOfDataCollection;
     private List<Boolean> rollbackOfTheDataCollection;
@@ -14,12 +14,12 @@ public class DataCollectionPermissionFilter {
     private List<Boolean> createNewVersionOfDataSample;
     private List<Boolean> deleteDataSample;
 
-    public List<String> getRoleName() {
-        return roleName;
+    public List<String> getName() {
+        return name;
     }
 
-    public void setRoleName(List<String> roleName) {
-        this.roleName = roleName;
+    public void setName(List<String> name) {
+        this.name = name;
     }
 
     public List<Boolean> getEditDataCollectionMetadata() {
