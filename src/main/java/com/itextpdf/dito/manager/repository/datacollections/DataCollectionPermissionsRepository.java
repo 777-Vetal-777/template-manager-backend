@@ -69,7 +69,7 @@ public interface DataCollectionPermissionsRepository extends JpaRepository<DataC
     String PERMISSION_SEARCH_CONDITION = " and LOWER(name) like CONCAT('%',:search,'%')";
 
     @Query(value = PERMISSION_SELECT_CLAUSE + PERMISSION_TABLE_CLAUSE + PERMISSION_FILTER_CONDITION,
-            countQuery = PERMISSION_COUNT_CLAUSE + PERMISSION_TABLE_CLAUSE + PERMISSION_FILTER_CONDITION + PERMISSION_SEARCH_CONDITION,
+            countQuery = PERMISSION_COUNT_CLAUSE + PERMISSION_TABLE_CLAUSE + PERMISSION_FILTER_CONDITION,
             nativeQuery = true)
     Page<DataCollectionPermissionsModel> filterPermissions(Pageable pageable,
                                                            @Param("name") String dataCollectionName,
