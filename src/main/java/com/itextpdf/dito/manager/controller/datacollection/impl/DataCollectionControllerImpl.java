@@ -204,7 +204,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
             throw new DataCollectionFileSizeExceedLimitException(fileSize);
         }
     }
-    
+
     @Override
 	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
 		final String dataSampleName = dataSampleCreateRequestDTO.getName();
@@ -214,6 +214,5 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 		final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
 		return new ResponseEntity<>(dataSampleMapper.map(dataSampleEntity), HttpStatus.CREATED);
 	}
-
 
 }
