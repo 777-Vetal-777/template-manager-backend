@@ -149,7 +149,7 @@ public interface DataCollectionController {
                                                          @Parameter(description = "Data collections name encoded with base64.") @PathVariable("data-collection-name") String name,
                                                          @ParameterObject DataCollectionDependencyFilter filter,
                                                          @RequestParam(name = "search", required = false) String searchParam);
-   
+
 	@PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
 	@Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
