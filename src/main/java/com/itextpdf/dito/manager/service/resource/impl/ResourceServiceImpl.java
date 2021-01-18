@@ -148,10 +148,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         fileEntity.setCreatedOn(new Date());
         fileEntity.setModifiedOn(new Date());
 
+        resourceFileRepository.save(fileEntity);
+
         existingResourceEntity.getResourceFiles().add(fileEntity);
         existingResourceEntity.getResourceLogs().add(logEntity);
         existingResourceEntity.setLatestFile(fileEntity);
-
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
 
         final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(existingResourceEntity.getId());
@@ -164,7 +165,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             });
             templateRepository.saveAll(templateEntities);
         }
-
         return updatedResourceEntity;
     }
 
