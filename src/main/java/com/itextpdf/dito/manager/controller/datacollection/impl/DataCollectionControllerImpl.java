@@ -25,6 +25,7 @@ import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollecti
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
+import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
@@ -32,6 +33,7 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionDependency
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermissionService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -57,6 +59,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final PermissionMapper permissionMapper;
     private final DataSampleMapper dataSampleMapper;
     private final DataCollectionPermissionService dataCollectionPermissionService;
+    private final DataSampleService dataSampleService;
     private final Long sizeJsonLimit;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
@@ -67,8 +70,8 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final PermissionMapper permissionMapper,
                                         final DataSampleMapper dataSampleMapper,
                                         final DataCollectionPermissionService dataCollectionPermissionService,
-                                        @Value("${data-collection.json.size-limit}")
-                                        final Long sizeJsonLimit) {
+                                        final DataSampleService dataSampleService,
+                                        @Value("${data-collection.json.size-limit}") final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
         this.dependencyMapper = dependencyMapper;
@@ -77,6 +80,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.permissionMapper = permissionMapper;
         this.dataSampleMapper = dataSampleMapper;
         this.dataCollectionPermissionService = dataCollectionPermissionService;
+        this.dataSampleService = dataSampleService;
         this.sizeJsonLimit = sizeJsonLimit;
     }
 
@@ -214,5 +218,15 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 		final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
 		return new ResponseEntity<>(dataSampleMapper.map(dataSampleEntity), HttpStatus.CREATED);
 	}
+
+    @Override
+    public ResponseEntity<Page<DataSampleDTO>> list(final Pageable pageable, final DataSampleFilter filter, final String searchParam) {
+        return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, filter, searchParam)), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<DataSampleDTO> getDataSample(final String dataSampleName) {
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))), HttpStatus.OK);
+    }
 
 }

@@ -37,13 +37,5 @@ public class DataSampleControllerImpl extends AbstractController implements Data
         throw new NotImplementedException("Not realized yet");
     }
 
-    @Override
-    public ResponseEntity<Page<DataSampleDTO>> list(final Pageable pageable, final DataSampleFilter filter, final String searchParam) {
-        return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, filter, searchParam)), HttpStatus.OK);
-    }
 
-    @Override
-    public ResponseEntity<DataSampleDTO> get(final String dataSampleName) {
-        return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.get(dataSampleName)), HttpStatus.OK);
-    }
 }

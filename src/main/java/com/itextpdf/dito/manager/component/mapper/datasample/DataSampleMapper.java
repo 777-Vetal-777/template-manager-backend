@@ -8,5 +8,7 @@ import org.springframework.data.domain.Page;
 public interface DataSampleMapper {
     DataSampleDTO map(DataSampleEntity entity);
 
+    DataSampleDTO mapWithFile(DataSampleEntity entity);
+
     Page<DataSampleDTO> map(Page<DataSampleEntity> entities);
 }
