@@ -17,7 +17,7 @@ import java.util.List;
 
 @Repository
 public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity, Long> {
-    List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "active", "directionType");
+    List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
     List<String> SUPPORTED_SORT_FIELDS = List.of("version", "deployed", "modifiedBy", "modifiedOn", "comment");
 
     ResourceFileEntity findFirstByResource_IdOrderByVersionDesc(Long id);
@@ -64,52 +64,61 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                     @Param("deployed") @Nullable Boolean deployed,
                                     @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, file.deployed) "
-            + "from ResourceFileEntity file "
-            + "join file.templateFiles templateFiles "
-            + "join templateFiles.template template "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+            + "from ResourceEntity resource "
+            + "join resource.latestFile file "
+            + "left join file.templateFiles templateFiles "
+            + "left join templateFiles.instance instance "
+            + "left join instance.stage stage "
+            + "left join templateFiles.template template "
             + "where "
             //filtering
             + "file.resource.id = :id "
             + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
             + "and (:version=0l or file.version is null or file.version=:version) "
             + "and (:type is null or file.resource.type = :type) "
-            + "and (:deployed=null or file.deployed IS :deployed) ")
+            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ")
     Page<DependencyModel> filter(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
                                  @Param("type") @Nullable ResourceTypeEnum type,
-                                 @Param("deployed") @Nullable Boolean deployed);
+                                 @Param("stage") @Nullable String stage);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, file.deployed) "
-            + "from ResourceFileEntity file "
-            + "join file.templateFiles templateFiles "
-            + "join templateFiles.template template "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+            + "from ResourceEntity resource "
+            + "join resource.latestFile file "
+            + "left join file.templateFiles templateFiles "
+            + "left join templateFiles.instance instance "
+            + "left join instance.stage stage "
+            + "left join templateFiles.template template "
             + "where "
             //filtering
             + "file.resource.id = :id "
             + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
             + "and (:version=0l or file.version is null or file.version=:version) "
             + "and (:type is null or file.resource.type = :type) "
-            + "and (:deployed=null or file.deployed IS :deployed) "
+            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) "
             //search
             + "and LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or CAST(file.version as string) like CONCAT('%',:search,'%') "
             + "or LOWER(CAST(file.resource.type as string)) like CONCAT('%',:search,'%') "
-            + "or (LOWER(file.resource.type) like CONCAT('%',:search,'%')) ")
+            + "or LOWER(stage.name) like CONCAT('%',:search,'%')")
     Page<DependencyModel> search(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
                                  @Param("type") @Nullable ResourceTypeEnum type,
-                                 @Param("deployed") @Nullable Boolean deployed,
+                                 @Param("stage") @Nullable String stage,
                                  @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, file.deployed) "
-            + "from ResourceFileEntity file "
-            + "join file.templateFiles templateFiles "
-            + "join templateFiles.template template "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+            + "from ResourceEntity resource "
+            + "join resource.latestFile file "
+            + "left join file.templateFiles templateFiles "
+            + "left join templateFiles.instance instance "
+            + "left join instance.stage stage "
+            + "left join templateFiles.template template "
             + "where file.resource.id = :id ")
     List<DependencyModel> search(@Param("id") Long resourceId);
 }
