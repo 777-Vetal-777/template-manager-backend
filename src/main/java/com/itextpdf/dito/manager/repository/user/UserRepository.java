@@ -35,6 +35,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             //search
             + "and (LOWER(user.email) like CONCAT('%',:search,'%') "
             + "or LOWER(role.name) like CONCAT('%',:search,'%') "
+            + "or (LOWER(role.name) = 'global_administrator' and 'global administrator' like CONCAT('%',:search,'%')) "
+            + "or (LOWER(role.name) = 'template_designer' and 'template designer' like CONCAT('%',:search,'%')) "
             + "or LOWER(CONCAT(user.firstName, ' ',  user.lastName)) like CONCAT('%',:search,'%'))"
             + "group by user.id")
     Page<UserEntity> search(Pageable pageable,
