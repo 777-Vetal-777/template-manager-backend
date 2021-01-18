@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,4 +24,9 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setFileName(entity.getFileName());
         return dto;
 	}
+
+    @Override
+    public Page<DataSampleDTO> map(final Page<DataSampleEntity> entities) {
+        return entities.map(this::map);
+    }
 }
