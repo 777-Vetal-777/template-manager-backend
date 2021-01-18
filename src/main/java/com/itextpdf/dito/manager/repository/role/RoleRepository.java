@@ -88,6 +88,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
             + " and role.master = true)"
             //filtering
             + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%')) "
+            + "or (LOWER(role.name) = 'global_administrator' and 'global administrator' like CONCAT('%',:search,'%')) "
+            + "or (LOWER(role.name) = 'template_designer' and 'template designer' like CONCAT('%',:search,'%')) "
             + "and (COALESCE(:types) is null or role.type in (:types)) "
             + "group by (role.id, role.type)")
     Page<RoleEntity> search(Pageable pageable,
