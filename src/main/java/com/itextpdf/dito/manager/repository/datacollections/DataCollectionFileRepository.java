@@ -16,26 +16,22 @@ import java.util.List;
 
 @Repository
 public interface DataCollectionFileRepository extends JpaRepository<DataCollectionFileEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment", "deploymentStatus");
-    List<String> SUPPORTED_VERSION_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment");
     List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
 
     String SELECT_CLAUSE = "select file from DataCollectionFileEntity file "
-            + " left join file.templateFiles templateFiles "
-            + " left join templateFiles.instance instance "
-            + " left join instance.stage stage "
             + " where file.dataCollection.id = :id and ";
 
     String FILTER_CONDITION = "(:version=0l or file.version=:version) "
             + "and (:createdBy='' or LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) like CONCAT('%',:createdBy,'%')) "
             + "and (cast(:startDate as date) is null or file.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%')) "
-            + "and (:deployed='' or :deployed = case when stage.id is not null then 'true' else 'false' end)";
+            + "and (:deployed='' or :deployed = case when (select max(stage.id) from file.templateFiles templateFiles left join templateFiles.instance instance left join instance.stage stage) is not null then 'true' else 'false' end )";
 
     String SEARCH_CONDITION = "( CAST(file.version as string) like CONCAT('%',:search,'%') "
             + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
-            + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
-            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') )";
+            + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%')) "
+            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ) ";
 
     String SELECT_DEPENDENCIES_CLAUSE = "select new com.itextpdf.dito.manager.model.datacollection.DataCollectionDependencyModel(template.name, lastTemplateFile.version, stage.name) "
             + "from TemplateEntity template "
