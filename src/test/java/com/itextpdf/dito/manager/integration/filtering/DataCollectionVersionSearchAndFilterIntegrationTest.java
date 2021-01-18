@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class DataCollectionVersionSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
-    private static final String DATACOLLECTION_NAME = "data-collection-test";
+    private static final String DATACOLLECTION_NAME = "data-collection-search-test";
     private static final String DATACOLLECTION_BASE64_ENCODED_NAME = Base64.encode(DATACOLLECTION_NAME);
     private static final String TYPE = "JSON";
     private static final String VERSIONS_URN = DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE;
