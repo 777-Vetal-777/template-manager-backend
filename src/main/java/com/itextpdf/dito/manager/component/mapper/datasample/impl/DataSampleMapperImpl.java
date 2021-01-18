@@ -26,6 +26,13 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 	}
 
     @Override
+    public DataSampleDTO mapWithFile(final DataSampleEntity entity) {
+        final DataSampleDTO result = map(entity);
+        result.setFile(new String(entity.getData()));
+        return result;
+    }
+
+    @Override
     public Page<DataSampleDTO> map(final Page<DataSampleEntity> entities) {
         return entities.map(this::map);
     }

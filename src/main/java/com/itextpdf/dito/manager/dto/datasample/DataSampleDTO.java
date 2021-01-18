@@ -15,8 +15,16 @@ public class DataSampleDTO {
     private String authorLastName;
     private String fileName;
     private String comment;
+    private String file;
 
- 
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
     public String getComment() {
         return comment;
     }

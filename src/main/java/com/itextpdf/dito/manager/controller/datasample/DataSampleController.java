@@ -32,9 +32,6 @@ public interface DataSampleController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/datasamples";
 
-    String DATA_SAMPLE_PATH_VARIABLE = "data-sample-name";
-    String DATA_SAMPLE_WITH_PATH_VARIABLE = "/{" + DATA_SAMPLE_PATH_VARIABLE + "}";
-
     @PostMapping
     @Operation(summary = "Create data sample", description = "Create new data sample",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -45,15 +42,5 @@ public interface DataSampleController {
     ResponseEntity<DataSampleDTO> create(@RequestBody DataSampleCreateRequestDTO templateCreateRequestDTO,
                                              Principal principal);
 
-    @GetMapping
-    @Operation(summary = "Get list of data samples",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<DataSampleDTO>> list(Pageable pageable, @ParameterObject DataSampleFilter filter,
-                                                 @RequestParam(name = "search", required = false) String searchParam);
-
-    @GetMapping(DATA_SAMPLE_WITH_PATH_VARIABLE)
-    @Operation(summary = "Get data sample by name", description = "Get data sample by name",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<DataSampleDTO> get(@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_WITH_PATH_VARIABLE) String name);
 
 }
