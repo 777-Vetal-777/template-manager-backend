@@ -42,12 +42,12 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
 
     String FILTERING_DEPENDENCIES_CONDITION = " file.dataCollection.id = :id "
             + "and (:dependencyName='' or LOWER(template.name) like CONCAT('%',:dependencyName,'%')) "
-            + "and (:version=0l or file.version=:version) "
+            + "and (:version=0l or lastTemplateFile.version=:version) "
             + "and (CONCAT(:direction) is null or 'soft' in (:direction)) "
             + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ";
 
     String SEARCH_DEPENDENCIES_CONDITION = "( LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or cast(file.version as text) like CONCAT('%',:search,'%') "
+            + "or cast(lastTemplateFile.version as text) like CONCAT('%',:search,'%') "
             + "or 'template' like CONCAT('%',:search,'%') "
             + "or 'soft' like CONCAT('%',:search,'%') "
             + "or stage.name like CONCAT('%',:search,'%') )";
