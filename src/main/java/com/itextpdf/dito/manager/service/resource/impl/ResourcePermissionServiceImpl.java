@@ -51,7 +51,7 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
                 ? resourcePermissionRepository.filter(pageable, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
                 createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage)
                 : resourcePermissionRepository.search(pageable, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
-                createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, search);
+                createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, search.toLowerCase());
     }
 
 }
