@@ -13,8 +13,6 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -82,11 +80,8 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setComment(entity.getComment());
 
         final Optional<StageEntity> stageEntity = entity.getTemplateFiles().stream().flatMap(templateFile -> templateFile.getInstance().stream()).map(InstanceEntity::getStage).findAny();
-        if (stageEntity.isPresent()) {
-            dto.setDeploymentStatus(true);
-        } else {
-            dto.setDeploymentStatus(false);
-        }
+        dto.setDeploymentStatus(stageEntity.isPresent());
+
         return dto;
     }
 
