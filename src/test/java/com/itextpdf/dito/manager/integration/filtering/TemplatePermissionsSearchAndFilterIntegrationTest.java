@@ -88,7 +88,7 @@ public class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractI
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
         mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
-                .param("name", "ADMIN"))
+                .param("name", "GLOBAL_ADMINISTRATOR"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
         mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
@@ -102,8 +102,8 @@ public class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractI
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "false,true"))
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].E9_US75_EDIT_TEMPLATE_METADATA_STANDARD").value("true"))
-                .andExpect(jsonPath("$.content[0].E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD").value("true"));
+                .andExpect(jsonPath("$.content[0].E9_US24_EXPORT_TEMPLATE_DATA").value("false"))
+                .andExpect(jsonPath("$.content[0].E9_US81_PREVIEW_TEMPLATE_STANDARD").value("false"));
 
     }
 
