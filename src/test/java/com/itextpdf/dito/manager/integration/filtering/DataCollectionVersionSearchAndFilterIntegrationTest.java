@@ -74,7 +74,7 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
-        for (String field : DataCollectionFileRepository.SUPPORTED_VERSION_SORT_FIELDS) {
+        for (String field : DataCollectionFileRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                     .param("sort", field)
                     .param("search", "comment"))
@@ -86,7 +86,7 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
     @Override
     @Test
     public void test_sortWithFiltering() throws Exception {
-        for (String field : DataCollectionFileRepository.SUPPORTED_VERSION_SORT_FIELDS) {
+        for (String field : DataCollectionFileRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                     .param("sort", field)
                     .param("deployed", String.valueOf(false)))
