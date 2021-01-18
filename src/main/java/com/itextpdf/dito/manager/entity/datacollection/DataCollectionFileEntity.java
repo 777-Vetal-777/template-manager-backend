@@ -100,4 +100,12 @@ public class DataCollectionFileEntity {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    public List<TemplateFileEntity> getTemplateFiles() {
+        return templateFiles;
+    }
+
+    public void setTemplateFiles(List<TemplateFileEntity> templateFiles) {
+        this.templateFiles = templateFiles;
+    }
 }

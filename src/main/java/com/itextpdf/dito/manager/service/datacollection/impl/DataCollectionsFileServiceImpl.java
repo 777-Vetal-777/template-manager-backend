@@ -23,6 +23,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromMultiselectBooleanFilter;
 
 @Service
 public class DataCollectionsFileServiceImpl extends AbstractService implements DataCollectionFileService {
@@ -48,6 +49,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
         final Long version = getLongFromFilter(filter.getVersion());
         final String createdBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
+        final String deploymentStatus = getStringFromMultiselectBooleanFilter(filter.getDeployed());
 
         Date createdOnStartDate = null;
         Date createdOnEndDate = null;
@@ -60,8 +62,8 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
             createdOnEndDate = getEndDateFromRange(createdOnDateRange);
         }
         return StringUtils.isEmpty(searchParam)
-                ? dataCollectionFileRepository.filter(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, comment)
-                : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, comment, searchParam);
+                ? dataCollectionFileRepository.filter(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, deploymentStatus, comment)
+                : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, deploymentStatus, comment, searchParam);
     }
 
     private Pageable updateSort(final Pageable pageable) {

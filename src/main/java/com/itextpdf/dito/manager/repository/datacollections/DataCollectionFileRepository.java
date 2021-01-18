@@ -20,12 +20,17 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
     List<String> SUPPORTED_VERSION_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment");
     List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
 
-    String SELECT_CLAUSE = "select file from DataCollectionFileEntity file where file.dataCollection.id = :id and ";
+    String SELECT_CLAUSE = "select file from DataCollectionFileEntity file "
+            + " left join file.templateFiles templateFiles "
+            + " left join templateFiles.instance instance "
+            + " left join instance.stage stage "
+            + " where file.dataCollection.id = :id and ";
 
     String FILTER_CONDITION = "(:version=0l or file.version=:version) "
             + "and (:createdBy='' or LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) like CONCAT('%',:createdBy,'%')) "
             + "and (cast(:startDate as date) is null or file.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))";
+            + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%')) "
+            + "and (:deployed='' or :deployed = case when stage.id is not null then 'true' else 'false' end)";
 
     String SEARCH_CONDITION = "( CAST(file.version as string) like CONCAT('%',:search,'%') "
             + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
@@ -61,6 +66,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                           @Param("createdBy") @Nullable String createdBy,
                                           @Param("startDate") @Nullable @Temporal Date startDate,
                                           @Param("endDate") @Nullable @Temporal Date endDate,
+                                          @Param("deployed") @Nullable String deploymentStatus,
                                           @Param("comment") @Nullable String comment);
 
     @Query(value = SELECT_CLAUSE + FILTER_CONDITION + " and " + SEARCH_CONDITION)
@@ -70,6 +76,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                           @Param("createdBy") @Nullable String createdBy,
                                           @Param("startDate") @Nullable @Temporal Date startDate,
                                           @Param("endDate") @Nullable @Temporal Date endDate,
+                                          @Param("deployed") @Nullable String deploymentStatus,
                                           @Param("comment") @Nullable String comment,
                                           @Param("search") @Nullable String search);
 
