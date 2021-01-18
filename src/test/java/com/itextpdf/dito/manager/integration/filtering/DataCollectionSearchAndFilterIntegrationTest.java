@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,13 +26,13 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
 
     @BeforeEach
     public void init() throws Exception {
-        dataCollectionService.create("data-collection-test", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+        dataCollectionService.create("data-collection-search-test", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
     }
 
     @AfterEach
     public void clearDb() {
-        dataCollectionService.delete("data-collection-test", "admin@email.com");
+        dataCollectionService.delete("data-collection-search-test", "admin@email.com");
     }
 
     @Test
@@ -49,7 +48,7 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
     @Test
     public void test_filtering() throws Exception {
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
-                .param("name", "data-COLLECTION-test"))
+                .param("name", "data-COLLECTION-search-test"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("modifiedOn", "01/01/1970")
@@ -61,7 +60,7 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
     @Test
     public void test_searchAndFiltering() throws Exception {
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
-                .param("search", "data-COLLECTION-test"))
+                .param("search", "data-COLLECTION-search-test"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
