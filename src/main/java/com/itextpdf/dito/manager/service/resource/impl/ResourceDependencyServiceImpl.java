@@ -78,7 +78,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("name")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "templates.name");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
                     }
                     if (sortParam.getProperty().equals("version")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
