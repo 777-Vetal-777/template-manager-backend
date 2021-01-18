@@ -53,18 +53,17 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
             final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
-            final Boolean deployed = getBooleanMultiselectFromFilter(filter.getActive());
+            final String stage = getStringFromFilter(filter.getStage());
             final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD
             if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) || IMAGE_RESOURCE_TYPE.contains(searchParam.toLowerCase()))) {
-                searchResult = resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed);
+                searchResult = resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, stage);
             } else {
                 searchResult = isSearchEmpty
-                        ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, deployed)
-                        : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, deployed, searchParam);
+                        ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, type, stage)
+                        : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, type, stage, searchParam.toLowerCase());
             }
         }
-        //TODO Redo getting the status from the instance to which the template depends. Now there is no binding of the instance to the template.
         return searchResult;
     }
 
@@ -89,8 +88,8 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
                     if (sortParam.getProperty().equals("dependencyType")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "file.resource.type");
                     }
-                    if (sortParam.getProperty().equals("active")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "file.deployed");
+                    if (sortParam.getProperty().equals("stage")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
                     }
                     return sortParam;
                 })

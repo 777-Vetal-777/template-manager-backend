@@ -10,7 +10,7 @@ public class ResourceDependencyFilter {
     private String name;
     private Long version;
     private List<DependencyType> dependencyType;
-    private List<Boolean> active;
+    private String stage;
     private List<DependencyDirectionType> directionType;
 
     public String getName() {
@@ -37,19 +37,19 @@ public class ResourceDependencyFilter {
         this.dependencyType = dependencyType;
     }
 
-    public List<Boolean> getActive() {
-        return active;
-    }
-
-    public void setActive(List<Boolean> active) {
-        this.active = active;
-    }
-
     public List<DependencyDirectionType> getDirectionType() {
         return directionType;
     }
 
     public void setDirectionType(List<DependencyDirectionType> directionType) {
         this.directionType = directionType;
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 }

@@ -7,12 +7,12 @@ import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 public class ResourceDependencyModel implements DependencyModel {
     private String name;
     private Long version;
-    private Boolean active;
+    private String stage;
 
-    public ResourceDependencyModel(String name, Long version, Boolean active) {
+    public ResourceDependencyModel(String name, Long version, String stage) {
         this.name = name;
         this.version = version;
-        this.active = active;
+        this.stage = stage;
     }
 
     public String getName() {
@@ -34,7 +34,7 @@ public class ResourceDependencyModel implements DependencyModel {
 
     @Override
     public String getStage() {
-        return null;
+        return stage;
     }
 
     @Override
@@ -46,11 +46,4 @@ public class ResourceDependencyModel implements DependencyModel {
         this.version = version;
     }
 
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
 }
