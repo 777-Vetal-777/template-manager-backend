@@ -6,20 +6,21 @@ import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import java.util.Optional;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
@@ -135,7 +136,9 @@ public class TemplateMapperImpl implements TemplateMapper {
         version.setVersion(entity.getVersion());
         version.setComment(entity.getComment());
         version.setModifiedOn(entity.getCreatedOn());
-        version.setDeploymentStatus(entity.getDeployed());
+
+        final Optional<StageEntity> stageEntity = entity.getInstance().stream().map(instance -> instance.getStage()).filter(Objects::nonNull).findAny();
+        version.setDeploymentStatus(stageEntity.isPresent());
 
         final UserEntity author = entity.getAuthor();
         if (Objects.nonNull(author)) {
