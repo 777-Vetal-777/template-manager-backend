@@ -56,7 +56,7 @@ public interface DataCollectionPermissionsRepository extends JpaRepository<DataC
             + " group by r.name) as rolesTable "
             + "where ";
 
-    String PERMISSION_FILTER_CONDITION = "(COALESCE(:role_names) is null or name in (CAST(:role_names AS text)))"
+    String PERMISSION_FILTER_CONDITION = "(COALESCE(:role_names) is null or CAST(name as text) in (:role_names))"
             + "  and (:editDataCollectionMetadata='' or :editDataCollectionMetadata=E6_US34_EDIT_DATA_COLLECTION_METADATA) "
             + "  and (:createNewVersionOfDataCollection='' or :createNewVersionOfDataCollection=E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON) "
             + "  and (:rollbackOfTheDataCollection='' or :rollbackOfTheDataCollection=E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION) "
@@ -69,6 +69,7 @@ public interface DataCollectionPermissionsRepository extends JpaRepository<DataC
     String PERMISSION_SEARCH_CONDITION = " and LOWER(name) like CONCAT('%',:search,'%')";
 
     @Query(value = PERMISSION_SELECT_CLAUSE + PERMISSION_TABLE_CLAUSE + PERMISSION_FILTER_CONDITION,
+            countQuery = PERMISSION_COUNT_CLAUSE + PERMISSION_TABLE_CLAUSE + PERMISSION_FILTER_CONDITION + PERMISSION_SEARCH_CONDITION,
             nativeQuery = true)
     Page<DataCollectionPermissionsModel> filterPermissions(Pageable pageable,
                                                            @Param("name") String dataCollectionName,

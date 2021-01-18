@@ -26,7 +26,7 @@ public class DataCollectionPermissionFilter {
         return editDataCollectionMetadata;
     }
 
-    public void setEditDataCollectionMetadata(List<Boolean> editDataCollectionMetadata) {
+    public void setE6_US34_EDIT_DATA_COLLECTION_METADATA(List<Boolean> editDataCollectionMetadata) {
         this.editDataCollectionMetadata = editDataCollectionMetadata;
     }
 
@@ -34,7 +34,7 @@ public class DataCollectionPermissionFilter {
         return createNewVersionOfDataCollection;
     }
 
-    public void setCreateNewVersionOfDataCollection(List<Boolean> createNewVersionOfDataCollection) {
+    public void setE6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON(List<Boolean> createNewVersionOfDataCollection) {
         this.createNewVersionOfDataCollection = createNewVersionOfDataCollection;
     }
 
@@ -42,7 +42,7 @@ public class DataCollectionPermissionFilter {
         return rollbackOfTheDataCollection;
     }
 
-    public void setRollbackOfTheDataCollection(List<Boolean> rollbackOfTheDataCollection) {
+    public void setE6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION(List<Boolean> rollbackOfTheDataCollection) {
         this.rollbackOfTheDataCollection = rollbackOfTheDataCollection;
     }
 
@@ -50,7 +50,7 @@ public class DataCollectionPermissionFilter {
         return deleteDataCollection;
     }
 
-    public void setDeleteDataCollection(List<Boolean> deleteDataCollection) {
+    public void setE6_US38_DELETE_DATA_COLLECTION(List<Boolean> deleteDataCollection) {
         this.deleteDataCollection = deleteDataCollection;
     }
 
@@ -58,7 +58,7 @@ public class DataCollectionPermissionFilter {
         return createNewDataSample;
     }
 
-    public void setCreateNewDataSample(List<Boolean> createNewDataSample) {
+    public void setE7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE(List<Boolean> createNewDataSample) {
         this.createNewDataSample = createNewDataSample;
     }
 
@@ -66,7 +66,7 @@ public class DataCollectionPermissionFilter {
         return editSampleMetadata;
     }
 
-    public void setEditSampleMetadata(List<Boolean> editSampleMetadata) {
+    public void setE7_US47_EDIT_SAMPLE_METADATA(List<Boolean> editSampleMetadata) {
         this.editSampleMetadata = editSampleMetadata;
     }
 
@@ -74,7 +74,7 @@ public class DataCollectionPermissionFilter {
         return createNewVersionOfDataSample;
     }
 
-    public void setCreateNewVersionOfDataSample(List<Boolean> createNewVersionOfDataSample) {
+    public void setE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE(List<Boolean> createNewVersionOfDataSample) {
         this.createNewVersionOfDataSample = createNewVersionOfDataSample;
     }
 
@@ -82,7 +82,7 @@ public class DataCollectionPermissionFilter {
         return deleteDataSample;
     }
 
-    public void setDeleteDataSample(List<Boolean> deleteDataSample) {
+    public void setE7_US50_DELETE_DATA_SAMPLE(List<Boolean> deleteDataSample) {
         this.deleteDataSample = deleteDataSample;
     }
 }

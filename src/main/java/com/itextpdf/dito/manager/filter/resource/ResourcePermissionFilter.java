@@ -6,19 +6,19 @@ import java.util.List;
 
 public class ResourcePermissionFilter {
     private List<String> name;
-    private List<Boolean> E8_US55_EDIT_RESOURCE_METADATA_IMAGE;
-    private List<Boolean> E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE;
-    private List<Boolean> E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE;
-    private List<Boolean> E8_US66_DELETE_RESOURCE_IMAGE;
+    private List<Boolean> editResourceMetadataImage;
+    private List<Boolean> createNewVersionResourceImage;
+    private List<Boolean> rollBackResourceImage;
+    private List<Boolean> deleteResourceImage;
 
-    public ResourcePermissionFilter(List<String> name, List<Boolean> e8_US55_EDIT_RESOURCE_METADATA_IMAGE,
-                                    List<Boolean> e8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE, List<Boolean> e8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE,
-                                    List<Boolean> e8_US66_DELETE_RESOURCE_IMAGE) {
+    public ResourcePermissionFilter(List<String> name, List<Boolean> editResourceMetadataImage,
+                                    List<Boolean> createNewVersionResourceImage, List<Boolean> rollBackResourceImage,
+                                    List<Boolean> deleteResourceImage) {
         this.name = name;
-        E8_US55_EDIT_RESOURCE_METADATA_IMAGE = e8_US55_EDIT_RESOURCE_METADATA_IMAGE;
-        E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE = e8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE;
-        E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE = e8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE;
-        E8_US66_DELETE_RESOURCE_IMAGE = e8_US66_DELETE_RESOURCE_IMAGE;
+        this.editResourceMetadataImage = editResourceMetadataImage;
+        this.createNewVersionResourceImage = createNewVersionResourceImage;
+        this.rollBackResourceImage = rollBackResourceImage;
+        this.deleteResourceImage = deleteResourceImage;
     }
 
     public List<String> getName() {
@@ -29,35 +29,35 @@ public class ResourcePermissionFilter {
         this.name = name;
     }
 
-    public List<Boolean> getE8_US55_EDIT_RESOURCE_METADATA_IMAGE() {
-        return E8_US55_EDIT_RESOURCE_METADATA_IMAGE;
+    public List<Boolean> getEditResourceMetadataImage() {
+        return editResourceMetadataImage;
     }
 
-    public void setE8_US55_EDIT_RESOURCE_METADATA_IMAGE(List<Boolean> e8_US55_EDIT_RESOURCE_METADATA_IMAGE) {
-        E8_US55_EDIT_RESOURCE_METADATA_IMAGE = e8_US55_EDIT_RESOURCE_METADATA_IMAGE;
+    public List<Boolean> getCreateNewVersionResourceImage() {
+        return createNewVersionResourceImage;
     }
 
-    public List<Boolean> getE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE() {
-        return E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE;
+    public List<Boolean> getRollBackResourceImage() {
+        return rollBackResourceImage;
     }
 
-    public void setE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE(List<Boolean> e8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE) {
-        E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE = e8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE;
+    public List<Boolean> getDeleteResourceImage() {
+        return deleteResourceImage;
     }
 
-    public List<Boolean> getE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE() {
-        return E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE;
+    public void setE8_US55_EDIT_RESOURCE_METADATA_IMAGE(List<Boolean> editResourceMetadataImage) {
+        this.editResourceMetadataImage = editResourceMetadataImage;
     }
 
-    public void setE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE(List<Boolean> e8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE) {
-        E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE = e8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE;
+    public void setE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE(List<Boolean> createNewVersionResourceImage) {
+        this.createNewVersionResourceImage = createNewVersionResourceImage;
     }
 
-    public List<Boolean> getE8_US66_DELETE_RESOURCE_IMAGE() {
-        return E8_US66_DELETE_RESOURCE_IMAGE;
+    public void setE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE(List<Boolean> rollBackResourceImage) {
+        this.rollBackResourceImage = rollBackResourceImage;
     }
 
-    public void setE8_US66_DELETE_RESOURCE_IMAGE(List<Boolean> e8_US66_DELETE_RESOURCE_IMAGE) {
-        E8_US66_DELETE_RESOURCE_IMAGE = e8_US66_DELETE_RESOURCE_IMAGE;
+    public void setE8_US66_DELETE_RESOURCE_IMAGE(List<Boolean> deleteResourceImage) {
+        this.deleteResourceImage = deleteResourceImage;
     }
 }

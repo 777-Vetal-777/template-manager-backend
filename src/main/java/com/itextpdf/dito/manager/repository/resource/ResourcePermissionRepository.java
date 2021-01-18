@@ -44,7 +44,7 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             " group by role.name) as resourcePermissions" +
             " where";
 
-    String FILTER_CONDITION = " (COALESCE(:names) is null or name in (CAST(:names AS text)))" +
+    String FILTER_CONDITION = " (COALESCE(:role_names) is null or CAST(name as text) in (:role_names))" +
             " and (:EDIT_RESOURCE_METADATA_IMAGE_BOOLEAN = '' or :EDIT_RESOURCE_METADATA_IMAGE_BOOLEAN= E8_US55_EDIT_RESOURCE_METADATA_IMAGE)" +
             " and (:CREATE_NEW_VERSION_OF_RESOURCE_IMAGE_BOOLEAN = '' or :CREATE_NEW_VERSION_OF_RESOURCE_IMAGE_BOOLEAN= E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE)" +
             " and (:ROLL_BACK_OF_THE_RESOURCE_IMAGE_BOOLEAN = '' or :ROLL_BACK_OF_THE_RESOURCE_IMAGE_BOOLEAN= E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE)" +
@@ -56,7 +56,7 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             countQuery = SELECT_COUNT_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION,
             nativeQuery = true)
     Page<ResourcePermissionModel> filter(Pageable pageable, @Param("resourceId") Long resourceId,
-                                         @Param("names") List<String> names,
+                                         @Param("role_names") List<String> names,
                                          @Param("EDIT_RESOURCE_METADATA_IMAGE_BOOLEAN") String editResource,
                                          @Param("CREATE_NEW_VERSION_OF_RESOURCE_IMAGE_BOOLEAN") String createVersion,
                                          @Param("ROLL_BACK_OF_THE_RESOURCE_IMAGE_BOOLEAN") String rollBack,
@@ -68,7 +68,7 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             nativeQuery = true)
     Page<ResourcePermissionModel> search(Pageable pageable,
                                          @Param("resourceId") Long resourceId,
-                                         @Param("names") List<String> names,
+                                         @Param("role_names") List<String> names,
                                          @Param("EDIT_RESOURCE_METADATA_IMAGE_BOOLEAN") String editResource,
                                          @Param("CREATE_NEW_VERSION_OF_RESOURCE_IMAGE_BOOLEAN") String createVersion,
                                          @Param("ROLL_BACK_OF_THE_RESOURCE_IMAGE_BOOLEAN") String rollBack,
