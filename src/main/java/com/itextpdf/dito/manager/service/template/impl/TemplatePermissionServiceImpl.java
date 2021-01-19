@@ -53,23 +53,12 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
     private Pageable updateSort(final Pageable pageable) {
         final Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if (sortParam.getProperty().equals("name")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "name");
-                    }
-                    if (sortParam.getProperty().equals("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E9_US75_EDIT_TEMPLATE_METADATA_STANDARD");
-                    }
-                    if (sortParam.getProperty().equals("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD");
-                    }
-                    if (sortParam.getProperty().equals("E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE");
-                    }
-                    if (sortParam.getProperty().equals("E9_US81_PREVIEW_TEMPLATE_STANDARD")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E9_US81_PREVIEW_TEMPLATE_STANDARD");
-                    }
-                    if (sortParam.getProperty().equals("E9_US24_EXPORT_TEMPLATE_DATA")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E9_US24_EXPORT_TEMPLATE_DATA");
+                    if (!sortParam.getProperty().equals("name")) {
+                        if (sortParam.isAscending()) {
+                            sortParam = new Sort.Order(Sort.Direction.DESC, sortParam.getProperty());
+                        } else if (sortParam.isDescending()) {
+                            sortParam = new Sort.Order(Sort.Direction.ASC, sortParam.getProperty());
+                        }
                     }
                     return sortParam;
                 })
