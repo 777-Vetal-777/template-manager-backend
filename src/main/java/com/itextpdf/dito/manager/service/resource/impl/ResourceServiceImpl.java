@@ -9,7 +9,6 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
-import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
@@ -215,6 +214,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         if (slaveRoleEntity == null) {
             // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
             final RoleEntity masterRoleEntity = roleService.getMasterRole(roleName);
+            checkNotAdminRole(masterRoleEntity);
 
             slaveRoleEntity = new RoleEntity();
             slaveRoleEntity.setName(masterRoleEntity.getName());

@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedTo
 import com.itextpdf.dito.manager.exception.role.AttemptToAttachGlobalAdministratorRoleException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
+import com.itextpdf.dito.manager.exception.role.UnableToSetPermissionsException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
 
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,11 @@ public class RoleExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(UnableToUpdateSystemRoleException.class)
     public ResponseEntity<ErrorResponseDTO> unableToUpdateSystemRoleExceptionHandler(
             final UnableToUpdateSystemRoleException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(UnableToSetPermissionsException.class)
+    public ResponseEntity<ErrorResponseDTO> unableToSetPermissionsExceptionHandler(
+            final UnableToSetPermissionsException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }

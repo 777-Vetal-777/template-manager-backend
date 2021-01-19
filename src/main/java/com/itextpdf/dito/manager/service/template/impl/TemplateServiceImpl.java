@@ -289,6 +289,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (slaveRoleEntity == null) {
             // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
             final RoleEntity masterRoleEntity = roleService.getMasterRole(roleName);
+            checkNotAdminRole(masterRoleEntity);
 
             slaveRoleEntity = new RoleEntity();
             slaveRoleEntity.setName(masterRoleEntity.getName());
