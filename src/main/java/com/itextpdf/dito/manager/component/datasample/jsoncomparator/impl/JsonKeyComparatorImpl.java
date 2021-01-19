@@ -14,7 +14,7 @@ public class JsonKeyComparatorImpl implements JsonKeyComparator {
 
 	@Override
 	public boolean checkJsonKeysEquals(final String json1, final String json2) {
-		boolean result = false;
+		boolean result;
 		try {
 			result = checkLastDataCollectionEqualsSample(json1, json1);
 		} catch (JSONException e) {

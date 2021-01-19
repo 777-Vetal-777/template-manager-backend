@@ -7,7 +7,11 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+<<<<<<< HEAD
 import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
+=======
+import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
+>>>>>>> DataSamples endpoints added
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
@@ -64,7 +68,13 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
 		}
+<<<<<<< HEAD
 		
+=======
+		if (dataSampleRepository.existsByName(name)) {
+	        throw new DataSampleNameAlreadyExistsException();
+	    }
+>>>>>>> DataSamples endpoints added
 		final DataCollectionFileEntity lastEntity = dataCollectionEntity.getLatestVersion();
 		final String jsonFromCollection = new String(lastEntity.getData());
 		if(!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
@@ -82,7 +92,11 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		dataSampleEntity.setCreatedOn(new Date());
 		dataSampleEntity.setAuthor(userEntity);
 		dataSampleEntity.setData(sample.getBytes());
+<<<<<<< HEAD
 		dataSampleEntity.setIsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
+=======
+		dataSampleEntity.setSetAsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
+>>>>>>> DataSamples endpoints added
 		return dataSampleRepository.save(dataSampleEntity);
 	}	
 
@@ -114,7 +128,11 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 
 		return StringUtils.isEmpty(searchParam)
 				? dataSampleRepository
+<<<<<<< HEAD
 				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, isDefault, comment)
+=======
+				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, setAsDefault, comment)
+>>>>>>> DataSamples endpoints added
 				: dataSampleRepository
 				.search(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment,  searchParam.toLowerCase());
 	}
@@ -139,6 +157,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	@Override
 	public DataSampleEntity setAsDefault(final String dataSampleName) {
 		final DataSampleEntity dataSampleEntity = get(dataSampleName);
+<<<<<<< HEAD
 		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection();
 		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity)
 				.orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
@@ -147,6 +166,12 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 			e.setModifiedOn(new Date());
 		});
 		dataSampleEntity.setIsDefault(true);
+=======
+		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection(); 
+		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity).orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
+		list.stream().forEach(e->{e.setSetAsDefault(false);e.setModifiedOn(new Date());});
+		dataSampleEntity.setSetAsDefault(true);
+>>>>>>> DataSamples endpoints added
 		dataSampleRepository.saveAll(list);
 		return dataSampleEntity;
 	}
