@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
 
