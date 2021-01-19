@@ -4,15 +4,14 @@ package com.itextpdf.dito.manager.service.template.impl;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
-import com.itextpdf.dito.manager.filter.template.TemplateDependencyFilter;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,12 +33,12 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
     }
 
     @Override
-    public Page<DependencyModel> list(final Pageable pageable, final String name, final TemplateDependencyFilter filter, final String search) {
+    public Page<DependencyModel> list(final Pageable pageable, final String name, final DependencyFilter filter, final String search) {
         final String templateName = decodeBase64(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
         final String directionType = getDirectionAsString(filter.getDirectionType());
-        final String depend = getStringFromFilter(filter.getDependencyName());
+        final String depend = getStringFromFilter(filter.getName());
         final Long version = getLongFromFilter(filter.getVersion());
 
         return StringUtils.isEmpty(search)

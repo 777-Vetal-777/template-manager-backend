@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
@@ -17,7 +18,6 @@ import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
-import com.itextpdf.dito.manager.filter.template.TemplateDependencyFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
@@ -108,7 +108,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependenciesPageable(final String name,
                                                                         final Pageable pageable,
-                                                                        final TemplateDependencyFilter dependencyFilter,
+                                                                        final DependencyFilter dependencyFilter,
                                                                         final String searchParam) {
         return new ResponseEntity<>(dependencyMapper.map(templateDependencyService
                 .list(pageable, name, dependencyFilter, searchParam)), HttpStatus.OK);

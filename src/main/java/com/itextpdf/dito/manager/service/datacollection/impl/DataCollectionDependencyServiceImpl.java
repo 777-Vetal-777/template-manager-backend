@@ -1,8 +1,8 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
@@ -38,14 +38,14 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
     @Override
     public Page<DependencyModel> list(final Pageable pageable,
                                       final String name,
-                                      final DataCollectionDependencyFilter filter,
+                                      final DependencyFilter filter,
                                       final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         Page<DependencyModel> searchResult = Page.empty();
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(name);
         final Pageable pageWithSort = updateSort(pageable);
         final Long version = getLongFromFilter(filter.getVersion());
-        final String depend = getStringFromFilter(filter.getDependencyName());
+        final String depend = getStringFromFilter(filter.getName());
         final String stageName = getStringFromFilter(filter.getStageName());
         final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d ->  d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
         final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);

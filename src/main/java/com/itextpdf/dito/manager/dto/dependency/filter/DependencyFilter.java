@@ -3,21 +3,15 @@ package com.itextpdf.dito.manager.dto.dependency.filter;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
 
+import java.util.List;
+
 
 public class DependencyFilter {
     private String name;
     private Long version;
-    private DependencyType dependencyType;
-    private Boolean active;
-    private DependencyDirectionType directionType;
-
-    public DependencyType getDependencyType() {
-        return dependencyType;
-    }
-
-    public void setDependencyType(DependencyType dependencyType) {
-        this.dependencyType = dependencyType;
-    }
+    private List<DependencyType> dependencyType;
+    private String stageName;
+    private List<DependencyDirectionType> directionType;
 
     public String getName() {
         return name;
@@ -35,20 +29,27 @@ public class DependencyFilter {
         this.version = version;
     }
 
-
-    public Boolean getActive() {
-        return active;
+    public List<DependencyType> getDependencyType() {
+        return dependencyType;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setDependencyType(List<DependencyType> dependencyType) {
+        this.dependencyType = dependencyType;
     }
 
-    public DependencyDirectionType getDirectionType() {
+    public String getStageName() {
+        return stageName;
+    }
+
+    public void setStageName(String stageName) {
+        this.stageName = stageName;
+    }
+
+    public List<DependencyDirectionType> getDirectionType() {
         return directionType;
     }
 
-    public void setDirectionType(DependencyDirectionType directionType) {
+    public void setDirectionType(List<DependencyDirectionType> directionType) {
         this.directionType = directionType;
     }
 

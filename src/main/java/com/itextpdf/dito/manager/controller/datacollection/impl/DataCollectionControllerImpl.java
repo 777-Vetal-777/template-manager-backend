@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
@@ -22,7 +23,6 @@ import com.itextpdf.dito.manager.exception.datacollection.DataCollectionFileSize
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
@@ -172,7 +172,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     @Override
     public ResponseEntity<Page<DependencyDTO>> listDependencies(final Pageable pageable,
                                                                 final String name,
-                                                                final DataCollectionDependencyFilter filter,
+                                                                final DependencyFilter filter,
                                                                 final String searchParam) {
         final String dataCollectionName = decodeBase64(name);
         final Page<DependencyModel> result = dataCollectionDependencyService.list(pageable, dataCollectionName, filter, searchParam);

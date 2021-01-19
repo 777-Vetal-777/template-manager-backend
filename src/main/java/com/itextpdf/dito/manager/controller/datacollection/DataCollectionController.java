@@ -8,9 +8,9 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
@@ -151,7 +151,7 @@ public interface DataCollectionController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DependencyDTO>> listDependencies(Pageable pageable,
                                                          @Parameter(description = "Data collections name encoded with base64.") @PathVariable("data-collection-name") String name,
-                                                         @ParameterObject DataCollectionDependencyFilter filter,
+                                                         @ParameterObject DependencyFilter filter,
                                                          @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
