@@ -1,4 +1,3 @@
-
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -14,5 +13,4 @@
     <changeSet id="002-drop-file-name-not-null-constraint-from-resource-file-table" author="Sergey_Nemets">
         <dropNotNullConstraint tableName="resource_file" columnName="file_name"/>
     </changeSet>
-
 </databaseChangeLog>
