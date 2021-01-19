@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
+import com.itextpdf.dito.manager.exception.role.UnableToSetPermissionsException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
 
 import java.util.List;
@@ -36,6 +37,12 @@ public abstract class AbstractService {
 
     protected Set<String> retrieveSetOfRoleNames(final Set<RoleEntity> roleEntities) {
         return roleEntities.stream().map(RoleEntity::getName).collect(Collectors.toSet());
+    }
+
+    protected void checkNotAdminRole(final RoleEntity roleEntity){
+        if ("GLOBAL_ADMINISTRATOR".equals(roleEntity.getName()) || "ADMINISTRATOR".equals(roleEntity.getName())) {
+            throw new UnableToSetPermissionsException();
+        }
     }
 
     protected void checkUserPermissions(final Set<String> userRoleNames,

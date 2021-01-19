@@ -263,6 +263,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         if (slaveRoleEntity == null) {
             // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
             final RoleEntity masterRoleEntity = roleService.getMasterRole(roleName);
+            checkNotAdminRole(masterRoleEntity);
 
             slaveRoleEntity = new RoleEntity();
             slaveRoleEntity.setName(masterRoleEntity.getName());
@@ -341,7 +342,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     protected List<String> getSupportedSortFields() {
         return DataCollectionRepository.SUPPORTED_SORT_FIELDS;
     }
-    
+
     @Override
 	public DataSampleEntity create(final String dataCollectionName, final String name, final String fileName, final String sample, final String comment, final String email) {
 		//TODO CHECK IS DATA SAMPLE WITH SAME NAME EXIST
