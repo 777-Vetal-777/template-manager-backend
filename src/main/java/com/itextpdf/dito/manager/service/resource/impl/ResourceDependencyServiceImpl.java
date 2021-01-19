@@ -2,9 +2,9 @@ package com.itextpdf.dito.manager.service.resource.impl;
 
 import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
-import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.IMAGE;
-import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -42,7 +41,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     }
 
     @Override
-    public Page<DependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final ResourceDependencyFilter filter, final String searchParam) {
+    public Page<DependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final DependencyFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         Page<DependencyModel> searchResult = Page.empty();
         final List<DependencyType> dependenciesType = filter.getDependencyType();
@@ -53,7 +52,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
             final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
-            final String stage = getStringFromFilter(filter.getStage());
+            final String stage = getStringFromFilter(filter.getStageName());
             final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD
             if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) || IMAGE_RESOURCE_TYPE.contains(searchParam.toLowerCase()))) {

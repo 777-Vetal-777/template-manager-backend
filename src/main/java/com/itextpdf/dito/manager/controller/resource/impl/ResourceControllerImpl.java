@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
+import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
@@ -20,7 +21,6 @@ import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitE
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.filter.resource.ResourcePermissionFilter;
-import com.itextpdf.dito.manager.filter.resource.dependency.ResourceDependencyFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.resource.ResourcePermissionModel;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
@@ -99,7 +99,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
-            final String searchParam, final ResourceDependencyFilter filter) {
+            final String searchParam, final DependencyFilter filter) {
         final String decodedName = decodeBase64(resource);
         final Page<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
