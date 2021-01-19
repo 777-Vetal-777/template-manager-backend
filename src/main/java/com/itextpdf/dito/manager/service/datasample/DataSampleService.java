@@ -12,4 +12,7 @@ public interface DataSampleService {
     Page<DataSampleEntity> list(Pageable pageable, DataSampleFilter filter, String searchParam);
 
     DataSampleEntity get(String dataSampleName);
+    
+    DataSampleEntity setAsDefault(String dataSampleName);
+    
 }

@@ -10,7 +10,10 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
+import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,6 +61,8 @@ public interface DataCollectionController {
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
     String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/datasamples";
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE;
+    String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE + "/setasdefault";
+    String DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + "/all";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable";
     String DATA_COLLECTION_VERSIONS = "/versions";
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
@@ -154,15 +160,16 @@ public interface DataCollectionController {
                                                          @ParameterObject DependencyFilter filter,
                                                          @RequestParam(name = "search", required = false) String searchParam);
 
-    @PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
-    @Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Success! File is uploaded", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class))}),
-            @ApiResponse(responseCode = "409", description = "Invalid input or datasample already exists", content = @Content),
+	@PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
+			@ApiResponse(responseCode = "409", description = "Invalid input or datasample already exists", content = @Content),
+
             @ApiResponse(responseCode = "400", description = "Invalid data sample structure", content = @Content)})
     ResponseEntity<DataSampleDTO> create(
-            @Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+            @Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName ,
             @RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
     @GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
@@ -176,4 +183,38 @@ public interface DataCollectionController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataSampleDTO> getDataSample(@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName);
 
+	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@Operation(summary = "Delete list of data samples", description = "Delete list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
+			@ApiResponse(responseCode = "409", description = "Some data samples has dependencies and cannot be removed", content = @Content),
+			@ApiResponse(responseCode = "404", description = "Some data samples not found", content = @Content) 
+	})
+	ResponseEntity<Void> deleteDataSampleList(
+			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+			@RequestBody List<String> dataSampleNames, Principal principal);
+	
+	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE)
+	@Operation(summary = "Delete all data samples of data collection", description = "Delete all data samples of data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
+			@ApiResponse(responseCode = "409", description = "Data samples has dependencies and cannot be removed", content = @Content),
+			@ApiResponse(responseCode = "404", description = "Data samples not found", content = @Content) 
+	})
+	ResponseEntity<Void> deleteAllDataSamples(
+			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+			 Principal principal);
+	
+
+	 @PutMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT)
+	    @Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	    @ApiResponses(value = {
+	            @ApiResponse(responseCode = "200", description = "Data sample updated successfully", content = {
+	                    @Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class))}),
+	            @ApiResponse(responseCode = "404", description = "Data sample not found", content = @Content)
+	    })
+	    ResponseEntity<DataSampleDTO> setDataSampleAsDefault(
+	            @Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+	            @Parameter(description = "Data sample name encoded with base64.", required = true) @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName
+	           , Principal principal);
 }
