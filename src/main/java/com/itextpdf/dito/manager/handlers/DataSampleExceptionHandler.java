@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
 
@@ -20,5 +21,11 @@ public class DataSampleExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> invalidDataSampleStructureExceptionHandler(
             final InvalidDataSampleStructureException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(DataSampleNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> dataSampleNameAlreadyExistsException(
+            final DataSampleNameAlreadyExistsException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
     }
 }

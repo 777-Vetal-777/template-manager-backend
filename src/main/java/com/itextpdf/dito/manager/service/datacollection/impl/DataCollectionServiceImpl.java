@@ -345,9 +345,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
 	public DataSampleEntity create(final String dataCollectionName, final String name, final String fileName, final String sample, final String comment, final String email) {
-		//TODO CHECK IS DATA SAMPLE WITH SAME NAME EXIST
         final DataCollectionEntity dataCollectionEntity = get(dataCollectionName);
-
 		return dataSampleService.create(dataCollectionEntity, name, fileName, sample, comment, email);
 	}
 }

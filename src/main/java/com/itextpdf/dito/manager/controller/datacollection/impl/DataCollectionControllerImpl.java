@@ -37,6 +37,7 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermission
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -221,7 +222,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 		final String data = dataSampleCreateRequestDTO.getSample();
 		final String comment = dataSampleCreateRequestDTO.getComment();
 		final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
-		return new ResponseEntity<>(dataSampleMapper.map(dataSampleEntity), HttpStatus.CREATED);
+		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
 	}
 
     @Override
@@ -233,5 +234,21 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataSampleDTO> getDataSample(final String dataSampleName) {
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))), HttpStatus.OK);
     }
+	@Override
+	public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName, final List<String> dataSampleNames,
+			final Principal principal) {
+		throw new NotImplementedException("Method is not realized yet");
+	}
+
+	@Override
+	public ResponseEntity<Void> deleteAllDataSamples(final String dataCollectionName, final Principal principal) {
+		throw new NotImplementedException("Method is not realized yet");
+	}
+
+	@Override
+	public ResponseEntity<DataSampleDTO> setDataSampleAsDefault(final String dataCollectionName, final String dataSampleName,
+			final Principal principal) {
+		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.setAsDefault(decodeBase64(dataSampleName))), HttpStatus.OK);
+	}
 
 }

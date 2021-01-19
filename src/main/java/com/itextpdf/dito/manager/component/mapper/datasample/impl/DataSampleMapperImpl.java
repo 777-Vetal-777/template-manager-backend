@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.datasample.impl;
 
+import com.itextpdf.dito.manager.component.datasample.jsoncomparator.JsonKeyComparator;
 import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -9,6 +10,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataSampleMapperImpl implements DataSampleMapper {
+
+	private final JsonKeyComparator jsonKeyComparator;
+	
+	
+	public DataSampleMapperImpl(JsonKeyComparator jsonKeyComparator) {
+		this.jsonKeyComparator = jsonKeyComparator;
+	}
 
 	@Override
 	public DataSampleDTO map(final DataSampleEntity entity) {
@@ -22,7 +30,10 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setComment(entity.getComment());
         dto.setFileName(entity.getFileName());
-        return dto;
+        dto.setSetAsDefault(entity.getSetAsDefault());
+		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getData()),
+				new String(entity.getDataCollection().getLatestVersion().getData())));
+		 return dto;
 	}
 
     @Override

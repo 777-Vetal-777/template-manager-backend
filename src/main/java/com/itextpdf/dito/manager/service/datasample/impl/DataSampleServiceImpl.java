@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
@@ -57,6 +59,9 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
 		}
+		if (dataSampleRepository.existsByName(name)) {
+	        throw new DataSampleNameAlreadyExistsException();
+	    }
 		final DataCollectionFileEntity lastEntity = dataCollectionEntity.getLatestVersion();
 		final String jsonFromCollection = new String(lastEntity.getData());
 		if(!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
@@ -74,7 +79,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		dataSampleEntity.setCreatedOn(new Date());
 		dataSampleEntity.setAuthor(userEntity);
 		dataSampleEntity.setData(sample.getBytes());
-
+		dataSampleEntity.setSetAsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
 		return dataSampleRepository.save(dataSampleEntity);
 	}	
 
@@ -106,9 +111,9 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 
 		return StringUtils.isEmpty(searchParam)
 				? dataSampleRepository
-				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment)
+				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, setAsDefault, comment)
 				: dataSampleRepository
-				.search(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment, searchParam.toLowerCase());
+				.search(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment,  searchParam.toLowerCase());
 	}
 
 	@Override
@@ -127,4 +132,18 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 				.collect(Collectors.toList()));
 		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
 	}
+
+	@Override
+	public DataSampleEntity setAsDefault(final String dataSampleName) {
+		final DataSampleEntity dataSampleEntity = get(dataSampleName);
+		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection(); 
+		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity).orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
+		list.stream().forEach(e->{e.setSetAsDefault(false);e.setModifiedOn(new Date());});
+		dataSampleEntity.setSetAsDefault(true);
+		dataSampleRepository.saveAll(list);
+		return dataSampleEntity;
+	}
+	
+	
+	
 }

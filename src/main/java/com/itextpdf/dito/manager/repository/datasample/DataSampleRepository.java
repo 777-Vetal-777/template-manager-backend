@@ -1,8 +1,7 @@
 package com.itextpdf.dito.manager.repository.datasample;
 
-import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,7 +24,8 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     String DATA_SAMPLE_TABLE_FILTER_CONDITION = "(:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
             + "and (:modifiedBy='' or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or ds.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (:comment='' or LOWER(ds.comment) like CONCAT('%',:comment,'%')) ";
+            + "and (:comment='' or LOWER(ds.comment) like CONCAT('%',:comment,'%'))"
+            + "and (:setAsDefault='' or ds.setAsDefault=:setAsDefault) ";
 
     String DATA_SAMPLE_TABLE_SEARCH_CONDITION = " and (CAST(ds.modifiedOn as string) like CONCAT('%',:search,'%') "
             + "or LOWER(ds.comment) like CONCAT('%',:search,'%') "
@@ -38,7 +38,7 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                   @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
-                                  //TODO add setAsDefault param
+                                  @Param("setAsDefault") @Nullable Boolean setAsDefault,
                                   @Param("comment") @Nullable String comment);
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION + DATA_SAMPLE_TABLE_SEARCH_CONDITION)
@@ -48,8 +48,14 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                   @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
                                   @Param("comment") @Nullable String comment,
-                                  //TODO add setAsDefault param
                                   @Param("search") @Nullable String search);
 
     Optional<DataSampleEntity> findByName(String name);
+    
+    Boolean existsByName(String name);
+    
+    Boolean existsByDataCollection(DataCollectionEntity dataCollection);
+    
+    Optional<List<DataSampleEntity>> findByDataCollection(DataCollectionEntity dataCollection);
+    
 }

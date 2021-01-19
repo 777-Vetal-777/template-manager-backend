@@ -4,6 +4,8 @@ import com.itextpdf.dito.manager.component.datasample.jsoncomparator.JsonKeyComp
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,11 @@ public class JsonKeyComparatorImpl implements JsonKeyComparator {
 
     @Override
     public boolean checkJsonKeysEquals(final String json1, final String json2) {
+    	try {
         return checkLastDataCollectionEqualsSample(json1, json1);
+    	}catch(JSONException e) {
+    		return false;
+    	}
     }
 
     private boolean checkLastDataCollectionEqualsSample(final String json1, final String json2) {
