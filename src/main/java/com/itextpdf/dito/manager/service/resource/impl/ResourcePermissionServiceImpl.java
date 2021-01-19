@@ -10,11 +10,14 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.repository.resource.ResourcePermissionRepository.SUPPORTED_SORT_FIELDS;
 
@@ -47,11 +50,29 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
         final String createNewVersionResourceImage = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionResourceImage());
         final String rollBackResourceImage = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollBackResourceImage());
         final String deleteResourceImage = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteResourceImage());
+
+        final Pageable pageWithSort = updateSort(pageable);
+
         return StringUtils.isEmpty(search)
-                ? resourcePermissionRepository.filter(pageable, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
+                ? resourcePermissionRepository.filter(pageWithSort, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
                 createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage)
-                : resourcePermissionRepository.search(pageable, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
+                : resourcePermissionRepository.search(pageWithSort, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
                 createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, search.toLowerCase());
     }
 
+    private Pageable updateSort(final Pageable pageable) {
+        final Sort newSort = Sort.by(pageable.getSort().stream()
+                .map(sortParam -> {
+                    if (!sortParam.getProperty().equals("name")) {
+                        if (sortParam.isAscending()) {
+                            sortParam = new Sort.Order(Sort.Direction.DESC, sortParam.getProperty());
+                        } else if (sortParam.isDescending()) {
+                            sortParam = new Sort.Order(Sort.Direction.ASC, sortParam.getProperty());
+                        }
+                    }
+                    return sortParam;
+                })
+                .collect(Collectors.toList()));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
+    }
 }

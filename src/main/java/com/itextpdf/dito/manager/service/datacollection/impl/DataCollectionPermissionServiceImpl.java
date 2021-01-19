@@ -42,40 +42,22 @@ public class DataCollectionPermissionServiceImpl extends AbstractService impleme
         final String createNewVersionOfDataSample = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionOfDataSample());
         final String deleteDataSample = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteDataSample());
 
+        final Pageable pageWithSort = updateSort(pageable);
+
         return StringUtils.isEmpty(search)
-                ? dataCollectionPermissionsRepository.filterPermissions(pageable, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample)
-                : dataCollectionPermissionsRepository.searchPermissions(pageable, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample, search.toLowerCase());
+                ? dataCollectionPermissionsRepository.filterPermissions(pageWithSort, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample)
+                : dataCollectionPermissionsRepository.searchPermissions(pageWithSort, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample, search.toLowerCase());
     }
 
     private Pageable updateSort(final Pageable pageable) {
         final Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if (sortParam.getProperty().equals("name")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "name");
-                    }
-                    if (sortParam.getProperty().equals("E6_US34_EDIT_DATA_COLLECTION_METADATA")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E6_US34_EDIT_DATA_COLLECTION_METADATA");
-                    }
-                    if (sortParam.getProperty().equals("E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON");
-                    }
-                    if (sortParam.getProperty().equals("E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION");
-                    }
-                    if (sortParam.getProperty().equals("E6_US38_DELETE_DATA_COLLECTION")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E6_US38_DELETE_DATA_COLLECTION");
-                    }
-                    if (sortParam.getProperty().equals("E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE");
-                    }
-                    if (sortParam.getProperty().equals("E7_US47_EDIT_SAMPLE_METADATA")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E7_US47_EDIT_SAMPLE_METADATA");
-                    }
-                    if (sortParam.getProperty().equals("E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE");
-                    }
-                    if (sortParam.getProperty().equals("E7_US50_DELETE_DATA_SAMPLE")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "E7_US50_DELETE_DATA_SAMPLE");
+                    if (!sortParam.getProperty().equals("name")) {
+                        if (sortParam.isAscending()) {
+                            sortParam = new Sort.Order(Sort.Direction.DESC, sortParam.getProperty());
+                        } else if (sortParam.isDescending()) {
+                            sortParam = new Sort.Order(Sort.Direction.ASC, sortParam.getProperty());
+                        }
                     }
                     return sortParam;
                 })
