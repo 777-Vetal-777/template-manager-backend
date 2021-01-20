@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
@@ -8,9 +9,9 @@ import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
+import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
-import com.itextpdf.dito.manager.dto.resource.ResourceFileDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
@@ -53,6 +54,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final List<String> supportedPictureExtensions;
     private final ResourcePermissionService resourcePermissionService;
     private final PermissionMapper permissionMapper;
+    private final FileVersionMapper fileVersionMapper;
     private final Long sizePictureLimit;
 
     public ResourceControllerImpl(
@@ -65,7 +67,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final RoleMapper roleMapper,
             final ResourcePermissionService resourcePermissionService,
             final PermissionMapper permissionMapper,
-            final DependencyMapper dependencyMapper) {
+            final DependencyMapper dependencyMapper,
+            final FileVersionMapper fileVersionMapper) {
         this.supportedPictureExtensions = supportedPictureExtensions;
         this.sizePictureLimit = sizePictureLimit;
         this.resourceService = resourceService;
@@ -76,13 +79,14 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.dependencyMapper = dependencyMapper;
         this.resourcePermissionService = resourcePermissionService;
         this.permissionMapper = permissionMapper;
+        this.fileVersionMapper = fileVersionMapper;
     }
 
     @Override
-    public ResponseEntity<Page<ResourceFileDTO>> getVersions(final Principal principal, final Pageable pageable,
-            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
+    public ResponseEntity<Page<FileVersionDTO>> getVersions(final Principal principal, final Pageable pageable,
+                                                            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
-        final Page<ResourceFileDTO> versionsDTOs = resourceMapper.mapVersions(resourceVersionsService
+        final Page<FileVersionDTO> versionsDTOs = fileVersionMapper.map(resourceVersionsService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
         return new ResponseEntity<>(versionsDTOs, HttpStatus.OK);
     }

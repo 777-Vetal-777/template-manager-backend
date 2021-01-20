@@ -1,9 +1,11 @@
 package com.itextpdf.dito.manager.entity.template;
 
 import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
+import org.hibernate.annotations.JoinFormula;
 
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -58,6 +60,14 @@ public class TemplateFileEntity {
             joinColumns = @JoinColumn(name = "template_file_id"),
             inverseJoinColumns = @JoinColumn(name = "instance_id"))
     private Set<InstanceEntity> instance = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("( select stage.id from {h-schema}stage stage where stage.sequence_order = (select max(instanceStage.sequence_order) " +
+            "from {h-schema}template_file_instance toInstance " +
+            "join {h-schema}instance instance on instance.id = toInstance.instance_id " +
+            "join {h-schema}stage instanceStage on instanceStage.id = instance.stage_id " +
+            "where toInstance.template_file_id = id) )")
+    private StageEntity stage;
 
     public Long getId() {
         return id;
@@ -156,4 +166,11 @@ public class TemplateFileEntity {
         this.deployed = deployed;
     }
 
+    public StageEntity getStage() {
+        return stage;
+    }
+
+    public void setStage(StageEntity stage) {
+        this.stage = stage;
+    }
 }

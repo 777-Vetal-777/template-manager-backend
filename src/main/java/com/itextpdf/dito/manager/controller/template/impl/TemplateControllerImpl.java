@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.template.impl;
 
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
@@ -8,11 +9,11 @@ import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
+import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
-import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -55,6 +56,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final PermissionMapper permissionMapper;
     private final RoleMapper roleMapper;
     private final TemplateDependencyService templateDependencyService;
+    private final FileVersionMapper fileVersionMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
                                   final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionFileService dataCollectionFileService,
@@ -64,6 +66,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplatePermissionService templatePermissionService,
                                   final PermissionMapper permissionMapper,
                                   final TemplateDependencyService templateDependencyService,
+                                  final FileVersionMapper fileVersionMapper,
                                   final RoleMapper roleMapper) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
@@ -74,6 +77,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templatePermissionService = templatePermissionService;
         this.permissionMapper = permissionMapper;
         this.roleMapper = roleMapper;
+        this.fileVersionMapper = fileVersionMapper;
         this.templateDependencyService = templateDependencyService;
     }
 
@@ -129,11 +133,11 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<Page<TemplateVersionDTO>> getVersions(final Pageable pageable, final String name,
-                                                                final VersionFilter versionFilter, final String searchParam) {
+    public ResponseEntity<Page<FileVersionDTO>> getVersions(final Pageable pageable, final String name,
+                                                            final VersionFilter versionFilter, final String searchParam) {
 
-        return new ResponseEntity<>(templateMapper
-                .mapVersions(templateVersionsService.list(pageable, decodeBase64(name), versionFilter, searchParam)),
+        return new ResponseEntity<>(fileVersionMapper
+                .map(templateVersionsService.list(pageable, decodeBase64(name), versionFilter, searchParam)),
                 HttpStatus.OK);
     }
 

@@ -1,11 +1,8 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
-import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
-import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -21,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -39,7 +35,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
     }
 
     @Override
-    public Page<TemplateFileEntity> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
+    public Page<FileVersionModel> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final TemplateEntity template = templateService.get(name);
 
@@ -47,7 +43,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
         final Long version = getLongFromFilter(filter.getVersion());
         final String modifiedBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
-        final Boolean deployed = getBooleanMultiselectFromFilter(filter.getDeployed());
+        final String stageName = getStringFromFilter(filter.getStage());
 
         Date modifiedOnStartDate = null;
         Date modifiedOnEndDate = null;
@@ -60,19 +56,27 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
         return StringUtils.isEmpty(searchParam)
-                ? templateFileRepository.filter(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, deployed)
-                : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, deployed, searchParam);
+                ? templateFileRepository.filter(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName)
+                : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam);
     }
 
     private Pageable updateSort(final Pageable pageable) {
-        Sort newSort = Sort.by(pageable.getSort().stream()
-                .map(sortParam -> {
-                    if (sortParam.getProperty().equals("modifiedBy")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
-                    }
-                    return sortParam;
-                })
-                .collect(Collectors.toList()));
+        Sort newSort;
+        if (pageable.getSort().isSorted()) {
+            newSort = Sort.by(pageable.getSort().stream()
+                    .map(sortParam -> {
+                        if (sortParam.getProperty().equals("modifiedBy")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
+                        }
+                        if (sortParam.getProperty().equals("stage")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
+                        }
+                        return sortParam;
+                    })
+                    .collect(Collectors.toList()));
+        } else {
+            newSort = Sort.by("version").ascending();
+        }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 

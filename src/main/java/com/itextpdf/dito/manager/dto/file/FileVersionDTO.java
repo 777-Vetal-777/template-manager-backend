@@ -1,13 +1,13 @@
-package com.itextpdf.dito.manager.dto.datacollection;
+package com.itextpdf.dito.manager.dto.file;
 
 import java.util.Date;
 
-public class DataCollectionVersionDTO {
+public class FileVersionDTO {
     private Long version;
     private String modifiedBy;
     private Date modifiedOn;
     private String comment;
-    private Boolean deploymentStatus;
+    private String stage;
 
     public Long getVersion() {
         return version;
@@ -41,11 +41,11 @@ public class DataCollectionVersionDTO {
         this.comment = comment;
     }
 
-    public Boolean isDeploymentStatus() {
-        return deploymentStatus;
+    public String getStage() {
+        return stage;
     }
 
-    public void setDeploymentStatus(Boolean deploymentStatus) {
-        this.deploymentStatus = deploymentStatus;
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 }

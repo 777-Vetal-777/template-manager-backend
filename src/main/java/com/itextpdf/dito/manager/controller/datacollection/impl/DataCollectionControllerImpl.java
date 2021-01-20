@@ -3,17 +3,18 @@ package com.itextpdf.dito.manager.controller.datacollection.impl;
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
+import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
+import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
@@ -29,6 +30,7 @@ import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
+import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionDependencyService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermissionService;
@@ -60,6 +62,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataSampleMapper dataSampleMapper;
     private final DataCollectionPermissionService dataCollectionPermissionService;
     private final DataSampleService dataSampleService;
+    private final FileVersionMapper fileVersionMapper;
     private final Long sizeJsonLimit;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
@@ -71,6 +74,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataSampleMapper dataSampleMapper,
                                         final DataCollectionPermissionService dataCollectionPermissionService,
                                         final DataSampleService dataSampleService,
+                                        final FileVersionMapper fileVersionMapper,
                                         @Value("${data-collection.json.size-limit}") final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
@@ -81,6 +85,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.dataSampleMapper = dataSampleMapper;
         this.dataCollectionPermissionService = dataCollectionPermissionService;
         this.dataSampleService = dataSampleService;
+        this.fileVersionMapper = fileVersionMapper;
         this.sizeJsonLimit = sizeJsonLimit;
     }
 
@@ -140,13 +145,13 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<Page<DataCollectionVersionDTO>> getVersions(final Pageable pageable,
-                                                                      final String name,
-                                                                      final VersionFilter versionFilter,
-                                                                      final String searchParam) {
+    public ResponseEntity<Page<FileVersionDTO>> getVersions(final Pageable pageable,
+                                                            final String name,
+                                                            final VersionFilter versionFilter,
+                                                            final String searchParam) {
         final String dataCollectionName = decodeBase64(name);
-        final Page<DataCollectionFileEntity> dataCollectionVersionEntities = dataCollectionFileService.list(pageable, dataCollectionName, versionFilter, searchParam);
-        return new ResponseEntity<>(dataCollectionMapper.mapVersions(dataCollectionVersionEntities), HttpStatus.OK);
+        final Page<FileVersionModel> dataCollectionVersionEntities = dataCollectionFileService.list(pageable, dataCollectionName, versionFilter, searchParam);
+        return new ResponseEntity<>(fileVersionMapper.map(dataCollectionVersionEntities), HttpStatus.OK);
     }
 
     private byte[] getBytesFromMultipart(final MultipartFile multipartFile) {

@@ -1,7 +1,9 @@
 package com.itextpdf.dito.manager.entity.datacollection;
 
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,6 +38,15 @@ public class DataCollectionFileEntity {
     private String fileName;
     @OneToMany(mappedBy = "dataCollectionFile")
     private List<TemplateFileEntity> templateFiles;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("( select stage.id from {h-schema}stage stage where stage.sequence_order = (select max(instanceStage.sequence_order) " +
+            "from {h-schema}template_file templateFile " +
+            "join {h-schema}template_file_instance toInstance on toInstance.template_file_id = templateFile.id " +
+            "join {h-schema}instance instance on instance.id = toInstance.instance_id " +
+            "join {h-schema}stage instanceStage on instanceStage.id = instance.stage_id " +
+            "where templateFile.data_collection_file_id = id) )")
+    private StageEntity stage;
 
     public Date getCreatedOn() {
         return createdOn;
@@ -107,5 +118,13 @@ public class DataCollectionFileEntity {
 
     public void setTemplateFiles(List<TemplateFileEntity> templateFiles) {
         this.templateFiles = templateFiles;
+    }
+
+    public StageEntity getStage() {
+        return stage;
+    }
+
+    public void setStage(StageEntity stage) {
+        this.stage = stage;
     }
 }
