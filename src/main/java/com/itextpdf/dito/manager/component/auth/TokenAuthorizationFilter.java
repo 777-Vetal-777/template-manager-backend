@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.auth;
 import com.itextpdf.dito.manager.component.auth.token.extractor.TokenExtractor;
 import com.itextpdf.dito.manager.component.auth.token.helper.TokenHelper;
 import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtAccessTokenHelper;
+import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtEditorTokenHelper;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.token.IllegalAccessTokenException;
 import com.itextpdf.dito.manager.service.token.TokenService;
@@ -30,16 +31,19 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
     private static final Logger log = LogManager.getLogger(TokenAuthorizationFilter.class);
 
     private final TokenExtractor tokenExtractor;
-    private final TokenHelper tokenManager;
+    private final TokenHelper accessTokenHelper;
+    private final TokenHelper editorTokenHelper;
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
 
     public TokenAuthorizationFilter(final TokenExtractor tokenExtractor,
-            final @Qualifier(JwtAccessTokenHelper.BEAN_ID) TokenHelper tokenManager,
+            final @Qualifier(JwtAccessTokenHelper.BEAN_ID) TokenHelper accessTokenHelper,
+            final @Qualifier(JwtEditorTokenHelper.BEAN_ID) TokenHelper editorTokenHelper,
             final UserDetailsService userDetailsService,
             final TokenService tokenService) {
         this.tokenExtractor = tokenExtractor;
-        this.tokenManager = tokenManager;
+        this.accessTokenHelper = accessTokenHelper;
+        this.editorTokenHelper = editorTokenHelper;
         this.userDetailsService = userDetailsService;
         this.tokenService = tokenService;
     }
@@ -50,8 +54,8 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
             final FilterChain filterChain) throws ServletException, IOException {
         try {
             final String token = tokenExtractor.extract(httpServletRequest);
-            if (!StringUtils.isEmpty(token) && tokenManager.isValid(token)) {
-                final String username = tokenManager.getSubject(token);
+            if (!StringUtils.isEmpty(token) && (accessTokenHelper.isValid(token) || editorTokenHelper.isValid(token))) {
+                final String username = accessTokenHelper.getSubject(token);
 
                 if (!StringUtils.isEmpty(username)) {
                     final UserEntity userEntity = (UserEntity) userDetailsService.loadUserByUsername(username);

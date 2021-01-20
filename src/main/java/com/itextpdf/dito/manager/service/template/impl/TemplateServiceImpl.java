@@ -125,12 +125,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return templateRepository.save(templateEntity);
     }
 
-    private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final String email) {
-        final UserEntity author = userService.findByEmail(email);
-
-        return createLogEntity(templateEntity, author);
-    }
-
     private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final UserEntity author) {
         final TemplateLogEntity logEntity = new TemplateLogEntity();
         logEntity.setAuthor(author);
@@ -218,6 +212,15 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String templateName) {
+        final TemplateEntity templateEntity = createNewVersion(name, data, email, comment);
+        if (templateName != null) {
+            templateEntity.setName(templateName);
+        }
+        return templateRepository.save(templateEntity);
+    }
+
+    @Override
     public TemplateEntity createNewVersionAsCopy(final TemplateFileEntity fileEntityToCopy,
                                                  final UserEntity userEntity,
                                                  final String comment) {
@@ -238,7 +241,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
                 existingTemplateEntity.getAppliedRoles(), PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_TEMPLATE);
 
-        final Long oldVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId()).getVersion();
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
         final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, newVersion, fileEntityToCopyDependencies);
@@ -332,6 +334,13 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateEntity.getAppliedRoles().remove(roleEntity);
         roleService.delete(roleEntity);
         return templateRepository.save(templateEntity);
+    }
+
+    @Override
+    public TemplateEntity delete(String templateName) {
+        final TemplateEntity templateEntity = findByName(templateName);
+        templateRepository.delete(templateEntity);
+        return templateEntity;
     }
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
