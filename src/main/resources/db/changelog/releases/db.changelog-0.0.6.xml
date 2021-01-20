@@ -7,6 +7,7 @@
 		<addColumn tableName="data_sample">
 			<column name="is_default" type="boolean" defaultValueBoolean="false">
 				<constraints nullable="false" notNullConstraintName="data_sample_is_default_not_null_constraint" />
+
 			</column>
 		</addColumn>
 	</changeSet>

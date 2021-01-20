@@ -37,8 +37,13 @@ public class DataSampleEntity {
     private byte[] data;
     @Column(name="file_name")
     private String fileName;
+<<<<<<< HEAD
     @Column(name="is_default")
     private Boolean isDefault;
+=======
+    @Column(name="default")
+    private Boolean setAsDefault;
+>>>>>>> DataSamples endpoints added
     
     public Date getModifiedOn() {
 		return modifiedOn;
