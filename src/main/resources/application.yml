@@ -46,6 +46,9 @@ resources:
     extensions:
       supported: bmp,ccit,gif,jpg,jpg2000,png,svg,wmf
     size-limit: 8388608
+  stylesheets:
+    extensions:
+      supported: css
 
 
 data-collection:

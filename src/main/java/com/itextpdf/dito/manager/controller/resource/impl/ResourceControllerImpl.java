@@ -41,7 +41,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
@@ -51,14 +53,15 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final ResourceMapper resourceMapper;
     private final DependencyMapper dependencyMapper;
     private final RoleMapper roleMapper;
-    private final List<String> supportedPictureExtensions;
+    private final Map<ResourceTypeEnum, List<String>> supportedExtensions = new HashMap<>();
     private final ResourcePermissionService resourcePermissionService;
     private final PermissionMapper permissionMapper;
     private final FileVersionMapper fileVersionMapper;
-    private final Long sizePictureLimit;
+    private final Map<ResourceTypeEnum, Long> sizeLimit = new HashMap<>();
 
     public ResourceControllerImpl(
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
+            @Value("${resources.stylesheets.extensions.supported}") final List<String> supportedStylesheetExtensions,
             @Value("${resources.pictures.size-limit}") final Long sizePictureLimit,
             final ResourceService resourceService,
             final ResourceDependencyService resourceDependencyService,
@@ -69,8 +72,9 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
             final FileVersionMapper fileVersionMapper) {
-        this.supportedPictureExtensions = supportedPictureExtensions;
-        this.sizePictureLimit = sizePictureLimit;
+        this.supportedExtensions.put(ResourceTypeEnum.IMAGE, supportedPictureExtensions);
+        this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
+        this.sizeLimit.put(ResourceTypeEnum.IMAGE, sizePictureLimit);
         this.resourceService = resourceService;
         this.resourceDependencyService = resourceDependencyService;
         this.resourceVersionsService = resourceVersionsService;
@@ -93,11 +97,12 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment, final String type, final MultipartFile file) {
-        checkFileExtensionIsSupported(file);
-        checkFileSizeIsNotExceededLimit(file.getSize());
+        final ResourceTypeEnum resourceType = parseResourceType(type);
+        checkFileExtensionIsSupported(resourceType, file);
+        checkFileSizeIsNotExceededLimit(resourceType, file.getSize());
         final byte[] data = getFileBytes(file);
         final ResourceEntity resourceEntity = resourceService
-                .createNewVersion(name, parseResourceType(type), data, file.getOriginalFilename(), principal.getName(), comment);
+                .createNewVersion(name, resourceType, data, file.getOriginalFilename(), principal.getName(), comment);
         return new ResponseEntity<>(resourceMapper.mapWithFile(resourceEntity), HttpStatus.OK);
     }
 
@@ -135,11 +140,12 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
             final MultipartFile multipartFile) {
-        checkFileExtensionIsSupported(multipartFile);
-        checkFileSizeIsNotExceededLimit(multipartFile.getSize());
+        final ResourceTypeEnum resourceType = parseResourceType(type);
+        checkFileExtensionIsSupported(resourceType, multipartFile);
+        checkFileSizeIsNotExceededLimit(resourceType, multipartFile.getSize());
         byte[] data = getFileBytes(multipartFile);
 
-        final ResourceEntity resourceEntity = resourceService.create(name, parseResourceType(type), data, multipartFile.getOriginalFilename(), principal.getName());
+        final ResourceEntity resourceEntity = resourceService.create(name, resourceType, data, multipartFile.getOriginalFilename(), principal.getName());
         return new ResponseEntity<>(resourceMapper.mapWithFile(resourceEntity), HttpStatus.CREATED);
     }
 
@@ -183,8 +189,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void checkFileSizeIsNotExceededLimit(final Long fileSize) {
-        if (fileSize > sizePictureLimit) {
+    private void checkFileSizeIsNotExceededLimit(final ResourceTypeEnum resourceType, final Long fileSize) {
+        if (this.sizeLimit.containsKey(resourceType) && fileSize > this.sizeLimit.get(resourceType)) {
             throw new ResourceFileSizeExceedLimitException(fileSize);
         }
     }
@@ -199,9 +205,9 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         return data;
     }
 
-    private void checkFileExtensionIsSupported(final MultipartFile resource) {
+    private void checkFileExtensionIsSupported(final ResourceTypeEnum resourceType, final MultipartFile resource) {
         final String resourceExtension = FilenameUtils.getExtension(resource.getOriginalFilename()).toLowerCase();
-        if (!supportedPictureExtensions.contains(resourceExtension)) {
+        if (this.supportedExtensions.containsKey(resourceType) && !this.supportedExtensions.get(resourceType).contains(resourceExtension)) {
             throw new ResourceExtensionNotSupportedException(resourceExtension);
         }
     }

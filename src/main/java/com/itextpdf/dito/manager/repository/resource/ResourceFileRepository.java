@@ -65,7 +65,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
-            + "left join file.templateFiles templateFiles "
+            + "join file.templateFiles templateFiles "
             + "left join templateFiles.instance instance "
             + "left join instance.stage stage "
             + "left join templateFiles.template template "
@@ -86,13 +86,13 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
-            + "left join file.templateFiles templateFiles "
+            + "join file.templateFiles templateFiles "
             + "left join templateFiles.instance instance "
             + "left join instance.stage stage "
             + "left join templateFiles.template template "
             + "where "
             //filtering
-            + "file.resource.id = :id "
+            + "resource.id = :id "
             + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
             + "and (:version=0l or file.version is null or file.version=:version) "
             + "and (:type is null or file.resource.type = :type) "
@@ -113,10 +113,10 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
-            + "left join file.templateFiles templateFiles "
+            + "join file.templateFiles templateFiles "
             + "left join templateFiles.instance instance "
             + "left join instance.stage stage "
             + "left join templateFiles.template template "
-            + "where file.resource.id = :id ")
+            + "where resource.id = :id ")
     List<DependencyModel> search(@Param("id") Long resourceId);
 }

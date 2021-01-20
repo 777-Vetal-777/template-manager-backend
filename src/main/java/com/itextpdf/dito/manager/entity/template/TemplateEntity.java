@@ -60,7 +60,7 @@ public class TemplateEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
-            "SELECT log.id " +
+            "SELECT max(log.id) " +
             "FROM manager.template_log log " +
             "WHERE log.template_id = id and log.date=(" +
             "select max(log.date) from manager.template_log log where log.template_id = id)" +
