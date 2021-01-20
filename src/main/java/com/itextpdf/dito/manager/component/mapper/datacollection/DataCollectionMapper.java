@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.datacollection;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
@@ -15,7 +14,5 @@ public interface DataCollectionMapper {
     DataCollectionDTO mapWithFile(final DataCollectionEntity entity);
 
     Page<DataCollectionDTO> map(Page<DataCollectionEntity> entities);
-
-    Page<DataCollectionVersionDTO> mapVersions(Page<DataCollectionFileEntity> entities);
 
 }

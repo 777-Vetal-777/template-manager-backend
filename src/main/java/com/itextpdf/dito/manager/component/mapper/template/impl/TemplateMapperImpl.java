@@ -4,10 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
-import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.StageEntity;
-import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -20,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
@@ -130,26 +126,4 @@ public class TemplateMapperImpl implements TemplateMapper {
         return entities.map(this::map);
     }
 
-    @Override
-    public TemplateVersionDTO map(final TemplateFileEntity entity) {
-        final TemplateVersionDTO version = new TemplateVersionDTO();
-        version.setVersion(entity.getVersion());
-        version.setComment(entity.getComment());
-        version.setModifiedOn(entity.getCreatedOn());
-
-        final Optional<StageEntity> stageEntity = entity.getInstance().stream().map(instance -> instance.getStage()).filter(Objects::nonNull).findAny();
-        version.setDeploymentStatus(stageEntity.isPresent());
-
-        final UserEntity author = entity.getAuthor();
-        if (Objects.nonNull(author)) {
-            version.setModifiedBy(
-                    new StringBuilder(author.getFirstName()).append(" ").append(author.getLastName()).toString());
-        }
-        return version;
-    }
-
-    @Override
-    public Page<TemplateVersionDTO> mapVersions(final Page<TemplateFileEntity> entities) {
-        return entities.map(this::map);
-    }
 }

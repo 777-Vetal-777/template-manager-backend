@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
@@ -23,7 +24,6 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
-import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromMultiselectBooleanFilter;
 
 @Service
 public class DataCollectionsFileServiceImpl extends AbstractService implements DataCollectionFileService {
@@ -41,7 +41,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
     }
 
     @Override
-    public Page<DataCollectionFileEntity> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
+    public Page<FileVersionModel> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final DataCollectionEntity dataCollection = dataCollectionService.get(name);
 
@@ -49,7 +49,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
         final Long version = getLongFromFilter(filter.getVersion());
         final String createdBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
-        final String deploymentStatus = getStringFromMultiselectBooleanFilter(filter.getDeployed());
+        final String stageName = getStringFromFilter(filter.getStage());
 
         Date createdOnStartDate = null;
         Date createdOnEndDate = null;
@@ -62,28 +62,36 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
             createdOnEndDate = getEndDateFromRange(createdOnDateRange);
         }
         return StringUtils.isEmpty(searchParam)
-                ? dataCollectionFileRepository.filter(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, deploymentStatus, comment)
-                : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, deploymentStatus, comment, searchParam);
+                ? dataCollectionFileRepository.filter(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment)
+                : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment, searchParam);
     }
 
     private Pageable updateSort(final Pageable pageable) {
-        Sort newSort = Sort.by(pageable.getSort().stream()
-                .map(sortParam -> {
-                    if (sortParam.getProperty().equals("version")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "version");
-                    }
-                    if (sortParam.getProperty().equals("modifiedBy")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
-                    }
-                    if (sortParam.getProperty().equals("modifiedOn")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "createdOn");
-                    }
-                    if (sortParam.getProperty().equals("comment")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "comment");
-                    }
-                    return sortParam;
-                })
-                .collect(Collectors.toList()));
+        Sort newSort;
+        if (pageable.getSort().isSorted()) {
+            newSort = Sort.by(pageable.getSort().stream()
+                    .map(sortParam -> {
+                        if (sortParam.getProperty().equals("version")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "version");
+                        }
+                        if (sortParam.getProperty().equals("modifiedBy")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
+                        }
+                        if (sortParam.getProperty().equals("modifiedOn")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "createdOn");
+                        }
+                        if (sortParam.getProperty().equals("comment")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "comment");
+                        }
+                        if (sortParam.getProperty().equals("stage")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
+                        }
+                        return sortParam;
+                    })
+                    .collect(Collectors.toList()));
+        } else {
+            newSort = Sort.by("version").ascending();
+        }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 

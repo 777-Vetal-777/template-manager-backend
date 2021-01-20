@@ -194,7 +194,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
-                .andExpect(jsonPath("$.content[0].deployed").value(false))
+                .andExpect(jsonPath("$.content[0].stage").isEmpty())
                 .andExpect(jsonPath("$.content[1].version").value(2))
                 .andExpect(jsonPath("$.content[2].version").value(3))
                 .andExpect(jsonPath("$.content[3].version").value(4))

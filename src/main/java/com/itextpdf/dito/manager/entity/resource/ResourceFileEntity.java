@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.entity.resource;
 
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -41,6 +43,16 @@ public class ResourceFileEntity {
 
     @ManyToMany(mappedBy = "resourceFiles")
     private Set<TemplateFileEntity> templateFiles = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("( select stage.id from {h-schema}stage stage where stage.sequence_order = (select max(instanceStage.sequence_order) " +
+            "from {h-schema}resource_file_template_file toTemplateFile " +
+            "join {h-schema}template_file templateFile on toTemplateFile.template_file_id = templateFile.id " +
+            "join {h-schema}template_file_instance toInstance on toInstance.template_file_id = templateFile.id " +
+            "join {h-schema}instance instance on instance.id = toInstance.instance_id " +
+            "join {h-schema}stage instanceStage on instanceStage.id = instance.stage_id " +
+            "where toTemplateFile.resource_file_id = id) )")
+    private StageEntity stage;
 
     public Set<TemplateFileEntity> getTemplateFiles() {
         return templateFiles;
@@ -128,5 +140,13 @@ public class ResourceFileEntity {
 
     public void setResource(ResourceEntity resource) {
         this.resource = resource;
+    }
+
+    public StageEntity getStage() {
+        return stage;
+    }
+
+    public void setStage(StageEntity stage) {
+        this.stage = stage;
     }
 }

@@ -3,17 +3,12 @@ package com.itextpdf.dito.manager.component.mapper.datacollection.impl;
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionVersionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.InstanceEntity;
-import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
@@ -63,26 +58,6 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
     @Override
     public Page<DataCollectionDTO> map(final Page<DataCollectionEntity> entities) {
         return entities.map(this::map);
-    }
-
-    @Override
-    public Page<DataCollectionVersionDTO> mapVersions(final Page<DataCollectionFileEntity> entities) {
-        return entities.map(this::mapVersion);
-    }
-
-    public DataCollectionVersionDTO mapVersion(final DataCollectionFileEntity entity) {
-        final DataCollectionVersionDTO dto = new DataCollectionVersionDTO();
-        final UserEntity modifiedBy = entity.getAuthor();
-
-        dto.setVersion(entity.getVersion());
-        dto.setModifiedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
-        dto.setModifiedOn(entity.getCreatedOn());
-        dto.setComment(entity.getComment());
-
-        final Optional<StageEntity> stageEntity = entity.getTemplateFiles().stream().flatMap(templateFile -> templateFile.getInstance().stream()).map(InstanceEntity::getStage).findAny();
-        dto.setDeploymentStatus(stageEntity.isPresent());
-
-        return dto;
     }
 
 }

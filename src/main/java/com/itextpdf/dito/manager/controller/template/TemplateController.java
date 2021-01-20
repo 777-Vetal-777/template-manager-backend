@@ -3,11 +3,11 @@ package com.itextpdf.dito.manager.controller.template;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
+import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
-import com.itextpdf.dito.manager.dto.template.TemplateVersionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -120,10 +120,10 @@ public interface TemplateController {
     @GetMapping(TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of template by name.", description = "Get a list of template versions using the template name and template type, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<TemplateVersionDTO>> getVersions(Pageable pageable,
-                                                         @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-                                                         @ParameterObject VersionFilter versionFilter,
-                                                         @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<FileVersionDTO>> getVersions(Pageable pageable,
+                                                     @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                     @ParameterObject VersionFilter versionFilter,
+                                                     @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get template preview", description = "Get generated template PDF preview",
