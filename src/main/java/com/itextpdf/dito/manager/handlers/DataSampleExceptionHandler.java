@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
-import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
 
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class DataSampleExceptionHandler extends AbstractExceptionHandler {
+	
     @ExceptionHandler(InvalidDataSampleException.class)
     public ResponseEntity<ErrorResponseDTO> invalidDataSampleExceptionHandler(final InvalidDataSampleException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
@@ -23,9 +24,4 @@ public class DataSampleExceptionHandler extends AbstractExceptionHandler {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
     
-    @ExceptionHandler(DataSampleNameAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDTO> dataSampleNameAlreadyExistsException(
-            final DataSampleNameAlreadyExistsException ex) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
-    }
 }
