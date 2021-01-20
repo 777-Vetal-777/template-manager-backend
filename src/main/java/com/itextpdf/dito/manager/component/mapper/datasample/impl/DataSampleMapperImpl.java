@@ -17,7 +17,11 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 	public DataSampleMapperImpl(final JsonKeyComparator jsonKeyComparator) {
 =======
 	
+<<<<<<< HEAD
 	public DataSampleMapperImpl(JsonKeyComparator jsonKeyComparator) {
+>>>>>>> DataSamples endpoints added
+=======
+	public DataSampleMapperImpl(final JsonKeyComparator jsonKeyComparator) {
 >>>>>>> DataSamples endpoints added
 		this.jsonKeyComparator = jsonKeyComparator;
 	}
