@@ -8,9 +8,13 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 <<<<<<< HEAD
+<<<<<<< HEAD
 import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
 =======
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
+>>>>>>> DataSamples endpoints added
+=======
+import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
 >>>>>>> DataSamples endpoints added
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
@@ -68,16 +72,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
 		}
-<<<<<<< HEAD
-		
-=======
-		if (dataSampleRepository.existsByName(name)) {
-	        throw new DataSampleNameAlreadyExistsException();
-	    }
->>>>>>> DataSamples endpoints added
+
 		final DataCollectionFileEntity lastEntity = dataCollectionEntity.getLatestVersion();
 		final String jsonFromCollection = new String(lastEntity.getData());
-		if(!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
+		if (!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
 			throw new InvalidDataSampleStructureException();
 		}
 		
