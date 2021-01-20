@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.itextpdf.dito</groupId>
     <artifactId>template-manager</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6-SNAPSHOT</version>
     <name>DITO PDF Template Manager</name>
 
     <properties>
