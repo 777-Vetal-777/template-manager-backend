@@ -29,7 +29,7 @@ public class ResourceDependencyModel implements DependencyModel {
 
     @Override
     public DependencyType getDependencyType() {
-        return DependencyType.IMAGE;
+        return DependencyType.TEMPLATE;
     }
 
     @Override

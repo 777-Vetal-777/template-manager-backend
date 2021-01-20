@@ -25,15 +25,6 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +33,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -59,6 +57,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE,
             PERMISSION_NAME_FOR_ROLLBACK_IMAGE,
             PERMISSION_NAME_FOR_DELETE_IMAGE);
+    private static final String PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET = "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET";
+    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET = "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET";
+    private static final List<String> AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES = Arrays.asList(
+            PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET,
+            PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
 
     private final ResourceRepository resourceRepository;
     private final ResourceLogRepository resourceLogRepository;
@@ -128,8 +131,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
-        if (ResourceTypeEnum.IMAGE.equals(type)) {
-            checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
+        switch (type) {
+            case IMAGE:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
+                break;
+            case STYLESHEET:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
+                break;
         }
 
         final Long oldVersion = resourceFileRepository
@@ -185,9 +194,15 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final ResourceEntity existingResource = getResource(name, entity.getType());
         final UserEntity userEntity = userService.findByEmail(mail);
 
-        if (ResourceTypeEnum.IMAGE.equals(entity.getType())) {
-            checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                    existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
+        switch (entity.getType()) {
+            case IMAGE:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
+                break;
+            case STYLESHEET:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET);
+                break;
         }
 
         if (!existingResource.getName().equals(entity.getName())) {
@@ -237,8 +252,13 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     private void checkIfPermissionsAllowedForResourceType(final List<String> permissions,
             final ResourceTypeEnum resourceTypeEnum) {
-        if (ResourceTypeEnum.IMAGE.equals(resourceTypeEnum)) {
-            throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES);
+        switch (resourceTypeEnum) {
+            case IMAGE:
+                throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES);
+                break;
+            case STYLESHEET:
+                throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES);
+                break;
         }
     }
 

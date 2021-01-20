@@ -70,7 +70,7 @@ public class ResourceEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
-            "SELECT log.id " +
+            "SELECT max(log.id) " +
             "FROM manager.resource_log log " +
             "WHERE log.resource_id = id and log.date=(" +
             "select max(log.date) from manager.resource_log log where log.resource_id = id)" +
