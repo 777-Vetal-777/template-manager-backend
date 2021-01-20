@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateUpdateD
 import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDescriptorMapper;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,12 +33,14 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public InputStream get(final String templateId) {
-        return null;
+        final TemplateEntity templateEntity = templateService.get(decodeBase64(templateId));
+        return new ByteArrayInputStream(templateEntity.getLatestFile().getData());
     }
 
     @Override
     public List<TemplateDescriptor> getAllDescriptors(final String workspaceId) {
-        return null;
+        // At now we support only single workspace, that's why all templates will be returned.
+        return templateDescriptorMapper.map(templateService.getAll());
     }
 
     @Override

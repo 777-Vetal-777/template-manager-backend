@@ -169,6 +169,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    public List<TemplateEntity> getAll() {
+        return templateRepository.findAll();
+    }
+
+    @Override
     public TemplateEntity get(final String name) {
         return findByName(name);
     }

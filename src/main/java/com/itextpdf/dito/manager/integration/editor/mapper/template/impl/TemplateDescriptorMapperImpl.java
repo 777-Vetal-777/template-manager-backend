@@ -5,6 +5,8 @@ import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateDescrip
 import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDescriptorMapper;
 
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,6 +21,11 @@ public class TemplateDescriptorMapperImpl implements TemplateDescriptorMapper {
                 .getName();
         result.setDataCollectionId(encodeToBase64(dataCollectionName));
         return result;
+    }
+
+    @Override
+    public List<TemplateDescriptor> map(List<TemplateEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
     }
 
     private String encodeToBase64(final String value) {
