@@ -66,7 +66,7 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
                         return Stream.empty();
                     }
                     if ("version".equals(sortParam.getProperty())) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "file.version");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "lastTemplateFile.version");
                     }
                     if ("stage".equals(sortParam.getProperty())) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
