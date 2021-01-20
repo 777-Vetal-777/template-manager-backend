@@ -13,16 +13,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 
 	private final JsonKeyComparator jsonKeyComparator;
 	
-<<<<<<< HEAD
 	public DataSampleMapperImpl(final JsonKeyComparator jsonKeyComparator) {
-=======
-	
-<<<<<<< HEAD
-	public DataSampleMapperImpl(JsonKeyComparator jsonKeyComparator) {
->>>>>>> DataSamples endpoints added
-=======
-	public DataSampleMapperImpl(final JsonKeyComparator jsonKeyComparator) {
->>>>>>> DataSamples endpoints added
 		this.jsonKeyComparator = jsonKeyComparator;
 	}
 
@@ -38,11 +29,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setComment(entity.getComment());
         dto.setFileName(entity.getFileName());
-<<<<<<< HEAD
         dto.setIsDefault(entity.getIsDefault());
-=======
-        dto.setSetAsDefault(entity.getSetAsDefault());
->>>>>>> DataSamples endpoints added
 		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getData()),
 				new String(entity.getDataCollection().getLatestVersion().getData())));
 		 return dto;
