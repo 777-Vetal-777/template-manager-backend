@@ -17,6 +17,8 @@ public interface TemplateService {
 
     Page<TemplateEntity> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam);
 
+    List<TemplateEntity> getAll();
+
     TemplateEntity get(String name);
 
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
