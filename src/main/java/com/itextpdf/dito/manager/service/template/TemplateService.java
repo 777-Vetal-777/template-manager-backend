@@ -25,6 +25,8 @@ public interface TemplateService {
 
     TemplateEntity createNewVersion(String name, byte[] data, String email, String comment);
 
+    TemplateEntity createNewVersion(String name, byte[] data, String email, String comment, String templateName);
+
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
     Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);
@@ -32,4 +34,6 @@ public interface TemplateService {
     TemplateEntity applyRole(String templateName, String roleName, List<String> permissions, String email);
 
     TemplateEntity detachRole(String templateName, String roleName, String email);
+
+    TemplateEntity delete(String templateName);
 }

@@ -4,7 +4,9 @@ import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateAddDesc
 import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateDescriptor;
 import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateUpdateDescriptor;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +24,8 @@ public interface TemplateManagementController {
     String TEMPLATE_DESCRIPTOR_URL = "/templates/{template-id}/descriptor";
 
     @PostMapping(value = CREATE_TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    TemplateDescriptor add(@PathVariable("workspace-id") String workspaceId,
+    TemplateDescriptor add(Principal principal,
+            @PathVariable("workspace-id") String workspaceId,
             @RequestPart TemplateAddDescriptor descriptor,
             @RequestPart InputStream data);
 
@@ -36,9 +39,10 @@ public interface TemplateManagementController {
     List<TemplateDescriptor> getAllDescriptors(@PathVariable("workspace-id") String workspaceId);
 
     @PutMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    TemplateDescriptor update(@PathVariable("template-id") String templateId,
+    TemplateDescriptor update(Principal principal,
+            @PathVariable("template-id") String templateId,
             @RequestPart TemplateUpdateDescriptor descriptor,
-            @RequestPart InputStream data);
+            @RequestPart InputStream data) throws IOException;
 
     @DeleteMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     TemplateDescriptor delete(@PathVariable("template-id") String templateId);

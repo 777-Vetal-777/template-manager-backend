@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template.impl;
 
 import com.itextpdf.dito.manager.controller.AbstractController;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateAddDescriptor;
@@ -10,8 +11,11 @@ import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDesc
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,13 +31,15 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public TemplateDescriptor getDescriptor(final String templateId) {
-        final TemplateEntity templateEntity = templateService.get(decodeBase64(templateId));
+        final String decodedTemplateId = decodeBase64(templateId);
+        final TemplateEntity templateEntity = templateService.get(decodedTemplateId);
         return templateDescriptorMapper.map(templateEntity);
     }
 
     @Override
     public InputStream get(final String templateId) {
-        final TemplateEntity templateEntity = templateService.get(decodeBase64(templateId));
+        final String decodedTemplateId = decodeBase64(templateId);
+        final TemplateEntity templateEntity = templateService.get(decodedTemplateId);
         return new ByteArrayInputStream(templateEntity.getLatestFile().getData());
     }
 
@@ -44,19 +50,37 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public TemplateDescriptor update(final String templateId, final TemplateUpdateDescriptor descriptor,
-            final InputStream data) {
-        return null;
+    public TemplateDescriptor update(final Principal principal, final String templateId,
+            final TemplateUpdateDescriptor descriptor,
+            final InputStream data) throws IOException {
+        final String email = principal.getName();
+        final String decodedTemplateId = decodeBase64(templateId);
+        final String newName = descriptor.getName();
+        final byte[] dataAsByteArray = new byte[data.available()];
+        data.read(dataAsByteArray);
+
+        final TemplateEntity templateEntity = templateService
+                .createNewVersion(decodedTemplateId, dataAsByteArray, email, null, newName);
+
+        return templateDescriptorMapper.map(templateEntity);
     }
 
     @Override
-    public TemplateDescriptor add(final String workspaceId, final TemplateAddDescriptor descriptor,
+    public TemplateDescriptor add(final Principal principal, final String workspaceId,
+            @Valid final TemplateAddDescriptor descriptor,
             final InputStream data) {
-        return null;
+        final String email = principal.getName();
+        final TemplateEntity templateEntity = templateService
+                .create(descriptor.getName(), TemplateTypeEnum.STANDARD, null, email);
+        return templateDescriptorMapper.map(templateEntity);
     }
 
     @Override
     public TemplateDescriptor delete(final String templateId) {
-        return null;
+        final String decodedTemplateId = decodeBase64(templateId);
+
+        final TemplateEntity templateEntity = templateService.delete(decodedTemplateId);
+
+        return templateDescriptorMapper.map(templateEntity);
     }
 }

@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.token.impl;
 
 import com.itextpdf.dito.manager.component.auth.token.builder.TokenBuilder;
 import com.itextpdf.dito.manager.component.auth.token.builder.impl.JwtAccessTokenBuilder;
+import com.itextpdf.dito.manager.component.auth.token.builder.impl.JwtEditorTokenBuilder;
 import com.itextpdf.dito.manager.component.auth.token.builder.impl.JwtRefreshTokenBuilder;
 import com.itextpdf.dito.manager.component.auth.token.helper.TokenHelper;
 import com.itextpdf.dito.manager.component.auth.token.helper.impl.JwtRefreshTokenHelper;
@@ -19,16 +20,19 @@ public class TokenServiceImpl implements TokenService {
     private final TokenHelper refreshTokenHelper;
     private final TokenBuilder accessTokenBuilder;
     private final TokenBuilder refreshTokenBuilder;
+    private final TokenBuilder editorTokenBuilder;
     private final UserService userService;
 
     public TokenServiceImpl(
             final @Qualifier(JwtRefreshTokenHelper.BEAN_ID) TokenHelper refreshTokenHelper,
             final @Qualifier(JwtAccessTokenBuilder.BEAN_ID) TokenBuilder accessTokenBuilder,
             final @Qualifier(JwtRefreshTokenBuilder.BEAN_ID) TokenBuilder refreshTokenBuilder,
+            final @Qualifier(JwtEditorTokenBuilder.BEAN_ID) TokenBuilder editorTokenBuilder,
             final UserService userService) {
         this.refreshTokenHelper = refreshTokenHelper;
         this.accessTokenBuilder = accessTokenBuilder;
         this.refreshTokenBuilder = refreshTokenBuilder;
+        this.editorTokenBuilder = editorTokenBuilder;
         this.userService = userService;
     }
 
@@ -65,13 +69,12 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public boolean isTokenIssuedAfterUserChanges(String token, String email) {
-        final Date lastUserChangesDate = userService.findByEmail(email).getModifiedAt();
-        return isTokenIssuedAfterUserChanges(token, lastUserChangesDate);
+    public boolean isTokenIssuedAfterUserChanges(String token, Date userChangesDate) {
+        return refreshTokenHelper.isTokenWasIssuedAfter(token, userChangesDate);
     }
 
     @Override
-    public boolean isTokenIssuedAfterUserChanges(String token, Date userChangesDate) {
-        return refreshTokenHelper.isTokenWasIssuedAfter(token, userChangesDate);
+    public String getTokenForEditor(String subject) {
+        return editorTokenBuilder.build(subject);
     }
 }

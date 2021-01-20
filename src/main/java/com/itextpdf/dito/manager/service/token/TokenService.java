@@ -13,5 +13,5 @@ public interface TokenService {
 
     boolean isTokenIssuedAfterUserChanges(String token, Date userChangesDate);
 
-    boolean isTokenIssuedAfterUserChanges(String token, String email);
+    String getTokenForEditor(String subject);
 }
