@@ -37,8 +37,8 @@ public class DataSampleEntity {
     private byte[] data;
     @Column(name="file_name")
     private String fileName;
-    @Column(name="default")
-    private Boolean setAsDefault;
+    @Column(name="is_default")
+    private Boolean isDefault;
     
     public Date getModifiedOn() {
 		return modifiedOn;
@@ -114,13 +114,12 @@ public class DataSampleEntity {
 		this.name = name;
 	}
 
-	public Boolean getSetAsDefault() {
-		return setAsDefault;
+	public Boolean getIsDefault() {
+		return isDefault;
 	}
 
-	public void setSetAsDefault(Boolean setAsDefault) {
-		this.setAsDefault = setAsDefault;
-	}
-    
+	public void setIsDefault(Boolean isDefault) {
+		this.isDefault = isDefault;
+	} 
     
 }

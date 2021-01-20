@@ -30,7 +30,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setComment(entity.getComment());
         dto.setFileName(entity.getFileName());
-        dto.setSetAsDefault(entity.getSetAsDefault());
+        dto.setIsDefault(entity.getIsDefault());
 		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getData()),
 				new String(entity.getDataCollection().getLatestVersion().getData())));
 		 return dto;

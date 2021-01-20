@@ -82,7 +82,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		dataSampleEntity.setCreatedOn(new Date());
 		dataSampleEntity.setAuthor(userEntity);
 		dataSampleEntity.setData(sample.getBytes());
-		dataSampleEntity.setSetAsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
+		dataSampleEntity.setIsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
 		return dataSampleRepository.save(dataSampleEntity);
 	}	
 
@@ -99,7 +99,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		final String name = getStringFromFilter(filter.getName());
 		final String modifiedBy = getStringFromFilter(filter.getModifiedBy());
 		final String comment = getStringFromFilter(filter.getComment());
-		final Boolean setAsDefault = getBooleanMultiselectFromFilter(filter.getSetAsDefault());
+		final Boolean isDefault = getBooleanMultiselectFromFilter(filter.getIsDefault());
 
 		Date editedOnStartDate = null;
 		Date editedOnEndDate = null;
@@ -114,7 +114,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 
 		return StringUtils.isEmpty(searchParam)
 				? dataSampleRepository
-				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, setAsDefault, comment)
+				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, isDefault, comment)
 				: dataSampleRepository
 				.search(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment,  searchParam.toLowerCase());
 	}
@@ -143,10 +143,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity)
 				.orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
 		list.stream().forEach(e -> {
-			e.setSetAsDefault(false);
+			e.setIsDefault(false);
 			e.setModifiedOn(new Date());
 		});
-		dataSampleEntity.setSetAsDefault(true);
+		dataSampleEntity.setIsDefault(true);
 		dataSampleRepository.saveAll(list);
 		return dataSampleEntity;
 	}

@@ -16,7 +16,7 @@ public class DataSampleDTO {
     private String fileName;
     private String comment;
     private String file;
-    private Boolean setAsDefault;
+    private Boolean isDefault;
     private Boolean isActual;
     
     public String getFile() {
@@ -91,13 +91,12 @@ public class DataSampleDTO {
         this.authorLastName = authorLastName;
     }
 
-
-	public Boolean getSetAsDefault() {
-		return setAsDefault;
+	public Boolean getIsDefault() {
+		return isDefault;
 	}
 
-	public void setSetAsDefault(Boolean setAsDefault) {
-		this.setAsDefault = setAsDefault;
+	public void setIsDefault(Boolean isDefault) {
+		this.isDefault = isDefault;
 	}
 
 	public Boolean getIsActual() {
