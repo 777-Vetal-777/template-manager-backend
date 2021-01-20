@@ -22,7 +22,8 @@ public class NotReachableInstanceException extends RuntimeException {
 
     private String buildMessage(final String socket) {
         final StringBuilder result = new StringBuilder(AliasConstants.INSTANCE);
-        result.append("'s socket is not reachable.");
+        result.append("'s socket is not reachable: ");
+        result.append(socket);
         return result.toString();
     }
 }

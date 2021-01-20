@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.controller.instance.impl;
 
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
-import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImplFake;
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
@@ -15,6 +14,7 @@ import com.itextpdf.dito.manager.service.instance.InstanceService;
 import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,10 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class InstanceControllerImpl extends AbstractController implements InstanceController {
     private InstanceService instanceService;
     private InstanceMapper instanceMapper;
+    private InstanceClient instanceClient;
 
-    public InstanceControllerImpl(final InstanceService instanceService, final InstanceMapper instanceMapper) {
+    public InstanceControllerImpl(final InstanceService instanceService, final InstanceClient instanceClient, final InstanceMapper instanceMapper) {
         this.instanceService = instanceService;
         this.instanceMapper = instanceMapper;
+        this.instanceClient = instanceClient;
     }
 
     @Override
@@ -41,9 +43,8 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
-    public ResponseEntity<Void> ping(String socket) {
-        final InstanceClient instanceClient = new InstanceClientImplFake(decodeBase64(socket));
-        instanceClient.ping();
+    public ResponseEntity<Void> ping(final String socket) {
+        instanceClient.ping(decodeBase64(socket));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -54,8 +55,9 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
-    public ResponseEntity<Page<InstanceDTO>> getInstances(final Pageable pageable, final InstanceFilter instanceFilter,
-            String searchParam) {
+    public ResponseEntity<Page<InstanceDTO>> getInstances(final Pageable pageable,
+                                                          final InstanceFilter instanceFilter,
+                                                          final String searchParam) {
         final Page<InstanceEntity> instanceEntities = instanceService.getAll(instanceFilter, pageable, searchParam);
         return new ResponseEntity<>(instanceMapper.map(instanceEntities), HttpStatus.OK);
     }
