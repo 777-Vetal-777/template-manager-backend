@@ -39,7 +39,7 @@ public abstract class AbstractService {
         return roleEntities.stream().map(RoleEntity::getName).collect(Collectors.toSet());
     }
 
-    protected void checkNotAdminRole(final RoleEntity roleEntity){
+    protected void checkNotAdminRole(final RoleEntity roleEntity) {
         if ("GLOBAL_ADMINISTRATOR".equals(roleEntity.getName()) || "ADMINISTRATOR".equals(roleEntity.getName())) {
             throw new UnableToSetPermissionsException();
         }
