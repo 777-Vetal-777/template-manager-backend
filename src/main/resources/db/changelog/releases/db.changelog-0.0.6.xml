@@ -4,11 +4,10 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-	<changeSet id="001-update-data-sample-table-structure" author="Denys_Kovbii">
+	<changeSet id="001-add-default-column-to-data-sample-table" author="Denys_Kovbii">
 		<addColumn tableName="data_sample">
-			<column name="default" type="boolean"
-				defaultValueBoolean="false">
-				<constraints nullable="false" notNullConstraintName="data_sample_default_not_null_constraint" />
+			<column name="is_default" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false" notNullConstraintName="data_sample_is_default_not_null_constraint" />
 			</column>
 		</addColumn>
 	</changeSet>

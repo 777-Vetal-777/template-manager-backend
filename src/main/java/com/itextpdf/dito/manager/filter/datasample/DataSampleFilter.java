@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.filter.datasample;
 
-import java.util.Date;
 import java.util.List;
 
 public class DataSampleFilter {
@@ -9,7 +8,7 @@ public class DataSampleFilter {
     private String modifiedBy;
     private List<String> modifiedOn;
     private String comment;
-    private List<Boolean> setAsDefault;
+    private List<Boolean> isDefault;
 
     public String getName() {
         return name;
@@ -43,11 +42,12 @@ public class DataSampleFilter {
         this.comment = comment;
     }
 
-    public List<Boolean> getSetAsDefault() {
-        return setAsDefault;
-    }
+	public List<Boolean> getIsDefault() {
+		return isDefault;
+	}
 
-    public void setSetAsDefault(List<Boolean> setAsDefault) {
-        this.setAsDefault = setAsDefault;
-    }
+	public void setIsDefault(List<Boolean> isDefault) {
+		this.isDefault = isDefault;
+	}
+
 }
