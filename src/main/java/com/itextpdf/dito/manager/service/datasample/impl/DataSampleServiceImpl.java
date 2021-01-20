@@ -56,12 +56,15 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	@Override
 	public DataSampleEntity create(final DataCollectionEntity dataCollectionEntity, final String name, final String fileName,
 			final String sample, final String comment, final String email) {
-		if (!jsonValidator.isValid(sample.getBytes())) {
-			throw new InvalidDataSampleException();
-		}
+		
 		if (dataSampleRepository.existsByName(name)) {
 	        throw new DataSampleAlreadyExistsException(name);
 	    }
+		
+		if (!jsonValidator.isValid(sample.getBytes())) {
+			throw new InvalidDataSampleException();
+		}
+		
 		final DataCollectionFileEntity lastEntity = dataCollectionEntity.getLatestVersion();
 		final String jsonFromCollection = new String(lastEntity.getData());
 		if(!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
@@ -136,9 +139,13 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	@Override
 	public DataSampleEntity setAsDefault(final String dataSampleName) {
 		final DataSampleEntity dataSampleEntity = get(dataSampleName);
-		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection(); 
-		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity).orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
-		list.stream().forEach(e->{e.setSetAsDefault(false);e.setModifiedOn(new Date());});
+		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection();
+		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity)
+				.orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
+		list.stream().forEach(e -> {
+			e.setSetAsDefault(false);
+			e.setModifiedOn(new Date());
+		});
 		dataSampleEntity.setSetAsDefault(true);
 		dataSampleRepository.saveAll(list);
 		return dataSampleEntity;

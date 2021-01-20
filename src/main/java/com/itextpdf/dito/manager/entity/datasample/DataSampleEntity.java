@@ -37,7 +37,7 @@ public class DataSampleEntity {
     private byte[] data;
     @Column(name="file_name")
     private String fileName;
-    @Column(name="set_as_default")
+    @Column(name="default")
     private Boolean setAsDefault;
     
     public Date getModifiedOn() {
