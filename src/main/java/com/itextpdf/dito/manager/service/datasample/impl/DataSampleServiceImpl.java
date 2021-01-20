@@ -7,7 +7,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
-import com.itextpdf.dito.manager.exception.datasample.DataSampleNameAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException;
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
@@ -60,7 +60,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 			throw new InvalidDataSampleException();
 		}
 		if (dataSampleRepository.existsByName(name)) {
-	        throw new DataSampleNameAlreadyExistsException();
+	        throw new DataSampleAlreadyExistsException(name);
 	    }
 		final DataCollectionFileEntity lastEntity = dataCollectionEntity.getLatestVersion();
 		final String jsonFromCollection = new String(lastEntity.getData());

@@ -12,14 +12,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class JsonKeyComparatorImpl implements JsonKeyComparator {
 
-    @Override
-    public boolean checkJsonKeysEquals(final String json1, final String json2) {
-    	try {
-        return checkLastDataCollectionEqualsSample(json1, json1);
-    	}catch(JSONException e) {
-    		return false;
-    	}
-    }
+	@Override
+	public boolean checkJsonKeysEquals(final String json1, final String json2) {
+		boolean result = false;
+		try {
+			result = checkLastDataCollectionEqualsSample(json1, json1);
+		} catch (JSONException e) {
+			result = false;
+		}
+		return result;
+	}
 
     private boolean checkLastDataCollectionEqualsSample(final String json1, final String json2) {
         final List<String> keys1 = Arrays.asList(getJsonKeys(json1));

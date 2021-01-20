@@ -14,7 +14,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 	private final JsonKeyComparator jsonKeyComparator;
 	
 	
-	public DataSampleMapperImpl(JsonKeyComparator jsonKeyComparator) {
+	public DataSampleMapperImpl(final JsonKeyComparator jsonKeyComparator) {
 		this.jsonKeyComparator = jsonKeyComparator;
 	}
 
