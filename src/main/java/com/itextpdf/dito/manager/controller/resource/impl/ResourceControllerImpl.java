@@ -15,7 +15,9 @@ import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.resource.FontTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.exception.resource.IncorrectResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupportedException;
 import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitException;
@@ -28,6 +30,13 @@ import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.validation.Valid;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,13 +46,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.FONT;
+import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD;
+import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD_ITALIC;
+import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.ITALIC;
+import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.REGULAR;
 
 @RestController
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
@@ -62,6 +69,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResourceControllerImpl(
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
             @Value("${resources.stylesheets.extensions.supported}") final List<String> supportedStylesheetExtensions,
+            @Value("${resources.fonts.extensions.supported}") final List<String> supportedFontExtensions,
             @Value("${resources.pictures.size-limit}") final Long sizePictureLimit,
             final ResourceService resourceService,
             final ResourceDependencyService resourceDependencyService,
@@ -74,6 +82,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final FileVersionMapper fileVersionMapper) {
         this.supportedExtensions.put(ResourceTypeEnum.IMAGE, supportedPictureExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
+        this.supportedExtensions.put(ResourceTypeEnum.FONT, supportedFontExtensions);
         this.sizeLimit.put(ResourceTypeEnum.IMAGE, sizePictureLimit);
         this.resourceService = resourceService;
         this.resourceDependencyService = resourceDependencyService;
@@ -87,8 +96,34 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
+    public ResponseEntity<byte[]> getFile(final String uuid) {
+        return new ResponseEntity<>(resourceService.getFile(uuid), HttpStatus.OK);
+    }
+    //TODO MERGE TWO CREATE ENDPOINT I
+    @Override
+    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
+            final String originalFileName,
+            final MultipartFile regular, final MultipartFile bold, final MultipartFile italic,
+            final MultipartFile boldItalic) {
+        final ResourceTypeEnum typeEnum = parseResourceType(type);
+        if (typeEnum != FONT) {
+            throw new IncorrectResourceTypeException(type);
+        }
+        final HashMap<FontTypeEnum, MultipartFile> fileMap = new HashMap<>();
+        fileMap.put(REGULAR, regular);
+        fileMap.put(BOLD, bold);
+        fileMap.put(ITALIC, italic);
+        fileMap.put(BOLD_ITALIC, boldItalic);
+
+        fileMap.entrySet().forEach(entry -> checkFileExtensionIsSupported(typeEnum, entry.getValue()));
+        final ResourceEntity resourceEntity = resourceService
+                .createNewFont(principal.getName(), name, originalFileName, typeEnum, fileMap);
+        return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Page<FileVersionDTO>> getVersions(final Principal principal, final Pageable pageable,
-                                                            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
+            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
         final Page<FileVersionDTO> versionsDTOs = fileVersionMapper.map(resourceVersionsService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
@@ -96,14 +131,18 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment, final String type, final MultipartFile file) {
+    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
+            final String type, final MultipartFile file) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
+        if (resourceType == FONT) {
+            throw new IncorrectResourceTypeException(type);
+        }
         checkFileExtensionIsSupported(resourceType, file);
         checkFileSizeIsNotExceededLimit(resourceType, file.getSize());
         final byte[] data = getFileBytes(file);
         final ResourceEntity resourceEntity = resourceService
                 .createNewVersion(name, resourceType, data, file.getOriginalFilename(), principal.getName(), comment);
-        return new ResponseEntity<>(resourceMapper.mapWithFile(resourceEntity), HttpStatus.OK);
+        return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
@@ -119,14 +158,14 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<List<DependencyDTO>> list(final String name, final String type) {
         final String decodedName = decodeBase64(name);
         final ResourceTypeEnum typeEnum = parseResourceTypeFromPath(type);
-        final List<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService.list(decodedName, typeEnum));
+        final List<DependencyDTO> dependencyDTOs = dependencyMapper
+                .map(resourceDependencyService.list(decodedName, typeEnum));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<ResourceDTO>> list(final Pageable pageable,
-            final ResourceFilter filter,
-            final String searchParam) {
+            final ResourceFilter filter, final String searchParam) {
         final Page<ResourceDTO> dtos = resourceMapper.map(resourceService.list(pageable, filter, searchParam));
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
@@ -134,19 +173,23 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type) {
         final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceTypeFromPath(type));
-        return new ResponseEntity<>(resourceMapper.mapWithFile(entity), HttpStatus.OK);
+        return new ResponseEntity<>(resourceMapper.map(entity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
             final MultipartFile multipartFile) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
+        if (resourceType == FONT) {
+            throw new IncorrectResourceTypeException(type);
+        }
         checkFileExtensionIsSupported(resourceType, multipartFile);
         checkFileSizeIsNotExceededLimit(resourceType, multipartFile.getSize());
         byte[] data = getFileBytes(multipartFile);
 
-        final ResourceEntity resourceEntity = resourceService.create(name, resourceType, data, multipartFile.getOriginalFilename(), principal.getName());
-        return new ResponseEntity<>(resourceMapper.mapWithFile(resourceEntity), HttpStatus.CREATED);
+        final ResourceEntity resourceEntity = resourceService
+                .create(name, resourceType, data, multipartFile.getOriginalFilename(), principal.getName());
+        return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
     }
 
     @Override
@@ -154,7 +197,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final Principal principal) {
         final ResourceEntity entity = resourceService
                 .update(decodeBase64(name), resourceMapper.map(updateRequestDTO), principal.getName());
-        final ResourceDTO dto = resourceMapper.mapWithFile(entity);
+        final ResourceDTO dto = resourceMapper.map(entity);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -169,7 +212,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<Page<ResourcePermissionDTO>> getRoles(final Pageable pageable, final String name, final String type, final ResourcePermissionFilter filter, final String search) {
+    public ResponseEntity<Page<ResourcePermissionDTO>> getRoles(final Pageable pageable, final String name,
+            final String type, final ResourcePermissionFilter filter, final String search) {
         final Page<ResourcePermissionModel> resourcePermissions = resourcePermissionService
                 .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter, search);
         return new ResponseEntity<>(permissionMapper.mapResourcePermissions(resourcePermissions), HttpStatus.OK);
@@ -195,7 +239,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         }
     }
 
-    private byte[] getFileBytes(final MultipartFile file) {
+    public static byte[] getFileBytes(final MultipartFile file) {
         byte[] data;
         try {
             data = file.getBytes();
@@ -207,7 +251,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     private void checkFileExtensionIsSupported(final ResourceTypeEnum resourceType, final MultipartFile resource) {
         final String resourceExtension = FilenameUtils.getExtension(resource.getOriginalFilename()).toLowerCase();
-        if (this.supportedExtensions.containsKey(resourceType) && !this.supportedExtensions.get(resourceType).contains(resourceExtension)) {
+        if (this.supportedExtensions.containsKey(resourceType) && !this.supportedExtensions.get(resourceType)
+                .contains(resourceExtension)) {
             throw new ResourceExtensionNotSupportedException(resourceExtension);
         }
     }

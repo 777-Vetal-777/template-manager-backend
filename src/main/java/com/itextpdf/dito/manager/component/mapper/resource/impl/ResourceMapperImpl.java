@@ -3,16 +3,19 @@ package com.itextpdf.dito.manager.component.mapper.resource.impl;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceMapperImpl implements ResourceMapper {
@@ -38,12 +41,14 @@ public class ResourceMapperImpl implements ResourceMapper {
         final Collection<ResourceFileEntity> files = entity.getResourceFiles();
         if (Objects.nonNull(files) && !files.isEmpty()) {
             final ResourceFileEntity fileEntity = files.stream().findFirst().get();
+            final Map<String, String> uuids = files.stream().collect(Collectors
+                    .toMap(entity.getType() == ResourceTypeEnum.FONT ? ResourceFileEntity::getFontName
+                            : ResourceFileEntity::getFileName, ResourceFileEntity::getUuid));
             result.setVersion(fileEntity.getVersion());
-            result.setFileName(fileEntity.getFileName());
             result.setComment(fileEntity.getComment());
             result.setDeployed(fileEntity.getDeployed());
+            result.setMetadataUrls(uuids);
         }
-
         final Collection<ResourceLogEntity> logs = entity.getResourceLogs();
         if (Objects.nonNull(logs) && !logs.isEmpty()) {
             final ResourceLogEntity log = logs.stream().findFirst().get();
@@ -59,17 +64,6 @@ public class ResourceMapperImpl implements ResourceMapper {
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
 
         return result;
-    }
-
-    @Override
-    public ResourceDTO mapWithFile(final ResourceEntity entity) {
-        final ResourceDTO dto = map(entity);
-        final Collection<ResourceFileEntity> files = entity.getResourceFiles();
-        if (Objects.nonNull(files) && !files.isEmpty()) {
-            final ResourceFileEntity fileEntity = files.stream().findFirst().get();
-            dto.setFile(fileEntity.getFile());
-        }
-        return dto;
     }
 
     @Override

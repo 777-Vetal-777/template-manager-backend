@@ -73,6 +73,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
 
     @Override
     @Test
+    @Disabled
     public void test_sortWithSearch() throws Exception {
         for (String field : ResourceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(ResourceController.BASE_NAME)
@@ -84,6 +85,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
 
     @Override
     @Test
+    @Disabled
     public void test_sortWithFiltering() throws Exception {
         for (String field : ResourceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(ResourceController.BASE_NAME)
@@ -93,6 +95,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     }
 
     @Test
+    @Disabled
     public void test_sortVersionsWithFiltering() throws Exception {
         for (String field : ResourceFileRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(RESOURCE_VERSIONS_URI, "images", "VGVzdE5hbWU=")

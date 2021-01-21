@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.dto.resource;
 
 public enum ResourceTypeEnum {
     IMAGE("images"),
+    FONT("fonts"),
     STYLESHEET("stylesheets");
 
     public final String pluralName;

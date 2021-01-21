@@ -13,4 +13,19 @@
     <changeSet id="002-drop-file-name-not-null-constraint-from-resource-file-table" author="Sergey_Nemets">
         <dropNotNullConstraint tableName="resource_file" columnName="file_name"/>
     </changeSet>
+
+    <changeSet id="003-add-uuid-column-to-resource_file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="uuid" type="varchar(36)">
+                <constraints nullable="false" notNullConstraintName="resource_file_uuid_not_null"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="004-add-font-name-column-to-resource_file-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="resource_file">
+            <column name="font_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

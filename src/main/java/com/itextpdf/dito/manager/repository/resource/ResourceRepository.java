@@ -19,19 +19,20 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedBy", "modifiedOn", "comment");
 
-    String SELECT_CLAUSE = "select resource from ResourceEntity resource ";
+    String SELECT_CLAUSE = "select distinct resource from ResourceEntity resource "
+            + " join resource.latestFile latestFile ";
 
     String FILTER_CONDITION = "((:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or resource.type in (:types)) "
-            + "and (:comment='' or LOWER(resource.latestFile.comment) like LOWER(CONCAT('%',:comment,'%'))) "
+            + "and (:comment='' or LOWER(latestFile.comment) like LOWER(CONCAT('%',:comment,'%'))) "
             + "and (:modifiedBy='' or LOWER(CONCAT(resource.latestLogRecord.author.firstName, ' ', resource.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or resource.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date))) ";
 
     String SEARCH_CONDITION = "(LOWER(resource.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(resource.latestFile.comment) like CONCAT('%',:search,'%') "
+            + "or LOWER(latestFile.comment) like CONCAT('%',:search,'%') "
+            + "or LOWER(resource.type) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(resource.latestLogRecord.author.firstName, ' ', resource.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
             + "or CAST(CAST(resource.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
-
 
     String PAGEABLE_FILTER_QUERY = SELECT_CLAUSE + " where " + FILTER_CONDITION;
     String PAGEABLE_SEARCH_AND_FILTER_QUERY = PAGEABLE_FILTER_QUERY + " and" + SEARCH_CONDITION;
@@ -41,6 +42,12 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
     Optional<ResourceEntity> findByNameAndType(String resourcesName, ResourceTypeEnum type);
 
     ResourceEntity findByName(String name);
+
+    @Query("select resource from ResourceEntity resource "
+            + "join fetch resource.latestFile "
+            + "join fetch resource.latestLogRecord "
+            + "where resource.name = :resourceName and resource.type = :resourceType")
+    Optional<ResourceEntity> getResourceWithLastFileAndLogs(@Param("resourceName") String resourceName, @Param("resourceType") ResourceTypeEnum type);
 
     @Query(value = PAGEABLE_FILTER_QUERY)
     Page<ResourceEntity> filter(Pageable pageable,

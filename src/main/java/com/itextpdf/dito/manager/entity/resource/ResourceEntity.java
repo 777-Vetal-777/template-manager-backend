@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -27,6 +28,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "resource")
@@ -59,14 +61,9 @@ public class ResourceEntity {
     @OrderBy("date DESC")
     private Collection<ResourceLogEntity> resourceLogs;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinFormula("(" +
-            "SELECT file.id " +
-            "FROM manager.resource_file file " +
-            "WHERE file.resource_id = id and file.version=(" +
-            "select max(file.version) from manager.resource_file file where file.resource_id = id)" +
-            ")")
-    private ResourceFileEntity latestFile;
+    @OneToMany(mappedBy = "resource")
+    @Where(clause = "version=(select max(file.version) from manager.resource_file file where file.resource_id = resource_id)")
+    private List<ResourceFileEntity> latestFile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
@@ -158,11 +155,11 @@ public class ResourceEntity {
         this.latestLogRecord = latestLogRecord;
     }
 
-    public ResourceFileEntity getLatestFile() {
+    public List<ResourceFileEntity> getLatestFile() {
         return latestFile;
     }
 
-    public void setLatestFile(ResourceFileEntity latestFile) {
+    public void setLatestFile(List<ResourceFileEntity> latestFile) {
         this.latestFile = latestFile;
     }
 

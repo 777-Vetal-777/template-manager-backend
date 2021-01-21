@@ -2,8 +2,11 @@ package com.itextpdf.dito.manager.entity.resource;
 
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.PrePersist;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.Entity;
@@ -53,6 +56,31 @@ public class ResourceFileEntity {
             "join {h-schema}stage instanceStage on instanceStage.id = instance.stage_id " +
             "where toTemplateFile.resource_file_id = id) )")
     private StageEntity stage;
+
+    @Column(name = "uuid")
+    private String uuid;
+    private String fontName;
+
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getFontName() {
+        return fontName;
+    }
+
+    public void setFontName(String fontName) {
+        this.fontName = fontName;
+    }
 
     public Set<TemplateFileEntity> getTemplateFiles() {
         return templateFiles;
