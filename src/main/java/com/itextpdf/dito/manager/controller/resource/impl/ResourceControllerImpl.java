@@ -49,7 +49,7 @@ import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD_ITALIC;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.ITALIC;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.REGULAR;
-import static com.itextpdf.dito.manager.util.FileUtil.getFileBytes;
+import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @RestController
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
