@@ -25,11 +25,7 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
             + "and (:modifiedBy='' or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or ds.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:comment='' or LOWER(ds.comment) like CONCAT('%',:comment,'%'))"
-<<<<<<< HEAD
             + "and (:isDefault=null or ds.isDefault IS :isDefault) "; 
-=======
-            + "and (:setAsDefault='' or ds.setAsDefault=:setAsDefault) ";
->>>>>>> DataSamples endpoints added
 
     String DATA_SAMPLE_TABLE_SEARCH_CONDITION = " and (CAST(ds.modifiedOn as string) like CONCAT('%',:search,'%') "
             + "or LOWER(ds.comment) like CONCAT('%',:search,'%') "
@@ -42,11 +38,7 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                   @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
-<<<<<<< HEAD
                                   @Param("isDefault") @Nullable Boolean isDefault,
-=======
-                                  @Param("setAsDefault") @Nullable Boolean setAsDefault,
->>>>>>> DataSamples endpoints added
                                   @Param("comment") @Nullable String comment);
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION + DATA_SAMPLE_TABLE_SEARCH_CONDITION)

@@ -13,10 +13,6 @@ import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
-<<<<<<< HEAD
-=======
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionDependencyFilter;
->>>>>>> DataSamples endpoints added
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
