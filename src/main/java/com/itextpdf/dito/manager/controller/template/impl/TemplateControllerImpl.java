@@ -18,7 +18,6 @@ import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
-import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
@@ -40,7 +39,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -186,15 +184,5 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final TemplateEntity templateEntity = templateService
                 .detachRole(decodeBase64(name), decodeBase64(roleName), principal.getName());
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
-    }
-
-    private byte[] getFileBytes(final MultipartFile file) {
-        byte[] data;
-        try {
-            data = file.getBytes();
-        } catch (IOException e) {
-            throw new UnreadableResourceException(file.getOriginalFilename());
-        }
-        return data;
     }
 }
