@@ -56,7 +56,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
             + "or cast(lastTemplateFile.version as text) like CONCAT('%',:search,'%') "
             + "or 'template' like CONCAT('%',:search,'%') "
             + "or 'soft' like CONCAT('%',:search,'%') "
-            + "or stage.name like CONCAT('%',:search,'%') )";
+            + "or LOWER(stage.name) like CONCAT('%',:search,'%') )";
 
     DataCollectionFileEntity findFirstByDataCollection_IdOrderByVersionDesc(Long id);
 
