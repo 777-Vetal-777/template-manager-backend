@@ -5,11 +5,11 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.resource.FontTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
-
-import java.util.HashMap;
 import java.util.List;
 
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ResourceService {
     ResourceEntity create(String name, ResourceTypeEnum type, byte[] data, String fileName, String email);
 
-    ResourceEntity createNewFont(String email, String resourceName, String fileName, ResourceTypeEnum type, HashMap<FontTypeEnum, MultipartFile> fonts);
+    ResourceEntity createNewFont(String email, String resourceName, String fileName, ResourceTypeEnum type, Map<FontTypeEnum, MultipartFile> fonts);
 
     ResourceEntity createNewVersion(String name, ResourceTypeEnum type, byte[] data, String fileName, String email, String comment);
 
