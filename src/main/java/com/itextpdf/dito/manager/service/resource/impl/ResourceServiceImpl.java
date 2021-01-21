@@ -47,7 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
-import static com.itextpdf.dito.manager.util.FileUtil.getFileBytes;
+import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @Service
 public class ResourceServiceImpl extends AbstractService implements ResourceService {
