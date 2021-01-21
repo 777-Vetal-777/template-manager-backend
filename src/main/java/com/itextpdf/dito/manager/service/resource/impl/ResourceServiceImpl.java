@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.resource.FontTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
@@ -25,22 +26,25 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import javax.transaction.Transactional;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import org.springframework.web.multipart.MultipartFile;
+import static com.itextpdf.dito.manager.controller.resource.impl.ResourceControllerImpl.getFileBytes;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -62,6 +66,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private static final List<String> AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES = Arrays.asList(
             PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET,
             PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
+    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT = "E8_US58_EDIT_RESOURCE_METADATA_FONT";
+    private static final List<String> AVAILABLE_PERMISSIONS_FOR_FONT_SLAVE_ROLES = Arrays.asList(
+            PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
 
     private final ResourceRepository resourceRepository;
     private final ResourceLogRepository resourceLogRepository;
@@ -92,6 +99,32 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
+    public ResourceEntity createNewFont(final String email, final String resourceName, final String originalFileName,
+            final ResourceTypeEnum type,
+            final HashMap<FontTypeEnum, MultipartFile> fonts) {
+        throwExceptionIfResourceExists(resourceName, type);
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        final ResourceEntity resourceEntity = new ResourceEntity();
+        resourceEntity.setName(resourceName);
+        resourceEntity.setType(type);
+        resourceEntity.setCreatedOn(new Date());
+        resourceEntity.setCreatedBy(userEntity);
+
+        final ResourceLogEntity logEntity = createResourceLogEntry(resourceEntity, userEntity);
+        final List<ResourceFileEntity> files = new ArrayList<>();
+        fonts.entrySet()
+                .forEach(entry -> files.add(createFileEntry(userEntity, resourceEntity, getFileBytes(entry.getValue()),
+                        Objects.isNull(originalFileName) ? entry.getValue().getOriginalFilename() : originalFileName,
+                        entry.getKey().name)));
+        resourceEntity.setResourceFiles(files);
+        resourceEntity.setLatestFile(files);
+        resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
+        return resourceRepository.save(resourceEntity);
+    }
+
+    @Override
     public ResourceEntity create(final String name, final ResourceTypeEnum type, final byte[] data,
             final String fileName, final String email) {
         final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(name, type);
@@ -109,16 +142,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         final ResourceLogEntity logEntity = createResourceLogEntry(resourceEntity, userEntity);
 
-        final ResourceFileEntity fileEntity = new ResourceFileEntity();
-        fileEntity.setResource(resourceEntity);
-        fileEntity.setVersion(1L);
-        fileEntity.setFile(data);
-        fileEntity.setFileName(fileName);
-        fileEntity.setDeployed(false);
-        fileEntity.setAuthor(userEntity);
-        fileEntity.setCreatedOn(new Date());
-        fileEntity.setModifiedOn(new Date());
-
+        final ResourceFileEntity fileEntity = createFileEntry(userEntity, resourceEntity, data, fileName, null);
+        resourceEntity.setLatestFile(Collections.singletonList(fileEntity));
         resourceEntity.setResourceFiles(Collections.singletonList(fileEntity));
         resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
         return resourceRepository.save(resourceEntity);
@@ -133,7 +158,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         switch (type) {
             case IMAGE:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
                 break;
             case STYLESHEET:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
@@ -160,13 +186,15 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         existingResourceEntity.getResourceFiles().add(fileEntity);
         existingResourceEntity.getResourceLogs().add(logEntity);
-        existingResourceEntity.setLatestFile(fileEntity);
+        existingResourceEntity.setLatestFile(Collections.singletonList(fileEntity));
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
 
-        final List<TemplateEntity> templateEntities = templateRepository.findTemplatesByResourceId(existingResourceEntity.getId());
+        final List<TemplateEntity> templateEntities = templateRepository
+                .findTemplatesByResourceId(existingResourceEntity.getId());
         if (Objects.nonNull(templateEntities)) {
             templateEntities.forEach(t -> {
-                final TemplateEntity extendedTemplateEntity = templateService.createNewVersionAsCopy(t.getLatestFile(), userEntity, "");
+                final TemplateEntity extendedTemplateEntity = templateService
+                        .createNewVersionAsCopy(t.getLatestFile(), userEntity, "");
                 final Set<ResourceFileEntity> resourceFiles = extendedTemplateEntity.getLatestFile().getResourceFiles();
                 resourceFiles.removeAll(existingResourceEntity.getResourceFiles());
                 resourceFiles.add(fileEntity);
@@ -178,15 +206,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceEntity get(final String name, final ResourceTypeEnum type) {
-        final ResourceEntity resourceEntity = getResource(name, type);
-        //specially made to reduce the load of files
-        final ResourceFileEntity file = resourceFileRepository
-                .findFirstByResource_IdOrderByVersionDesc(resourceEntity.getId());
-        final ResourceLogEntity log = resourceLogRepository
-                .findFirstByResource_IdOrderByDateDesc(resourceEntity.getId());
-        resourceEntity.setResourceFiles(Collections.singletonList(file));
-        resourceEntity.setResourceLogs(log != null ? Collections.singletonList(log) : null);
-        return resourceEntity;
+        return getResource(name, type);
     }
 
     @Override
@@ -203,10 +223,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
                         existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET);
                 break;
+            case FONT:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
+                break;
         }
 
         if (!existingResource.getName().equals(entity.getName())) {
-            throwExceptionIfResourceExists(entity);
+            throwExceptionIfResourceExists(entity.getName(), entity.getType());
         }
         existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
@@ -258,6 +282,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 break;
             case STYLESHEET:
                 throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES);
+                break;
+            case FONT:
+                throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_FONT_SLAVE_ROLES);
                 break;
         }
     }
@@ -346,16 +373,23 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
-    private void throwExceptionIfResourceExists(final ResourceEntity entity) {
-        final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(entity.getName(), entity.getType());
+    private void throwExceptionIfResourceExists(final String resourceName, final ResourceTypeEnum type) {
+        final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(resourceName, type);
         if (resourceExists) {
-            throw new ResourceAlreadyExistsException(entity.getName());
+            throw new ResourceAlreadyExistsException(resourceName);
         }
     }
 
     @Override
     public ResourceEntity getResource(final String name, final ResourceTypeEnum type) {
         return resourceRepository.findByNameAndType(name, type).orElseThrow(() -> new ResourceNotFoundException(name));
+    }
+
+    @Override
+    public byte[] getFile(final String uuid) {
+        final ResourceFileEntity file = resourceFileRepository.findFirstByUuid(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException(uuid));
+        return file.getFile();
     }
 
     @Override
@@ -371,4 +405,18 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return log;
     }
 
+    private ResourceFileEntity createFileEntry(final UserEntity userEntity, final ResourceEntity resourceEntity,
+            final byte[] file, final String fileName, final String fontName) {
+        final ResourceFileEntity fileEntity = new ResourceFileEntity();
+        fileEntity.setResource(resourceEntity);
+        fileEntity.setVersion(1L);
+        fileEntity.setFile(file);
+        fileEntity.setFileName(fileName);
+        fileEntity.setDeployed(false);
+        fileEntity.setAuthor(userEntity);
+        fileEntity.setCreatedOn(new Date());
+        fileEntity.setModifiedOn(new Date());
+        fileEntity.setFontName(fontName);
+        return fileEntity;
+    }
 }

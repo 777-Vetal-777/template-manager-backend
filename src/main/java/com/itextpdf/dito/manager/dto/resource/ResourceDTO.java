@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.role.RoleDTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 public class ResourceDTO {
@@ -19,8 +20,7 @@ public class ResourceDTO {
     private String modifiedBy;
     private Date modifiedOn;
     private Long version;
-    private String fileName;
-    private byte[] file;
+    private Map<String,String> metadataUrls;
     private Boolean deployed;
     private Set<RoleDTO> appliedRoles;
 
@@ -64,20 +64,12 @@ public class ResourceDTO {
         this.version = version;
     }
 
-    public byte[] getFile() {
-        return file;
+    public Map<String, String> getMetadataUrls() {
+        return metadataUrls;
     }
 
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setMetadataUrls(Map<String, String> metadataUrls) {
+        this.metadataUrls = metadataUrls;
     }
 
     public ResourceTypeEnum getType() {

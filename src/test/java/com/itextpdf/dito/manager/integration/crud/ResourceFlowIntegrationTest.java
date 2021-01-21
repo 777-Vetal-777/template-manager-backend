@@ -144,6 +144,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     public void shouldSuccessfullyCreateNewVersionOfResource() throws Exception {
         final URI createResourceURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode()
                 .toUri();
@@ -169,6 +170,7 @@ public class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     public void shouldCreateVersionsAndReturnThem() throws Exception {
         final URI createResourceURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode()
                 .toUri();

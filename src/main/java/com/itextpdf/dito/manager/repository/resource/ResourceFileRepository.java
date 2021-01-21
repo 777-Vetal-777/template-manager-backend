@@ -4,6 +4,8 @@ import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
+
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,8 +24,9 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     List<String> SUPPORTED_SORT_FIELDS = List.of("version", "stage", "modifiedBy", "modifiedOn", "comment");
 
     ResourceFileEntity findFirstByResource_IdOrderByVersionDesc(Long id);
+    Optional<ResourceFileEntity> findFirstByUuid(String uuid);
 
-    String SELECT_CLAUSE = "select file.version as version, LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
+    String SELECT_CLAUSE = "select distinct file.version as version, LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
             + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage "
             + " from ResourceFileEntity file "
             + " left join file.stage "
@@ -62,7 +65,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("stage") @Nullable String stageName,
                                   @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
@@ -83,7 +86,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("type") @Nullable ResourceTypeEnum type,
                                  @Param("stage") @Nullable String stage);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
@@ -110,7 +113,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("stage") @Nullable String stage,
                                  @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "

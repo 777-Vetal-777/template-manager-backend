@@ -50,6 +50,7 @@ public interface ResourceController {
     String RESOURCE_PATH_VARIABLE = "resource-name";
     String RESOURCE_TYPE_PATH_VARIABLE = "resource-type";
     String ROLE_PATH_VARIABLE = "role-name";
+    String FILE_UUID_PATH_VARIABLE = "file-uuid";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
     String RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE = "/{" + RESOURCE_TYPE_PATH_VARIABLE + "}";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE;
@@ -57,6 +58,10 @@ public interface ResourceController {
     String RESOURCE_VERSION_ENDPOINT = "/versions";
     String RESOURCE_DEPENDENCIES_ENDPOINT = "/dependencies";
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
+    String FONTS_ENDPOINT = "/fonts";
+    String FILE_ENDPOINT = "/file";
+    //File
+    String RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE = FILE_ENDPOINT + "/{" + FILE_UUID_PATH_VARIABLE + "}";
     //Versions
     String RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_VERSION_ENDPOINT;
     //Dependencies
@@ -65,6 +70,35 @@ public interface ResourceController {
     //Roles
     String RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
     String RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES = RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
+
+    @GetMapping(RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE)
+    @Operation(summary = "Get the file using uuid", description = "A method for getting a file as an array of bytes using the uuid identifier.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The file was found and sent successfully."),
+            @ApiResponse(responseCode = "400", description = "The file for the specified uuid was not found.")
+    })
+    ResponseEntity<byte[]> getFile(@Parameter(name = FILE_UUID_PATH_VARIABLE, description = "Encoded with base64 file uuid", required = true) @PathVariable(FILE_UUID_PATH_VARIABLE) String name);
+
+    @PostMapping(path = FONTS_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Save new fonts.", description = "Api for saving new fonts (.ttf)",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Fonts saved successfully."),
+            @ApiResponse(responseCode = "409", description = "A resource with the same name already exists."),
+            @ApiResponse(responseCode = "400", description = "Resource file exceeds the file limit."),
+            @ApiResponse(responseCode = "400", description = "The font files cannot be read."),
+            @ApiResponse(responseCode = "400", description = "File extension not supported.")
+    })
+    ResponseEntity<ResourceDTO> create(Principal principal,
+            @Parameter(name = "name", description = "Resource name", style = ParameterStyle.FORM) @RequestPart String name,
+            @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM, required = true) @RequestPart String type,
+            @Parameter(name = "original_file", description = "Original file name", style = ParameterStyle.FORM, required = false) @RequestPart(required = false) String original_file,
+            @Parameter(name = "regular", description = "File: regular font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("regular") MultipartFile regular,
+            @Parameter(name = "bold", description = "File: bold font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold") MultipartFile bold,
+            @Parameter(name = "italic", description = "File: italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("italic") MultipartFile italic,
+            @Parameter(name = "bold_italic", description = "File: bold italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold_italic") MultipartFile boldItalic);
+
 
     @GetMapping(RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get a list of versions of resource by name.", description = "Get a list of resource versions using the resource name and resource type, sorting and filters.",

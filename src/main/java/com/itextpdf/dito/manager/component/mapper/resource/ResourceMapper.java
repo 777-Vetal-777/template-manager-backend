@@ -8,10 +8,7 @@ import org.springframework.data.domain.Page;
 public interface ResourceMapper {
     ResourceDTO map(ResourceEntity entity);
 
-    ResourceDTO mapWithFile(ResourceEntity entity);
-
     ResourceEntity map(ResourceUpdateRequestDTO dto);
 
     Page<ResourceDTO> map(Page<ResourceEntity> entities);
-
 }

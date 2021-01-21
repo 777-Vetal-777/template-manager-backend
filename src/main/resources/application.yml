@@ -49,7 +49,9 @@ resources:
   stylesheets:
     extensions:
       supported: css
-
+  fonts:
+    extensions:
+      supported: ttf
 
 data-collection:
   json:
