@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,10 +44,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import static com.itextpdf.dito.manager.controller.resource.impl.ResourceControllerImpl.getFileBytes;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static com.itextpdf.dito.manager.util.FileUtil.getFileBytes;
 
 @Service
 public class ResourceServiceImpl extends AbstractService implements ResourceService {
@@ -101,8 +101,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Override
     @Transactional(rollbackOn = Exception.class)
     public ResourceEntity createNewFont(final String email, final String resourceName, final String originalFileName,
-            final ResourceTypeEnum type,
-            final HashMap<FontTypeEnum, MultipartFile> fonts) {
+            final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
         throwExceptionIfResourceExists(resourceName, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
