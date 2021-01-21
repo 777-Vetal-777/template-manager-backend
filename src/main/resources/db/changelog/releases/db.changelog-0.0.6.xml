@@ -16,9 +16,7 @@
 
     <changeSet id="003-add-uuid-column-to-resource-file-table" author="Yaroslav_Maievskij">
         <addColumn tableName="resource_file">
-            <column name="uuid" type="varchar(36)">
-                <constraints nullable="false" notNullConstraintName="resource_file_uuid_not_null"/>
-            </column>
+            <column name="uuid" type="varchar(36)"/>
         </addColumn>
     </changeSet>
 
