@@ -52,7 +52,7 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
         if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType().contains(DependencyType.TEMPLATE)) {
             searchResult = isSearchEmpty
                     ? dataCollectionFileRepository.filter(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stageName)
-                    : dataCollectionFileRepository.search(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stageName, searchParam);
+                    : dataCollectionFileRepository.search(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stageName, searchParam.toLowerCase());
         }
         return searchResult;
 
