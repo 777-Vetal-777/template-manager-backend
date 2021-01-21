@@ -41,6 +41,7 @@ import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.security.Principal;
 import java.util.List;
+import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @RestController
 public class TemplateControllerImpl extends AbstractController implements TemplateController {
