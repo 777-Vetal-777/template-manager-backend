@@ -3,6 +3,9 @@ package com.itextpdf.dito.manager.service.datasample;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,5 +17,9 @@ public interface DataSampleService {
     DataSampleEntity get(String dataSampleName);
     
     DataSampleEntity setAsDefault(String dataSampleName);
+    
+	void delete(List<String> dataSamplesList);
+
+	void delete(DataCollectionEntity dataCollectionEntity);
     
 }

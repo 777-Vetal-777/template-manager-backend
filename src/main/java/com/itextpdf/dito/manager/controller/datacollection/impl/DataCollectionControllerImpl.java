@@ -216,7 +216,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
 		final String dataSampleName = dataSampleCreateRequestDTO.getName();
 		final String fileName = dataSampleCreateRequestDTO.getFileName();
 		final String data = dataSampleCreateRequestDTO.getSample();
@@ -234,15 +234,18 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataSampleDTO> getDataSample(final String dataSampleName) {
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))), HttpStatus.OK);
     }
+    
 	@Override
-	public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName, final List<String> dataSampleNames,
-			final Principal principal) {
-		throw new NotImplementedException("Method is not realized yet");
+	public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName,
+			final List<String> dataSampleNames, final Principal principal) {
+		dataSampleService.delete(dataSampleNames);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> deleteAllDataSamples(final String dataCollectionName, final Principal principal) {
-		throw new NotImplementedException("Method is not realized yet");
+		dataSampleService.delete(dataCollectionService.get(decodeBase64(dataCollectionName)));
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
