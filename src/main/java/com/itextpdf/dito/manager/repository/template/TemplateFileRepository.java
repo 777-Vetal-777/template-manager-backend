@@ -18,7 +18,7 @@ import java.util.List;
 public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("version", "stage", "modifiedBy", "modifiedOn", "comment");
 
-    String SELECT_CLAUSE = "select file.version as version, LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
+    String SELECT_CLAUSE = "select file.version as version, CONCAT(file.author.firstName, ' ',file.author.lastName) as modifiedBy, "
             + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage "
             + " from TemplateFileEntity file "
             + " left join file.stage "

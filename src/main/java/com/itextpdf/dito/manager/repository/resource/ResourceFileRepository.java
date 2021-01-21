@@ -26,7 +26,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     ResourceFileEntity findFirstByResource_IdOrderByVersionDesc(Long id);
     Optional<ResourceFileEntity> findFirstByUuid(String uuid);
 
-    String SELECT_CLAUSE = "select distinct file.version as version, LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
+    String SELECT_CLAUSE = "select distinct file.version as version, CONCAT(file.author.firstName, ' ',file.author.lastName) as modifiedBy, "
             + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage "
             + " from ResourceFileEntity file "
             + " left join file.stage "

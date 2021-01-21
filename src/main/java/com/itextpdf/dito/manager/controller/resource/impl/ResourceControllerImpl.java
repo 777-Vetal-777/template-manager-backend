@@ -45,6 +45,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.FONT;
+import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.IMAGE;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD_ITALIC;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.ITALIC;
@@ -79,10 +80,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
             final FileVersionMapper fileVersionMapper) {
-        this.supportedExtensions.put(ResourceTypeEnum.IMAGE, supportedPictureExtensions);
+        this.supportedExtensions.put(IMAGE, supportedPictureExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.FONT, supportedFontExtensions);
-        this.sizeLimit.put(ResourceTypeEnum.IMAGE, sizePictureLimit);
+        this.sizeLimit.put(IMAGE, sizePictureLimit);
         this.resourceService = resourceService;
         this.resourceDependencyService = resourceDependencyService;
         this.resourceVersionsService = resourceVersionsService;
@@ -130,8 +131,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String comment,
-            final String type, final MultipartFile file) {
+    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
+                                              final String type, final MultipartFile file) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -176,18 +177,19 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String type,
-            final MultipartFile multipartFile) {
+    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
+                                              final MultipartFile multipartFile) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
             throw new IncorrectResourceTypeException(type);
         }
         checkFileExtensionIsSupported(resourceType, multipartFile);
         checkFileSizeIsNotExceededLimit(resourceType, multipartFile.getSize());
-        byte[] data = getFileBytes(multipartFile);
+        final byte[] data = getFileBytes(multipartFile);
+        final String originalFilename = (resourceType == IMAGE ? multipartFile.getOriginalFilename() : "stylesheet.css");
 
         final ResourceEntity resourceEntity = resourceService
-                .create(name, resourceType, data, multipartFile.getOriginalFilename(), principal.getName());
+                .create(name, resourceType, data, originalFilename, principal.getName());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
     }
 
