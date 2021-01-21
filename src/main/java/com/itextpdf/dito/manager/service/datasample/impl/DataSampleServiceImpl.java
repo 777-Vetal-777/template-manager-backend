@@ -151,6 +151,18 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		return dataSampleEntity;
 	}
 	
-	
+	@Override
+	public void delete(final List<String> dataSamplesList) {
+		final List<DataSampleEntity> dataSampleListToDelete = dataSamplesList.stream().map(e->get(e)).collect(Collectors.toList());
+		dataSampleRepository.deleteAll(dataSampleListToDelete);
+	}
+
+	@Override
+	public void delete(final DataCollectionEntity dataCollectionEntity) {
+		final List<DataSampleEntity> dataSampleListToDelete = dataSampleRepository
+				.findByDataCollection(dataCollectionEntity)
+				.orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
+		dataSampleRepository.deleteAll(dataSampleListToDelete);
+	}
 	
 }
