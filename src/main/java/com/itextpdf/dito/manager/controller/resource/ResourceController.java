@@ -90,7 +90,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "The font files cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<ResourceDTO> create(Principal principal,
+    ResponseEntity<ResourceDTO> createFont(Principal principal,
             @Parameter(name = "name", description = "Resource name", style = ParameterStyle.FORM) @RequestPart String name,
             @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM, required = true) @RequestPart String type,
             @Parameter(name = "original_file", description = "Original file name", style = ParameterStyle.FORM, required = false) @RequestPart(required = false) String original_file,
@@ -119,7 +119,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "The file cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<ResourceDTO> create(Principal principal,
+    ResponseEntity<ResourceDTO> createFont(Principal principal,
                                        @Parameter(name = "name", description = "Name of an existing resource", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(name = "comment", description = "Comment on the new version of the resource", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
                                        @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", required = true, style = ParameterStyle.FORM) @RequestPart String type,
@@ -168,7 +168,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "The file cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<ResourceDTO> create(Principal principal,
+    ResponseEntity<ResourceDTO> createFont(Principal principal,
                                        @Parameter(name = "name", description = "resource name", style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM) @RequestPart String type,
                                        @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);

@@ -21,7 +21,6 @@ import com.itextpdf.dito.manager.exception.resource.IncorrectResourceTypeExcepti
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupportedException;
 import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitException;
-import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.filter.resource.ResourcePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
@@ -31,7 +30,6 @@ import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +99,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
     //TODO MERGE TWO CREATE ENDPOINT I
     @Override
-    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
+    public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String type,
             final String originalFileName,
             final MultipartFile regular, final MultipartFile bold, final MultipartFile italic,
             final MultipartFile boldItalic) {
@@ -131,7 +129,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
+    public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String comment,
             final String type, final MultipartFile file) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
@@ -177,7 +175,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
+    public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String type,
             final MultipartFile multipartFile) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
@@ -237,16 +235,6 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         if (this.sizeLimit.containsKey(resourceType) && fileSize > this.sizeLimit.get(resourceType)) {
             throw new ResourceFileSizeExceedLimitException(fileSize);
         }
-    }
-
-    public static byte[] getFileBytes(final MultipartFile file) {
-        byte[] data;
-        try {
-            data = file.getBytes();
-        } catch (IOException e) {
-            throw new UnreadableResourceException(file.getOriginalFilename());
-        }
-        return data;
     }
 
     private void checkFileExtensionIsSupported(final ResourceTypeEnum resourceType, final MultipartFile resource) {
