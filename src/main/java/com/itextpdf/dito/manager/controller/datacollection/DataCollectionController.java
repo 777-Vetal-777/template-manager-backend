@@ -46,6 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
 import java.util.List;
 
+import javax.validation.Valid;
+
 @RequestMapping(DataCollectionController.BASE_NAME)
 @Tag(name = "data collection", description = "data collection API")
 public interface DataCollectionController {
@@ -169,7 +171,7 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "400", description = "Invalid data sample structure", content = @Content)})
     ResponseEntity<DataSampleDTO> create(
             @Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName ,
-            @RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
+            @RequestBody @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
     @GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
     @Operation(summary = "Get list of data samples",
