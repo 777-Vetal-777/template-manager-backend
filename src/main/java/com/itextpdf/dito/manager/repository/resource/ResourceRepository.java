@@ -19,7 +19,7 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedBy", "modifiedOn", "comment");
 
-    String SELECT_CLAUSE = "select distinct resource from ResourceEntity resource "
+    String SELECT_CLAUSE = "select resource from ResourceEntity resource "
             + " join resource.latestFile latestFile ";
 
     String FILTER_CONDITION = "((:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "

@@ -38,7 +38,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             result.setAuthorLastName(author.getLastName());
         }
 
-        final Collection<ResourceFileEntity> files = entity.getResourceFiles();
+        final Collection<ResourceFileEntity> files = entity.getLatestFile();
         if (Objects.nonNull(files) && !files.isEmpty()) {
             final ResourceFileEntity fileEntity = files.stream().findFirst().get();
             final Map<String, String> uuids = files.stream().collect(Collectors
