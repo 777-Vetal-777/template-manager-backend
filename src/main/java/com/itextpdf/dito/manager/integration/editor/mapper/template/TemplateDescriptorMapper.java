@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.integration.editor.mapper.template;
 
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateDescriptor;
 
 import java.util.List;
 

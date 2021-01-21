@@ -1,8 +1,8 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template;
 
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateAddDescriptor;
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateDescriptor;
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateUpdateDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
 
 import java.io.IOException;
 import java.io.InputStream;

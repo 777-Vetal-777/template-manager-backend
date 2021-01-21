@@ -1,12 +1,12 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template.impl;
 
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateAddDescriptor;
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateDescriptor;
-import com.itextpdf.dito.manager.integration.editor.dto.template.TemplateUpdateDescriptor;
 import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDescriptorMapper;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
