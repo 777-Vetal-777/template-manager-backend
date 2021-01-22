@@ -22,6 +22,7 @@ pipeline {
         dockerCredentials="docker-dev-itext"
         SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
         ENV_FILE = "itext_env_dev"
+        MVN_CONFIG_FILE = "itext_mvn_conf"
     }
     agent{
         label "master"
@@ -31,9 +32,13 @@ pipeline {
             steps{
                 script {
                   env.RELEASE_VER = sh(script: 'python3 -c "import xml.etree.ElementTree as ET; tree = ET.parse(\'pom.xml\'); print(tree.getroot()[4].text)"', returnStdout: true).trim()
-                  dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
+                  
                   sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"
                   dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
+                    withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'FILE')]){
+                        sh "cp ${FILE} ${WORKSPACE}/settings-docker.xml"
+                        dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
+                    }
                 }
             }
         }
