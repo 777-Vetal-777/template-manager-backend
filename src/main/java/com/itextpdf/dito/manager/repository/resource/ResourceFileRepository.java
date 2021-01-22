@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
 
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,12 +25,13 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     List<String> SUPPORTED_SORT_FIELDS = List.of("version", "stage", "modifiedBy", "modifiedOn", "comment");
 
     ResourceFileEntity findFirstByResource_IdOrderByVersionDesc(Long id);
+
     Optional<ResourceFileEntity> findFirstByUuid(String uuid);
 
-    String SELECT_CLAUSE = "select distinct file.version as version, CONCAT(file.author.firstName, ' ',file.author.lastName) as modifiedBy, "
-            + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage "
+    String SELECT_CLAUSE = "select file.version as version, max(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
+            + " max(file.createdOn) as modifiedOn, max(file.comment) as comment, max(file.stage.name) as stage,  max(file.author.firstName) as firstName, max(file.author.lastName) as lastName"
             + " from ResourceFileEntity file "
-            + " left join file.stage "
+            + " left join file.stage"
             + " where file.resource.id = :id and ";
 
     String FILTER_CONDITION = " (:version=0l or file.version is null or file.version=:version) "
@@ -38,7 +40,15 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))"
             + "and (:stage='' or LOWER(file.stage.name) like CONCAT('%',:stage,'%')) ";
 
-    @Query(value = SELECT_CLAUSE + FILTER_CONDITION)
+    String GROUP_BY_VERSION = "group by file.version";
+
+    String SEARCH_CONDITION = "and (CAST(file.version as string) like CONCAT('%',:search,'%') "
+            + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
+            + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
+            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') "
+            + "or LOWER(file.stage.name) like CONCAT('%',:search,'%') ) ";
+
+    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + GROUP_BY_VERSION)
     Page<FileVersionModel> filter(Pageable pageable,
                                   @Param("id") Long resourceId,
                                   @Param("version") @Nullable Long version,
@@ -48,13 +58,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("comment") @Nullable String comment,
                                   @Param("stage") @Nullable String stageName);
 
-    @Query(value = SELECT_CLAUSE + FILTER_CONDITION
-            //search
-            + "and (CAST(file.version as string) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
-            + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
-            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.stage.name) like CONCAT('%',:search,'%') ) ")
+    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION + GROUP_BY_VERSION)
     Page<FileVersionModel> search(Pageable pageable,
                                   @Param("id") Long resourceId,
                                   @Param("version") @Nullable Long version,
