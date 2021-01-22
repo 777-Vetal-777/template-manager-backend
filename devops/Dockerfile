@@ -1,5 +1,5 @@
 FROM maven:3.6.3-openjdk-11 as builder
-COPY ./settings-docker.xml /root/.m2/
+COPY ./settings.xml /root/.m2/
 COPY . /src
 WORKDIR /src
 RUN cat /root/.m2/settings.xml
