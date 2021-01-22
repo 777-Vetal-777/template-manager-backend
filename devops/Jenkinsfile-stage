@@ -28,7 +28,7 @@ pipeline {
         label "master"
     }
     stages { 
-        stage("Build docker image"){
+        /*stage("Build docker image"){
             steps{
                 script {
                     env.RELEASE_VER = sh(script: 'python3 -c "import xml.etree.ElementTree as ET; tree = ET.parse(\'pom.xml\'); print(tree.getroot()[4].text)"', returnStdout: true).trim()
@@ -40,13 +40,15 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
         stage('Sonarqube analysis') {
             steps {
                 script {
                     withSonarQubeEnv('SonarQube_8.3') {
-                        withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'MVN_FILE')]){                    
-                            sh 'mvn -s ${MVN_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                        withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'MVN_FILE')]){
+                            sh "cp \${MVN_FILE}  ./settings.xml"
+                            sh "export MAVEN_SETTINGS_PATH=${WORKSPACE}"             
+                            sh 'mvn -s sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
                         }
                     }
                 }
