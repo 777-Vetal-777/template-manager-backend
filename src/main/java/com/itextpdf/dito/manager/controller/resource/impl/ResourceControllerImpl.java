@@ -99,12 +99,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<byte[]> getFile(final String uuid) {
         return new ResponseEntity<>(resourceService.getFile(uuid), HttpStatus.OK);
     }
-    //TODO MERGE TWO CREATE ENDPOINT I
+
     @Override
     public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String type,
-            final String originalFileName,
-            final MultipartFile regular, final MultipartFile bold, final MultipartFile italic,
-            final MultipartFile boldItalic) {
+            final MultipartFile regular, final MultipartFile bold, final MultipartFile italic, final MultipartFile boldItalic) {
         final ResourceTypeEnum typeEnum = parseResourceType(type);
         if (typeEnum != FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -117,7 +115,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
         fileMap.entrySet().forEach(entry -> checkFileExtensionIsSupported(typeEnum, entry.getValue()));
         final ResourceEntity resourceEntity = resourceService
-                .createNewFont(principal.getName(), name, originalFileName, typeEnum, fileMap);
+                .createNewFont(principal.getName(), name, typeEnum, fileMap);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 

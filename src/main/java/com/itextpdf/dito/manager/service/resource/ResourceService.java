@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ResourceService {
     ResourceEntity create(String name, ResourceTypeEnum type, byte[] data, String fileName, String email);
 
-    ResourceEntity createNewFont(String email, String resourceName, String fileName, ResourceTypeEnum type, Map<FontTypeEnum, MultipartFile> fonts);
+    ResourceEntity createNewFont(String email, String resourceName, ResourceTypeEnum type, Map<FontTypeEnum, MultipartFile> fonts);
 
     ResourceEntity createNewVersion(String name, ResourceTypeEnum type, byte[] data, String fileName, String email, String comment);
 
