@@ -44,8 +44,10 @@ pipeline {
         stage('Sonarqube analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube_8.3') {                        
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                    withSonarQubeEnv('SonarQube_8.3') {
+                        withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'MVN_FILE')]){                    
+                            sh 'mvn -s ${MVN_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                        }
                     }
                 }
             }
