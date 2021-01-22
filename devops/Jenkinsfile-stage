@@ -22,6 +22,7 @@ pipeline {
         dockerCredentials = "docker-stage-itext"
         SCM_URL = "https://git.itextsupport.com/scm/dito/template-manager-backend.git"
         ENV_FILE = "itext_env_stage"
+        MVN_CONFIG_FILE = "itext_mvn_conf"
     }
     agent{
         label "master"
@@ -34,6 +35,10 @@ pipeline {
                   dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
                   sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"
                   dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
+                    withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'FILE')]){
+                        sh "cp ${FILE} ${WORKSPACE}/settings-docker.xml"
+                        dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
+                    }
                 }
             }
         }
