@@ -158,11 +158,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         switch (type) {
             case IMAGE:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
+                        retrieveEntityAppliedRoles(existingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
                 break;
             case STYLESHEET:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResourceEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
+                        retrieveEntityAppliedRoles(existingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
                 break;
         }
 
@@ -216,15 +216,15 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         switch (entity.getType()) {
             case IMAGE:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
+                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
                 break;
             case STYLESHEET:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET);
+                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET);
                 break;
             case FONT:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        existingResource.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
+                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
                 break;
         }
 

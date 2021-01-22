@@ -95,9 +95,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         final UserEntity author = userService.findByEmail(email);
 
-        checkUserPermissions(retrieveSetOfRoleNames(author.getRoles()),
-                templateEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_TEMPLATE_METADATA);
-
         final TemplateLogEntity logEntity = createLogEntity(templateEntity, author);
 
         final TemplateFileEntity templateFileEntity = new TemplateFileEntity();
@@ -183,7 +180,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final UserEntity userEntity = userService.findByEmail(userEmail);
 
         checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                existingTemplate.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_TEMPLATE_METADATA);
+                retrieveEntityAppliedRoles(existingTemplate.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_TEMPLATE_METADATA);
 
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
             existingTemplate.setName(updatedTemplateEntity.getName());
@@ -196,7 +193,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateLogs.add(logEntity);
         existingTemplate.setTemplateLogs(templateLogs);
 
-        //TODO add logging version https://jira.itextsupport.com/browse/DTM-758
         return templateRepository.save(existingTemplate);
     }
 
@@ -239,7 +235,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                             final String comment,
                                             final Long newVersion) {
         checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                existingTemplateEntity.getAppliedRoles(), PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_TEMPLATE);
+                retrieveEntityAppliedRoles(existingTemplateEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_TEMPLATE);
 
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
@@ -290,7 +286,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final UserEntity userEntity = userService.findByEmail(email);
 
         checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                templateEntity.getAppliedRoles(), PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS);
+                retrieveEntityAppliedRoles(templateEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, templateEntity);
         if (slaveRoleEntity == null) {
@@ -323,7 +319,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final UserEntity userEntity = userService.findByEmail(email);
 
         checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                templateEntity.getAppliedRoles(), PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS);
+                retrieveEntityAppliedRoles(templateEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS);
 
         final RoleEntity roleEntity = roleService.getSlaveRole(roleName, templateEntity);
 

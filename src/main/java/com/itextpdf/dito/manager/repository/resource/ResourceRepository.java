@@ -43,12 +43,6 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
 
     ResourceEntity findByName(String name);
 
-    @Query("select resource from ResourceEntity resource "
-            + "join fetch resource.latestFile "
-            + "join fetch resource.latestLogRecord "
-            + "where resource.name = :resourceName and resource.type = :resourceType")
-    Optional<ResourceEntity> getResourceWithLastFileAndLogs(@Param("resourceName") String resourceName, @Param("resourceType") ResourceTypeEnum type);
-
     @Query(value = PAGEABLE_FILTER_QUERY)
     Page<ResourceEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
