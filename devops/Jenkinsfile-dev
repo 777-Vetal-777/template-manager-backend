@@ -36,7 +36,7 @@ pipeline {
                   sh "docker run -v ${WORKSPACE}:/opt/mount --rm --entrypoint cp ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} template-manager.jar /opt/mount/"
                   dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
                     withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'FILE')]){
-                        sh "cp \${FILE} ${WORKSPACE}/settings-docker.xml"
+                        sh "cat ${FILE} > ./settings-docker.xml"
                         dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
                     }
                 }
