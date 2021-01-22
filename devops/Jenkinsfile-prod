@@ -23,6 +23,7 @@ pipeline {
         SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
         ENV_FILE = "itext_env_prod"
         MVN_CONFIG_FILE = "itext_mvn_conf"
+        MVN_SONAR_CONFIG_FILE = "itext_mvn_sonar_conf"
     }
     agent{
         label "master"
@@ -44,8 +45,10 @@ pipeline {
         stage('Sonarqube analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube_8.3') {                        
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                    withSonarQubeEnv('SonarQube_8.3') {
+                        withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
+                            sh 'mvn -s ${MVN_SONAR_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                        }
                     }
                 }
             }
