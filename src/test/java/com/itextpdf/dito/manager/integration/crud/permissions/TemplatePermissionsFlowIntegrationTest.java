@@ -110,12 +110,18 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
                 .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD)))
                 .andExpect(status().isOk());
 
-        //reducing role
         final ApplyRoleRequestDTO applyRoleRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/permissions/role-for-permissions-test-apply-request.json"), ApplyRoleRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
                 .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
+        //reducing role as global administrator, custom user has no permissions for the action
+        mockMvc.perform(post(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
+                .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 

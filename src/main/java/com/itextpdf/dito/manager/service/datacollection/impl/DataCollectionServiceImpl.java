@@ -137,7 +137,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final DataCollectionEntity existingDataCollectionEntity = findByName(name);
         final UserEntity userEntity = userService.findByEmail(email);
 
-        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), existingDataCollectionEntity.getAppliedRoles(), PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON);
+        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), retrieveEntityAppliedRoles(existingDataCollectionEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON);
 
         final Long oldVersion = dataCollectionFileRepository.findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
         final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity, userEntity);
@@ -217,7 +217,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final DataCollectionEntity deletingDataCollection = findByName(name);
         final UserEntity userEntity = userService.findByEmail(userEmail);
 
-        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), deletingDataCollection.getAppliedRoles(), PERMISSION_NAME_FOR_DELETE_DATA_COLLECTION);
+        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()), retrieveEntityAppliedRoles(deletingDataCollection.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_DATA_COLLECTION);
 
         if (hasOutboundDependencies(deletingDataCollection.getId())) {
             throw new DataCollectionHasDependenciesException();
@@ -234,7 +234,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final DataCollectionEntity existingEntity = findByName(name);
         final UserEntity currentUser = userService.findByEmail(userEmail);
 
-        checkUserPermissions(retrieveSetOfRoleNames(currentUser.getRoles()), existingEntity.getAppliedRoles(), PERMISSION_NAME_FOR_EDIT_DATA_COLLECTION_METADATA);
+        checkUserPermissions(retrieveSetOfRoleNames(currentUser.getRoles()), retrieveEntityAppliedRoles(existingEntity.getAppliedRoles(), currentUser.getRoles()), PERMISSION_NAME_FOR_EDIT_DATA_COLLECTION_METADATA);
 
         existingEntity.setType(updatedEntity.getType());
         final String newName = updatedEntity.getName();

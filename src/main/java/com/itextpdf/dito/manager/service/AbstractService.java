@@ -6,10 +6,13 @@ import com.itextpdf.dito.manager.exception.role.UnableToSetPermissionsException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
+
+import static java.util.stream.Collectors.toMap;
 
 public abstract class AbstractService {
 
@@ -33,6 +36,12 @@ public abstract class AbstractService {
 
     protected boolean isUserAdmin(final Set<String> userRoleNames) {
         return userRoleNames.contains("GLOBAL_ADMINISTRATOR") || userRoleNames.contains("ADMINISTRATOR");
+    }
+
+    protected Set<RoleEntity> retrieveEntityAppliedRoles(final Set<RoleEntity> entityAppliedRoles, final Set<RoleEntity> userMasterRoles) {
+        final Map<String, RoleEntity> appliedRoles = entityAppliedRoles.stream().collect(toMap(RoleEntity::getName, role -> role));
+        userMasterRoles.forEach(role -> appliedRoles.putIfAbsent(role.getName(), role));
+        return appliedRoles.values().stream().collect(Collectors.toSet());
     }
 
     protected Set<String> retrieveSetOfRoleNames(final Set<RoleEntity> roleEntities) {
