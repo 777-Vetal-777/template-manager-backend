@@ -109,9 +109,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         final ResourceLogEntity logEntity = createResourceLogEntry(resourceEntity, userEntity);
         final List<ResourceFileEntity> files = new ArrayList<>();
-        fonts.entrySet()
-                .forEach(entry -> files.add(createFileEntry(userEntity, resourceEntity, getFileBytes(entry.getValue()),
-                        entry.getValue().getOriginalFilename(), entry.getKey().name)));
+        fonts.forEach((key, value) -> files.add(createFileEntry(userEntity, resourceEntity, getFileBytes(value),
+                value.getOriginalFilename(), key.name())));
         resourceEntity.setResourceFiles(files);
         resourceEntity.setLatestFile(files);
         resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
@@ -180,7 +179,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         existingResourceEntity.getResourceFiles().add(fileEntity);
         existingResourceEntity.getResourceLogs().add(logEntity);
-        existingResourceEntity.setLatestFile(Collections.singletonList(fileEntity));
+        final List<ResourceFileEntity> latestFile = existingResourceEntity.getLatestFile();
+        latestFile.clear();
+        latestFile.addAll(Collections.singletonList(fileEntity));
         final ResourceEntity updatedResourceEntity = resourceRepository.save(existingResourceEntity);
 
         final List<TemplateEntity> templateEntities = templateRepository
