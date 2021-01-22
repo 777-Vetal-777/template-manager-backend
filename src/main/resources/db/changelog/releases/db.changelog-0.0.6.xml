@@ -35,7 +35,7 @@
         <dropColumn tableName="data_sample" columnName="file_name"/>
     </changeSet>
 
-    <changeSet id="007-data-sample-log-sequence" author="Denys_Kovbii">
+    <changeSet id="007-create-data-sample-log-sequence" author="Denys_Kovbii">
         <createSequence sequenceName="data_sample_log_sequence"/>
     </changeSet>
 
@@ -73,7 +73,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="009-data-sample-file-sequence" author="Denys_Kovbii">
+    <changeSet id="009-create-data-sample-file-sequence" author="Denys_Kovbii">
         <createSequence sequenceName="data_sample_file_sequence"/>
     </changeSet>
 
