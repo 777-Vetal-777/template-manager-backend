@@ -2,6 +2,9 @@ package com.itextpdf.dito.manager.entity.datasample;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import org.hibernate.annotations.JoinFormula;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,8 +13,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Collection;
 import java.util.Date;
 
 @Entity
@@ -34,16 +40,45 @@ public class DataSampleEntity {
     private Date modifiedOn;
     @Column(name="created_on")
     private Date createdOn;
-    private byte[] data;
-    @Column(name="file_name")
-    private String fileName;
     @Column(name="is_default")
     private Boolean isDefault;
     public Date getModifiedOn() {
 		return modifiedOn;
 	}
 
-	public void setModifiedOn(Date modifiedOn) {
+    @OneToMany(mappedBy = "dataSample",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @OrderBy("version DESC")
+    private Collection<DataSampleFileEntity> versions;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT log.id " +
+            "FROM {h-schema}data_sample_log log " +
+            "WHERE log.data_sample_id = id and log.date=(" +
+            "select max(logLatest.date) from {h-schema}data_sample_log logLatest where logLatest.data_sample_id = id)" +
+            ")")
+    private DataSampleLogEntity lastDataSampleLog;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
+            "SELECT file.id " +
+            "FROM manager.data_sample_file file " +
+            "WHERE file.data_sample_id = id and file.version=(" +
+            "select max(file.version) from manager.data_sample_file file where file.data_sample_id = id))")
+    private DataSampleFileEntity latestVersion;
+
+    @OneToMany(
+            mappedBy = "dataSample",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @OrderBy("date DESC")
+    private Collection<DataSampleLogEntity> dataSampleLog;
+
+    public void setModifiedOn(Date modifiedOn) {
 		this.modifiedOn = modifiedOn;
 	}
 
@@ -81,22 +116,6 @@ public class DataSampleEntity {
         this.author = author;
     }
 
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
 	public Date getCreatedOn() {
 		return createdOn;
 	}
@@ -119,6 +138,45 @@ public class DataSampleEntity {
 
 	public void setIsDefault(Boolean isDefault) {
 		this.isDefault = isDefault;
-	} 
-    
+	}
+
+    public Boolean getDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
+    }
+
+    public Collection<DataSampleFileEntity> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(Collection<DataSampleFileEntity> versions) {
+        this.versions = versions;
+    }
+
+    public DataSampleLogEntity getLastDataSampleLog() {
+        return lastDataSampleLog;
+    }
+
+    public void setLastDataSampleLog(DataSampleLogEntity lastDataSampleLog) {
+        this.lastDataSampleLog = lastDataSampleLog;
+    }
+
+    public DataSampleFileEntity getLatestVersion() {
+        return latestVersion;
+    }
+
+    public void setLatestVersion(DataSampleFileEntity latestVersion) {
+        this.latestVersion = latestVersion;
+    }
+
+    public Collection<DataSampleLogEntity> getDataSampleLog() {
+        return dataSampleLog;
+    }
+
+    public void setDataSampleLog(Collection<DataSampleLogEntity> dataSampleLog) {
+        this.dataSampleLog = dataSampleLog;
+    }
 }

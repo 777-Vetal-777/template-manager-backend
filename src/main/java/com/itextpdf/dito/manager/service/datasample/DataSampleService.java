@@ -17,7 +17,9 @@ public interface DataSampleService {
     DataSampleEntity get(String dataSampleName);
     
     DataSampleEntity setAsDefault(String dataSampleName);
-    
+
+    DataSampleEntity createNewVersion(String name, String data, String fileName, String email, String comment);
+
 	void delete(List<String> dataSamplesList);
 
 	void delete(DataCollectionEntity dataCollectionEntity);

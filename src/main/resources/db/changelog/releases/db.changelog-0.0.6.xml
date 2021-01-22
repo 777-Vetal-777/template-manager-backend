@@ -11,7 +11,7 @@
 		</addColumn>
 	</changeSet>
 
-    <changeSet id="002-drop-file-name-not-null-constraint-from-resource-file-table" author="Sergey_Nemets">
+  	<changeSet id="002-drop-file-name-not-null-constraint-from-resource-file-table" author="Sergey_Nemets">
         <dropNotNullConstraint tableName="resource_file" columnName="file_name"/>
     </changeSet>
 
@@ -26,5 +26,72 @@
             <column name="font_name" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+ 
+    <changeSet id="005-drop-data-column-from-data-sample-table" author="Denys_Kovbii">
+        <dropColumn tableName="data_sample" columnName="data"/>
+    </changeSet>
 
+    <changeSet id="006-drop-file-name-column-from-data-sample-table" author="Denys_Kovbii">
+        <dropColumn tableName="data_sample" columnName="file_name"/>
+    </changeSet>
+
+    <changeSet id="007-data-sample-log-sequence" author="Denys_Kovbii">
+        <createSequence sequenceName="data_sample_log_sequence"/>
+    </changeSet>
+
+    <changeSet id="008-create-data-sample-file-table" author="Denys_Kovbii">
+        <createTable tableName="data_sample_file">
+            <column name="id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_sample_file_id_not_null_constraint"
+                             primaryKey="true" primaryKeyName="data_sample_file_pk"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_sample_file_version_not_null_constraint"/>
+            </column>
+            <column name="data_sample_id" type="bigint">
+                <constraints nullable="false"
+                             notNullConstraintName="data_sample_file_data_sample_id_not_null_constraint"
+                             foreignKeyName="fk_data_sample_file_to_data_sample"
+                             references="data_sample(id)"/>
+            </column>
+            <column name="created_on" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="data_sample_file_created_on_not_null_constraint"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_sample_file_author_id_not_null_constraint"
+                             foreignKeyName="fk_data_sample_file_to_user"
+                             references="user(id)"/>
+            </column>
+            <column name="comment" type="varchar(255)"/>
+            <column name="data" type="${blob}">
+                <constraints nullable="false" notNullConstraintName="data_sample_file_data_not_null_constraint"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false"
+                             notNullConstraintName="data_sample_file_file_name_not_null_constraint"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="009-data-sample-file-sequence" author="Denys_Kovbii">
+        <createSequence sequenceName="data_sample_file_sequence"/>
+    </changeSet>
+
+    <changeSet id="010-create-data-sample-log-table" author="Denys_Kovbii">
+        <createTable tableName="data_sample_log">
+            <column name="id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_sample_log_id_not_null_constraint" primaryKey="true" primaryKeyName="data_sample_log_pk"/>
+            </column>
+            <column name="date" type="timestamp" defaultValueComputed="current_timestamp">
+                <constraints nullable="false" notNullConstraintName="data_sample_log_date_not_null_constraint"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="data_sample_log_author_id_not_null_constraint" foreignKeyName="fk_data_sample_log_to_user" references="user(id)"/>
+            </column>
+            <column name="data_sample_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_data_sample_log_to_data_sample"
+                             references="data_sample(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
