@@ -17,7 +17,6 @@ import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
-import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
@@ -71,7 +70,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
 
     private final ResourceRepository resourceRepository;
-    private final ResourceLogRepository resourceLogRepository;
     private final ResourceFileRepository resourceFileRepository;
     private final TemplateRepository templateRepository;
     private final TemplateService templateService;
@@ -81,7 +79,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     public ResourceServiceImpl(
             final ResourceRepository resourceRepository,
-            final ResourceLogRepository resourceLogRepository,
             final ResourceFileRepository resourceFileRepository,
             final TemplateRepository templateRepository,
             final UserService userService,
@@ -89,7 +86,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             final PermissionService permissionService,
             final TemplateService templateService) {
         this.resourceRepository = resourceRepository;
-        this.resourceLogRepository = resourceLogRepository;
         this.resourceFileRepository = resourceFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -100,7 +96,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public ResourceEntity createNewFont(final String email, final String resourceName, final String originalFileName,
+    public ResourceEntity createNewFont(final String email, final String resourceName,
             final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
         throwExceptionIfResourceExists(resourceName, type);
         final UserEntity userEntity = userService.findByEmail(email);
@@ -115,8 +111,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final List<ResourceFileEntity> files = new ArrayList<>();
         fonts.entrySet()
                 .forEach(entry -> files.add(createFileEntry(userEntity, resourceEntity, getFileBytes(entry.getValue()),
-                        Objects.isNull(originalFileName) ? entry.getValue().getOriginalFilename() : originalFileName,
-                        entry.getKey().name)));
+                        entry.getValue().getOriginalFilename(), entry.getKey().name)));
         resourceEntity.setResourceFiles(files);
         resourceEntity.setLatestFile(files);
         resourceEntity.setResourceLogs(Collections.singletonList(logEntity));

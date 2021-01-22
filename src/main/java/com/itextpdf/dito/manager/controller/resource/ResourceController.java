@@ -93,7 +93,6 @@ public interface ResourceController {
     ResponseEntity<ResourceDTO> createFont(Principal principal,
             @Parameter(name = "name", description = "Resource name", style = ParameterStyle.FORM) @RequestPart String name,
             @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM, required = true) @RequestPart String type,
-            @Parameter(name = "original_file", description = "Original file name", style = ParameterStyle.FORM, required = false) @RequestPart(required = false) String original_file,
             @Parameter(name = "regular", description = "File: regular font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("regular") MultipartFile regular,
             @Parameter(name = "bold", description = "File: bold font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold") MultipartFile bold,
             @Parameter(name = "italic", description = "File: italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("italic") MultipartFile italic,

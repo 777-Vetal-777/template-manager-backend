@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
+import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
-import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
@@ -11,7 +11,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
@@ -41,13 +41,11 @@ public class ResourceMapperImpl implements ResourceMapper {
         final Collection<ResourceFileEntity> files = entity.getLatestFile();
         if (Objects.nonNull(files) && !files.isEmpty()) {
             final ResourceFileEntity fileEntity = files.stream().findFirst().get();
-            final Map<String, String> uuids = files.stream().collect(Collectors
-                    .toMap(entity.getType() == ResourceTypeEnum.FONT ? ResourceFileEntity::getFontName
-                            : ResourceFileEntity::getFileName, ResourceFileEntity::getUuid));
+            final List<FileMetaInfoDTO> fileMetaInfoDTOS = files.stream().map(file-> map(file)).collect(Collectors.toList());
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
             result.setDeployed(fileEntity.getDeployed());
-            result.setMetadataUrls(uuids);
+            result.setMetadataUrls(fileMetaInfoDTOS);
         }
         final Collection<ResourceLogEntity> logs = entity.getResourceLogs();
         if (Objects.nonNull(logs) && !logs.isEmpty()) {
@@ -78,6 +76,14 @@ public class ResourceMapperImpl implements ResourceMapper {
     @Override
     public Page<ResourceDTO> map(final Page<ResourceEntity> entities) {
         return entities.map(this::map);
+    }
+
+    private static FileMetaInfoDTO map(final ResourceFileEntity file) {
+        final FileMetaInfoDTO fileMetaInfoDTO = new FileMetaInfoDTO();
+        fileMetaInfoDTO.setUuid(file.getUuid());
+        fileMetaInfoDTO.setFileName(file.getFileName());
+        fileMetaInfoDTO.setFontType(file.getFontName());
+        return fileMetaInfoDTO;
     }
 
 }
