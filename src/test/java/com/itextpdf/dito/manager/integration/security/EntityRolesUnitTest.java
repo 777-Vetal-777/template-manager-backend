@@ -19,12 +19,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 @SpringBootTest
+@ActiveProfiles("integration-test")
 public class EntityRolesUnitTest extends AbstractService {
 
     private static final String CUSTOM_ROLE = "custom_role";
@@ -52,12 +54,7 @@ public class EntityRolesUnitTest extends AbstractService {
         RoleEntity masterRole;
         UserEntity user;
 
-        try {
-            masterRole = roleService.create(CUSTOM_ROLE, permissions, true);
-        } catch (RoleAlreadyExistsException e) {
-            masterRole = roleService.getMasterRole(CUSTOM_ROLE);
-        }
-        try {
+        masterRole = roleService.create(CUSTOM_ROLE, permissions, true);
 
         user = new UserEntity();
         user.setEmail(CUSTOM_USER_EMAIL);
@@ -68,11 +65,6 @@ public class EntityRolesUnitTest extends AbstractService {
         user.setActive(Boolean.TRUE);
 
         userService.create(user, Collections.singletonList(masterRole.getName()));
-        } catch (UserAlreadyExistsException e) {
-            user = userService.findByEmail(CUSTOM_USER_EMAIL);
-            user.setRoles(Set.of(masterRole));
-            userService.updateUser(user, CUSTOM_USER_EMAIL);
-        }
     }
 
     @AfterEach
