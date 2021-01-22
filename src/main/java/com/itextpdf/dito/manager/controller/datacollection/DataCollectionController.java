@@ -6,13 +6,12 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
-import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
-import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
@@ -206,16 +205,21 @@ public interface DataCollectionController {
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			 Principal principal);
 	
+	@PutMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT)
+	@Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Data sample updated successfully", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
+			@ApiResponse(responseCode = "404", description = "Data sample not found", content = @Content) })
+	ResponseEntity<DataSampleDTO> setDataSampleAsDefault(
+			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+			@Parameter(description = "Data sample name encoded with base64.", required = true) @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName,
+			Principal principal);
 
-	 @PutMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT)
-	    @Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-	    @ApiResponses(value = {
-	            @ApiResponse(responseCode = "200", description = "Data sample updated successfully", content = {
-	                    @Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class))}),
-	            @ApiResponse(responseCode = "404", description = "Data sample not found", content = @Content)
-	    })
-	    ResponseEntity<DataSampleDTO> setDataSampleAsDefault(
-	            @Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
-	            @Parameter(description = "Data sample name encoded with base64.", required = true) @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName
-	           , Principal principal);
+	@PatchMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@Operation(summary = "Update data sample", description = "Update data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	ResponseEntity<DataSampleDTO> updateDataSample(
+			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
+			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
+	
 }
