@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.repository.datasample;
 
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -57,5 +58,7 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     Boolean existsByDataCollection(DataCollectionEntity dataCollection);
     
     Optional<List<DataSampleEntity>> findByDataCollection(DataCollectionEntity dataCollection);
-    
+
+    @Query("select file from DataSampleFileEntity file where file.dataSample.Id = :id and file.version = (select max(file.version) from file where file.dataSample.Id = :id)")
+   DataSampleFileEntity findLastByDataSampleAndVersionMax(@Param("id") long id);
 }

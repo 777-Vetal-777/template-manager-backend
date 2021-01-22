@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleLogEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +36,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselect
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static java.util.Collections.singleton;
 
 @Service
 public class DataSampleServiceImpl extends AbstractService implements DataSampleService {
@@ -42,8 +46,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
     private final JsonValidator jsonValidator;
     private final JsonKeyComparator jsonKeyComparator;
 
-
-	public DataSampleServiceImpl(final DataSampleRepository dataSampleRepository, 
+	public DataSampleServiceImpl(final DataSampleRepository dataSampleRepository,
 								 final UserService userService,
 								 final JsonValidator jsonValidator,
 								 final JsonKeyComparator jsonKeyComparator) {
@@ -56,11 +59,11 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	@Override
 	public DataSampleEntity create(final DataCollectionEntity dataCollectionEntity, final String name, final String fileName,
 			final String sample, final String comment, final String email) {
-		
+
 		if (dataSampleRepository.existsByName(name)) {
 	        throw new DataSampleAlreadyExistsException(name);
 	    }
-		
+
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
 		}
@@ -70,21 +73,32 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		if (!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
 			throw new InvalidDataSampleStructureException();
 		}
-		
+
 		final UserEntity userEntity = userService.findByEmail(email);
 
-		final DataSampleEntity dataSampleEntity = new DataSampleEntity();
-		dataSampleEntity.setDataCollection(dataCollectionEntity);
-		dataSampleEntity.setName(name);
-		dataSampleEntity.setComment(comment);
-		dataSampleEntity.setFileName(fileName);
-		dataSampleEntity.setModifiedOn(new Date());
-		dataSampleEntity.setCreatedOn(new Date());
-		dataSampleEntity.setAuthor(userEntity);
-		dataSampleEntity.setData(sample.getBytes());
-		dataSampleEntity.setIsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
-		return dataSampleRepository.save(dataSampleEntity);
-	}	
+        final DataSampleEntity dataSampleEntity = new DataSampleEntity();
+        dataSampleEntity.setDataCollection(dataCollectionEntity);
+        dataSampleEntity.setName(name);
+        dataSampleEntity.setComment(comment);
+        dataSampleEntity.setModifiedOn(new Date());
+        dataSampleEntity.setCreatedOn(new Date());
+        dataSampleEntity.setAuthor(userEntity);
+        dataSampleEntity.setIsDefault(!dataSampleRepository.existsByDataCollection(dataCollectionEntity));
+
+        final DataSampleFileEntity dataSampleFileEntity = new DataSampleFileEntity();
+        dataSampleFileEntity.setData(sample.getBytes());
+        dataSampleFileEntity.setFileName(fileName);
+        dataSampleFileEntity.setAuthor(userEntity);
+        dataSampleFileEntity.setCreatedOn(new Date());
+        dataSampleFileEntity.setVersion(1L);
+        dataSampleFileEntity.setDataSample(dataSampleEntity);
+        dataSampleEntity.setVersions(singleton(dataSampleFileEntity));
+        dataSampleEntity.setLatestVersion(dataSampleFileEntity);
+        final DataSampleLogEntity logEntity = createDataSampleLogEntry(dataSampleEntity, userEntity);
+        dataSampleEntity.setDataSampleLog(Arrays.asList(logEntity));
+
+        return dataSampleRepository.save(dataSampleEntity);
+    }
 
 	@Override
 	protected List<String> getSupportedSortFields() {
@@ -163,6 +177,48 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 				.findByDataCollection(dataCollectionEntity)
 				.orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
 		dataSampleRepository.deleteAll(dataSampleListToDelete);
+	}
+
+	@Override
+	public DataSampleEntity createNewVersion(final String name, final String sample, final String fileName, final String email, final String comment) {
+		if (!jsonValidator.isValid(sample.getBytes())) {
+			throw new InvalidDataSampleException();
+		}
+		final DataSampleEntity dataSampleEntity = get(name);
+		final DataSampleFileEntity lastEntity = dataSampleEntity.getLatestVersion();
+		final String jsonFromCollection = new String(lastEntity.getData());
+		if (!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
+			throw new InvalidDataSampleStructureException();
+		}
+
+		final DataSampleEntity existingDataSampleEntity = get(name);
+		final UserEntity userEntity = userService.findByEmail(email);
+
+		final DataSampleLogEntity logEntity = createDataSampleLogEntry(existingDataSampleEntity, userEntity);
+		final DataSampleFileEntity fileEntity = new DataSampleFileEntity();
+		fileEntity.setDataSample(existingDataSampleEntity);
+		fileEntity.setVersion(lastEntity.getVersion() + 1);
+		fileEntity.setData(sample.getBytes());
+		fileEntity.setFileName(fileName);
+		fileEntity.setCreatedOn(new Date());
+		fileEntity.setAuthor(userEntity);
+		fileEntity.setComment(comment);
+
+		existingDataSampleEntity.setModifiedOn(new Date());
+		existingDataSampleEntity.getVersions().add(fileEntity);
+		existingDataSampleEntity.setLatestVersion(fileEntity);
+		existingDataSampleEntity.getDataSampleLog().add(logEntity);
+
+		return dataSampleRepository.save(existingDataSampleEntity);
+	}
+
+	private DataSampleLogEntity createDataSampleLogEntry(final DataSampleEntity dataSampleEntity, final UserEntity userEntity) {
+		final DataSampleLogEntity logDataSample = new DataSampleLogEntity();
+		logDataSample.setAuthor(userEntity);
+		logDataSample.setDataSample(dataSampleEntity);
+		logDataSample.setDate(new Date());
+		dataSampleEntity.setLastDataSampleLog(logDataSample);
+		return logDataSample;
 	}
 	
 }

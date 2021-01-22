@@ -28,9 +28,9 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setAuthorFirstName(entity.getAuthor().getFirstName());
         dto.setAuthorLastName(entity.getAuthor().getLastName());
         dto.setComment(entity.getComment());
-        dto.setFileName(entity.getFileName());
+        dto.setFileName(entity.getLatestVersion().getFileName());
         dto.setIsDefault(entity.getIsDefault());
-		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getData()),
+		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getLatestVersion().getData()),
 				new String(entity.getDataCollection().getLatestVersion().getData())));
 		 return dto;
 	}
@@ -38,7 +38,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
     @Override
     public DataSampleDTO mapWithFile(final DataSampleEntity entity) {
         final DataSampleDTO result = map(entity);
-        result.setFile(new String(entity.getData()));
+        result.setFile(new String(entity.getLatestVersion().getData()));
         return result;
     }
 
