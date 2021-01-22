@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
@@ -216,7 +217,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final  DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
 		final String dataSampleName = dataSampleCreateRequestDTO.getName();
 		final String fileName = dataSampleCreateRequestDTO.getFileName();
 		final String data = dataSampleCreateRequestDTO.getSample();
@@ -252,6 +253,12 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 	public ResponseEntity<DataSampleDTO> setDataSampleAsDefault(final String dataCollectionName, final String dataSampleName,
 			final Principal principal) {
 		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.setAsDefault(decodeBase64(dataSampleName))), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<DataSampleDTO> updateDataSample(final String name,
+			@Valid final DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, final Principal principal) {
+		throw new NotImplementedException("Not realized yet");
 	}
 
 }
