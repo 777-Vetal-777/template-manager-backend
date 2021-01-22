@@ -46,8 +46,8 @@ pipeline {
                 script {
                     withSonarQubeEnv('SonarQube_8.3') {
                         withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'MVN_FILE')]){
-                            sh "cp \${MVN_FILE}  ./settings.xml"
-                            sh "mvn -s ./settings.xml dependency:list"             
+                            //sh "cp \${MVN_FILE}  ./settings.xml"
+                            //sh "mvn -s ./settings.xml dependency:list"             
                             sh 'mvn sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
                         }
                     }
