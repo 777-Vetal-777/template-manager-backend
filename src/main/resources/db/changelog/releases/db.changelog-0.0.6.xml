@@ -94,4 +94,7 @@
             </column>
         </createTable>
     </changeSet>
+	<changeSet id="011-rename-comment-column-in-data-sample-table" author="Denys_Kovbii" >
+		<renameColumn newColumnName="description" oldColumnName="comment" tableName="data_sample" />
+	</changeSet>
 </databaseChangeLog>

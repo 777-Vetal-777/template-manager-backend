@@ -20,35 +20,38 @@ import java.util.Optional;
 public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "modifiedBy", "modifiedOn", "comment", "isDefault");
 
-    String DATA_SAMPLE_TABLE_SELECT_CLAUSE = "select ds from DataSampleEntity ds where ";
+    String DATA_SAMPLE_TABLE_SELECT_CLAUSE = "select ds from DataSampleEntity ds where ds.dataCollection.id = :collectionId "; 
 
-    String DATA_SAMPLE_TABLE_FILTER_CONDITION = "(:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
+    String DATA_SAMPLE_TABLE_FILTER_CONDITION = "and (:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
             + "and (:modifiedBy='' or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or ds.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (:comment='' or LOWER(ds.comment) like CONCAT('%',:comment,'%'))"
+            + "and (:description='' or LOWER(ds.description) like CONCAT('%',:description,'%'))"
             + "and (:isDefault=null or ds.isDefault IS :isDefault) "; 
 
     String DATA_SAMPLE_TABLE_SEARCH_CONDITION = " and (CAST(ds.modifiedOn as string) like CONCAT('%',:search,'%') "
-            + "or LOWER(ds.comment) like CONCAT('%',:search,'%') "
+            + "or LOWER(ds.description) like CONCAT('%',:search,'%') "
             + "or LOWER(ds.name) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like LOWER(CONCAT('%',:search,'%')))";
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION)
     Page<DataSampleEntity> filter(Pageable pageable,
+    							  @Param("collectionId") @Nullable Long collectionId,
                                   @Param("name") @Nullable String name,
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                   @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
                                   @Param("isDefault") @Nullable Boolean isDefault,
-                                  @Param("comment") @Nullable String comment);
+                                  @Param("description") @Nullable String description);
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION + DATA_SAMPLE_TABLE_SEARCH_CONDITION)
     Page<DataSampleEntity> search(Pageable pageable,
+    							  @Param("collectionId") @Nullable Long collectionId,
                                   @Param("name") @Nullable String name,
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                   @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
-                                  @Param("comment") @Nullable String comment,
+                                  @Param("description") @Nullable String description,
+                                  @Param("isDefault") @Nullable Boolean isDefault,
                                   @Param("search") @Nullable String search);
 
     Optional<DataSampleEntity> findByName(String name);

@@ -15,7 +15,7 @@ public class DataSampleCreateRequestDTO {
     @NotBlank
     @Schema(example = "{data collection JSON object}")
     private String sample;
-    @Schema(example = "some-data-collection coment")
+    @Schema(example = "some-data-collection comment")
     private String comment;
 	public String getName() {
 		return name;

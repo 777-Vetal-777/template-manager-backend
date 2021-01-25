@@ -19,7 +19,6 @@ import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionFileSizeExceedLimitException;
 import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
@@ -38,7 +37,6 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermission
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -217,7 +215,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final  DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
 		final String dataSampleName = dataSampleCreateRequestDTO.getName();
 		final String fileName = dataSampleCreateRequestDTO.getFileName();
 		final String data = dataSampleCreateRequestDTO.getSample();
@@ -226,15 +224,19 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
 	}
 
-    @Override
-    public ResponseEntity<Page<DataSampleDTO>> list(final Pageable pageable, final DataSampleFilter filter, final String searchParam) {
-        return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, filter, searchParam)), HttpStatus.OK);
-    }
+	@Override
+	public ResponseEntity<Page<DataSampleDTO>> list(final String dataCollectionName, final Pageable pageable,
+			final DataSampleFilter filter, final String searchParam) {
+		 final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
+		return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, dataCollection.getId(),filter, searchParam)),
+				HttpStatus.OK);
+	}
 
-    @Override
-    public ResponseEntity<DataSampleDTO> getDataSample(final String dataSampleName) {
-        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))), HttpStatus.OK);
-    }
+	@Override
+	public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {
+		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))),
+				HttpStatus.OK);
+	}
     
 	@Override
 	public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName,
@@ -256,9 +258,12 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 	}
 
 	@Override
-	public ResponseEntity<DataSampleDTO> updateDataSample(final String name,
+	public ResponseEntity<DataSampleDTO> updateDataSample(final String dataCollectionName, final String dataSampleName,
 			@Valid final DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, final Principal principal) {
-		throw new NotImplementedException("Not realized yet");
+		  final DataSampleEntity entity = dataSampleService.update(decodeBase64(dataSampleName), dataSampleMapper.map(dataSampleUpdateRequestDTO),
+	                principal.getName());
+
+	        return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
 	}
 
 }

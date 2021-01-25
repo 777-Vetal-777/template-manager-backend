@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.dto.datasample;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
@@ -9,15 +8,14 @@ public class DataSampleDTO {
     private String modifiedBy;
     private Date modifiedOn;
     private Date createdOn;
-    @JsonProperty("author.firstName")
-    private String authorFirstName;
-    @JsonProperty("author.lastName")
-    private String authorLastName;
+    private String createdBy;
     private String fileName;
+    private String description;
     private String comment;
     private String file;
     private Boolean isDefault;
     private Boolean isActual;
+    private Long version;
     
     public String getFile() {
         return file;
@@ -27,15 +25,15 @@ public class DataSampleDTO {
         this.file = file;
     }
 
-    public String getComment() {
-        return comment;
-    }
+    public String getDescription() {
+		return description;
+	}
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public String getFileName() {
+	public String getFileName() {
         return fileName;
     }
 
@@ -75,22 +73,6 @@ public class DataSampleDTO {
         this.modifiedOn = modifiedOn;
     }
 
-    public String getAuthorFirstName() {
-        return authorFirstName;
-    }
-
-    public void setAuthorFirstName(String authorFirstName) {
-        this.authorFirstName = authorFirstName;
-    }
-
-    public String getAuthorLastName() {
-        return authorLastName;
-    }
-
-    public void setAuthorLastName(String authorLastName) {
-        this.authorLastName = authorLastName;
-    }
-
 	public Boolean getIsDefault() {
 		return isDefault;
 	}
@@ -105,6 +87,30 @@ public class DataSampleDTO {
 
 	public void setIsActual(Boolean isActual) {
 		this.isActual = isActual;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

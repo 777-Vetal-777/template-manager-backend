@@ -32,7 +32,7 @@ public class DataSampleEntity {
     @JoinColumn(name = "data_collection_id")
     private DataCollectionEntity dataCollection;  
     private String name; 
-    private String comment;   
+    private String description;   
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private UserEntity author;
@@ -100,15 +100,17 @@ public class DataSampleEntity {
         this.dataCollection = dataCollection;
     }
 
-    public String getComment() {
-        return comment;
-    }
+    public String getDescription() {
+		return description;
+	}
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public UserEntity getAuthor() {
+
+
+	public UserEntity getAuthor() {
         return author;
     }
 

@@ -3,8 +3,11 @@ package com.itextpdf.dito.manager.component.mapper.datasample.impl;
 import com.itextpdf.dito.manager.component.datasample.jsoncomparator.JsonKeyComparator;
 import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
+import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -25,25 +28,36 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setModifiedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
         dto.setModifiedOn(entity.getModifiedOn());
         dto.setCreatedOn(entity.getCreatedOn());
-        dto.setAuthorFirstName(entity.getAuthor().getFirstName());
-        dto.setAuthorLastName(entity.getAuthor().getLastName());
-        dto.setComment(entity.getComment());
+        dto.setCreatedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
+        dto.setDescription(entity.getDescription());
         dto.setFileName(entity.getLatestVersion().getFileName());
         dto.setIsDefault(entity.getIsDefault());
 		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getLatestVersion().getData()),
 				new String(entity.getDataCollection().getLatestVersion().getData())));
 		 return dto;
 	}
-
+ 
     @Override
     public DataSampleDTO mapWithFile(final DataSampleEntity entity) {
-        final DataSampleDTO result = map(entity);
-        result.setFile(new String(entity.getLatestVersion().getData()));
-        return result;
+        final DataSampleDTO dto = map(entity);
+        final DataSampleFileEntity latestVersion = entity.getLatestVersion();
+        dto.setFile(new String(latestVersion.getData()));
+        dto.setVersion(latestVersion.getVersion());
+        dto.setComment(latestVersion.getComment());
+        dto.setFileName(latestVersion.getFileName());
+        return dto;
     }
 
     @Override
     public Page<DataSampleDTO> map(final Page<DataSampleEntity> entities) {
         return entities.map(this::map);
+    }
+    
+    @Override
+    public DataSampleEntity map(DataSampleUpdateRequestDTO dto) {
+        final DataSampleEntity entity = new DataSampleEntity();
+        entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
+        return entity;
     }
 }

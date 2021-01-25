@@ -170,18 +170,20 @@ public interface DataCollectionController {
             @ApiResponse(responseCode = "400", description = "Invalid data sample structure", content = @Content)})
     ResponseEntity<DataSampleDTO> create(
             @Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName ,
-            @RequestBody @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
+            @RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
-    @GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
-    @Operation(summary = "Get list of data samples",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<DataSampleDTO>> list(Pageable pageable, @ParameterObject DataSampleFilter filter,
-                                             @RequestParam(name = "search", required = false) String searchParam);
+	@GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@Operation(summary = "Get list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	ResponseEntity<Page<DataSampleDTO>> list(
+			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+			Pageable pageable, @ParameterObject DataSampleFilter filter,
+			@RequestParam(name = "search", required = false) String searchParam);
 
-    @GetMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
-    @Operation(summary = "Get data sample by name", description = "Get data sample by name",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<DataSampleDTO> getDataSample(@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName);
+	@GetMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
+	@Operation(summary = "Get data sample by name", description = "Get data sample by name", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	ResponseEntity<DataSampleDTO> getDataSample(
+			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+			@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName);
 
 	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
 	@Operation(summary = "Delete list of data samples", description = "Delete list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -216,10 +218,11 @@ public interface DataCollectionController {
 			@Parameter(description = "Data sample name encoded with base64.", required = true) @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName,
 			Principal principal);
 
-	@PatchMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@PatchMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
 	@Operation(summary = "Update data sample", description = "Update data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<DataSampleDTO> updateDataSample(
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
+			@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName,
 			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
 	
 }
