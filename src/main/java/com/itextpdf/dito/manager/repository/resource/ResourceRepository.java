@@ -20,21 +20,20 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedBy", "modifiedOn", "comment");
 
     String SELECT_CLAUSE = "select resource from ResourceEntity resource "
-            + " left join resource.latestFile latestFile "
-            + " left join resource.latestLogRecord latestLogRecord";
+            + " join resource.latestFile latestFile "
+            + " join resource.latestLogRecord latestLogRecord";
     String FILTER_CONDITION = "((:name='' or LOWER(resource.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or resource.type in (:types)) "
             + "and (:comment='' or LOWER(latestFile.comment) like LOWER(CONCAT('%',:comment,'%'))) "
             + "and (:modifiedBy='' or LOWER(CONCAT(resource.latestLogRecord.author.firstName, ' ', resource.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or resource.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date))) ";
-
     String SEARCH_CONDITION = "(LOWER(resource.name) like CONCAT('%',:search,'%') "
             + "or LOWER(latestFile.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(resource.type) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(resource.latestLogRecord.author.firstName, ' ', resource.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
             + "or CAST(CAST(resource.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
 
-    String GROUP_BY_ID_COMMENT_DATE = "group by resource.id, latestFile.comment, latestLogRecord.date";
+    String GROUP_BY_ID_COMMENT_DATE_FIRSTNAME = "group by resource.id, latestFile.comment, latestLogRecord.date, latestLogRecord.author.firstName";
     String PAGEABLE_FILTER_QUERY = SELECT_CLAUSE + " where " + FILTER_CONDITION;
     String PAGEABLE_SEARCH_AND_FILTER_QUERY = PAGEABLE_FILTER_QUERY + " and" + SEARCH_CONDITION;
 
@@ -44,7 +43,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
 
     ResourceEntity findByName(String name);
 
-    @Query(value = PAGEABLE_FILTER_QUERY + GROUP_BY_ID_COMMENT_DATE)
+    @Query(value = PAGEABLE_FILTER_QUERY + GROUP_BY_ID_COMMENT_DATE_FIRSTNAME)
     Page<ResourceEntity> filter(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,
@@ -53,7 +52,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
                                 @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                 @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate);
 
-    @Query(value = PAGEABLE_SEARCH_AND_FILTER_QUERY + GROUP_BY_ID_COMMENT_DATE)
+    @Query(value = PAGEABLE_SEARCH_AND_FILTER_QUERY + GROUP_BY_ID_COMMENT_DATE_FIRSTNAME)
     Page<ResourceEntity> search(Pageable pageable,
                                 @Param("name") @Nullable String name,
                                 @Param("types") @Nullable List<ResourceTypeEnum> types,
