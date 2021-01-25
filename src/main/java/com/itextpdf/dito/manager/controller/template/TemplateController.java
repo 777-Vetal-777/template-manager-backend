@@ -181,7 +181,8 @@ public interface TemplateController {
     @Operation(summary = "Block template for editing", description = "Block template for editing by current user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Template blocked for editing successfully."),
-            @ApiResponse(responseCode = "401", description = "Template not found or already blocked")
+            @ApiResponse(responseCode = "404", description = "Template not found."),
+            @ApiResponse(responseCode = "403", description = "Template already blocked")
     })
     ResponseEntity<TemplateMetadataDTO> block(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
@@ -189,7 +190,8 @@ public interface TemplateController {
     @Operation(summary = "Unblock template for editing", description = "Unblock template for editing by current user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Template unblocked for editing successfully."),
-            @ApiResponse(responseCode = "401", description = "Template not found or can't be unblocked")
+            @ApiResponse(responseCode = "404", description = "Template not found."),
+            @ApiResponse(responseCode = "403", description = "Template can't be unblocked")
     })
     ResponseEntity<TemplateMetadataDTO> unblock(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 }
