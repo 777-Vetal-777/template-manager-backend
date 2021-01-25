@@ -24,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
-import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_COLLECTION_VERSIONS;
+import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.VERSIONS_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -101,7 +101,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", TYPE.getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
         final URI newVersionURI = UriComponentsBuilder
-                .fromUriString(DataCollectionController.BASE_NAME + DATA_COLLECTION_VERSIONS).build().encode().toUri();
+                .fromUriString(DataCollectionController.BASE_NAME + VERSIONS_ENDPOINT).build().encode().toUri();
         mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
                 .file(file)
                 .file(name)
