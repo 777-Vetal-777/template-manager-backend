@@ -53,6 +53,12 @@ resources:
     extensions:
       supported: ttf
 
+template:
+  unblock-scheduler:
+    execution-delay-in-millis: 3600000
+    initial-delay-in-millis: 1000
+
+
 data-collection:
   json:
       size-limit: 8388608
