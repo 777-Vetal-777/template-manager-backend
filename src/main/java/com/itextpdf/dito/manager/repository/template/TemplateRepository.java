@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
@@ -143,4 +144,9 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Query(value = DEPENDENCY_QUERY, nativeQuery = true)
     List<DependencyModel> list(@Param("id") Long templateId);
+
+    @Modifying
+    @Query("update TemplateEntity t set t.blockedBy = null, t.blockedAt=null where t.blockedAt< :blockExpirationDate")
+    void unlockTemplatesWithExpiredBlockTime(@Param("blockExpirationDate") @Temporal Date blockExpirationDate);
+
 }

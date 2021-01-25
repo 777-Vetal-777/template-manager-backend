@@ -47,13 +47,11 @@ import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 public class TemplateControllerImpl extends AbstractController implements TemplateController {
     private final TemplateService templateService;
     private final TemplatePreviewGenerator templatePreviewGenerator;
-    private final DataCollectionFileService dataCollectionFileService;
     private final TemplateMapper templateMapper;
     private final DependencyMapper dependencyMapper;
     private final TemplateVersionsService templateVersionsService;
     private final TemplatePermissionService templatePermissionService;
     private final PermissionMapper permissionMapper;
-    private final RoleMapper roleMapper;
     private final TemplateDependencyService templateDependencyService;
     private final FileVersionMapper fileVersionMapper;
 
@@ -69,13 +67,11 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final RoleMapper roleMapper) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
-        this.dataCollectionFileService = dataCollectionFileService;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
         this.templateVersionsService = templateVersionsService;
         this.templatePermissionService = templatePermissionService;
         this.permissionMapper = permissionMapper;
-        this.roleMapper = roleMapper;
         this.fileVersionMapper = fileVersionMapper;
         this.templateDependencyService = templateDependencyService;
     }
@@ -185,5 +181,15 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final TemplateEntity templateEntity = templateService
                 .detachRole(decodeBase64(name), decodeBase64(roleName), principal.getName());
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<TemplateMetadataDTO> block(final Principal principal, final String name) {
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.block(principal.getName(), decodeBase64(name))), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<TemplateMetadataDTO> unblock(final Principal principal, final String name) {
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.unblock(principal.getName(), decodeBase64(name))), HttpStatus.OK);
     }
 }

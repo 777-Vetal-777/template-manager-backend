@@ -15,6 +15,7 @@ public class TemplateMetadataDTO{
     private Date modifiedOn;
     private String description;
     private Long version;
+    private boolean blocked;
     private Set<RoleDTO> appliedRoles;
 
     public Set<RoleDTO> getAppliedRoles() { return appliedRoles; }
@@ -83,5 +84,13 @@ public class TemplateMetadataDTO{
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 }

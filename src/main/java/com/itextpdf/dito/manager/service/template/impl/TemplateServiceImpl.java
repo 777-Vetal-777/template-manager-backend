@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFound
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.template.TemplateBlockedException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
@@ -204,7 +205,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity,  oldTemplateFileVersion, userEntity, data, comment, oldVersion + 1);
+        return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, comment, oldVersion + 1);
     }
 
     @Override
@@ -337,6 +338,38 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity templateEntity = findByName(templateName);
         templateRepository.delete(templateEntity);
         return templateEntity;
+    }
+
+    @Override
+    public TemplateEntity block(final String userEmail, final String templateName) {
+        final TemplateEntity templateEntity = findByName(templateName);
+        final UserEntity currentUser = userService.findByEmail(userEmail);
+        if (templateEntity.getBlockedAt() != null && currentUser != templateEntity.getBlockedBy()) {
+            throw new TemplateBlockedException(new StringBuilder().append("Template ")
+                    .append(templateEntity.getName())
+                    .append(" already blocked by user ")
+                    .append(templateEntity.getBlockedBy().getEmail())
+                    .toString());
+        }
+        templateEntity.setBlockedAt(new Date());
+        templateEntity.setBlockedBy(currentUser);
+        return templateRepository.save(templateEntity);
+    }
+
+    @Override
+    public TemplateEntity unblock(final String userEmail, final String templateName) {
+        final TemplateEntity templateEntity = findByName(templateName);
+        final UserEntity currentUser = userService.findByEmail(userEmail);
+        if (currentUser != templateEntity.getBlockedBy()) {
+            throw new TemplateBlockedException(new StringBuilder().append("Template ")
+                    .append(templateEntity.getName())
+                    .append(" was blocked by other user ")
+                    .append(templateEntity.getBlockedBy().getEmail())
+                    .toString());
+        }
+        templateEntity.setBlockedBy(null);
+        templateEntity.setBlockedAt(null);
+        return templateRepository.save(templateEntity);
     }
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
