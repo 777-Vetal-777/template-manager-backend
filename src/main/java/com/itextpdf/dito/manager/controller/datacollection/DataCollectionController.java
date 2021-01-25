@@ -55,6 +55,8 @@ public interface DataCollectionController {
     String DATA_COLLECTION_PATH_VARIABLE = "data-collection-name";
     String ROLE_PATH_VARIABLE = "role-name";
     String DATA_SAMPLE_PATH_VARIABLE = "data-sample-name";
+    String VERSIONS_ENDPOINT = "/versions";
+    String DATA_SAMPLE_ENDPOINT = "/datasamples";
     String DATA_SAMPLE_WITH_PATH_VARIABLE = "/{" + DATA_SAMPLE_PATH_VARIABLE + "}";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
@@ -64,12 +66,13 @@ public interface DataCollectionController {
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE + "/setasdefault";
     String DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + "/all";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable";
-    String DATA_COLLECTION_VERSIONS = "/versions";
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
-    String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_COLLECTION_VERSIONS;
+    String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES = DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
-
+    String DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE = DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
+    String DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE = DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
+    
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -82,7 +85,7 @@ public interface DataCollectionController {
     @ApiResponse(responseCode = "200", description = "Information about one data collection dependencies is prepared according to the specified conditions.")
     ResponseEntity<List<DependencyDTO>> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
-    @PostMapping(path = DATA_COLLECTION_VERSIONS, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = VERSIONS_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create new version of data collection", description = "Make a new version of a data collection: upload a new json and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -225,4 +228,22 @@ public interface DataCollectionController {
 			@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName,
 			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
 	
+	@PostMapping(DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE)
+	@Operation(summary = "Create new version of data sample ")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Data sample version is created"),
+			@ApiResponse(responseCode = "400", description = "This file exceeds the file limit."),
+			@ApiResponse(responseCode = "400", description = "This file is not valid. Please try again"),
+			@ApiResponse(responseCode = "403", description = "You don't have permissions to create new version."), })
+	ResponseEntity<DataSampleDTO> create(Principal principal,
+			@Parameter(description = "Data sample name encoded with base64.", required = true) @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name,
+			@Parameter(description = "Data collection JSON object") String sample,
+			@Parameter(description = "Comment of new version data sample") String comment,
+			@Parameter(description = "FileName of new version data sample") String fileName);
+
+	@GetMapping(DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE)
+	@Operation(summary = "Get a list of versions of data sample by name", description = "Get a list of data sample versions using the data sample name, sorting and filters.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(Pageable pageable,
+			@PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name, VersionFilter versionFilter,
+			@RequestParam(value = "search", required = false) String searchParam);
+
 }
