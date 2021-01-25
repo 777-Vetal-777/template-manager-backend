@@ -35,6 +35,7 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionDependency
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermissionService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.datasample.DataSampleFileService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +63,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataSampleMapper dataSampleMapper;
     private final DataCollectionPermissionService dataCollectionPermissionService;
     private final DataSampleService dataSampleService;
+    private final DataSampleFileService dataSampleFileService;
     private final FileVersionMapper fileVersionMapper;
     private final Long sizeJsonLimit;
 
@@ -74,6 +76,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataSampleMapper dataSampleMapper,
                                         final DataCollectionPermissionService dataCollectionPermissionService,
                                         final DataSampleService dataSampleService,
+                                        final DataSampleFileService dataSampleFileService,
                                         final FileVersionMapper fileVersionMapper,
                                         @Value("${data-collection.json.size-limit}") final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
@@ -87,6 +90,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.dataSampleService = dataSampleService;
         this.fileVersionMapper = fileVersionMapper;
         this.sizeJsonLimit = sizeJsonLimit;
+        this.dataSampleFileService = dataSampleFileService;
     }
 
     @Override
@@ -265,5 +269,21 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
 	        return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
 	}
+	
+
+    @Override
+    public ResponseEntity<DataSampleDTO> create(final Principal principal, final String name, final String sample,
+                                                final String comment, final String fileName) {
+        final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(decodeBase64(name), sample, fileName, principal.getName(), comment);
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(final Pageable pageable, final String name, final VersionFilter versionFilter, final String searchParam) {
+        final String dataSampleName = decodeBase64(name);
+        final Page<FileVersionModel> dataSampleVersionEntities = dataSampleFileService.list(pageable, dataSampleName, versionFilter, searchParam);
+
+        return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
+    }
 
 }
