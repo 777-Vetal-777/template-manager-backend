@@ -1,11 +1,8 @@
 package com.itextpdf.dito.manager.entity.template;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
-import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
@@ -25,6 +22,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +38,10 @@ public class TemplateEntity {
     @Enumerated(EnumType.STRING)
     private TemplateTypeEnum type;
     private String description;
+    private Date blockedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "blocked_by")
+    private UserEntity blockedBy;
 
 
     @OneToMany(
@@ -155,5 +157,21 @@ public class TemplateEntity {
 
     public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
         this.appliedRoles = appliedRoles;
+    }
+
+    public Date getBlockedAt() {
+        return blockedAt;
+    }
+
+    public void setBlockedAt(Date blockedAt) {
+        this.blockedAt = blockedAt;
+    }
+
+    public UserEntity getBlockedBy() {
+        return blockedBy;
+    }
+
+    public void setBlockedBy(UserEntity blockedBy) {
+        this.blockedBy = blockedBy;
     }
 }

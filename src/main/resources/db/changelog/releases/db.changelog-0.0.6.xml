@@ -94,7 +94,24 @@
             </column>
         </createTable>
     </changeSet>
+
 	<changeSet id="011-rename-comment-column-in-data-sample-table" author="Denys_Kovbii" >
 		<renameColumn newColumnName="description" oldColumnName="comment" tableName="data_sample" />
 	</changeSet>
+
+
+    <changeSet id="012-add-blocked-at-column-to-template-table" author="Ivan_Semenov">
+        <addColumn tableName="template">
+            <column name="blocked_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="013-add-blocked-by-column-to-template-table" author="Ivan_Semenov">
+        <addColumn tableName="template">
+            <column name="blocked_by" type="bigint">
+                <constraints nullable="true" foreignKeyName="fk_template_to_user"
+                             references="user(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

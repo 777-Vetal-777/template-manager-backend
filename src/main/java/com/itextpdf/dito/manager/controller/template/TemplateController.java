@@ -51,9 +51,13 @@ public interface TemplateController {
     String TEMPLATE_PATH_VARIABLE = "template-name";
     String ROLE_PATH_VARIABLE = "role-name";
     String TEMPLATE_VERSION_ENDPOINT = "/versions";
+    String TEMPLATE_BLOCK_ENDPOINT = "/block";
+    String TEMPLATE_UNBLOCK_ENDPOINT = "/unblock";
     String PAGEABLE_ENDPOINT = "/pageable";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
+    String TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}" + TEMPLATE_BLOCK_ENDPOINT;
+    String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}" + TEMPLATE_UNBLOCK_ENDPOINT;
     //Dependencies
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
     String TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
@@ -160,8 +164,8 @@ public interface TemplateController {
             @ApiResponse(responseCode = "401", description = "Template is not found in repository")
     })
     ResponseEntity<TemplateMetadataDTO> applyRole(Principal principal,
-            @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-            @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
+                                                  @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                  @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
 
     @DeleteMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME)
     @Operation(summary = "Remove role from a template", description = "Detach custom role from a template", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -170,7 +174,22 @@ public interface TemplateController {
             @ApiResponse(responseCode = "401", description = "Role or template are not found in repository")
     })
     ResponseEntity<TemplateMetadataDTO> deleteRole(Principal principal,
-            @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
-            @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
+                                                   @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+                                                   @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
+    @GetMapping(TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Block template for editing", description = "Block template for editing by current user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template blocked for editing successfully."),
+            @ApiResponse(responseCode = "401", description = "Template not found or already blocked")
+    })
+    ResponseEntity<TemplateMetadataDTO> block(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+
+    @GetMapping(TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Unblock template for editing", description = "Unblock template for editing by current user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template unblocked for editing successfully."),
+            @ApiResponse(responseCode = "401", description = "Template not found or can't be unblocked")
+    })
+    ResponseEntity<TemplateMetadataDTO> unblock(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 }

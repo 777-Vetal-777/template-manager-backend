@@ -107,6 +107,9 @@ public class TemplateMapperImpl implements TemplateMapper {
                 ? dataCollectionFileEntity.getDataCollection().getName()
                 : null);
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        if (entity.getBlockedBy() != null) {
+            result.setBlocked(true);
+        }
         return result;
     }
 
