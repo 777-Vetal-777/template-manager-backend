@@ -15,6 +15,7 @@ import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleException
 import com.itextpdf.dito.manager.exception.datasample.InvalidDataSampleStructureException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
+import com.itextpdf.dito.manager.repository.datasample.DataSampleLogRepository;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
@@ -32,6 +33,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -45,8 +48,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
     private final UserService userService;
     private final JsonValidator jsonValidator;
     private final JsonKeyComparator jsonKeyComparator;
+    private final DataSampleLogRepository dataSampleLogRepository;
 
 	public DataSampleServiceImpl(final DataSampleRepository dataSampleRepository,
+								 final DataSampleLogRepository dataSampleLogRepository,
 								 final UserService userService,
 								 final JsonValidator jsonValidator,
 								 final JsonKeyComparator jsonKeyComparator) {
@@ -54,6 +59,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		this.userService = userService;
 		this.jsonValidator = jsonValidator;
 		this.jsonKeyComparator = jsonKeyComparator;
+		this.dataSampleLogRepository = dataSampleLogRepository;
 	}
 
 	@Override
@@ -79,7 +85,6 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
         final DataSampleEntity dataSampleEntity = new DataSampleEntity();
         dataSampleEntity.setDataCollection(dataCollectionEntity);
         dataSampleEntity.setName(name);
-        dataSampleEntity.setComment(comment);
         dataSampleEntity.setModifiedOn(new Date());
         dataSampleEntity.setCreatedOn(new Date());
         dataSampleEntity.setAuthor(userEntity);
@@ -90,6 +95,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
         dataSampleFileEntity.setFileName(fileName);
         dataSampleFileEntity.setAuthor(userEntity);
         dataSampleFileEntity.setCreatedOn(new Date());
+        dataSampleFileEntity.setComment(comment);
         dataSampleFileEntity.setVersion(1L);
         dataSampleFileEntity.setDataSample(dataSampleEntity);
         dataSampleEntity.setVersions(singleton(dataSampleFileEntity));
@@ -106,7 +112,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	}
 
 	@Override
-	public Page<DataSampleEntity> list(final Pageable pageable, final DataSampleFilter filter, final String searchParam) {
+	public Page<DataSampleEntity> list(final Pageable pageable, final long dataCollectionId, final DataSampleFilter filter, final String searchParam) {
 		throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
 		final Pageable pageWithSort = updateSort(pageable);
@@ -128,9 +134,9 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 
 		return StringUtils.isEmpty(searchParam)
 				? dataSampleRepository
-				.filter(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, isDefault, comment)
+				.filter(pageWithSort, dataCollectionId, name, modifiedBy, editedOnStartDate, editedOnEndDate, isDefault, comment)
 				: dataSampleRepository
-				.search(pageWithSort, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment,  searchParam.toLowerCase());
+				.search(pageWithSort, dataCollectionId, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment, isDefault, searchParam.toLowerCase());
 	}
 
 	@Override
@@ -219,6 +225,34 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		logDataSample.setDate(new Date());
 		dataSampleEntity.setLastDataSampleLog(logDataSample);
 		return logDataSample;
+	}
+	
+	@Override
+	@Transactional
+	public DataSampleEntity update(final String name, final DataSampleEntity updatedEntity, final String userEmail) {
+		final DataSampleEntity existingEntity = dataSampleRepository.findByName(name)
+				.orElseThrow(() -> new DataSampleNotFoundException(name));
+		final UserEntity currentUser = userService.findByEmail(userEmail);
+
+		final String newName = updatedEntity.getName();
+		if (!name.equals(newName) && dataSampleRepository.existsByName(newName)) {
+			throw new DataSampleAlreadyExistsException(newName);
+		}
+		existingEntity.setName(newName);
+		existingEntity.setModifiedOn(new Date());
+		existingEntity.setDescription(updatedEntity.getDescription());
+		final DataSampleEntity savedCollection = dataSampleRepository.save(existingEntity);
+		logDataSampleUpdate(savedCollection, currentUser);
+		return savedCollection;
+	}
+
+	private void logDataSampleUpdate(final DataSampleEntity sampleEntity, final UserEntity userEntity) {
+		final DataSampleLogEntity logDataSample = new DataSampleLogEntity();
+		logDataSample.setAuthor(userEntity);
+		logDataSample.setDataSample(sampleEntity);
+		logDataSample.setDate(new Date());
+		sampleEntity.setLastDataSampleLog(logDataSample);
+		dataSampleLogRepository.save(logDataSample);
 	}
 	
 }
