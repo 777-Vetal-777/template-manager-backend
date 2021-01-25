@@ -70,8 +70,8 @@ public interface DataCollectionController {
     String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES = DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
-    String DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE = DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
-    String DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE = DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
+    String DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + VERSIONS_ENDPOINT;
+    String DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
     
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create data collection",
@@ -229,20 +229,21 @@ public interface DataCollectionController {
 			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
 	
 	@PostMapping(DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE)
-	@Operation(summary = "Create new version of data sample ")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Data sample version is created"),
-			@ApiResponse(responseCode = "400", description = "This file exceeds the file limit."),
-			@ApiResponse(responseCode = "400", description = "This file is not valid. Please try again"),
-			@ApiResponse(responseCode = "403", description = "You don't have permissions to create new version."), })
-	ResponseEntity<DataSampleDTO> create(Principal principal,
-			@Parameter(description = "Data sample name encoded with base64.", required = true) @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name,
-			@Parameter(description = "Data collection JSON object") String sample,
-			@Parameter(description = "Comment of new version data sample") String comment,
-			@Parameter(description = "FileName of new version data sample") String fileName);
+	@Operation(summary = "Create new version data sample", description = "Create new version data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
+			@ApiResponse(responseCode = "409", description = "Invalid input or datasample already exists", content = @Content),
+
+			@ApiResponse(responseCode = "400", description = "Invalid data sample structure", content = @Content) })
+	ResponseEntity<DataSampleDTO> createDataSampleNewVersion(
+			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+			@RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
 	@GetMapping(DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE)
 	@Operation(summary = "Get a list of versions of data sample by name", description = "Get a list of data sample versions using the data sample name, sorting and filters.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(Pageable pageable,
+			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			@PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name, VersionFilter versionFilter,
 			@RequestParam(value = "search", required = false) String searchParam);
 
