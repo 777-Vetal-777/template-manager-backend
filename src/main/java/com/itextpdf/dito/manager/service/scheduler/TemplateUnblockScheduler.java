@@ -11,10 +11,6 @@ import java.util.Date;
 @Component
 public class TemplateUnblockScheduler {
 
-    //1 hour
-    final long executionDelayInMilliseconds = 3600000;
-    final long initialDelayInMilliseconds = 1000;
-
     private final TemplateRepository templateRepository;
 
     public TemplateUnblockScheduler(final TemplateRepository templateRepository) {
@@ -22,8 +18,8 @@ public class TemplateUnblockScheduler {
     }
 
     @Scheduled(
-            fixedDelay = executionDelayInMilliseconds,
-            initialDelay = initialDelayInMilliseconds
+            fixedDelayString = "${template.unblock-scheduler.execution-delay-in-millis}",
+            initialDelayString = "${template.unblock-scheduler.initial-delay-in-millis}"
     )
     @Transactional
     public void unlockTemplatesWithExpiredBlockTime() {

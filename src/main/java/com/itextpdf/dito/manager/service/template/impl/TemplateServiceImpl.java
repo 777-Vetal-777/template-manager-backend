@@ -13,7 +13,7 @@ import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFound
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.template.TemplateBlockedException;
+import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
@@ -345,11 +345,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findByEmail(userEmail);
         if (templateEntity.getBlockedAt() != null && currentUser != templateEntity.getBlockedBy()) {
-            throw new TemplateBlockedException(new StringBuilder().append("Template ")
-                    .append(templateEntity.getName())
-                    .append(" already blocked by user ")
-                    .append(templateEntity.getBlockedBy().getEmail())
-                    .toString());
+            throw new TemplateBlockedByOtherUserException(templateEntity.getName(), templateEntity.getBlockedBy().getEmail());
         }
         templateEntity.setBlockedAt(new Date());
         templateEntity.setBlockedBy(currentUser);
@@ -361,11 +357,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findByEmail(userEmail);
         if (currentUser != templateEntity.getBlockedBy()) {
-            throw new TemplateBlockedException(new StringBuilder().append("Template ")
-                    .append(templateEntity.getName())
-                    .append(" was blocked by other user ")
-                    .append(templateEntity.getBlockedBy().getEmail())
-                    .toString());
+            throw new TemplateBlockedByOtherUserException(templateName, templateEntity.getBlockedBy().getEmail());
         }
         templateEntity.setBlockedBy(null);
         templateEntity.setBlockedAt(null);
