@@ -112,7 +112,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	}
 
 	@Override
-	public Page<DataSampleEntity> list(final Pageable pageable, final long dataCollectionId, final DataSampleFilter filter, final String searchParam) {
+	public Page<DataSampleEntity> list(final Pageable pageable, final Long dataCollectionId, final DataSampleFilter filter, final String searchParam) {
 		throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
 		final Pageable pageWithSort = updateSort(pageable);
