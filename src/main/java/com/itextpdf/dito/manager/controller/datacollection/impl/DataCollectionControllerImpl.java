@@ -268,22 +268,29 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 	                principal.getName());
 
 	        return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
+	}	
+
+	@Override
+	public ResponseEntity<DataSampleDTO> createDataSampleNewVersion(final String dataCollectionName,
+			final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+		final String dataSampleName = dataSampleCreateRequestDTO.getName();
+		final String fileName = dataSampleCreateRequestDTO.getFileName();
+		final String data = dataSampleCreateRequestDTO.getSample();
+		final String comment = dataSampleCreateRequestDTO.getComment();
+		final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(dataSampleName, data, fileName,
+				principal.getName(), comment);
+		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
 	}
-	
 
-    @Override
-    public ResponseEntity<DataSampleDTO> create(final Principal principal, final String name, final String sample,
-                                                final String comment, final String fileName) {
-        final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(decodeBase64(name), sample, fileName, principal.getName(), comment);
-        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
-    }
+	@Override
+	public ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(final Pageable pageable,
+			final String dataCollectionName, final String name, final VersionFilter versionFilter,
+			final String searchParam) {
+		final String dataSampleName = decodeBase64(name);
+		final Page<FileVersionModel> dataSampleVersionEntities = dataSampleFileService.list(pageable, dataSampleName,
+				versionFilter, searchParam);
 
-    @Override
-    public ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(final Pageable pageable, final String name, final VersionFilter versionFilter, final String searchParam) {
-        final String dataSampleName = decodeBase64(name);
-        final Page<FileVersionModel> dataSampleVersionEntities = dataSampleFileService.list(pageable, dataSampleName, versionFilter, searchParam);
-
-        return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
-    }
+		return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
+	}
 
 }
