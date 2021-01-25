@@ -33,6 +33,6 @@ jpa:
       show_sql: true
       format_sql: true
 
-#sentry:
-#  dsn: ${DITO_MANAGER_SENTRY_DSN}
-#  environment: ${DITO_MANAGER_SENTRY_ENVIRONMENT}
+sentry:
+  dsn: ${DITO_MANAGER_SENTRY_DSN}
+  environment: ${DITO_MANAGER_SENTRY_ENVIRONMENT}
