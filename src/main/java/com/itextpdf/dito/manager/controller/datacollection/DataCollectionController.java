@@ -234,7 +234,6 @@ public interface DataCollectionController {
 			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {
 					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
 			@ApiResponse(responseCode = "409", description = "Invalid input or datasample already exists", content = @Content),
-
 			@ApiResponse(responseCode = "400", description = "Invalid data sample structure", content = @Content) })
 	ResponseEntity<DataSampleDTO> createDataSampleNewVersion(
 			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
