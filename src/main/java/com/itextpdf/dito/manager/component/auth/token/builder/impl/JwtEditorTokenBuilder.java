@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.auth.token.builder.impl;
 
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,11 @@ public class JwtEditorTokenBuilder extends JwtTokenBuilder {
     private String id;
     @Value("${security.jwt.editor-token.time-to-live}")
     private int timeToLive;
+
+    @PostConstruct
+    public void init() {
+        super.init();
+    }
 
     @Override
     protected String getIdAlias() {
