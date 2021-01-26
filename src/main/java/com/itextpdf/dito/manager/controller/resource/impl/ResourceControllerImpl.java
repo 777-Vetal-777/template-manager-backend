@@ -139,7 +139,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         checkFileExtensionIsSupported(resourceType, file);
         checkFileSizeIsNotExceededLimit(resourceType, file.getSize());
         final byte[] data = getFileBytes(file);
-        final String originalFilename = (resourceType == IMAGE ? file.getOriginalFilename() : "stylesheet.css");
+        final String originalFilename = file.getOriginalFilename();
         final ResourceEntity resourceEntity = resourceService
                 .createNewVersion(name, resourceType, data, originalFilename, principal.getName(), comment);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
@@ -186,7 +186,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         checkFileExtensionIsSupported(resourceType, multipartFile);
         checkFileSizeIsNotExceededLimit(resourceType, multipartFile.getSize());
         final byte[] data = getFileBytes(multipartFile);
-        final String originalFilename = (resourceType == IMAGE ? multipartFile.getOriginalFilename() : "stylesheet.css");
+        final String originalFilename = multipartFile.getOriginalFilename();
 
         final ResourceEntity resourceEntity = resourceService
                 .create(name, resourceType, data, originalFilename, principal.getName());
