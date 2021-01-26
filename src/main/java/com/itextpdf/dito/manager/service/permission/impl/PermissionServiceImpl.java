@@ -42,16 +42,6 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public List<PermissionEntity> defaultPermissions() {
         final List<PermissionEntity> permissionEntities = permissionRepository.findByNameIn(defaultPermissionNames);
-        List<String> list = new ArrayList<>();
-        for (PermissionEntity permissionEntity : permissionEntities) {
-            list.add(permissionEntity.getName());
-        }
-       for(String str2:defaultPermissionNames){
-         if(!list.contains(str2)){
-             System.out.println(str2);
-         }
-       }
-
         if (permissionEntities.size() != defaultPermissionNames.size()) {
             throw new IllegalStateException("De-synchronization of default permission names between jvm and database.");
         }
