@@ -29,12 +29,6 @@ import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
-
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.validation.Valid;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +38,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.FONT;
 import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.IMAGE;
 import static com.itextpdf.dito.manager.entity.resource.FontTypeEnum.BOLD;
@@ -129,8 +130,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String comment,
-                                              final String type, final MultipartFile file) {
+    public ResponseEntity<ResourceDTO> createVersion(final Principal principal, final String name, final String comment,
+                                                     final String type, final MultipartFile file) {
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -138,8 +139,9 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         checkFileExtensionIsSupported(resourceType, file);
         checkFileSizeIsNotExceededLimit(resourceType, file.getSize());
         final byte[] data = getFileBytes(file);
+        final String originalFilename = (resourceType == IMAGE ? file.getOriginalFilename() : "stylesheet.css");
         final ResourceEntity resourceEntity = resourceService
-                .createNewVersion(name, resourceType, data, file.getOriginalFilename(), principal.getName(), comment);
+                .createNewVersion(name, resourceType, data, originalFilename, principal.getName(), comment);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 

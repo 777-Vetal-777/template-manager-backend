@@ -1,11 +1,15 @@
 package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
+import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
+import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
+import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
@@ -258,6 +262,87 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldCreateStylesheetVersionsAndReturnThem() throws Exception {
+        final String stylesheetName = "test-stylesheet";
+        final String stylesheetType = "STYLESHEET";
+        final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
+        final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
+        final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", ".h1 {\n \tfont-style: Helvetica\n }".getBytes());
+
+        //create test INSTANCE
+        InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper
+                .readValue(new File("src/test/resources/test-data/resources/instances-create-request.json"),
+                        InstancesRememberRequestDTO.class);
+
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        //create test WORKSPACE
+        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = objectMapper
+                .readValue(new File("src/test/resources/test-data/resources/workspace-create-request.json"),
+                        WorkspaceCreateRequestDTO.class);
+
+        mockMvc.perform(post(WorkspaceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(workspaceCreateRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        //create TEMPLATE
+
+        TemplateCreateRequestDTO templateCreateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/template-create-request.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(templateCreateRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        final Optional<TemplateEntity> template = templateRepository.findByName(templateCreateRequestDTO.getName());
+        assertTrue(template.isPresent());
+        final TemplateEntity existingTemplate = template.get();
+
+        //create resource
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
+                .file(FILE_PART)
+                .file(NAME_PART)
+                .file(TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(stylesheetName, ResourceTypeEnum.STYLESHEET);
+        assertTrue(createdResource.isPresent());
+
+        final ResourceEntity createdResourceEntity = createdResource.get();
+        final ResourceFileEntity latestResourceFile = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceEntity.getId());
+        existingTemplate.getLatestFile().getResourceFiles().addAll(Collections.singleton(latestResourceFile));
+        templateFileRepository.save(existingTemplate.getLatestFile());
+
+        //create new versions of resource
+        for (int i = 0; i < AMOUNT_VERSIONS; i++) {
+            mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT).file(NAME_PART).file(FILE_PART)
+                    .file(TYPE_PART).file(getUpdateTemplateBooleanPart(true))
+                    .contentType(MediaType.MULTIPART_FORM_DATA));
+        }
+        mockMvc.perform(
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
+                        STYLESHEETS, Base64.getEncoder().encodeToString(stylesheetName.getBytes()))).andExpect(status().isOk())
+                .andExpect(jsonPath("empty").value(false))
+                .andExpect(jsonPath("content").value(hasSize(6)))
+                .andExpect(jsonPath("$.content[0].version").value(1))
+                .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("$.content[0].comment").isEmpty())
+                .andExpect(jsonPath("$.content[0].stage").value("Development"))
+                .andExpect(jsonPath("$.content[1].version").value(2))
+                .andExpect(jsonPath("$.content[2].version").value(3))
+                .andExpect(jsonPath("$.content[3].version").value(4))
+                .andExpect(jsonPath("$.content[4].version").value(5))
+                .andExpect(jsonPath("$.content[4].stage").value("Development"));
+    }
+
+
+    @Test
     void shouldCreateVersionsAndReturnThem() throws Exception {
         final URI createResourceURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode()
                 .toUri();
@@ -355,6 +440,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         final Optional<DataCollectionEntity> existingDataCollectionEntity = dataCollectionRepository.findByName(DATA_COLLECTION_NAME);
         assertTrue(existingDataCollectionEntity.isPresent());
+
         //CREATE TEMPLATE
         final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         request.setDataCollectionName(DATA_COLLECTION_NAME);
