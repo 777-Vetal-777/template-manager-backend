@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.resource.impl;
 
+import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -10,6 +11,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
+import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
@@ -26,18 +28,6 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +35,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -88,6 +92,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private final UserService userService;
     private final RoleService roleService;
     private final PermissionService permissionService;
+    private final Map<ResourceTypeEnum, ContentValidator> contentValidators = new HashMap<>();
 
     public ResourceServiceImpl(
             final ResourceRepository resourceRepository,
@@ -96,7 +101,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             final UserService userService,
             final RoleService roleService,
             final PermissionService permissionService,
-            final TemplateService templateService) {
+            final TemplateService templateService,
+            final List<ContentValidator> contentValidators) {
         this.resourceRepository = resourceRepository;
         this.resourceFileRepository = resourceFileRepository;
         this.templateRepository = templateRepository;
@@ -104,12 +110,13 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         this.roleService = roleService;
         this.permissionService = permissionService;
         this.templateService = templateService;
+        this.contentValidators.putAll(contentValidators.stream().collect(Collectors.toMap(ContentValidator::getType, Function.identity())));
     }
 
     @Override
     @Transactional(rollbackOn = Exception.class)
     public ResourceEntity createNewFont(final String email, final String resourceName,
-            final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
+                                        final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
         throwExceptionIfResourceExists(resourceName, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
@@ -131,10 +138,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceEntity create(final String name, final ResourceTypeEnum type, final byte[] data,
-            final String fileName, final String email) {
+                                 final String fileName, final String email) {
         final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(name, type);
         if (resourceExists) {
             throw new ResourceAlreadyExistsException(name);
+        }
+
+        if (contentValidators.containsKey(type) && !contentValidators.get(type).isValid(data)) {
+            throw new InvalidResourceContentException();
         }
 
         final UserEntity userEntity = userService.findByEmail(email);
@@ -157,7 +168,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Override
     @Transactional(rollbackOn = Exception.class)
     public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data,
-            final String fileName, final String email, final String comment) {
+                                           final String fileName, final String email, final String comment) {
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
@@ -170,6 +181,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
                         retrieveEntityAppliedRoles(existingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
                 break;
+        }
+
+        if (contentValidators.containsKey(type) && !contentValidators.get(type).isValid(data)) {
+            throw new InvalidResourceContentException();
         }
 
         final Long oldVersion = resourceFileRepository
@@ -250,8 +265,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceEntity applyRole(final String resourceName, final ResourceTypeEnum resourceType,
-            final String roleName,
-            final List<String> permissions) {
+                                    final String roleName,
+                                    final List<String> permissions) {
         checkIfPermissionsAllowedForResourceType(permissions, resourceType);
 
         final ResourceEntity resourceEntity = getResource(resourceName, resourceType);
@@ -282,7 +297,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     private void checkIfPermissionsAllowedForResourceType(final List<String> permissions,
-            final ResourceTypeEnum resourceTypeEnum) {
+                                                          final ResourceTypeEnum resourceTypeEnum) {
         switch (resourceTypeEnum) {
             case IMAGE:
                 throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES);
@@ -297,7 +312,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     private void throwExceptionIfPermissionIsNotPresented(final List<String> permissions,
-            final List<String> allowedPermissions) {
+                                                          final List<String> allowedPermissions) {
         for (final String permission : permissions) {
             if (!allowedPermissions.contains(permission)) {
                 throw new PermissionIsNotAllowedForResourceTypeException(permission);
@@ -321,7 +336,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public Page<RoleEntity> getRoles(final Pageable pageable, final String resourceName, final ResourceTypeEnum type,
-            final RoleFilter roleFilter) {
+                                     final RoleFilter roleFilter) {
         final ResourceEntity resourceEntity = getResource(resourceName, type);
         return roleService.getSlaveRolesByResource(pageable, roleFilter, resourceEntity);
     }
@@ -350,7 +365,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 ? resourceRepository
                 .filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
                 : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate,
-                        modifiedOnEndDate, searchParam.toLowerCase());
+                modifiedOnEndDate, searchParam.toLowerCase());
     }
 
     @Override
@@ -433,7 +448,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     private ResourceFileEntity createFileEntry(final UserEntity userEntity, final ResourceEntity resourceEntity,
-            final byte[] file, final String fileName, final String fontName) {
+                                               final byte[] file, final String fileName, final String fontName) {
         final ResourceFileEntity fileEntity = new ResourceFileEntity();
         fileEntity.setResource(resourceEntity);
         fileEntity.setVersion(1L);
