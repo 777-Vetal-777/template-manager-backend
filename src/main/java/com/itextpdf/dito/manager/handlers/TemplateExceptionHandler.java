@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class TemplateExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(TemplateBlockedByOtherUserException.class)
-    public ResponseEntity<ErrorResponseDTO> templateBlockedExceptionHandler(final TemplateBlockedByOtherUserException ex) {
+    public ResponseEntity<ErrorResponseDTO> templateBlockedByOtherUserException(final TemplateBlockedByOtherUserException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.FORBIDDEN);
     }
 }
