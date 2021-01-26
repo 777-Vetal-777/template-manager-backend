@@ -3,8 +3,12 @@ package com.itextpdf.dito.manager.entity.datacollection;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import org.hibernate.annotations.JoinFormula;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,11 +26,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.hibernate.annotations.JoinFormula;
 
 @Entity
 @Table(name = "data_collection")
@@ -79,7 +79,8 @@ public class DataCollectionEntity {
             "SELECT max(log.id) " +
             "FROM {h-schema}data_collection_log log " +
             "WHERE log.data_collection_id = id and log.date=(" +
-            "select max(logLatest.date) from {h-schema}data_collection_log logLatest where logLatest.data_collection_id = id)" +
+            "select max(logLatest.date) from {h-schema}data_collection_log logLatest where logLatest.data_collection_id = id)"
+            +
             ")")
     private DataCollectionLogEntity lastDataCollectionLog;
 
@@ -91,6 +92,9 @@ public class DataCollectionEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id"))
     private Set<RoleEntity> appliedRoles = new HashSet<>();
+
+    @OneToMany(mappedBy = "dataCollection")
+    private Collection<DataSampleEntity> dataSamples;
 
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
         return dataCollectionLog;
@@ -190,5 +194,14 @@ public class DataCollectionEntity {
 
     public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
         this.appliedRoles = appliedRoles;
+    }
+
+    public Collection<DataSampleEntity> getDataSamples() {
+        return dataSamples;
+    }
+
+    public void setDataSamples(
+            Collection<DataSampleEntity> dataSamples) {
+        this.dataSamples = dataSamples;
     }
 }
