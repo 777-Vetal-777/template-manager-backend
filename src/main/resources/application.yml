@@ -62,3 +62,7 @@ template:
 data-collection:
   json:
       size-limit: 8388608
+
+sentry:
+  dsn: ${DITO_MANAGER_SENTRY_DSN:}
+  environment: ${DITO_MANAGER_SENTRY_ENVIRONMENT:}
