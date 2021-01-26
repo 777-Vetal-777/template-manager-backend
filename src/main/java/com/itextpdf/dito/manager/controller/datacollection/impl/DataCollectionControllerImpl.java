@@ -43,7 +43,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -110,7 +109,6 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    @PreAuthorize("hasAuthority('E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
     public ResponseEntity<DataCollectionDTO> create(final Principal principal, final String name, final String dataCollectionType, final MultipartFile multipartFile, final String comment) {
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
@@ -219,22 +217,23 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-	public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
-		final String dataSampleName = dataSampleCreateRequestDTO.getName();
-		final String fileName = dataSampleCreateRequestDTO.getFileName();
-		final String data = dataSampleCreateRequestDTO.getSample();
-		final String comment = dataSampleCreateRequestDTO.getComment();
-		final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
-		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
-	}
+    public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+        final String dataSampleName = dataSampleCreateRequestDTO.getName();
+        final String fileName = dataSampleCreateRequestDTO.getFileName();
+        final String data = dataSampleCreateRequestDTO.getSample();
+        final String comment = dataSampleCreateRequestDTO.getComment();
+        final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
+    }
 
-	@Override
-	public ResponseEntity<Page<DataSampleDTO>> list(final String dataCollectionName, final Pageable pageable,
-			final DataSampleFilter filter, final String searchParam) {
-		 final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
-		return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, dataCollection.getId(),filter, searchParam)),
-				HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Page<DataSampleDTO>> list(final String dataCollectionName, final Pageable pageable,
+                                                    final DataSampleFilter filter, final String searchParam) {
+        final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
+        return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, dataCollection.getId(), filter, searchParam)),
+                HttpStatus.OK);
+    }
+
     @Override
     public ResponseEntity<List<DataSampleDTO>> listDataSamples(final String dataCollectionName) {
         final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
@@ -243,61 +242,61 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     }
 
-	@Override
-	public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {
-		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))),
-				HttpStatus.OK);
-	}
-    
-	@Override
-	public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName,
-			final List<String> dataSampleNames, final Principal principal) {
-		dataSampleService.delete(dataSampleNames);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))),
+                HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Void> deleteAllDataSamples(final String dataCollectionName, final Principal principal) {
-		dataSampleService.delete(dataCollectionService.get(decodeBase64(dataCollectionName)));
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName,
+                                                     final List<String> dataSampleNames, final Principal principal) {
+        dataSampleService.delete(dataSampleNames);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<DataSampleDTO> setDataSampleAsDefault(final String dataCollectionName, final String dataSampleName,
-			final Principal principal) {
-		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.setAsDefault(decodeBase64(dataSampleName))), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Void> deleteAllDataSamples(final String dataCollectionName, final Principal principal) {
+        dataSampleService.delete(dataCollectionService.get(decodeBase64(dataCollectionName)));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<DataSampleDTO> updateDataSample(final String dataCollectionName, final String dataSampleName,
-			@Valid final DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, final Principal principal) {
-		  final DataSampleEntity entity = dataSampleService.update(decodeBase64(dataSampleName), dataSampleMapper.map(dataSampleUpdateRequestDTO),
-	                principal.getName());
+    @Override
+    public ResponseEntity<DataSampleDTO> setDataSampleAsDefault(final String dataCollectionName, final String dataSampleName,
+                                                                final Principal principal) {
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.setAsDefault(decodeBase64(dataSampleName))), HttpStatus.OK);
+    }
 
-	        return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
-	}	
+    @Override
+    public ResponseEntity<DataSampleDTO> updateDataSample(final String dataCollectionName, final String dataSampleName,
+                                                          @Valid final DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, final Principal principal) {
+        final DataSampleEntity entity = dataSampleService.update(decodeBase64(dataSampleName), dataSampleMapper.map(dataSampleUpdateRequestDTO),
+                principal.getName());
 
-	@Override
-	public ResponseEntity<DataSampleDTO> createDataSampleNewVersion(final String dataCollectionName,
-			final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
-		final String dataSampleName = dataSampleCreateRequestDTO.getName();
-		final String fileName = dataSampleCreateRequestDTO.getFileName();
-		final String data = dataSampleCreateRequestDTO.getSample();
-		final String comment = dataSampleCreateRequestDTO.getComment();
-		final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(dataSampleName, data, fileName,
-				principal.getName(), comment);
-		return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
-	}
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(final Pageable pageable,
-			final String dataCollectionName, final String name, final VersionFilter versionFilter,
-			final String searchParam) {
-		final String dataSampleName = decodeBase64(name);
-		final Page<FileVersionModel> dataSampleVersionEntities = dataSampleFileService.list(pageable, dataSampleName,
-				versionFilter, searchParam);
+    @Override
+    public ResponseEntity<DataSampleDTO> createDataSampleNewVersion(final String dataCollectionName,
+                                                                    final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+        final String dataSampleName = dataSampleCreateRequestDTO.getName();
+        final String fileName = dataSampleCreateRequestDTO.getFileName();
+        final String data = dataSampleCreateRequestDTO.getSample();
+        final String comment = dataSampleCreateRequestDTO.getComment();
+        final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(dataSampleName, data, fileName,
+                principal.getName(), comment);
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
+    }
 
-		return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(final Pageable pageable,
+                                                                      final String dataCollectionName, final String name, final VersionFilter versionFilter,
+                                                                      final String searchParam) {
+        final String dataSampleName = decodeBase64(name);
+        final Page<FileVersionModel> dataSampleVersionEntities = dataSampleFileService.list(pageable, dataSampleName,
+                versionFilter, searchParam);
+
+        return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
+    }
 
 }

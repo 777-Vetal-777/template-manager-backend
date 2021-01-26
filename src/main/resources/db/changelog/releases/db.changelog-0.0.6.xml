@@ -105,14 +105,13 @@
 		</addColumn>
 	</changeSet>
 
-    <changeSet id="013-add-blocked-by-column-to-template-table" author="Ivan_Semenov">
-        <addColumn tableName="template">
-            <column name="blocked_by" type="bigint">
-                <constraints foreignKeyName="fk_template_to_user"
-                             references="user(id)"/>
-            </column>
-        </addColumn>
-    </changeSet>
+	<changeSet id="013-add-blocked-by-column-to-template-table"	author="Ivan_Semenov">
+		<addColumn tableName="template">
+			<column name="blocked_by" type="bigint">
+				<constraints foreignKeyName="fk_template_to_user" references="user(id)" />
+			</column>
+		</addColumn>
+	</changeSet>
 
     <changeSet id="014-add-e8-us65-2-roll-back-of-the-resource-stylesheet-default-permission" author="Sergey_Nemets">
         <insert tableName="permission">
@@ -220,5 +219,4 @@
 			<where>name='E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD'</where>
 		</update>
 	</changeSet>
-	
 </databaseChangeLog>

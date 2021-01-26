@@ -1,0 +1,251 @@
+package com.itextpdf.dito.manager.component.security.impl;
+
+import com.itextpdf.dito.manager.component.security.PermissionHandler;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.RoleEntity;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
+import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.resource.ResourceService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
+import com.itextpdf.dito.manager.service.user.UserService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
+
+@Component
+public class PermissionHandlerImpl implements PermissionHandler {
+
+    private final Map<TemplateTypeEnum, Predicate<String>> templateCommonPermissionsByType = Map.of(
+            TemplateTypeEnum.STANDARD, "E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals,
+            TemplateTypeEnum.HEADER, "E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"::equals,
+            TemplateTypeEnum.FOOTER, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals);
+
+    private final Map<ResourceTypeEnum, Predicate<String>> resourceCommonPermissionsByType = Map.of(
+            ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,
+            ResourceTypeEnum.FONT, "E8_US57_VIEW_RESOURCE_METADATA_FONT"::equals,
+            ResourceTypeEnum.STYLESHEET, "E8_US60_VIEW_RESOURCE_METADATA_STYLESHEET"::equals);
+
+    private final Map<ResourceTypeEnum, Predicate<String>> resourceCreatePermissionsByType = Map.of(
+            ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,
+            ResourceTypeEnum.STYLESHEET, "E8_US60_VIEW_RESOURCE_METADATA_STYLESHEET"::equals);
+
+    private final Map<ResourceTypeEnum, Predicate<String>> resourceEditPermissionsByType = Map.of(
+            ResourceTypeEnum.IMAGE, "E8_US55_EDIT_RESOURCE_METADATA_IMAGE"::equals,
+            ResourceTypeEnum.FONT, "E8_US58_EDIT_RESOURCE_METADATA_FONT"::equals,
+            ResourceTypeEnum.STYLESHEET, "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET"::equals
+    );
+
+    private final Map<ResourceTypeEnum, Predicate<String>> resourceCreateVersionPermissionsByType = Map.of(
+            ResourceTypeEnum.IMAGE, "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE"::equals,
+            ResourceTypeEnum.STYLESHEET, "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET"::equals
+    );
+
+    private final UserService userService;
+    private final TemplateService templateService;
+    private final DataCollectionService dataCollectionService;
+    private final ResourceService resourceService;
+
+    public PermissionHandlerImpl(final UserService userService,
+                                 final TemplateService templateService,
+                                 final DataCollectionService dataCollectionService,
+                                 final ResourceService resourceService) {
+        this.userService = userService;
+        this.templateService = templateService;
+        this.dataCollectionService = dataCollectionService;
+        this.resourceService = resourceService;
+    }
+
+    //  Resources
+    @Override
+    public boolean checkResourceCommonPermissionByType(final Authentication authentication,
+                                                       final String type) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(resourceCommonPermissionsByType.get(fromPluralNameOrParse(type)));
+    }
+
+    @Override
+    public boolean checkResourceCreateVersionPermissionByType(final Authentication authentication,
+                                                              final String type) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(resourceCreateVersionPermissionsByType.get(fromPluralNameOrParse(type)));
+    }
+
+    @Override
+    public boolean checkResourceCreatePermissionByType(final Authentication authentication,
+                                                       final String type) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(resourceCreatePermissionsByType.get(fromPluralNameOrParse(type)));
+    }
+
+
+    @Override
+    public boolean checkResourceDeletePermissionByType(final Authentication authentication,
+                                                       final String type) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("E8_US66_DELETE_RESOURCE_IMAGE"::equals);
+    }
+
+    @Override
+    public boolean checkResourceEditPermissionByType(final Authentication authentication,
+                                                     final String type) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(resourceEditPermissionsByType.get(fromPluralNameOrParse(type)));
+    }
+
+    //  Templates
+    @Override
+    public boolean checkTemplateCommonPermissionByType(final Authentication authentication,
+                                                       final String type) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(templateCommonPermissionsByType.get(type));
+    }
+
+    @Override
+    public boolean checkTemplateCommonPermissionByType(final Authentication authentication,
+                                                       final TemplateCreateRequestDTO request) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(templateCommonPermissionsByType.get(request.getType()));
+    }
+
+    private ResourceTypeEnum fromPluralNameOrParse(final String type) {
+        return Optional.ofNullable(ResourceTypeEnum.getFromPluralName(type))
+                .orElseGet(() -> ResourceTypeEnum.valueOf(type));
+    }
+
+    @Override
+    public boolean checkResourceCreateVersionPermissions(final String email, final String resourceType, final String resourceName) {
+        final Map<ResourceTypeEnum, String> createNewVersionResourcePermissions =
+                Map.of(ResourceTypeEnum.IMAGE, "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE",
+                        ResourceTypeEnum.STYLESHEET, "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET",
+                        ResourceTypeEnum.FONT, "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT");
+        final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
+
+        return checkResourcePermissions(email, type, resourceName, createNewVersionResourcePermissions.get(type));
+    }
+
+    @Override
+    public boolean checkResourceEditMetadataPermissions(final String email, final String resourceType, final String resourceName) {
+        final Map<ResourceTypeEnum, String> editMetadataResourcePermissions =
+                Map.of(ResourceTypeEnum.IMAGE, "E8_US55_EDIT_RESOURCE_METADATA_IMAGE",
+                        ResourceTypeEnum.STYLESHEET, "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET",
+                        ResourceTypeEnum.FONT, "E8_US58_EDIT_RESOURCE_METADATA_FONT");
+
+        final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
+
+        return checkResourcePermissions(email, type, resourceName, editMetadataResourcePermissions.get(type));
+    }
+
+    @Override
+    public boolean checkResourceDeletePermissions(final String email, final String resourceType, final String resourceName) {
+        final Map<ResourceTypeEnum, String> deleteResourcePermissions =
+                Map.of(ResourceTypeEnum.IMAGE, "E8_US66_DELETE_RESOURCE_IMAGE",
+                        ResourceTypeEnum.STYLESHEET, "E8_US66_2_DELETE_RESOURCE_STYLESHEET",
+                        ResourceTypeEnum.FONT, "E8_US66_1_DELETE_RESOURCE_FONT");
+        final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
+
+        return checkResourcePermissions(email, type, resourceName, deleteResourcePermissions.get(type));
+    }
+
+
+    private boolean checkResourcePermissions(final String email, final ResourceTypeEnum resourceType, final String resourceName, final String checkingPermission) {
+        final ResourceEntity resourceEntity = resourceService.getResource(resourceName, resourceType);
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                retrieveEntityAppliedRoles(resourceEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
+    }
+
+    @Override
+    public boolean checkDataCollectionPermissions(final String email, final String dataCollectionName, final String checkingPermission) {
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(dataCollectionName);
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                retrieveEntityAppliedRoles(dataCollectionEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
+    }
+
+    @Override
+    public boolean checkTemplatePermissions(final UserEntity userEntity, final TemplateEntity templateEntity, final String checkingPermission) {
+        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                retrieveEntityAppliedRoles(templateEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
+    }
+
+    @Override
+    public boolean checkTemplatePermissions(final String email, final String templateName, final String checkingPermission) {
+        final TemplateEntity templateEntity = templateService.get(templateName);
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        return checkTemplatePermissions(userEntity, templateEntity, checkingPermission);
+    }
+
+    private Set<RoleEntity> retrieveEntityAppliedRoles(final Set<RoleEntity> entityAppliedRoles, final Set<RoleEntity> userMasterRoles) {
+        final Map<String, RoleEntity> appliedRoles = entityAppliedRoles.stream().collect(toMap(RoleEntity::getName, role -> role));
+        userMasterRoles.forEach(role -> appliedRoles.putIfAbsent(role.getName(), role));
+        return appliedRoles.values().stream().collect(Collectors.toSet());
+    }
+
+    private Set<String> retrieveSetOfRoleNames(final Set<RoleEntity> roleEntities) {
+        return roleEntities.stream().map(RoleEntity::getName).collect(Collectors.toSet());
+    }
+
+    private boolean isUserAdmin(final Set<String> userRoleNames) {
+        return userRoleNames.contains("GLOBAL_ADMINISTRATOR") || userRoleNames.contains("ADMINISTRATOR");
+    }
+
+    boolean checkUserPermissions(final UserEntity userEntity,
+                                 final Set<RoleEntity> entityAppliedRoles,
+                                 final String requiredPermission) {
+        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                retrieveEntityAppliedRoles(entityAppliedRoles, userEntity.getRoles()), requiredPermission);
+    }
+
+    private boolean checkUserPermissions(final Set<String> userRoleNames,
+                                         final Set<RoleEntity> entityAppliedRoles,
+                                         final String requiredPermission) {
+        boolean isPermissionRolePresented = false;
+
+        if (!isUserAdmin(userRoleNames) && !entityAppliedRoles.isEmpty()) {
+            final Set<String> entityAppliedRolesWithRequiredPermission = retrieveSetOfRoleNamesFilteredByPermission(entityAppliedRoles, requiredPermission);
+            for (final String role : entityAppliedRolesWithRequiredPermission) {
+                if (userRoleNames.contains(role)) {
+                    isPermissionRolePresented = true;
+                    break;
+                }
+            }
+        } else {
+            isPermissionRolePresented = true;
+        }
+
+        return isPermissionRolePresented;
+    }
+
+    private Set<String> retrieveSetOfRoleNamesFilteredByPermission(final Set<RoleEntity> roleEntities,
+                                                                   final String permission) {
+        return roleEntities.stream().filter(roleEntity -> roleEntity.getPermissions().stream()
+                .anyMatch(permissionEntity -> permissionEntity.getName().equals(permission)))
+                .map(RoleEntity::getName).collect(
+                        Collectors.toSet());
+    }
+}

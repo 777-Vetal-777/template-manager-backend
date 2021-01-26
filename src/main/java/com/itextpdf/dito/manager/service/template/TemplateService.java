@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -23,10 +24,10 @@ public interface TemplateService {
 
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
 
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#email, #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     TemplateEntity createNewVersion(String name, byte[] data, String email, String comment);
 
-    TemplateEntity createNewVersion(String name, byte[] data, String email, String comment, String templateName);
-
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #fileEntityToCopy.getTemplate(), 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
     Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);

@@ -112,7 +112,7 @@ public interface ResourceController {
                                                      @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(path = RESOURCE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@permissionHandler.checkResourceCreateVersionPermissionByType(authentication, #type)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceCreateVersionPermissions(#principal.name, #type, #name)")
     @Operation(summary = "Create new version of resource", description = "Make a new version of a resource: upload a new resource and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -148,7 +148,7 @@ public interface ResourceController {
                                              @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
     @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
-    @PreAuthorize("@permissionHandler.checkResourceCommonPermissionByType(authentication, #type)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceCommonPermissionByType(authentication, #type)")
     @Operation(summary = "Get resource", description = "Get resource",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> get(
@@ -165,7 +165,7 @@ public interface ResourceController {
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@permissionHandler.checkResourceCommonPermissionByType(authentication, #type)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceCommonPermissionByType(authentication, #type)")
     @Operation(summary = "Save new resource.", description = "Api for loading images, fonts, stylesheets.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -181,7 +181,7 @@ public interface ResourceController {
                                        @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @PutMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("@permissionHandler.checkResourceEditPermissionByType(authentication, #updateRequestDTO.type.pluralName)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceEditMetadataPermissions(#principal.name, #updateRequestDTO.type.pluralName, new String(T(java.util.Base64).getUrlDecoder().decode(#name)))")
     @Operation(summary = "Update resource", description = "Update resource metadata (name, description)", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Resource updated successfully", content = {
@@ -219,7 +219,7 @@ public interface ResourceController {
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
     @DeleteMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
-    @PreAuthorize("@permissionHandler.checkResourceDeletePermissionByType(authentication, #type)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceDeletePermissions(#principal.getName(), #type, new String(T(java.util.Base64).getUrlDecoder().decode(#name)))")
     @Operation(summary = "Delete resource", description = "Delete resource by name and type - the resource cannot be deleted if the resource version is used in the template.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

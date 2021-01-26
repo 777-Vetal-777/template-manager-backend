@@ -180,9 +180,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity existingTemplate = findByName(name);
         final UserEntity userEntity = userService.findByEmail(userEmail);
 
-        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(existingTemplate.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_TEMPLATE_METADATA);
-
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
             existingTemplate.setName(updatedTemplateEntity.getName());
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
@@ -209,15 +206,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String templateName) {
-        final TemplateEntity templateEntity = createNewVersion(name, data, email, comment);
-        if (templateName != null) {
-            templateEntity.setName(templateName);
-        }
-        return templateRepository.save(templateEntity);
-    }
-
-    @Override
     public TemplateEntity createNewVersionAsCopy(final TemplateFileEntity fileEntityToCopy,
                                                  final UserEntity userEntity,
                                                  final String comment) {
@@ -235,9 +223,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                             final byte[] data,
                                             final String comment,
                                             final Long newVersion) {
-        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(existingTemplateEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_TEMPLATE);
-
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
         final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, newVersion, fileEntityToCopyDependencies);
@@ -287,9 +272,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity userEntity = userService.findByEmail(email);
 
-        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(templateEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS);
-
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, templateEntity);
         if (slaveRoleEntity == null) {
             // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
@@ -319,9 +301,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     public TemplateEntity detachRole(final String templateName, final String roleName, final String email) {
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity userEntity = userService.findByEmail(email);
-
-        checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(templateEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS);
 
         final RoleEntity roleEntity = roleService.getSlaveRole(roleName, templateEntity);
 
