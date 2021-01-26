@@ -1,0 +1,37 @@
+package com.itextpdf.dito.manager.integration.editor.mapper.datasample.impl;
+
+import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor.DataType;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import com.itextpdf.dito.manager.integration.editor.mapper.datasample.DataSampleDescriptorMapper;
+
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DataSampleDescriptorMapperImpl implements DataSampleDescriptorMapper {
+    @Override
+    public DataSampleDescriptor map(final DataSampleEntity entity) {
+        final DataSampleDescriptor result;
+        final String name = entity.getName();
+        final String encodedName = encode(name);
+        result = new DataSampleDescriptor(encodedName);
+        result.setDisplayName(name);
+        result.setDataType(DataType.JSON);
+        result.setCollectionIdList(Collections.singletonList(encode(entity.getDataCollection().getName())));
+        return result;
+    }
+
+    @Override
+    public List<DataSampleDescriptor> map(final Collection<DataSampleEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
+    }
+
+    private String encode(final String name) {
+        return Base64.getUrlEncoder().encodeToString(name.getBytes());
+    }
+}

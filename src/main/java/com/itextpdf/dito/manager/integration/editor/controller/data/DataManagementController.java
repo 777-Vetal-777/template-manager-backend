@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration.editor.controller.data;
 import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor;
 
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +25,12 @@ public interface DataManagementController {
     InputStream fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @PutMapping(DATA_SAMPLE_URL)
-    DataSampleDescriptor createOrUpdate(@PathVariable("sample-id") String dataSampleId,
+    DataSampleDescriptor createOrUpdate(Principal principal, @PathVariable("sample-id") String dataSampleId,
             @RequestPart DataSampleDescriptor descriptor, @RequestPart InputStream data);
 
     @PostMapping(CREATE_DATA_SAMPLE_URL)
-    DataSampleDescriptor add(@RequestPart DataSampleDescriptor descriptor, @RequestPart InputStream data);
+    DataSampleDescriptor add(Principal principal, @RequestPart DataSampleDescriptor descriptor,
+            @RequestPart InputStream data);
 
     @DeleteMapping(DATA_SAMPLE_URL)
     DataSampleDescriptor deleteDataSampleById(@PathVariable("sample-id") String dataSampleId);

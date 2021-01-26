@@ -20,7 +20,7 @@ public interface DataSampleService {
 
     DataSampleEntity createNewVersion(String name, String data, String fileName, String email, String comment);
 
-	void delete(List<String> dataSamplesList);
+    List<DataSampleEntity> delete(List<String> dataSamplesList);
 
 	void delete(DataCollectionEntity dataCollectionEntity);
     
