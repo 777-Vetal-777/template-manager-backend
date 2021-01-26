@@ -1,0 +1,8 @@
+{
+  "instances":[
+    {
+      "name": "resource_test_instance",
+      "socket": "localhost:9999"
+    }
+  ]
+}
