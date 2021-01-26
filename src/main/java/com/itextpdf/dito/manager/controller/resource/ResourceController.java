@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -100,6 +101,7 @@ public interface ResourceController {
 
 
     @GetMapping(RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E8_US_64_RESOURCE_VERSIONS_HISTORY_IMAGE', 'E8_US101_RESOURCE_NAVIGATION_MENU')")
     @Operation(summary = "Get a list of versions of resource by name.", description = "Get a list of resource versions using the resource name and resource type, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<FileVersionDTO>> getVersions(Principal principal,
@@ -110,6 +112,7 @@ public interface ResourceController {
                                                      @Parameter(description = "Universal search string which filter dependencies names.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(path = RESOURCE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionHandler.checkResourceCreateVersionPermissionByType(authentication, #type)")
     @Operation(summary = "Create new version of resource", description = "Make a new version of a resource: upload a new resource and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -125,6 +128,7 @@ public interface ResourceController {
                                               @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", required = true, style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @GetMapping(RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E8_US69_TABLE_OF_THE_RESOURCE_DEPENDENCIES_IMAGE', 'E8_US101_RESOURCE_NAVIGATION_MENU')")
     @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving resource dependencies page using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about one resource dependencies is prepared according to the specified conditions.")
@@ -136,6 +140,7 @@ public interface ResourceController {
                                              @ParameterObject DependencyFilter resourceDependencyFilter);
 
     @GetMapping(RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E8_US69_TABLE_OF_THE_RESOURCE_DEPENDENCIES_IMAGE', 'E8_US101_RESOURCE_NAVIGATION_MENU')")
     @Operation(summary = "Get a list of dependencies of one resource", description = "Retrieving list of information about resource dependencies.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about resource dependencies")
@@ -143,6 +148,7 @@ public interface ResourceController {
                                              @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
     @GetMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
+    @PreAuthorize("@permissionHandler.checkResourceCommonPermissionByType(authentication, #type)")
     @Operation(summary = "Get resource", description = "Get resource",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> get(
@@ -150,6 +156,7 @@ public interface ResourceController {
             @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('E8_US52_TABLE_OF_RESOURCES', 'E8_US101_RESOURCE_NAVIGATION_MENU')")
     @Operation(summary = "Get resource list", description = "Get available resources",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<ResourceDTO>> list(Pageable pageable,
@@ -158,6 +165,7 @@ public interface ResourceController {
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionHandler.checkResourceCommonPermissionByType(authentication, #type)")
     @Operation(summary = "Save new resource.", description = "Api for loading images, fonts, stylesheets.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -173,6 +181,7 @@ public interface ResourceController {
                                        @Parameter(name = "resource", description = "File - image with max size 8mb and format (bmp ,ccitt, gif, jpg, jpg2000, png , svg, wmf), font, style sheet.", style = ParameterStyle.FORM) @RequestPart("resource") MultipartFile resource);
 
     @PutMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("@permissionHandler.checkResourceEditPermissionByType(authentication, #updateRequestDTO.type.pluralName)")
     @Operation(summary = "Update resource", description = "Update resource metadata (name, description)", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Resource updated successfully", content = {
@@ -184,6 +193,7 @@ public interface ResourceController {
             @RequestBody ResourceUpdateRequestDTO updateRequestDTO, Principal principal);
 
     @PostMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E8_US68_MANAGE_RESOURCE_PERMISSIONS_IMAGE')")
     @Operation(summary = "Add role to a resource", description = "Apply custom to a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> applyRole(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
@@ -192,6 +202,7 @@ public interface ResourceController {
 
 
     @GetMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E8_US67_TABLE_OF_RESOURCE_PERMISSIONS_IMAGE', 'E8_US101_RESOURCE_NAVIGATION_MENU')")
     @Operation(summary = "Get resource's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<ResourcePermissionDTO>> getRoles(Pageable pageable,
                                                          @Parameter(name = "resource-name", description = "Encoded with base 64 name of resource") @PathVariable(RESOURCE_PATH_VARIABLE) String resourceName,
@@ -200,6 +211,7 @@ public interface ResourceController {
                                                          @RequestParam(name = "search", required = false) String searchParam);
 
     @DeleteMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES)
+    @PreAuthorize("hasAnyAuthority('E8_US68_MANAGE_RESOURCE_PERMISSIONS_IMAGE')")
     @Operation(summary = "Remove role from a resource", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> deleteRole(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
@@ -207,6 +219,7 @@ public interface ResourceController {
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
     @DeleteMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
+    @PreAuthorize("@permissionHandler.checkResourceDeletePermissionByType(authentication, #type)")
     @Operation(summary = "Delete resource", description = "Delete resource by name and type - the resource cannot be deleted if the resource version is used in the template.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -74,6 +75,7 @@ public interface DataCollectionController {
     String DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('E6_US32_CREATE_NEW_DATA_COLLECTIONS_USING_JSON')")
     @Operation(summary = "Create data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> create(@Parameter(description = "The datacollections name.", required = true, style = ParameterStyle.FORM) @RequestPart String name,
@@ -81,6 +83,7 @@ public interface DataCollectionController {
                                              @Parameter(description = "Data collections file", required = true, style = ParameterStyle.FORM) @RequestPart("attachment") MultipartFile multipartFile, Principal principal);
 
     @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E6_US41_TABLE_OF_DATA_COLLECTION_DEPENDENCIES', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get a list of dependencies of one data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about one data collection dependencies is prepared according to the specified conditions.")
     ResponseEntity<List<DependencyDTO>> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
@@ -101,17 +104,20 @@ public interface DataCollectionController {
                                        @Parameter(description = "Optional comment to the new data collection version", name = "comment", style = ParameterStyle.FORM) @RequestPart(required = false) String comment);
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('E6_US30_TABLE_OF_DATA_COLLECTIONS', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get list of data collections",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DataCollectionDTO>> list(Pageable pageable, @ParameterObject DataCollectionFilter filter,
                                                  @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E6_US33_VIEW_DATA_COLLECTION_METADATA', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get data collection", description = "Get data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> get(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
     @PatchMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E6_US34_EDIT_DATA_COLLECTION_METADATA')")
     @Operation(summary = "Update data collection", description = "Update data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> update(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
@@ -119,6 +125,7 @@ public interface DataCollectionController {
                                              Principal principal);
 
     @DeleteMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E6_US38_DELETE_DATA_COLLECTION')")
     @Operation(summary = "Delete data collection", description = "Delete data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -129,6 +136,7 @@ public interface DataCollectionController {
     ResponseEntity<Void> delete(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(name = DATA_COLLECTION_PATH_VARIABLE) String name, Principal principal);
 
     @GetMapping(DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E6_US36_DATA_COLLECTION_VERSION_HISTORY')")
     @Operation(summary = "Get a list of versions of data collection by name", description = "Get a list of data collection versions using the data collection name, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<FileVersionDTO>> getVersions(Pageable pageable,
@@ -137,6 +145,7 @@ public interface DataCollectionController {
                                                      @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E6_US39_TABLE_OF_DATA_COLLECTIONS_PERMISSIONS', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get resource's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DataCollectionPermissionDTO>> getRoles(Pageable pageable,
                                                                @Parameter(name = "data_collection-name", description = "Encoded with base 64 name of dataCollection") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
@@ -144,18 +153,21 @@ public interface DataCollectionController {
                                                                @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E6_US_40_MANAGE_DATA_COLLECTION_PERMISSIONS')")
     @Operation(summary = "Add role to a dataCollection", description = "Apply custom to a dataCollection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> applyRole(
             @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
             @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
 
     @DeleteMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES)
+    @PreAuthorize("hasAuthority('E6_US_40_MANAGE_DATA_COLLECTION_PERMISSIONS')")
     @Operation(summary = "Remove role from a dataCollection", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> deleteRole(
             @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
     @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE)
+    @PreAuthorize("hasAnyAuthority('E6_US41_TABLE_OF_DATA_COLLECTION_DEPENDENCIES', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get list of data collection dependencies",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DependencyDTO>> listDependencies(Pageable pageable,
@@ -164,6 +176,7 @@ public interface DataCollectionController {
                                                          @RequestParam(name = "search", required = false) String searchParam);
 
 	@PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@PreAuthorize("hasAuthority('E7_US45_CREATE_DATA_SAMPLE_BASED_ON_DATA_COLLECTION_JSON_FILE')")
 	@Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {
@@ -176,6 +189,7 @@ public interface DataCollectionController {
             @RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
 	@GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE)
+	@PreAuthorize("hasAuthority('E7_US42_TABLE_OF_DATA_SAMPLES')")
 	@Operation(summary = "Get list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<Page<DataSampleDTO>> list(
 			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
@@ -188,13 +202,15 @@ public interface DataCollectionController {
 
 
 	@GetMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
+	@PreAuthorize("hasAnyAuthority('E7_US46_VIEW_SAMPLE_METADATA', 'E7_US43_DATA_SAMPLE_NAVIGATION_MENU')")
 	@Operation(summary = "Get data sample by name", description = "Get data sample by name", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<DataSampleDTO> getDataSample(
 			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName);
 
 	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
-	@Operation(summary = "Delete list of data samples", description = "Delete list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @PreAuthorize("hasAuthority('E7_US50_DELETE_DATA_SAMPLE')")
+    @Operation(summary = "Delete list of data samples", description = "Delete list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
 			@ApiResponse(responseCode = "409", description = "Some data samples has dependencies and cannot be removed", content = @Content),
@@ -205,7 +221,8 @@ public interface DataCollectionController {
 			@RequestBody List<String> dataSampleNames, Principal principal);
 
 	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE)
-	@Operation(summary = "Delete all data samples of data collection", description = "Delete all data samples of data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @PreAuthorize("hasAuthority('E7_US50_DELETE_DATA_SAMPLE')")
+    @Operation(summary = "Delete all data samples of data collection", description = "Delete all data samples of data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
 			@ApiResponse(responseCode = "409", description = "Data samples has dependencies and cannot be removed", content = @Content),
@@ -216,7 +233,8 @@ public interface DataCollectionController {
 			 Principal principal);
 
 	@PutMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT)
-	@Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @PreAuthorize("hasAuthority('E7_US47_EDIT_SAMPLE_METADATA')")
+    @Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data sample updated successfully", content = {
 					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
@@ -227,13 +245,15 @@ public interface DataCollectionController {
 			Principal principal);
 
 	@PatchMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
-	@Operation(summary = "Update data sample", description = "Update data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @PreAuthorize("hasAuthority('E7_US47_EDIT_SAMPLE_METADATA')")
+    @Operation(summary = "Update data sample", description = "Update data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<DataSampleDTO> updateDataSample(
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
 			@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName,
 			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
 
 	@PostMapping(DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE)
+	@PreAuthorize("hasAnyAuthority('E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
 	@Operation(summary = "Create new version data sample", description = "Create new version data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {
@@ -244,6 +264,7 @@ public interface DataCollectionController {
 			@RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
 	@GetMapping(DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE)
+	@PreAuthorize("hasAnyAuthority('E7_US49_DATA_SAMPLE_VERSION_HISTORY')")
 	@Operation(summary = "Get a list of versions of data sample by name", description = "Get a list of data sample versions using the data sample name, sorting and filters.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(Pageable pageable,
 			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,

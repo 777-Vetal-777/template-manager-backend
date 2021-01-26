@@ -18,12 +18,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -95,7 +99,10 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
         final TemplateUpdateRequestDTO templateUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/permissions/template-update-metadata-request.json"), TemplateUpdateRequestDTO.class);
         mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
                 .content(objectMapper.writeValueAsString(templateUpdateRequestDTO))
-                .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD))
+                .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
+                        Stream.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD")
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList())))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -107,14 +114,22 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(name)
                 .file(comment)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD)))
+                .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
+                        Stream.of("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD")
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList())
+                )))
                 .andExpect(status().isOk());
 
         final ApplyRoleRequestDTO applyRoleRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/permissions/role-for-permissions-test-apply-request.json"), ApplyRoleRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
                 .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD))
+                .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
+                        Stream.of("E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD")
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList())
+                ))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
 
