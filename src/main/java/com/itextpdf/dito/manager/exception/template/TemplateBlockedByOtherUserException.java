@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.exception.template;
 
+import com.itextpdf.dito.manager.exception.AliasConstants;
+
 public class TemplateBlockedByOtherUserException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
@@ -15,7 +17,7 @@ public class TemplateBlockedByOtherUserException extends RuntimeException {
     }
 
     private String buildMessage(final String templateName, final String userName) {
-        return new StringBuilder().append("Template ")
+        return new StringBuilder().append(AliasConstants.TEMPLATE)
                 .append(templateName)
                 .append(" was blocked by user ")
                 .append(userName)
