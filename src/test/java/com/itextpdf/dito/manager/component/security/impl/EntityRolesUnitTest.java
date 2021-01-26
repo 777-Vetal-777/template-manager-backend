@@ -1,20 +1,15 @@
-package com.itextpdf.dito.manager.integration.security;
+package com.itextpdf.dito.manager.component.security.impl;
 
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
-import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
-import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
-import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +20,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SpringBootTest
 @ActiveProfiles("integration-test")
-public class EntityRolesUnitTest extends AbstractService {
+public class EntityRolesUnitTest {
 
     private static final String CUSTOM_ROLE = "custom_role";
     private static final String CUSTOM_PERMISSION = "E6_US34_EDIT_DATA_COLLECTION_METADATA";
@@ -38,6 +36,9 @@ public class EntityRolesUnitTest extends AbstractService {
 
     @Autowired
     private PermissionService permissionService;
+
+    @Autowired
+    private PermissionHandlerImpl permissionHandler;
 
     @Autowired
     private RoleService roleService;
@@ -89,14 +90,12 @@ public class EntityRolesUnitTest extends AbstractService {
         UserEntity checkingUser = userRepository.findByEmail(CUSTOM_USER_EMAIL).get();
 
         //we have no real entity for this check, so we use Collections.singleton as parameter for retrieveEntityAppliedRoles
-        checkUserPermissions(retrieveSetOfRoleNames(checkingUser.getRoles()),
-                retrieveEntityAppliedRoles(Collections.singleton(slaveRole), checkingUser.getRoles()), CUSTOM_PERMISSION);
+        assertTrue(permissionHandler.checkUserPermissions(checkingUser, Collections.singleton(slaveRole), CUSTOM_PERMISSION));
 
         roleService.update(CUSTOM_ROLE, masterRole, Collections.emptyList());
         checkingUser = userRepository.findByEmail(CUSTOM_USER_EMAIL).get();
 
-        checkUserPermissions(retrieveSetOfRoleNames(checkingUser.getRoles()),
-                retrieveEntityAppliedRoles(Collections.singleton(slaveRole), checkingUser.getRoles()), CUSTOM_PERMISSION);
+        assertTrue(permissionHandler.checkUserPermissions(checkingUser, Collections.singleton(slaveRole), CUSTOM_PERMISSION));
 
         roleService.delete(slaveRole);
     }
@@ -104,8 +103,7 @@ public class EntityRolesUnitTest extends AbstractService {
     @Test
     void testPermissionCustomEntityWithoutCustomRole() {
         final UserEntity checkingUser = userRepository.findByEmail(CUSTOM_USER_EMAIL).get();
-        checkUserPermissions(retrieveSetOfRoleNames(checkingUser.getRoles()),
-                retrieveEntityAppliedRoles(Collections.emptySet(), checkingUser.getRoles()), CUSTOM_PERMISSION);
+        assertTrue(permissionHandler.checkUserPermissions(checkingUser, Collections.emptySet(), CUSTOM_PERMISSION));
     }
 
     @Test
@@ -122,16 +120,12 @@ public class EntityRolesUnitTest extends AbstractService {
         roleService.update(CUSTOM_ROLE, masterRole, Collections.singletonList(CUSTOM_PERMISSION));
         final UserEntity checkingUser = userRepository.findByEmail(CUSTOM_USER_EMAIL).get();
 
-        Assertions.assertThrows(ForbiddenOperationException.class,
-                () -> checkUserPermissions(retrieveSetOfRoleNames(checkingUser.getRoles()),
-                retrieveEntityAppliedRoles(Collections.singleton(slaveRole), checkingUser.getRoles()), CUSTOM_PERMISSION));
+        assertFalse(permissionHandler.checkUserPermissions(checkingUser, Collections.singleton(slaveRole), CUSTOM_PERMISSION));
 
         roleService.update(CUSTOM_ROLE, masterRole, Collections.emptyList());
         final UserEntity checkingUserWithUpdatedRole = userRepository.findByEmail(CUSTOM_USER_EMAIL).get();
 
-        Assertions.assertThrows(ForbiddenOperationException.class,
-                () -> checkUserPermissions(retrieveSetOfRoleNames(checkingUserWithUpdatedRole.getRoles()),
-                        retrieveEntityAppliedRoles(Collections.singleton(slaveRole), checkingUserWithUpdatedRole.getRoles()), CUSTOM_PERMISSION));
+        assertFalse(permissionHandler.checkUserPermissions(checkingUserWithUpdatedRole, Collections.singleton(slaveRole), CUSTOM_PERMISSION));
         roleService.delete(slaveRole);
     }
 
@@ -141,15 +135,9 @@ public class EntityRolesUnitTest extends AbstractService {
         roleService.update(CUSTOM_ROLE, masterRole, Collections.emptyList());
         final UserEntity checkingUser = userRepository.findByEmail(CUSTOM_USER_EMAIL).get();
 
-        Assertions.assertThrows(ForbiddenOperationException.class,
-                () -> checkUserPermissions(retrieveSetOfRoleNames(checkingUser.getRoles()),
-                retrieveEntityAppliedRoles(Collections.emptySet(), checkingUser.getRoles()), CUSTOM_PERMISSION));
+        assertFalse(permissionHandler.checkUserPermissions(checkingUser, Collections.emptySet(), CUSTOM_PERMISSION));
 
     }
 
-    @Override
-    protected List<String> getSupportedSortFields() {
-        return null;
-    }
 }
 

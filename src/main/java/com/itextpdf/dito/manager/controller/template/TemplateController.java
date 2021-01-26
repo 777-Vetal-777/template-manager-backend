@@ -69,7 +69,7 @@ public interface TemplateController {
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/{" + ROLE_PATH_VARIABLE + "}";
 
     @PostMapping
-    @PreAuthorize("@permissionHandler.checkTemplateCommonPermissionByType(authentication, #templateCreateRequestDTO)")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateCommonPermissionByType(authentication, #templateCreateRequestDTO)")
     @Operation(summary = "Create template", description = "Create new template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -120,7 +120,7 @@ public interface TemplateController {
             @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @PatchMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
     @Operation(summary = "Update template metadata", description = "Update template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> update(
@@ -146,7 +146,7 @@ public interface TemplateController {
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @PostMapping(TEMPLATE_VERSION_ENDPOINT)
-    @PreAuthorize("hasAnyAuthority('E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD', 'E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     @Operation(summary = "Create new version of template", description = "Make a new version of a template: upload a new template file and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

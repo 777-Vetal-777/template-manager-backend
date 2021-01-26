@@ -1,18 +1,11 @@
 package com.itextpdf.dito.manager.service;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
-import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
 import com.itextpdf.dito.manager.exception.role.UnableToSetPermissionsException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Sort;
 
-import static java.util.stream.Collectors.toMap;
+import java.util.List;
 
 public abstract class AbstractService {
 
@@ -34,52 +27,10 @@ public abstract class AbstractService {
         return result.toString();
     }
 
-    protected boolean isUserAdmin(final Set<String> userRoleNames) {
-        return userRoleNames.contains("GLOBAL_ADMINISTRATOR") || userRoleNames.contains("ADMINISTRATOR");
-    }
-
-    protected Set<RoleEntity> retrieveEntityAppliedRoles(final Set<RoleEntity> entityAppliedRoles, final Set<RoleEntity> userMasterRoles) {
-        final Map<String, RoleEntity> appliedRoles = entityAppliedRoles.stream().collect(toMap(RoleEntity::getName, role -> role));
-        userMasterRoles.forEach(role -> appliedRoles.putIfAbsent(role.getName(), role));
-        return appliedRoles.values().stream().collect(Collectors.toSet());
-    }
-
-    protected Set<String> retrieveSetOfRoleNames(final Set<RoleEntity> roleEntities) {
-        return roleEntities.stream().map(RoleEntity::getName).collect(Collectors.toSet());
-    }
-
     protected void checkNotAdminRole(final RoleEntity roleEntity) {
         if ("GLOBAL_ADMINISTRATOR".equals(roleEntity.getName()) || "ADMINISTRATOR".equals(roleEntity.getName())) {
             throw new UnableToSetPermissionsException();
         }
     }
 
-    protected void checkUserPermissions(final Set<String> userRoleNames,
-                                        final Set<RoleEntity> entityAppliedRoles,
-                                        final String requiredPermission) {
-        if (!isUserAdmin(userRoleNames) && !entityAppliedRoles.isEmpty()) {
-
-            boolean isPermissionRolePresented = false;
-            final Set<String> entityAppliedRolesWithRequiredPermission = retrieveSetOfRoleNamesFilteredByPermission(
-                    entityAppliedRoles, requiredPermission);
-            for (final String role : entityAppliedRolesWithRequiredPermission) {
-                if (userRoleNames.contains(role)) {
-                    isPermissionRolePresented = true;
-                    break;
-                }
-            }
-
-            if (!isPermissionRolePresented) {
-                throw new ForbiddenOperationException();
-            }
-        }
-    }
-
-    protected Set<String> retrieveSetOfRoleNamesFilteredByPermission(final Set<RoleEntity> roleEntities,
-                                                                     final String permission) {
-        return roleEntities.stream().filter(roleEntity -> roleEntity.getPermissions().stream()
-                .anyMatch(permissionEntity -> permissionEntity.getName().equals(permission)))
-                .map(RoleEntity::getName).collect(
-                        Collectors.toSet());
-    }
 }

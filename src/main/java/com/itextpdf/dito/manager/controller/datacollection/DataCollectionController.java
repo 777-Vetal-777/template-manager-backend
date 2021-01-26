@@ -89,6 +89,7 @@ public interface DataCollectionController {
     ResponseEntity<List<DependencyDTO>> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
     @PostMapping(path = VERSIONS_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), #name, 'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
     @Operation(summary = "Create new version of data collection", description = "Make a new version of a data collection: upload a new json and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -117,7 +118,7 @@ public interface DataCollectionController {
     ResponseEntity<DataCollectionDTO> get(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
     @PatchMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E6_US34_EDIT_DATA_COLLECTION_METADATA')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E6_US34_EDIT_DATA_COLLECTION_METADATA')")
     @Operation(summary = "Update data collection", description = "Update data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> update(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
@@ -125,7 +126,7 @@ public interface DataCollectionController {
                                              Principal principal);
 
     @DeleteMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E6_US38_DELETE_DATA_COLLECTION')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E6_US38_DELETE_DATA_COLLECTION')")
     @Operation(summary = "Delete data collection", description = "Delete data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -176,8 +177,8 @@ public interface DataCollectionController {
                                                          @RequestParam(name = "search", required = false) String searchParam);
 
 	@PostMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
-	@PreAuthorize("hasAuthority('E7_US45_CREATE_DATA_SAMPLE_BASED_ON_DATA_COLLECTION_JSON_FILE')")
-	@Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#dataCollectionName)), 'E7_US45_CREATE_DATA_SAMPLE_BASED_ON_DATA_COLLECTION_JSON_FILE')")
+    @Operation(summary = "Create data sample", description = "Create new data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {
 					@Content(mediaType = "application/json", schema = @Schema(implementation = DataSampleDTO.class)) }),
@@ -221,7 +222,7 @@ public interface DataCollectionController {
 			@RequestBody List<String> dataSampleNames, Principal principal);
 
 	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E7_US50_DELETE_DATA_SAMPLE')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#dataCollectionName)), 'E7_US50_DELETE_DATA_SAMPLE')")
     @Operation(summary = "Delete all data samples of data collection", description = "Delete all data samples of data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
@@ -233,7 +234,7 @@ public interface DataCollectionController {
 			 Principal principal);
 
 	@PutMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT)
-    @PreAuthorize("hasAuthority('E7_US47_EDIT_SAMPLE_METADATA')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#dataCollectionName)), 'E7_US47_EDIT_SAMPLE_METADATA')")
     @Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data sample updated successfully", content = {
@@ -245,7 +246,7 @@ public interface DataCollectionController {
 			Principal principal);
 
 	@PatchMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E7_US47_EDIT_SAMPLE_METADATA')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#dataCollectionName)), 'E7_US47_EDIT_SAMPLE_METADATA')")
     @Operation(summary = "Update data sample", description = "Update data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<DataSampleDTO> updateDataSample(
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
@@ -253,7 +254,7 @@ public interface DataCollectionController {
 			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
 
 	@PostMapping(DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE)
-	@PreAuthorize("hasAnyAuthority('E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#dataCollectionName)), 'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
 	@Operation(summary = "Create new version data sample", description = "Create new version data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Success! File is uploaded", content = {

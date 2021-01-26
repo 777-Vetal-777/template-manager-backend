@@ -172,17 +172,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
-        switch (type) {
-            case IMAGE:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(existingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE);
-                break;
-            case STYLESHEET:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(existingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
-                break;
-        }
-
         if (contentValidators.containsKey(type) && !contentValidators.get(type).isValid(data)) {
             throw new InvalidResourceContentException();
         }
@@ -235,21 +224,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
         final ResourceEntity existingResource = getResource(name, entity.getType());
         final UserEntity userEntity = userService.findByEmail(mail);
-
-        switch (entity.getType()) {
-            case IMAGE:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE);
-                break;
-            case STYLESHEET:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET);
-                break;
-            case FONT:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_METADATA_FONT);
-                break;
-        }
 
         if (!existingResource.getName().equals(entity.getName())) {
             throwExceptionIfResourceExists(entity.getName(), entity.getType());
@@ -372,21 +346,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
         final ResourceEntity deletingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findByEmail(mail);
-
-        switch (type) {
-            case IMAGE:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(deletingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_IMAGE);
-                break;
-            case STYLESHEET:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(deletingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_STYLESHEET);
-                break;
-            case FONT:
-                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(deletingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_FONT);
-                break;
-        }
 
         if (hasOutboundDependencies(deletingResourceEntity.getId())) {
             throw new ResourceHasDependenciesException();
