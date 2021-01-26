@@ -361,7 +361,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
     }
 
-
     @Test
     void test_create_get_update_stylesheet() throws Exception {
         final String stylesheetName = "test-stylesheet";
@@ -369,6 +368,13 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
         final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
         final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", ".h1 {\n \tfont-style: Helvetica\n }".getBytes());
+
+        //GET by name and make sure the resource is not exists
+        mockMvc.perform(
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                        STYLESHEETS, Base64.getEncoder().encodeToString(stylesheetName.getBytes())))
+                .andExpect(status().isNotFound());
+
         //Create
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
                 .file(FILE_PART)
