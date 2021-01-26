@@ -27,6 +27,7 @@ import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -68,6 +69,7 @@ public interface TemplateController {
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/{" + ROLE_PATH_VARIABLE + "}";
 
     @PostMapping
+    @PreAuthorize("@permissionHandler.checkTemplateCommonPermissionByType(authentication, #templateCreateRequestDTO)")
     @Operation(summary = "Create template", description = "Create new template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -78,6 +80,7 @@ public interface TemplateController {
                                        Principal principal);
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get template list", description = "Get templates",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplateDTO>> listTemplateTypes(Pageable pageable,
@@ -90,6 +93,7 @@ public interface TemplateController {
     ResponseEntity<TemplateTypeEnum[]> listTemplateTypes();
 
     @GetMapping(TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E9_US84_TABLE_OF_TEMPLATE_DEPENDENCIES', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get dependencies list", description = "Retrieving list of information about template dependencies",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about template dependencies")
@@ -97,6 +101,7 @@ public interface TemplateController {
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @GetMapping(TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E9_US84_TABLE_OF_TEMPLATE_DEPENDENCIES', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get dependencies list", description = "Retrieving list of information about dependencies using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about dependencies is prepared according to the specified conditions.")
@@ -108,12 +113,14 @@ public interface TemplateController {
             @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E9_US74_VIEW_TEMPLATE_METADATA_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get template metadata", description = "Get template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> get(
             @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @PatchMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
     @Operation(summary = "Update template metadata", description = "Update template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> update(
@@ -122,6 +129,7 @@ public interface TemplateController {
             Principal principal);
 
     @GetMapping(TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E9_US78_TEMPLATE_VERSIONS_HISTORY_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get a list of versions of template by name.", description = "Get a list of template versions using the template name and template type, sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<FileVersionDTO>> getVersions(Pageable pageable,
@@ -130,6 +138,7 @@ public interface TemplateController {
                                                      @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E9_US81_PREVIEW_TEMPLATE_STANDARD')")
     @Operation(summary = "Get template preview", description = "Get generated template PDF preview",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
@@ -137,6 +146,7 @@ public interface TemplateController {
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @PostMapping(TEMPLATE_VERSION_ENDPOINT)
+    @PreAuthorize("hasAnyAuthority('E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD', 'E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED')")
     @Operation(summary = "Create new version of template", description = "Make a new version of a template: upload a new template file and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -151,6 +161,7 @@ public interface TemplateController {
                                        @Parameter(name = "template", description = "Template file", required = false, style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplatePermissionDTO>> getRoles(Pageable pageable,
                                                          @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
@@ -158,6 +169,7 @@ public interface TemplateController {
                                                          @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @PostMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E9_US83_MANAGE_TEMPLATE_PERMISSIONS')")
     @Operation(summary = "Add/update role to a template", description = "Apply custom role to a template", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Role applied to template successfully."),
@@ -168,6 +180,7 @@ public interface TemplateController {
                                                   @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
 
     @DeleteMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME)
+    @PreAuthorize("hasAuthority('E9_US83_MANAGE_TEMPLATE_PERMISSIONS')")
     @Operation(summary = "Remove role from a template", description = "Detach custom role from a template", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Role detached from template successfully."),

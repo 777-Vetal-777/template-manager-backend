@@ -16,6 +16,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public interface WorkspaceController {
     String WORKSPACE_STAGES_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/stages";
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('E4_US18_WORKSPACE_DEFAULT_SETTINGS', 'E4_US23_WORKSPACE_SET_UP_WIZARD')")
     @Operation(summary = "Create workspace", description = "Create new workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -50,6 +52,7 @@ public interface WorkspaceController {
     ResponseEntity<List<WorkspaceDTO>> getAll();
 
     @GetMapping(WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E2_US5_HEADER_PANEL')")
     @Operation(summary = "Get workspace", description = "Get workspace",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<WorkspaceDTO> get(@NotBlank @PathVariable(WORKSPACE_PATH_VARIABLE) String name);
@@ -61,11 +64,13 @@ public interface WorkspaceController {
             @Valid @RequestBody WorkspaceDTO workspaceDTO);
 
     @GetMapping(WORKSPACE_PROMOTION_PATH_ENDPOINT)
+    @PreAuthorize("hasAuthority('E4_US22_PROMOTION_PATH')")
     @Operation(summary = "Promotion path", description = "Retrieve full promotion path",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<PromotionPathDTO> getPromotionPath(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
 
     @PatchMapping(WORKSPACE_PROMOTION_PATH_ENDPOINT)
+    @PreAuthorize("hasAuthority('E4_US22_PROMOTION_PATH')")
     @Operation(summary = "Update promotion path", description = "Update promotion path",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<PromotionPathDTO> updatePromotionPath(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,

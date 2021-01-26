@@ -2,22 +2,20 @@ package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
-import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
+import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.security.Principal;
-import java.util.List;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +24,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.security.Principal;
+import java.util.List;
 
 @Tag(name = "instance", description = "instance API")
 @RequestMapping(InstanceController.BASE_NAME)
@@ -56,6 +57,7 @@ public interface InstanceController {
             @PathVariable(INSTANCE_SOCKET_PATH_VARIABLE) String socket);
 
     @PostMapping
+    @PreAuthorize("hasAuthority('E5_US28_CONNECT_NEW_INSTANCE')")
     @Operation(summary = "Save instances",
             description = "Save a set of instances",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -67,6 +69,7 @@ public interface InstanceController {
             Principal principal);
 
     @DeleteMapping(INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E5_US29_DISCONNECT_INSTANCE')")
     @Operation(summary = "Disconnect instance", description = "Break communication with an instance.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Instance disconnected successfully.")
@@ -75,6 +78,7 @@ public interface InstanceController {
             @PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name);
 
     @GetMapping(PAGEABLE_ENDPOINT)
+    @PreAuthorize("hasAuthority('E4_US27_SEE_THE_TABLE_OF_INSTANCES')")
     @Operation(summary = "Get information about instances",
             description = "Retrieving list of information about instances using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -87,6 +91,7 @@ public interface InstanceController {
             @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('E4_US27_SEE_THE_TABLE_OF_INSTANCES', 'E2_US6_SETTINGS_PANEL')")
     @Operation(summary = "Get information about instances",
             description = "Retrieving list of information about instances using sorting and filters.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

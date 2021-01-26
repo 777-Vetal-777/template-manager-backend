@@ -5,8 +5,10 @@ import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundExceptio
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,16 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public List<PermissionEntity> defaultPermissions() {
         final List<PermissionEntity> permissionEntities = permissionRepository.findByNameIn(defaultPermissionNames);
+        List<String> list = new ArrayList<>();
+        for (PermissionEntity permissionEntity : permissionEntities) {
+            list.add(permissionEntity.getName());
+        }
+       for(String str2:defaultPermissionNames){
+         if(!list.contains(str2)){
+             System.out.println(str2);
+         }
+       }
+
         if (permissionEntities.size() != defaultPermissionNames.size()) {
             throw new IllegalStateException("De-synchronization of default permission names between jvm and database.");
         }
@@ -77,7 +89,7 @@ public class PermissionServiceImpl implements PermissionService {
             "E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD",
             "E9_US74_VIEW_TEMPLATE_METADATA_STANDARD",
             "E9_US78_TEMPLATE_VERSIONS_HISTORY_STANDARD",
-            "E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD",
+            "E9_US82_TABLE_OF_TEMPLATE_PERMISSIONS_STANDARD",
             "E9_US84_TABLE_OF_TEMPLATE_DEPENDENCIES",
             "E10_US85_USER_PROFILE",
             "E10_US86_CHANGE_PASSWORD",
