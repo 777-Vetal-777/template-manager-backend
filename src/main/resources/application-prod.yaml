@@ -36,7 +36,3 @@ spring:
           auth: ${DITO_MANAGER_SMTP_AUTH}
           starttls:
             enable: ${DITO_MANAGER_SMTP_TLS_ENABLE}
-
-sentry:
-  dsn: ${DITO_MANAGER_SENTRY_DSN}
-  environment: ${DITO_MANAGER_SENTRY_ENVIRONMENT}
