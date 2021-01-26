@@ -16,11 +16,13 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
+import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,10 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private TemplateFileRepository templateFileRepository;
     @Autowired
     private DataCollectionRepository dataCollectionRepository;
+    @Autowired
+    private WorkspaceRepository workspaceRepository;
+    @Autowired
+    private InstanceRepository instanceRepository;
 
     @AfterEach
     void tearDown() {
@@ -84,6 +90,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         templateRepository.deleteAll();
         resourceFileRepository.deleteAll();
         resourceRepository.deleteAll();
+        workspaceRepository.deleteAll();
+        instanceRepository.deleteAll();
 
     }
 
