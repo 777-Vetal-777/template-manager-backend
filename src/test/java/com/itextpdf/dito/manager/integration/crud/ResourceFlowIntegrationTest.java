@@ -136,9 +136,9 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(createdResourceEntity.isPresent());
         final List<ResourceFileEntity> files = createdResourceEntity.get().getLatestFile();
 
-        for (int i = 0; i < files.size(); i++) {
+        for (ResourceFileEntity file: files){
             mockMvc.perform(
-                    get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, files.get(i).getUuid()))
+                    get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, file.getUuid()))
                     .andExpect(status().isOk());
         }
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, "BAD UUID"))
