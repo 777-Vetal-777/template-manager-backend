@@ -150,6 +150,9 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 					if (sortParam.getProperty().equals("modifiedBy")) {
 						sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
 					}
+					if (sortParam.getProperty().equals("comment")) {
+						sortParam = new Sort.Order(sortParam.getDirection(), "latestFile.comment");
+					}
 					return sortParam;
 				})
 				.collect(Collectors.toList()));
