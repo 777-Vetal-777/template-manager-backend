@@ -214,7 +214,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "409", description = "The resource is used.", content = @Content),
             @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content),
     })
-    ResponseEntity<Void> delete(
+    ResponseEntity<Void> delete(Principal principal,
             @Parameter(name = "resource-name", description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
             @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
