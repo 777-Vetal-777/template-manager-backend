@@ -125,5 +125,5 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "left join instance.stage stage "
             + "left join templateFiles.template template "
             + "where resource.id = :id ")
-    List<DependencyModel> search(@Param("id") Long resourceId);
+    List<DependencyModel> searchDependencies(@Param("id") Long resourceId);
 }

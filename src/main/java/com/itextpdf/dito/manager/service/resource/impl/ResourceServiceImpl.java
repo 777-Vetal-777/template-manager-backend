@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
@@ -36,6 +37,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -345,6 +347,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity delete(final String name, final ResourceTypeEnum type) {
         final ResourceEntity deletingResourceEntity = getResource(name, type);
 
+        if (hasOutboundDependencies(deletingResourceEntity.getId())) {
+            throw new ResourceHasDependenciesException();
+        }
+
         resourceRepository.delete(deletingResourceEntity);
 
         return deletingResourceEntity;
@@ -414,4 +420,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         fileEntity.setFontName(fontName);
         return fileEntity;
     }
+
+    private boolean hasOutboundDependencies(final Long id) {
+        return !resourceFileRepository.searchDependencies(id).isEmpty();
+    }
+
 }

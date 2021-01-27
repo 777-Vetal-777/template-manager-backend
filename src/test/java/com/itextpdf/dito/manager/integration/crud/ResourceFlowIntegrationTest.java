@@ -64,7 +64,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String FONTS = "fonts";
     private static final String STYLESHEETS = "stylesheets";
     private static final String IMAGE_FILE_NAME = "any-name.png";
-
     private static final Integer AMOUNT_VERSIONS = 5;
     private static final String AUTHOR_NAME = "admin admin";
     private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
@@ -358,11 +357,10 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         Long createdResourceId = createdResourceEntity.get().getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
         assertNotNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId));
-
     }
 
     @Test
-    void test_create_get_update_stylesheet() throws Exception {
+    void test_create_get_update_delete_stylesheet() throws Exception {
         final String stylesheetName = "test-stylesheet";
         final String stylesheetType = "STYLESHEET";
         final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
@@ -422,6 +420,22 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("name").value(resourceUpdateRequestDTO.getName()))
                 .andExpect(jsonPath("description").value(resourceUpdateRequestDTO.getDescription()));
 
+        assertTrue(Objects.nonNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
+
+        //DELETE by name
+        mockMvc.perform(
+                delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                        STYLESHEETS, Base64.getEncoder().encodeToString(resourceUpdateRequestDTO.getName().getBytes())))
+                .andExpect(status().isOk());
+
+        assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
+        assertTrue(Objects.isNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId)));
+
+        //repeat DELETE by name
+        mockMvc.perform(
+                delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                        STYLESHEETS, Base64.getEncoder().encodeToString(resourceUpdateRequestDTO.getName().getBytes())))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -432,6 +446,33 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                         + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName,
                 encodedResourceType))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldAllowCreateEmptyStylesheet() throws Exception {
+        final String stylesheetName = "test-stylesheet";
+        final String stylesheetType = "STYLESHEET";
+        final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
+        final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
+        final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", "".getBytes());
+        //Create
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
+                .file(FILE_PART)
+                .file(NAME_PART)
+                .file(TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("name").value(stylesheetName))
+                .andExpect(jsonPath("type").value(stylesheetType))
+                .andExpect(jsonPath("createdOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("version").value(1));
+        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(stylesheetName, ResourceTypeEnum.STYLESHEET);
+        assertTrue(createdResourceEntity.isPresent());
+        Long createdResourceId = createdResourceEntity.get().getId();
+        assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
+        assertNotNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId));
+
     }
 
     @Test
