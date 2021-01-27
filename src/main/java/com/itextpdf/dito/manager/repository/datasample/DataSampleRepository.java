@@ -21,11 +21,12 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "modifiedBy", "modifiedOn", "comment", "isDefault");
 
     String DATA_SAMPLE_TABLE_SELECT_CLAUSE = "select ds from DataSampleEntity ds " +
+    		"join ds.lastDataSampleLog lastLog " +
             "join ds.latestVersion latestFile " +
             "where ds.dataCollection.id = :collectionId ";
 
     String DATA_SAMPLE_TABLE_FILTER_CONDITION = "and (:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
-            + "and (:modifiedBy='' or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
+    		+ "and (:modifiedBy='' or LOWER(CONCAT(lastLog.author.firstName, ' ',lastLog.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or ds.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:description='' or LOWER(ds.description) like CONCAT('%',:description,'%'))"
             + "and (:isDefault=null or ds.isDefault IS :isDefault) "; 

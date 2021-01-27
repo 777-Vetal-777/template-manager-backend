@@ -93,7 +93,6 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-
     }
 
     @Override
