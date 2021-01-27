@@ -63,11 +63,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String IMAGES = "images";
     private static final String FONTS = "fonts";
     private static final String STYLESHEETS = "stylesheets";
-    private static final String PICTURE_FILE_NAME = "any-name.png";
+    private static final String IMAGE_FILE_NAME = "any-name.png";
 
     private static final Integer AMOUNT_VERSIONS = 5;
     private static final String AUTHOR_NAME = "admin admin";
-    private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", PICTURE_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
+    private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
     private static final MockMultipartFile IMAGE_TYPE_PART = new MockMultipartFile("type", "type", "text/plain", IMAGE_TYPE.getBytes());
     private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
 
@@ -135,14 +135,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(NAME, ResourceTypeEnum.FONT);
         assertTrue(createdResourceEntity.isPresent());
         final List<ResourceFileEntity> files = createdResourceEntity.get().getLatestFile();
-        files.forEach(file ->{
-            try {
-                mockMvc.perform(
-                        get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, file.getUuid()))
-                        .andExpect(status().isOk());
-            } catch (Exception ignored) {}
 
-        });
+        for (int i = 0; i < files.size(); i++) {
+            mockMvc.perform(
+                    get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, files.get(i).getUuid()))
+                    .andExpect(status().isOk());
+        }
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, "BAD UUID"))
                 .andExpect(status().isNotFound());
     }
@@ -218,7 +216,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
         assertTrue(Objects.isNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId)));
 
-        //DELETE by name
+        //DELETE byPICTURE_FILE_NAME name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
                         FONTS, Base64.getEncoder().encodeToString(NAME.getBytes())))
@@ -452,7 +450,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("type").value(IMAGE_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("version").value(2L))
-                .andExpect(jsonPath("$.metadataUrls[0].fileName").value(PICTURE_FILE_NAME))
+                .andExpect(jsonPath("$.metadataUrls[0].fileName").value(IMAGE_FILE_NAME))
                 .andExpect(jsonPath("deployed").value(false));
     }
 
