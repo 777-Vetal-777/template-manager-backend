@@ -99,8 +99,7 @@
 		<renameColumn newColumnName="description" oldColumnName="comment" tableName="data_sample" />
 	</changeSet>
 
-	<changeSet id="012-add-blocked-at-column-to-template-table"
-		author="Ivan_Semenov">
+	<changeSet id="012-add-blocked-at-column-to-template-table"	author="Ivan_Semenov">
 		<addColumn tableName="template">
 			<column name="blocked_at" type="timestamp" />
 		</addColumn>
@@ -215,8 +214,7 @@
         </insert>
     </changeSet>
 
-	<changeSet id="019-update-name-in-permission-table"
-		author="Denys_Kovbii">
+	<changeSet id="019-update-name-in-permission-table"	author="Denys_Kovbii">
 		<update tableName="permission">
 			<column name="name"	value="E9_US82_TABLE_OF_TEMPLATE_PERMISSIONS_STANDARD" />
 			<where>name='E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD'</where>
