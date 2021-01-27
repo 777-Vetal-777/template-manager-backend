@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.exception.AliasConstants;
 public class UnreadableDataCollectionException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    private String message;
+    private final String message;
 
     public UnreadableDataCollectionException(String name) {
         this.message = buildMessage(name);

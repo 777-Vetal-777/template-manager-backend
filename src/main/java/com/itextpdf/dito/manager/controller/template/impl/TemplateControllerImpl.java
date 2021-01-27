@@ -56,15 +56,14 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final FileVersionMapper fileVersionMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
-                                  final TemplatePreviewGenerator templatePreviewGenerator, final DataCollectionFileService dataCollectionFileService,
+                                  final TemplatePreviewGenerator templatePreviewGenerator,
                                   final TemplateMapper templateMapper,
                                   final DependencyMapper dependencyMapper,
                                   final TemplateVersionsService templateVersionsService,
                                   final TemplatePermissionService templatePermissionService,
                                   final PermissionMapper permissionMapper,
                                   final TemplateDependencyService templateDependencyService,
-                                  final FileVersionMapper fileVersionMapper,
-                                  final RoleMapper roleMapper) {
+                                  final FileVersionMapper fileVersionMapper) {
         this.templateService = templateService;
         this.templatePreviewGenerator = templatePreviewGenerator;
         this.templateMapper = templateMapper;

@@ -60,7 +60,6 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final ResourceDependencyService resourceDependencyService;
     private final ResourceMapper resourceMapper;
     private final DependencyMapper dependencyMapper;
-    private final RoleMapper roleMapper;
     private final Map<ResourceTypeEnum, List<String>> supportedExtensions = new HashMap<>();
     private final ResourcePermissionService resourcePermissionService;
     private final PermissionMapper permissionMapper;
@@ -76,7 +75,6 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final ResourceDependencyService resourceDependencyService,
             final ResourceVersionsService resourceVersionsService,
             final ResourceMapper resourceMapper,
-            final RoleMapper roleMapper,
             final ResourcePermissionService resourcePermissionService,
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
@@ -89,7 +87,6 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourceDependencyService = resourceDependencyService;
         this.resourceVersionsService = resourceVersionsService;
         this.resourceMapper = resourceMapper;
-        this.roleMapper = roleMapper;
         this.dependencyMapper = dependencyMapper;
         this.resourcePermissionService = resourcePermissionService;
         this.permissionMapper = permissionMapper;

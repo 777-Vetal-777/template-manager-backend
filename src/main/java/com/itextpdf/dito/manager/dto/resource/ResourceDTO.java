@@ -5,7 +5,6 @@ import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class ResourceDTO {

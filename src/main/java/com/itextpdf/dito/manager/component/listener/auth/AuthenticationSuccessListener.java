@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationSuccessListener implements ApplicationListener<AuthenticationSuccessEvent> {
-    private static final Logger log = LogManager.getLogger(AuthenticationFailureListener.class);
+    private static final Logger log = LogManager.getLogger(AuthenticationSuccessListener.class);
 
     private final FailedLoginRepository failedLoginRepository;
 
