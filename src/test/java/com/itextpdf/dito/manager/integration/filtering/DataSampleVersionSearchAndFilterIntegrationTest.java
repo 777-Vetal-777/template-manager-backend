@@ -86,7 +86,6 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
                 .andExpect(jsonPath("$.content[0].version").value("6"))
                 .andExpect(jsonPath("$.content[1].version").value("7"));
 
-
     }
 
     @Override
@@ -105,7 +104,6 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(7)));
-
 
     }
 

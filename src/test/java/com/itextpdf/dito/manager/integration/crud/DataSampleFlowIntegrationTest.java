@@ -79,7 +79,6 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
 
-
         //Create new version
         request.setSample("{\"file\":\"data2\"}");
         request.setFileName("fileName2");
@@ -90,7 +89,6 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("version").value("2"));
 
-
         //Get by name
         mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +96,6 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("fileName").value("fileName2"))
                 .andExpect(jsonPath("isDefault").value("true"));
-
 
     }
 
@@ -166,8 +163,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-
-        
+     
         mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -201,8 +197,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-
-        
+     
         mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
