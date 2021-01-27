@@ -20,7 +20,9 @@ import java.util.Optional;
 public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "modifiedBy", "modifiedOn", "comment", "isDefault");
 
-    String DATA_SAMPLE_TABLE_SELECT_CLAUSE = "select ds from DataSampleEntity ds where ds.dataCollection.id = :collectionId "; 
+    String DATA_SAMPLE_TABLE_SELECT_CLAUSE = "select ds from DataSampleEntity ds " +
+            "join ds.latestVersion latestFile " +
+            "where ds.dataCollection.id = :collectionId ";
 
     String DATA_SAMPLE_TABLE_FILTER_CONDITION = "and (:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
             + "and (:modifiedBy='' or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "

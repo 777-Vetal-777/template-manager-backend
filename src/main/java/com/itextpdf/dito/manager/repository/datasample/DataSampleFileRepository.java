@@ -12,12 +12,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 
 @Repository
 public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEntity, Long> {
+    List<String> SUPPORTED_SORT_FIELDS = List.of("version", "modifiedBy", "modifiedOn", "comment", "stage");
 
-    String SELECT_CLAUSE = "select file.version as version, CONCAT(file.author.firstName, ' ',file.author.lastName) as modifiedBy, file.createdOn as modifiedOn, " +
-            "file.comment as comment, stages.name as stage from DataSampleFileEntity file " +
+    String SELECT_CLAUSE = "select file.version as version, CONCAT(max(file.author.firstName), ' ',max(file.author.lastName)) as modifiedBy, max(file.createdOn) as modifiedOn, " +
+            "max(file.comment) as comment, max(stages.name) as stage, max(file.author.firstName) as firstName from DataSampleFileEntity file " +
             "left join file.dataSample.dataCollection.latestVersion.templateFiles templateFiles " +
             "left join templateFiles.instance instance " +
             "left join instance.stage stages " +
@@ -34,7 +36,9 @@ public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEn
             "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%')) " +
             "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ) ";
 
-    @Query(SELECT_CLAUSE + FILTER_CONDITION)
+    String GROUP_BY_VERSION = "group by file.version";
+
+    @Query(SELECT_CLAUSE + FILTER_CONDITION + GROUP_BY_VERSION)
     Page<FileVersionModel> filter(Pageable pageable,
                                   @Param("name") @Nullable String name,
                                   @Param("version") @Nullable Long version,
@@ -44,7 +48,7 @@ public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEn
                                   @Param("stage") @Nullable String stage,
                                   @Param("comment") @Nullable String comment);
 
-    @Query(SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION)
+    @Query(SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION + GROUP_BY_VERSION)
     Page<FileVersionModel> search(Pageable pageable,
                                   @Param("name") @Nullable String name,
                                   @Param("version") @Nullable Long version,
