@@ -64,12 +64,22 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             PERMISSION_NAME_FOR_DELETE_IMAGE);
     private static final String PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET = "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET";
     private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET = "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET";
+    private static final String PERMISSION_NAME_FOR_ROLLBACK_STYLESHEET = "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET";
+    private static final String PERMISSION_NAME_FOR_DELETE_STYLESHEET = "E8_US66_2_DELETE_RESOURCE_STYLESHEET";
     private static final List<String> AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES = Arrays.asList(
             PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET,
-            PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET);
-    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT = "E8_US58_EDIT_RESOURCE_METADATA_FONT";
+            PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET,
+            PERMISSION_NAME_FOR_ROLLBACK_STYLESHEET,
+            PERMISSION_NAME_FOR_DELETE_STYLESHEET);
+    private static final String PERMISSION_NAME_FOR_EDIT_METADATA_FONT = "E8_US58_EDIT_RESOURCE_METADATA_FONT";
+    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT = "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT";
+    private static final String PERMISSION_NAME_FOR_ROLLBACK_FONT = "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT";
+    private static final String PERMISSION_NAME_FOR_DELETE_FONT = "E8_US66_1_DELETE_RESOURCE_FONT";
     private static final List<String> AVAILABLE_PERMISSIONS_FOR_FONT_SLAVE_ROLES = Arrays.asList(
-            PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
+            PERMISSION_NAME_FOR_EDIT_METADATA_FONT,
+            PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT,
+            PERMISSION_NAME_FOR_ROLLBACK_FONT,
+            PERMISSION_NAME_FOR_DELETE_FONT);
 
     private final ResourceRepository resourceRepository;
     private final ResourceFileRepository resourceFileRepository;
@@ -222,7 +232,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 break;
             case FONT:
                 checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT);
+                        retrieveEntityAppliedRoles(existingResource.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_EDIT_METADATA_FONT);
                 break;
         }
 
@@ -344,8 +354,24 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public ResourceEntity delete(final String name, final ResourceTypeEnum type) {
+    public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
         final ResourceEntity deletingResourceEntity = getResource(name, type);
+        final UserEntity userEntity = userService.findByEmail(mail);
+
+        switch (type) {
+            case IMAGE:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        retrieveEntityAppliedRoles(deletingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_IMAGE);
+                break;
+            case STYLESHEET:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        retrieveEntityAppliedRoles(deletingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_STYLESHEET);
+                break;
+            case FONT:
+                checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
+                        retrieveEntityAppliedRoles(deletingResourceEntity.getAppliedRoles(), userEntity.getRoles()), PERMISSION_NAME_FOR_DELETE_FONT);
+                break;
+        }
 
         if (hasOutboundDependencies(deletingResourceEntity.getId())) {
             throw new ResourceHasDependenciesException();

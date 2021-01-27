@@ -25,7 +25,7 @@ public interface ResourceService {
 
     ResourceEntity update(String name, ResourceEntity entity, String mail);
     
-    ResourceEntity delete(String name, ResourceTypeEnum type);
+    ResourceEntity delete(String name, ResourceTypeEnum type, String mail);
 
     ResourceEntity applyRole(String resourceName, ResourceTypeEnum resourceType, String roleName, List<String> permissions);
 

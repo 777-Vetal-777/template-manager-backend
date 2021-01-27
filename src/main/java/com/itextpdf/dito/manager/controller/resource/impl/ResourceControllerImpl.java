@@ -226,8 +226,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<Void> delete(final String name, final String type) {
-        resourceService.delete(decodeBase64(name), parseResourceTypeFromPath(type));
+    public ResponseEntity<Void> delete(final Principal principal, final String name, final String type) {
+        resourceService.delete(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
