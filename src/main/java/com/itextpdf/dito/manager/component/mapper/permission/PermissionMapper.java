@@ -4,7 +4,6 @@ import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
 import java.util.Collection;

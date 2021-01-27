@@ -114,12 +114,4 @@ public class PermissionMapperImpl implements PermissionMapper {
 
         return permissionDTO;
     }
-
-    private void addPermission(final String condition, final String result, final List<PermissionDTO> permissions) {
-        if (Boolean.parseBoolean(condition)) {
-            final PermissionDTO permission = new PermissionDTO();
-            permission.setName(result);
-            permissions.add(permission);
-        }
-    }
 }

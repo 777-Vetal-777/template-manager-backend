@@ -35,7 +35,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setComment(entity.getLatestVersion().getComment());
         dto.setVersion(entity.getLatestVersion().getVersion());
 		dto.setIsActual(jsonKeyComparator.checkJsonKeysEquals(new String(entity.getLatestVersion().getData()),
-				new String(entity.getDataCollection().getLatestVersion().getData())));
+                new String(entity.getDataCollection().getLatestVersion().getData())));
 		 return dto;
 	}
  
