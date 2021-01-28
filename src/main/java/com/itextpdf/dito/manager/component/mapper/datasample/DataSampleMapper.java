@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDT
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface DataSampleMapper {
     DataSampleDTO map(DataSampleEntity entity);
 
@@ -14,4 +16,6 @@ public interface DataSampleMapper {
     Page<DataSampleDTO> map(Page<DataSampleEntity> entities);
     
     DataSampleEntity map(DataSampleUpdateRequestDTO dto);
+
+    List<DataSampleDTO> map(List<DataSampleEntity> entities);
 }

@@ -235,6 +235,13 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 		return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, dataCollection.getId(),filter, searchParam)),
 				HttpStatus.OK);
 	}
+    @Override
+    public ResponseEntity<List<DataSampleDTO>> listDataSamples(String dataCollectionName) {
+        final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
+        return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(dataCollection.getId())),
+                HttpStatus.OK);
+
+    }
 
 	@Override
 	public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {

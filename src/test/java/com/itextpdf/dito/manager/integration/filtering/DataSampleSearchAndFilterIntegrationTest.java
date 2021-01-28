@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.PAGEABLE_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,7 +39,7 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
 
     @Autowired
     private TemplateRepository templateRepository;
-    
+
     @BeforeEach
     public void init() {
         DataCollectionEntity dataCollectionEntity = dataCollectionService.create(DATACOLLECTION_NAME, DataCollectionType.valueOf(TYPE), "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
@@ -49,7 +50,7 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
     }
 
     @AfterEach
-    public void clearDb() {	
+    public void clearDb() {
         dataSampleRepository.deleteAll();
         templateRepository.deleteAll();
         dataCollectionRepository.deleteAll();
@@ -59,18 +60,18 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
     @Override
     @Test
     public void test_filtering() throws Exception {
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(3)));
 
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .param("name", "name2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .param("name", "name2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -81,12 +82,12 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
     @Override
     @Test
     public void test_searchAndFiltering() throws Exception {
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .param("search", "name")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(3)));
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .param("search", "name")
                 .param("name", "name2")
                 .contentType(MediaType.APPLICATION_JSON)

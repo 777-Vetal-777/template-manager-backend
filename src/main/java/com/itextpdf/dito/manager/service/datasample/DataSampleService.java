@@ -14,6 +14,8 @@ public interface DataSampleService {
 
     Page<DataSampleEntity> list(Pageable pageable, Long dataCollectionId, DataSampleFilter filter, String searchParam);
 
+    List<DataSampleEntity> list(Long dataCollectionId);
+
     DataSampleEntity get(String dataSampleName);
     
     DataSampleEntity setAsDefault(String dataSampleName);
