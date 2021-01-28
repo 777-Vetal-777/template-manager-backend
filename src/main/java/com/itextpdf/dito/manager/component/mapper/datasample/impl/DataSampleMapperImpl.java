@@ -11,6 +11,9 @@ import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class DataSampleMapperImpl implements DataSampleMapper {
 
@@ -61,5 +64,11 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
         return entity;
+    }
+
+    @Override
+    public List<DataSampleDTO> map(List<DataSampleEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
+
     }
 }

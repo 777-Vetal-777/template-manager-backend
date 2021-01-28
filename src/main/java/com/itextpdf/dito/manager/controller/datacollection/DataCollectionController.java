@@ -55,22 +55,24 @@ public interface DataCollectionController {
     String DATA_SAMPLE_PATH_VARIABLE = "data-sample-name";
     String VERSIONS_ENDPOINT = "/versions";
     String DATA_SAMPLE_ENDPOINT = "/datasamples";
+    String PAGEABLE_ENDPOINT = "/pageable";
     String DATA_SAMPLE_WITH_PATH_VARIABLE = "/{" + DATA_SAMPLE_PATH_VARIABLE + "}";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
-    String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/datasamples";
+    String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT;
+    String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT +PAGEABLE_ENDPOINT;
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE;
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE + "/setasdefault";
     String DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + "/all";
-    String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + "/pageable";
+    String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
     String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES = DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
     String DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + VERSIONS_ENDPOINT;
     String DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + DATA_SAMPLE_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
-    
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -173,12 +175,17 @@ public interface DataCollectionController {
             @Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName ,
             @RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
-	@GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE)
 	@Operation(summary = "Get list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<Page<DataSampleDTO>> list(
 			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			Pageable pageable, @ParameterObject DataSampleFilter filter,
 			@RequestParam(name = "search", required = false) String searchParam);
+
+	@GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE)
+	@Operation(summary = "Get list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	ResponseEntity<List<DataSampleDTO>> listDataSamples(@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName);
+
 
 	@GetMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
 	@Operation(summary = "Get data sample by name", description = "Get data sample by name", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -191,23 +198,23 @@ public interface DataCollectionController {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
 			@ApiResponse(responseCode = "409", description = "Some data samples has dependencies and cannot be removed", content = @Content),
-			@ApiResponse(responseCode = "404", description = "Some data samples not found", content = @Content) 
+			@ApiResponse(responseCode = "404", description = "Some data samples not found", content = @Content)
 	})
 	ResponseEntity<Void> deleteDataSampleList(
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			@RequestBody List<String> dataSampleNames, Principal principal);
-	
+
 	@DeleteMapping(DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE)
 	@Operation(summary = "Delete all data samples of data collection", description = "Delete all data samples of data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Data samples is deleted", content = @Content),
 			@ApiResponse(responseCode = "409", description = "Data samples has dependencies and cannot be removed", content = @Content),
-			@ApiResponse(responseCode = "404", description = "Data samples not found", content = @Content) 
+			@ApiResponse(responseCode = "404", description = "Data samples not found", content = @Content)
 	})
 	ResponseEntity<Void> deleteAllDataSamples(
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			 Principal principal);
-	
+
 	@PutMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT)
 	@Operation(summary = "Update data sample, set as default", description = "Update data sample, set data sample as default for data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
@@ -225,7 +232,7 @@ public interface DataCollectionController {
 			@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
 			@Parameter(description = "Data sample name encoded with base64.") @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String dataSampleName,
 			@RequestBody DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, Principal principal);
-	
+
 	@PostMapping(DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE)
 	@Operation(summary = "Create new version data sample", description = "Create new version data sample", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
@@ -242,5 +249,4 @@ public interface DataCollectionController {
 			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			@PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name, VersionFilter versionFilter,
 			@RequestParam(value = "search", required = false) String searchParam);
-
 }

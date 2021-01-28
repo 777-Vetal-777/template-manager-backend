@@ -21,15 +21,15 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "modifiedBy", "modifiedOn", "comment", "isDefault");
 
     String DATA_SAMPLE_TABLE_SELECT_CLAUSE = "select ds from DataSampleEntity ds " +
-    		"join ds.lastDataSampleLog lastLog " +
+            "join ds.lastDataSampleLog lastLog " +
             "join ds.latestVersion latestFile " +
             "where ds.dataCollection.id = :collectionId ";
 
     String DATA_SAMPLE_TABLE_FILTER_CONDITION = "and (:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
-    		+ "and (:modifiedBy='' or LOWER(CONCAT(lastLog.author.firstName, ' ',lastLog.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(lastLog.author.firstName, ' ',lastLog.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or ds.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:description='' or LOWER(ds.description) like CONCAT('%',:description,'%'))"
-            + "and (:isDefault=null or ds.isDefault IS :isDefault) "; 
+            + "and (:isDefault=null or ds.isDefault IS :isDefault) ";
 
     String DATA_SAMPLE_TABLE_SEARCH_CONDITION = " and (CAST(ds.modifiedOn as string) like CONCAT('%',:search,'%') "
             + "or LOWER(ds.description) like CONCAT('%',:search,'%') "
@@ -38,7 +38,7 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION)
     Page<DataSampleEntity> filter(Pageable pageable,
-    							  @Param("collectionId") @Nullable Long collectionId,
+                                  @Param("collectionId") @Nullable Long collectionId,
                                   @Param("name") @Nullable String name,
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
@@ -48,7 +48,7 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION + DATA_SAMPLE_TABLE_SEARCH_CONDITION)
     Page<DataSampleEntity> search(Pageable pageable,
-    							  @Param("collectionId") @Nullable Long collectionId,
+                                  @Param("collectionId") @Nullable Long collectionId,
                                   @Param("name") @Nullable String name,
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
@@ -58,13 +58,16 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
                                   @Param("search") @Nullable String search);
 
     Optional<DataSampleEntity> findByName(String name);
-    
+
     Boolean existsByName(String name);
-    
+
     Boolean existsByDataCollection(DataCollectionEntity dataCollection);
-    
+
     Optional<List<DataSampleEntity>> findByDataCollection(DataCollectionEntity dataCollection);
 
+    @Query(DATA_SAMPLE_TABLE_SELECT_CLAUSE)
+    List<DataSampleEntity> findDataSampleEntitiesByDataCollectionId(@Param("collectionId") Long id);
+
     @Query("select file from DataSampleFileEntity file where file.dataSample.Id = :id and file.version = (select max(file.version) from file where file.dataSample.Id = :id)")
-   DataSampleFileEntity findLastByDataSampleAndVersionMax(@Param("id") long id);
+    DataSampleFileEntity findLastByDataSampleAndVersionMax(@Param("id") long id);
 }

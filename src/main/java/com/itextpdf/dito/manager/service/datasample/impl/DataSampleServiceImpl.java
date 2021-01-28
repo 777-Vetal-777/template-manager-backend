@@ -144,6 +144,11 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		return dataSampleRepository.findByName(dataSampleName).orElseThrow(() -> new DataSampleNotFoundException(dataSampleName));
 	}
 
+    @Override
+    public List<DataSampleEntity> list(Long dataCollectionId) {
+        return dataSampleRepository.findDataSampleEntitiesByDataCollectionId(dataCollectionId);
+    }
+
 	private Pageable updateSort(final Pageable pageable) {
 		Sort newSort = Sort.by(pageable.getSort().stream()
 				.map(sortParam -> {
