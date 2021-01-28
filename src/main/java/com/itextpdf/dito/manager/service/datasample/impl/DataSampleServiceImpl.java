@@ -145,7 +145,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	}
 
     @Override
-    public List<DataSampleEntity> list(Long dataCollectionId) {
+    public List<DataSampleEntity> list(final Long dataCollectionId) {
         return dataSampleRepository.findDataSampleEntitiesByDataCollectionId(dataCollectionId);
     }
 

@@ -59,7 +59,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
     }
     
     @Override
-    public DataSampleEntity map(DataSampleUpdateRequestDTO dto) {
+    public DataSampleEntity map(final DataSampleUpdateRequestDTO dto) {
         final DataSampleEntity entity = new DataSampleEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
@@ -67,7 +67,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
     }
 
     @Override
-    public List<DataSampleDTO> map(List<DataSampleEntity> entities) {
+    public List<DataSampleDTO> map(final List<DataSampleEntity> entities) {
         return entities.stream().map(this::map).collect(Collectors.toList());
 
     }

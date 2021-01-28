@@ -236,7 +236,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 				HttpStatus.OK);
 	}
     @Override
-    public ResponseEntity<List<DataSampleDTO>> listDataSamples(String dataCollectionName) {
+    public ResponseEntity<List<DataSampleDTO>> listDataSamples(final String dataCollectionName) {
         final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
         return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(dataCollection.getId())),
                 HttpStatus.OK);
