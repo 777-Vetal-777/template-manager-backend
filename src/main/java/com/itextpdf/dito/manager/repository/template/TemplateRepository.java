@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
-    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "editedOn");
+    List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "modifiedOn");
 
     String TEMPLATE_TABLE_SELECT_CLAUSE = "select template from TemplateEntity template "
             + "left join template.latestFile templateFile "
