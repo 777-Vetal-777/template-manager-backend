@@ -26,7 +26,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 	@Override
 	public DataSampleDTO map(final DataSampleEntity entity) {
 		final DataSampleDTO dto = new DataSampleDTO();
-		final UserEntity modifiedBy = entity.getAuthor();
+		final UserEntity modifiedBy = entity.getModifiedBy();
         dto.setName(entity.getName());
         dto.setModifiedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
         dto.setModifiedOn(entity.getModifiedOn());
