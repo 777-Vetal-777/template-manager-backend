@@ -69,7 +69,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("stage") @Nullable String stageName,
                                   @Param("search") @Nullable String search);
 
-    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
@@ -90,7 +90,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("type") @Nullable ResourceTypeEnum type,
                                  @Param("stage") @Nullable String stage);
 
-    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
@@ -117,7 +117,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("stage") @Nullable String stage,
                                  @Param("search") @Nullable String search);
 
-    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, file.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "

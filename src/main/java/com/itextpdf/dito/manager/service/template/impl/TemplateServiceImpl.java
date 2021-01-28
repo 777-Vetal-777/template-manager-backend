@@ -243,9 +243,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, newVersion, fileEntityToCopyDependencies);
         existingTemplateEntity.getFiles().add(fileEntity);
         existingTemplateEntity.getTemplateLogs().add(logEntity);
-
-        final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
-        fileEntity.getInstance().addAll(developerStageInstances);
+        existingTemplateEntity.setLatestLogRecord(logEntity);
+        existingTemplateEntity.setLatestFile(fileEntity);
 
         return templateRepository.save(existingTemplateEntity);
     }
@@ -272,6 +271,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         } else {
             fileEntity.setData(templateLoader.load());
         }
+        final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
+        fileEntity.getInstance().addAll(developerStageInstances);
         return fileEntity;
     }
 
