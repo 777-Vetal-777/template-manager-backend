@@ -181,4 +181,8 @@ public class DataSampleEntity {
     public void setDataSampleLog(Collection<DataSampleLogEntity> dataSampleLog) {
         this.dataSampleLog = dataSampleLog;
     }
+    
+    public UserEntity getModifiedBy() {
+        return getLastDataSampleLog().getAuthor();
+    }
 }
