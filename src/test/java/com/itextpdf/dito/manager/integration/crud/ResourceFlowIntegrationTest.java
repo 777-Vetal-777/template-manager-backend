@@ -24,8 +24,6 @@ import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
-
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +36,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -57,19 +56,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String DATA_COLLECTION_NAME = "DataCollectionName";
-    private static final String NAME = "test-image";
-    private static final String IMAGE_TYPE = "IMAGE";
-    private static final String FONT_TYPE = "FONT";
     private static final String IMAGES = "images";
     private static final String FONTS = "fonts";
-    private static final String STYLESHEETS = "stylesheets";
-    private static final String IMAGE_FILE_NAME = "any-name.png";
+    private static final String STYLESHEETS = ResourceTypeEnum.STYLESHEET.pluralName;
     private static final Integer AMOUNT_VERSIONS = 5;
     private static final String AUTHOR_NAME = "admin admin";
+
+    private static final String IMAGE_NAME = "test-image";
+    private static final String IMAGE_TYPE = "IMAGE";
+    private static final String IMAGE_FILE_NAME = "any-name.png";
     private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
     private static final MockMultipartFile IMAGE_TYPE_PART = new MockMultipartFile("type", "type", "text/plain", IMAGE_TYPE.getBytes());
-    private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+    private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", IMAGE_NAME.getBytes());
 
+    private static final String STYLESHEET_NAME = "test-stylesheet";
+    private static final String STYLESHEET_TYPE = ResourceTypeEnum.STYLESHEET.toString();
+    private static final MockMultipartFile STYLESHEET_TYPE_PART = new MockMultipartFile("type", "type", "text/plain", STYLESHEET_TYPE.getBytes());
+    private static final MockMultipartFile STYLESHEET_NAME_PART = new MockMultipartFile("name", "name", "text/plain", STYLESHEET_NAME.getBytes());
+    private static final MockMultipartFile STYLESHEET_FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", ".h1 {\n \tfont-style: Helvetica\n }".getBytes());
+
+    private static final String FONT_TYPE = "FONT";
     private static final String REGULAR_FILE_NAME = "regular.ttf";
     private static final String BOLD_FILE_NAME = "bold.ttf";
     private static final String ITALIC_FILE_NAME = "italic.ttf";
@@ -120,7 +126,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateFontAndReturnFileByUUID() throws Exception {
-        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME+FONTS_ENDPOINT).build().encode().toUri();
+        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME + FONTS_ENDPOINT).build().encode().toUri();
         mockMvc.perform(MockMvcRequestBuilders.multipart(createFontURI)
                 .file(NAME_PART)
                 .file(FONT_TYPE_PART)
@@ -131,11 +137,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk());
-        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(NAME, ResourceTypeEnum.FONT);
+        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(IMAGE_NAME, ResourceTypeEnum.FONT);
         assertTrue(createdResourceEntity.isPresent());
         final List<ResourceFileEntity> files = createdResourceEntity.get().getLatestFile();
 
-        for (ResourceFileEntity file: files){
+        for (ResourceFileEntity file : files) {
             mockMvc.perform(
                     get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, file.getUuid()))
                     .andExpect(status().isOk());
@@ -146,8 +152,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewFontsAndReturnThem() throws Exception {
-        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME+FONTS_ENDPOINT).build().encode().toUri();
-              //create resource
+        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME + FONTS_ENDPOINT).build().encode().toUri();
+        //create resource
         mockMvc.perform(MockMvcRequestBuilders.multipart(createFontURI)
                 .file(NAME_PART)
                 .file(FONT_TYPE_PART)
@@ -158,7 +164,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(jsonPath("name").value(IMAGE_NAME))
                 .andExpect(jsonPath("comment").isEmpty())
                 .andExpect(jsonPath("description").isEmpty())
                 .andExpect(jsonPath("createdOn").isNotEmpty())
@@ -177,7 +183,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.metadataUrls[3].fileName").isNotEmpty())
                 .andExpect(jsonPath("$.metadataUrls[3].uuid").isNotEmpty())
                 .andExpect(jsonPath("$.metadataUrls[3].fontType").isNotEmpty());
-        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(NAME, ResourceTypeEnum.FONT);
+        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(IMAGE_NAME, ResourceTypeEnum.FONT);
         assertTrue(createdResourceEntity.isPresent());
         Long createdResourceId = createdResourceEntity.get().getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
@@ -196,12 +202,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //GET by name
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        FONTS, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                        FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk());
         //UPDATE by name
         ResourceUpdateRequestDTO resourceUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/fonts_update_metadata.json"), ResourceUpdateRequestDTO.class);
 
-        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(NAME.getBytes()))
+        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceUpdateRequestDTO)))
                 .andExpect(status().isOk())
@@ -218,7 +224,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //DELETE byPICTURE_FILE_NAME name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        FONTS, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                        FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isNotFound());
     }
 
@@ -254,7 +260,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         final TemplateEntity existingTemplate = template.get();
 
         //CREATE RESOURCE
-        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME+FONTS_ENDPOINT).build().encode().toUri();
+        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME + FONTS_ENDPOINT).build().encode().toUri();
         mockMvc.perform(MockMvcRequestBuilders.multipart(createFontURI)
                 .file(NAME_PART)
                 .file(FONT_TYPE_PART)
@@ -264,7 +270,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(BOLD_ITALIC_FILE_PART)
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA));
-        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(NAME, ResourceTypeEnum.FONT);
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(IMAGE_NAME, ResourceTypeEnum.FONT);
         assertTrue(createdResource.isPresent());
 
         final ResourceEntity createdResourceEntity = createdResource.get();
@@ -274,7 +280,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //GET RESOURCE DEPENDENCIES
         mockMvc.perform(
-                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, FONTS, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk())
                 .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$").value(hasSize(1)))
@@ -295,11 +301,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(jsonPath("name").value(IMAGE_NAME))
                 .andExpect(jsonPath("type").value(IMAGE_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty());
-        Long createdResourceId = resourceRepository.findByName(NAME).getId();
+        Long createdResourceId = resourceRepository.findByName(IMAGE_NAME).getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
         assertNotNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId));
 
@@ -314,13 +320,13 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //GET by name
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        IMAGES, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk());
 
         //DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        IMAGES, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk());
 
         assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
@@ -329,30 +335,25 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //repeat DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        IMAGES, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void test_create_empty_stylesheet() throws Exception {
-        final String stylesheetName = "test-stylesheet";
-        final String stylesheetType = "STYLESHEET";
-        final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
-        final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
-        final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", "".getBytes());
         //Create
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
-                .file(FILE_PART)
-                .file(NAME_PART)
-                .file(TYPE_PART)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value(stylesheetName))
-                .andExpect(jsonPath("type").value(stylesheetType))
+                .andExpect(jsonPath("name").value(STYLESHEET_NAME))
+                .andExpect(jsonPath("type").value(STYLESHEET_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
-        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(stylesheetName, ResourceTypeEnum.STYLESHEET);
+        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(STYLESHEET_NAME, ResourceTypeEnum.STYLESHEET);
         assertTrue(createdResourceEntity.isPresent());
         Long createdResourceId = createdResourceEntity.get().getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
@@ -361,31 +362,25 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void test_create_get_update_delete_stylesheet() throws Exception {
-        final String stylesheetName = "test-stylesheet";
-        final String stylesheetType = "STYLESHEET";
-        final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
-        final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
-        final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", ".h1 {\n \tfont-style: Helvetica\n }".getBytes());
-
         //GET by name and make sure the resource is not exists
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(stylesheetName.getBytes())))
+                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
                 .andExpect(status().isNotFound());
 
         //Create
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
-                .file(FILE_PART)
-                .file(NAME_PART)
-                .file(TYPE_PART)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value(stylesheetName))
-                .andExpect(jsonPath("type").value(stylesheetType))
+                .andExpect(jsonPath("name").value(STYLESHEET_NAME))
+                .andExpect(jsonPath("type").value(STYLESHEET_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
-        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(stylesheetName, ResourceTypeEnum.STYLESHEET);
+        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(STYLESHEET_NAME, ResourceTypeEnum.STYLESHEET);
         assertTrue(createdResourceEntity.isPresent());
         Long createdResourceId = createdResourceEntity.get().getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
@@ -393,19 +388,19 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //Create again and get conflict error
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
-                .file(FILE_PART)
-                .file(NAME_PART)
-                .file(TYPE_PART)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isConflict());
 
         //GET by name
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(stylesheetName.getBytes())))
+                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("name").value(stylesheetName))
-                .andExpect(jsonPath("type").value(stylesheetType))
+                .andExpect(jsonPath("name").value(STYLESHEET_NAME))
+                .andExpect(jsonPath("type").value(STYLESHEET_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
@@ -413,7 +408,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //UPDATE by name
         ResourceUpdateRequestDTO resourceUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/stylesheet_update_metadata.json"), ResourceUpdateRequestDTO.class);
 
-        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(stylesheetName.getBytes()))
+        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceUpdateRequestDTO)))
                 .andExpect(status().isOk())
@@ -450,24 +445,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldAllowCreateEmptyStylesheet() throws Exception {
-        final String stylesheetName = "test-stylesheet";
-        final String stylesheetType = "STYLESHEET";
-        final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
-        final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
-        final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", "".getBytes());
+        final MockMultipartFile EMPTY_FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", "".getBytes());
         //Create
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
-                .file(FILE_PART)
-                .file(NAME_PART)
-                .file(TYPE_PART)
+                .file(EMPTY_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value(stylesheetName))
-                .andExpect(jsonPath("type").value(stylesheetType))
+                .andExpect(jsonPath("name").value(STYLESHEET_NAME))
+                .andExpect(jsonPath("type").value(STYLESHEET_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
-        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(stylesheetName, ResourceTypeEnum.STYLESHEET);
+        final Optional<ResourceEntity> createdResourceEntity = resourceRepository.findByNameAndType(STYLESHEET_NAME, ResourceTypeEnum.STYLESHEET);
         assertTrue(createdResourceEntity.isPresent());
         Long createdResourceId = createdResourceEntity.get().getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
@@ -492,8 +483,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 MockMvcRequestBuilders.multipart(resourcesVersionsURI).file(NAME_PART).file(IMAGE_FILE_PART).file(
                         IMAGE_TYPE_PART)
                         .file(getUpdateTemplateBooleanPart(true)).contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk()).andExpect(jsonPath("name").value(NAME))
-                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(IMAGE_NAME))
                 .andExpect(jsonPath("type").value(IMAGE_TYPE))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("version").value(2L))
@@ -503,12 +494,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateStylesheetVersionsAndReturnThem() throws Exception {
-        final String stylesheetName = "test-stylesheet";
-        final String stylesheetType = "STYLESHEET";
-        final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain", stylesheetType.getBytes());
-        final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", stylesheetName.getBytes());
-        final MockMultipartFile FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", ".h1 {\n \tfont-style: Helvetica\n }".getBytes());
-
         //create test INSTANCE
         InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper
                 .readValue(new File("src/test/resources/test-data/resources/instances-create-request.json"),
@@ -532,7 +517,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated());
 
         //create TEMPLATE
-
         TemplateCreateRequestDTO templateCreateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/template-create-request.json"), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(templateCreateRequestDTO))
@@ -545,12 +529,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //create resource
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
-                .file(FILE_PART)
-                .file(NAME_PART)
-                .file(TYPE_PART)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA));
 
-        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(stylesheetName, ResourceTypeEnum.STYLESHEET);
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(STYLESHEET_NAME, ResourceTypeEnum.STYLESHEET);
         assertTrue(createdResource.isPresent());
 
         final ResourceEntity createdResourceEntity = createdResource.get();
@@ -560,13 +544,14 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //create new versions of resource
         for (int i = 0; i < AMOUNT_VERSIONS; i++) {
-            mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT).file(NAME_PART).file(FILE_PART)
-                    .file(TYPE_PART).file(getUpdateTemplateBooleanPart(true))
+            mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT).file(STYLESHEET_NAME_PART).file(STYLESHEET_FILE_PART)
+                    .file(STYLESHEET_TYPE_PART).file(getUpdateTemplateBooleanPart(true))
                     .contentType(MediaType.MULTIPART_FORM_DATA));
         }
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(stylesheetName.getBytes()))).andExpect(status().isOk())
+                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("content").value(hasSize(6)))
                 .andExpect(jsonPath("$.content[0].version").value(1))
@@ -601,7 +586,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         }
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        IMAGES, Base64.getEncoder().encodeToString(NAME.getBytes()))).andExpect(status().isOk())
+                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("$.content[0].version").value(1))
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
@@ -647,11 +633,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(jsonPath("name").value(IMAGE_NAME))
                 .andExpect(jsonPath("type").value("IMAGE"))
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty());
-        assertNotNull(resourceRepository.findByName(NAME));
+        assertNotNull(resourceRepository.findByName(IMAGE_NAME));
 
         //Create again and get conflict error
         mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
@@ -663,7 +649,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturnSuccessfullyResourceDependencies() throws Exception {
+    void shouldReturnSuccessfullyImageResourceDependencies() throws Exception {
         //CREATE DATA COLLECTION
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{\"file\":\"data\"}".getBytes());
         final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", DATA_COLLECTION_NAME.getBytes());
@@ -702,7 +688,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA)).andExpect(status().isCreated());
 
-        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(NAME, ResourceTypeEnum.IMAGE);
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(IMAGE_NAME, ResourceTypeEnum.IMAGE);
         assertTrue(createdResource.isPresent());
 
         final ResourceEntity createdResourceEntity = createdResource.get();
@@ -715,14 +701,14 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 MockMvcRequestBuilders.multipart(resourcesVersionsURI).file(NAME_PART).file(IMAGE_FILE_PART).file(
                         IMAGE_TYPE_PART)
                         .file(getUpdateTemplateBooleanPart(true)).contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk()).andExpect(jsonPath("name").value(NAME))
-                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(IMAGE_NAME))
                 .andExpect(jsonPath("type").value(IMAGE_TYPE))
                 .andExpect(jsonPath("version").value(2));
 
         //GET RESOURCE DEPENDENCIES
         mockMvc.perform(
-                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk())
                 .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$").value(hasSize(1)))
@@ -732,4 +718,84 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].stage").isEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
     }
+
+    @Test
+    void shouldReturnSuccessfullyStylesheetResourceDependencies() throws Exception {
+        //CREATE DATA COLLECTION
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", DATA_COLLECTION_NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", "JSON".getBytes());
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("name").value(DATA_COLLECTION_NAME));
+
+        final Optional<DataCollectionEntity> existingDataCollectionEntity = dataCollectionRepository.findByName(DATA_COLLECTION_NAME);
+        assertTrue(existingDataCollectionEntity.isPresent());
+
+        //CREATE TEMPLATE
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        request.setDataCollectionName(DATA_COLLECTION_NAME);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("dataCollection").value(DATA_COLLECTION_NAME));
+
+        //create NEW VERSION of a TEMPLATE
+        final MockMultipartFile template_name_file = new MockMultipartFile("name", "name", "text/plain", request.getName().getBytes());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_VERSION_ENDPOINT)
+                .file(template_name_file)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
+
+        final Optional<TemplateEntity> template = templateRepository.findByName(request.getName());
+        assertTrue(template.isPresent());
+        final TemplateEntity existingTemplate = template.get();
+
+        //CREATE RESOURCE
+        final URI createResourceURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode().toUri();
+        final URI resourcesVersionsURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT).build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(createResourceURI)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA)).andExpect(status().isCreated());
+
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(STYLESHEET_NAME, ResourceTypeEnum.STYLESHEET);
+        assertTrue(createdResource.isPresent());
+
+        final ResourceEntity createdResourceEntity = createdResource.get();
+        final ResourceFileEntity latestFile = resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceEntity.getId());
+        existingTemplate.getLatestFile().getResourceFiles().addAll(Collections.singleton(latestFile));
+        templateFileRepository.save(existingTemplate.getLatestFile());
+
+        //create new version of resource
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart(resourcesVersionsURI).file(STYLESHEET_NAME_PART).file(STYLESHEET_FILE_PART).file(
+                        STYLESHEET_TYPE_PART)
+                        .file(getUpdateTemplateBooleanPart(true)).contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(STYLESHEET_NAME))
+                .andExpect(jsonPath("type").value(STYLESHEET_TYPE))
+                .andExpect(jsonPath("version").value(2));
+
+        //GET RESOURCE DEPENDENCIES
+        mockMvc.perform(
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
+                .andExpect(status().isOk())
+                .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
+                .andExpect(jsonPath("$").value(hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value(existingTemplate.getName()))
+                .andExpect(jsonPath("$[0].version").value(3))
+                .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
+                .andExpect(jsonPath("$[0].stage").isEmpty())
+                .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
+    }
+
 }
