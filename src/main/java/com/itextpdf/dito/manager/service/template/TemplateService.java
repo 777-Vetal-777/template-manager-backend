@@ -27,6 +27,8 @@ public interface TemplateService {
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#email, #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     TemplateEntity createNewVersion(String name, byte[] data, String email, String comment);
 
+    TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String templateName);
+
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #fileEntityToCopy.getTemplate(), 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
