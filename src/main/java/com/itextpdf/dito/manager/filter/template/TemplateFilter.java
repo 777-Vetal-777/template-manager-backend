@@ -8,7 +8,7 @@ public class TemplateFilter {
     private String name;
     private String dataCollection;
     //always array with two dates as string from FE
-    private List<String> editedOn;
+    private List<String> modifiedOn;
     private String modifiedBy;
     private List<TemplateTypeEnum> type;
 
@@ -20,12 +20,12 @@ public class TemplateFilter {
         this.name = name;
     }
 
-    public List<String> getEditedOn() {
-        return editedOn;
+    public List<String> getModifiedOn() {
+        return modifiedOn;
     }
 
-    public void setEditedOn(List<String> editedOn) {
-        this.editedOn = editedOn;
+    public void setModifiedOn(List<String> modifiedOn) {
+        this.modifiedOn = modifiedOn;
     }
 
     public String getModifiedBy() {
