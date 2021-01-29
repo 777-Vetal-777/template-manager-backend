@@ -124,6 +124,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
         existingRole.setName(updatedRole.getName());
         setPermissions(existingRole, permissions);
+        setDefaultPermissions(existingRole);
         return roleRepository.save(existingRole);
     }
 
