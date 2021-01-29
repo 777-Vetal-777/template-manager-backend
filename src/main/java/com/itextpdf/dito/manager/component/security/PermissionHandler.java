@@ -9,18 +9,7 @@ public interface PermissionHandler {
     //  Resources
     boolean checkResourceCommonPermissionByType(Authentication authentication, String type);
 
-    boolean checkResourceCreateVersionPermissionByType(Authentication authentication, String type);
-
     boolean checkResourceCreatePermissionByType(Authentication authentication, String type);
-
-    boolean checkResourceDeletePermissionByType(Authentication authentication, String type);
-
-    boolean checkResourceEditPermissionByType(Authentication authentication, String type);
-
-    //  Templates
-    boolean checkTemplateCommonPermissionByType(Authentication authentication, String type);
-
-    boolean checkTemplateCommonPermissionByType(Authentication authentication, TemplateCreateRequestDTO request);
 
     boolean checkResourceCreateVersionPermissions(String email, String resourceType, String resourceName);
 
@@ -28,9 +17,16 @@ public interface PermissionHandler {
 
     boolean checkResourceDeletePermissions(String email, String resourceType, String resourceName);
 
-    boolean checkDataCollectionPermissions(String email, String dataCollectionName, String checkingPermission);
+    //  Templates
+    boolean checkTemplateCommonPermissionByType(Authentication authentication, String type);
+
+    boolean checkTemplateCommonPermissionByType(Authentication authentication, TemplateCreateRequestDTO request);
 
     boolean checkTemplatePermissions(UserEntity userEntity, TemplateEntity templateEntity, String permission);
 
     boolean checkTemplatePermissions(String email, String templateName, String checkingPermission);
+
+    //  Data Collections
+    boolean checkDataCollectionPermissions(String email, String dataCollectionName, String checkingPermission);
+
 }

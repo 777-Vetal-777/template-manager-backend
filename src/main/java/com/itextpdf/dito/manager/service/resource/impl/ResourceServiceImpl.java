@@ -12,7 +12,6 @@ import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
-import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
@@ -38,10 +37,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,35 +54,6 @@ import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @Service
 public class ResourceServiceImpl extends AbstractService implements ResourceService {
-    // Image
-    private static final String PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE = "E8_US55_EDIT_RESOURCE_METADATA_IMAGE";
-    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE = "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE";
-    private static final String PERMISSION_NAME_FOR_ROLLBACK_IMAGE = "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE";
-    private static final String PERMISSION_NAME_FOR_DELETE_IMAGE = "E8_US66_DELETE_RESOURCE_IMAGE";
-    private static final List<String> AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES = Arrays.asList(
-            PERMISSION_NAME_FOR_EDIT_METADATA_IMAGE,
-            PERMISSION_NAME_FOR_EDIT_RESOURCE_IMAGE,
-            PERMISSION_NAME_FOR_ROLLBACK_IMAGE,
-            PERMISSION_NAME_FOR_DELETE_IMAGE);
-    private static final String PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET = "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET";
-    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET = "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET";
-    private static final String PERMISSION_NAME_FOR_ROLLBACK_STYLESHEET = "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET";
-    private static final String PERMISSION_NAME_FOR_DELETE_STYLESHEET = "E8_US66_2_DELETE_RESOURCE_STYLESHEET";
-    private static final List<String> AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES = Arrays.asList(
-            PERMISSION_NAME_FOR_EDIT_METADATA_STYLESHEET,
-            PERMISSION_NAME_FOR_EDIT_RESOURCE_STYLESHEET,
-            PERMISSION_NAME_FOR_ROLLBACK_STYLESHEET,
-            PERMISSION_NAME_FOR_DELETE_STYLESHEET);
-    private static final String PERMISSION_NAME_FOR_EDIT_METADATA_FONT = "E8_US58_EDIT_RESOURCE_METADATA_FONT";
-    private static final String PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT = "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT";
-    private static final String PERMISSION_NAME_FOR_ROLLBACK_FONT = "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT";
-    private static final String PERMISSION_NAME_FOR_DELETE_FONT = "E8_US66_1_DELETE_RESOURCE_FONT";
-    private static final List<String> AVAILABLE_PERMISSIONS_FOR_FONT_SLAVE_ROLES = Arrays.asList(
-            PERMISSION_NAME_FOR_EDIT_METADATA_FONT,
-            PERMISSION_NAME_FOR_EDIT_RESOURCE_FONT,
-            PERMISSION_NAME_FOR_ROLLBACK_FONT,
-            PERMISSION_NAME_FOR_DELETE_FONT);
-
     private final ResourceRepository resourceRepository;
     private final ResourceFileRepository resourceFileRepository;
     private final TemplateRepository templateRepository;
@@ -92,7 +61,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private final UserService userService;
     private final RoleService roleService;
     private final PermissionService permissionService;
-    private final Map<ResourceTypeEnum, ContentValidator> contentValidators = new HashMap<>();
+    private final Map<ResourceTypeEnum, ContentValidator> contentValidators = new EnumMap<>(ResourceTypeEnum.class);
 
     public ResourceServiceImpl(
             final ResourceRepository resourceRepository,
@@ -241,8 +210,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity applyRole(final String resourceName, final ResourceTypeEnum resourceType,
                                     final String roleName,
                                     final List<String> permissions) {
-        checkIfPermissionsAllowedForResourceType(permissions, resourceType);
-
         final ResourceEntity resourceEntity = getResource(resourceName, resourceType);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, resourceEntity);
@@ -268,30 +235,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         resourceEntity.getAppliedRoles().add(slaveRoleEntity);
         return resourceRepository.save(resourceEntity);
-    }
-
-    private void checkIfPermissionsAllowedForResourceType(final List<String> permissions,
-                                                          final ResourceTypeEnum resourceTypeEnum) {
-        switch (resourceTypeEnum) {
-            case IMAGE:
-                throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_IMAGE_SLAVE_ROLES);
-                break;
-            case STYLESHEET:
-                throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_STYLESHEET_SLAVE_ROLES);
-                break;
-            case FONT:
-                throwExceptionIfPermissionIsNotPresented(permissions, AVAILABLE_PERMISSIONS_FOR_FONT_SLAVE_ROLES);
-                break;
-        }
-    }
-
-    private void throwExceptionIfPermissionIsNotPresented(final List<String> permissions,
-                                                          final List<String> allowedPermissions) {
-        for (final String permission : permissions) {
-            if (!allowedPermissions.contains(permission)) {
-                throw new PermissionIsNotAllowedForResourceTypeException(permission);
-            }
-        }
     }
 
     @Override
@@ -345,7 +288,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Override
     public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
         final ResourceEntity deletingResourceEntity = getResource(name, type);
-        final UserEntity userEntity = userService.findByEmail(mail);
 
         if (hasOutboundDependencies(deletingResourceEntity.getId())) {
             throw new ResourceHasDependenciesException();
