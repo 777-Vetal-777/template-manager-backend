@@ -63,7 +63,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
         }
         return StringUtils.isEmpty(searchParam)
                 ? dataCollectionFileRepository.filter(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment)
-                : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment, searchParam);
+                : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment, searchParam.toLowerCase());
     }
 
     private Pageable updateSort(final Pageable pageable) {
