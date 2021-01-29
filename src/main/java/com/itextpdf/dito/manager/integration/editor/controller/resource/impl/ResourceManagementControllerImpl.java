@@ -1,7 +1,10 @@
 package com.itextpdf.dito.manager.integration.editor.controller.resource.impl;
 
+import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.ImageDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.StylesheetDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.resource.ResourceManagementController;
 import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
@@ -11,7 +14,7 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,11 +54,18 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     @Override
     public List<ResourceLeafDescriptor> add(final Principal principal, final ResourceLeafDescriptor descriptor,
             final InputStream data) throws IOException {
-        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(descriptor.getId());
+        final ResourceTypeEnum resourceTypeEnum;
+        if (descriptor instanceof ImageDescriptor) {
+            resourceTypeEnum = ResourceTypeEnum.IMAGE;
+        } else if (descriptor instanceof StylesheetDescriptor) {
+            resourceTypeEnum = ResourceTypeEnum.STYLESHEET;
+        } else {
+            resourceTypeEnum = ResourceTypeEnum.FONT;
+        }
         final ResourceEntity resourceEntity = resourceService
-                .create(resourceIdDTO.getName(), resourceIdDTO.getType(), data.readAllBytes(), resourceIdDTO.getName(),
+                .create(descriptor.getDisplayName(), resourceTypeEnum, data.readAllBytes(), descriptor.getDisplayName(),
                         principal.getName());
-        return Arrays.asList(resourceLeafDescriptorMapper.map(resourceEntity));
+        return Collections.singletonList(resourceLeafDescriptorMapper.map(resourceEntity));
     }
 
     @Override
