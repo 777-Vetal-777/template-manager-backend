@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration.editor.controller.resource;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,5 +31,5 @@ public interface ResourceManagementController {
     List<ResourceLeafDescriptor> add(@RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data);
 
     @DeleteMapping(RESOURCE_URL)
-    void deleteResourceById(@PathVariable("resource-id") String resourceId);
+    void deleteResourceById(Principal principal, @PathVariable("resource-id") String resourceId);
 }

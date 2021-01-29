@@ -35,6 +35,8 @@ public interface ResourceService {
 
     Page<ResourceEntity> list(Pageable pageable, ResourceFilter filter, String searchParam);
 
+    List<ResourceEntity> list();
+
     ResourceEntity getResource(String name, ResourceTypeEnum type);
 
     byte[] getFile(String uuid);
