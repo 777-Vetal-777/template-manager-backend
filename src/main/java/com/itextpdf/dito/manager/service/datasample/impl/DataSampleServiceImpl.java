@@ -200,8 +200,9 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 			throw new InvalidDataSampleException();
 		}
 		final DataSampleEntity dataSampleEntity = get(name);
+		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection();
 		final DataSampleFileEntity lastEntity = dataSampleEntity.getLatestVersion();
-		final String jsonFromCollection = new String(lastEntity.getData());
+		final String jsonFromCollection = new String(dataCollectionEntity.getLatestVersion().getData());
 		if (!jsonKeyComparator.checkJsonKeysEquals(jsonFromCollection, sample)) {
 			throw new InvalidDataSampleStructureException();
 		}
