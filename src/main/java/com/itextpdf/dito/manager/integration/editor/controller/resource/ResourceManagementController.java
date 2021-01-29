@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration.editor.controller.resource;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.List;
@@ -24,11 +25,12 @@ public interface ResourceManagementController {
     List<ResourceLeafDescriptor> getWorkspaceResources(@PathVariable("workspace-id") String workspaceId);
 
     @PutMapping(RESOURCE_URL)
-    ResourceLeafDescriptor createOrUpdate(@PathVariable("resource-id") String resourceId,
-            @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data);
+    ResourceLeafDescriptor createOrUpdate(Principal principal, @PathVariable("resource-id") String resourceId,
+            @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data) throws IOException;
 
     @PostMapping(CREATE_RESOURCE_URL)
-    List<ResourceLeafDescriptor> add(@RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data);
+    List<ResourceLeafDescriptor> add(Principal principal, @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data)
+            throws IOException;
 
     @DeleteMapping(RESOURCE_URL)
     void deleteResourceById(Principal principal, @PathVariable("resource-id") String resourceId);

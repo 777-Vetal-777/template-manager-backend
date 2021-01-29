@@ -8,8 +8,10 @@ import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,15 +38,24 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public ResourceLeafDescriptor createOrUpdate(final String resourceId, final ResourceLeafDescriptor descriptor,
-            final InputStream data) {
-
-        return null;
+    public ResourceLeafDescriptor createOrUpdate(final Principal principal, final String resourceId,
+            final ResourceLeafDescriptor descriptor,
+            final InputStream data) throws IOException {
+        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
+        final ResourceEntity resourceEntity = resourceService
+                .createNewVersion(resourceIdDTO.getName(), resourceIdDTO.getType(), data.readAllBytes(),
+                        resourceIdDTO.getName(), principal.getName(), null);
+        return resourceLeafDescriptorMapper.map(resourceEntity);
     }
 
     @Override
-    public List<ResourceLeafDescriptor> add(final ResourceLeafDescriptor descriptor, final InputStream data) {
-        return null;
+    public List<ResourceLeafDescriptor> add(final Principal principal, final ResourceLeafDescriptor descriptor,
+            final InputStream data) throws IOException {
+        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(descriptor.getId());
+        final ResourceEntity resourceEntity = resourceService
+                .create(resourceIdDTO.getName(), resourceIdDTO.getType(), data.readAllBytes(), resourceIdDTO.getName(),
+                        principal.getName());
+        return Arrays.asList(resourceLeafDescriptorMapper.map(resourceEntity));
     }
 
     @Override
