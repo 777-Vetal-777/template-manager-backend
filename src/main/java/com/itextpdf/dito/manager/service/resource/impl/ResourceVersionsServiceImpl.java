@@ -59,7 +59,7 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
         }
         return StringUtils.isEmpty(searchParam)
                 ? resourceFileRepository.filter(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName)
-                : resourceFileRepository.search(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam);
+                : resourceFileRepository.search(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam.toLowerCase());
     }
 
     private Pageable updateSort(final Pageable pageable) {

@@ -57,7 +57,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
         }
         return StringUtils.isEmpty(searchParam)
                 ? templateFileRepository.filter(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName)
-                : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam);
+                : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam.toLowerCase());
     }
 
     private Pageable updateSort(final Pageable pageable) {
