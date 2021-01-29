@@ -286,6 +286,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
+    public List<ResourceEntity> list() {
+        return resourceRepository.findAll();
+    }
+
+    @Override
     public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
         final ResourceEntity deletingResourceEntity = getResource(name, type);
 
