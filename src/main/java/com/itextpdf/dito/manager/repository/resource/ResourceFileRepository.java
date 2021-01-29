@@ -80,14 +80,12 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             //filtering
             + "file.resource.id = :id "
             + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
-            + "and (:version=0l or file.version is null or file.version=:version) "
-            + "and (:type is null or file.resource.type = :type) "
+            + "and (:version=0l or templateFiles.version is null or templateFiles.version=:version) "
             + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ")
     Page<DependencyModel> filter(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
-                                 @Param("type") @Nullable ResourceTypeEnum type,
                                  @Param("stage") @Nullable String stage);
 
     @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
@@ -101,19 +99,17 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             //filtering
             + "resource.id = :id "
             + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
-            + "and (:version=0l or file.version is null or file.version=:version) "
-            + "and (:type is null or file.resource.type = :type) "
+            + "and (:version=0l or templateFiles.version is null or templateFiles.version=:version) "
             + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) "
             //search
             + "and LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or CAST(file.version as string) like CONCAT('%',:search,'%') "
-            + "or LOWER(CAST(file.resource.type as string)) like CONCAT('%',:search,'%') "
+            + "or CAST(templateFiles.version as string) like CONCAT('%',:search,'%') "
+            + "or 'template' like CONCAT('%',:search,'%') "
             + "or LOWER(stage.name) like CONCAT('%',:search,'%')")
     Page<DependencyModel> search(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
-                                 @Param("type") @Nullable ResourceTypeEnum type,
                                  @Param("stage") @Nullable String stage,
                                  @Param("search") @Nullable String search);
 
