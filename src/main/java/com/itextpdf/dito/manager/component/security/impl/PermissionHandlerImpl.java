@@ -17,8 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,25 +33,30 @@ public class PermissionHandlerImpl implements PermissionHandler {
             TemplateTypeEnum.HEADER, "E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"::equals,
             TemplateTypeEnum.FOOTER, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals);
 
-    private final Map<ResourceTypeEnum, Predicate<String>> resourceCommonPermissionsByType = Map.of(
+    private static final Map<ResourceTypeEnum, Predicate<String>> RESOURCE_VIEW_PERMISSIONS = Map.of(
             ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,
             ResourceTypeEnum.FONT, "E8_US57_VIEW_RESOURCE_METADATA_FONT"::equals,
             ResourceTypeEnum.STYLESHEET, "E8_US60_VIEW_RESOURCE_METADATA_STYLESHEET"::equals);
 
-    private final Map<ResourceTypeEnum, Predicate<String>> resourceCreatePermissionsByType = Map.of(
-            ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,
-            ResourceTypeEnum.STYLESHEET, "E8_US60_VIEW_RESOURCE_METADATA_STYLESHEET"::equals);
+    private static final Map<ResourceTypeEnum, Predicate<String>> RESOURCE_CREATE_PERMISSIONS = Map.of(
+            ResourceTypeEnum.IMAGE, "E8_US53_CREATE_NEW_RESOURCE_IMAGE"::equals,
+            ResourceTypeEnum.STYLESHEET, "E8_US59_CREATE_NEW_RESOURCE_STYLESHEET"::equals,
+            ResourceTypeEnum.FONT, "E8_US56_CREATE_NEW_RESOURCE_FONT"::equals);
 
-    private final Map<ResourceTypeEnum, Predicate<String>> resourceEditPermissionsByType = Map.of(
-            ResourceTypeEnum.IMAGE, "E8_US55_EDIT_RESOURCE_METADATA_IMAGE"::equals,
-            ResourceTypeEnum.FONT, "E8_US58_EDIT_RESOURCE_METADATA_FONT"::equals,
-            ResourceTypeEnum.STYLESHEET, "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET"::equals
-    );
+    private static final Map<ResourceTypeEnum, String> RESOURCE_CREATE_NEW_VERSION_PERMISSIONS =
+            Map.of(ResourceTypeEnum.IMAGE, "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE",
+                    ResourceTypeEnum.STYLESHEET, "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET",
+                    ResourceTypeEnum.FONT, "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT");
 
-    private final Map<ResourceTypeEnum, Predicate<String>> resourceCreateVersionPermissionsByType = Map.of(
-            ResourceTypeEnum.IMAGE, "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE"::equals,
-            ResourceTypeEnum.STYLESHEET, "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET"::equals
-    );
+    private static final Map<ResourceTypeEnum, String> RESOURCE_EDIT_METADATA_PERMISSIONS =
+            Map.of(ResourceTypeEnum.IMAGE, "E8_US55_EDIT_RESOURCE_METADATA_IMAGE",
+                    ResourceTypeEnum.STYLESHEET, "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET",
+                    ResourceTypeEnum.FONT, "E8_US58_EDIT_RESOURCE_METADATA_FONT");
+
+    private static final Map<ResourceTypeEnum, String> RESOURCE_DELETE_PERMISSIONS =
+            Map.of(ResourceTypeEnum.IMAGE, "E8_US66_DELETE_RESOURCE_IMAGE",
+                    ResourceTypeEnum.STYLESHEET, "E8_US66_2_DELETE_RESOURCE_STYLESHEET",
+                    ResourceTypeEnum.FONT, "E8_US66_1_DELETE_RESOURCE_FONT");
 
     private final UserService userService;
     private final TemplateService templateService;
@@ -76,15 +79,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
                                                        final String type) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(resourceCommonPermissionsByType.get(fromPluralNameOrParse(type)));
-    }
-
-    @Override
-    public boolean checkResourceCreateVersionPermissionByType(final Authentication authentication,
-                                                              final String type) {
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(resourceCreateVersionPermissionsByType.get(fromPluralNameOrParse(type)));
+                .anyMatch(RESOURCE_VIEW_PERMISSIONS.get(fromPluralNameOrParse(type)));
     }
 
     @Override
@@ -92,24 +87,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
                                                        final String type) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(resourceCreatePermissionsByType.get(fromPluralNameOrParse(type)));
-    }
-
-
-    @Override
-    public boolean checkResourceDeletePermissionByType(final Authentication authentication,
-                                                       final String type) {
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch("E8_US66_DELETE_RESOURCE_IMAGE"::equals);
-    }
-
-    @Override
-    public boolean checkResourceEditPermissionByType(final Authentication authentication,
-                                                     final String type) {
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(resourceEditPermissionsByType.get(fromPluralNameOrParse(type)));
+                .anyMatch(RESOURCE_CREATE_PERMISSIONS.get(fromPluralNameOrParse(type)));
     }
 
     //  Templates
@@ -136,36 +114,23 @@ public class PermissionHandlerImpl implements PermissionHandler {
 
     @Override
     public boolean checkResourceCreateVersionPermissions(final String email, final String resourceType, final String resourceName) {
-        final Map<ResourceTypeEnum, String> createNewVersionResourcePermissions =
-                Map.of(ResourceTypeEnum.IMAGE, "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE",
-                        ResourceTypeEnum.STYLESHEET, "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET",
-                        ResourceTypeEnum.FONT, "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT");
         final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
 
-        return checkResourcePermissions(email, type, resourceName, createNewVersionResourcePermissions.get(type));
+        return checkResourcePermissions(email, type, resourceName, RESOURCE_CREATE_NEW_VERSION_PERMISSIONS.get(type));
     }
 
     @Override
     public boolean checkResourceEditMetadataPermissions(final String email, final String resourceType, final String resourceName) {
-        final Map<ResourceTypeEnum, String> editMetadataResourcePermissions =
-                Map.of(ResourceTypeEnum.IMAGE, "E8_US55_EDIT_RESOURCE_METADATA_IMAGE",
-                        ResourceTypeEnum.STYLESHEET, "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET",
-                        ResourceTypeEnum.FONT, "E8_US58_EDIT_RESOURCE_METADATA_FONT");
-
         final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
 
-        return checkResourcePermissions(email, type, resourceName, editMetadataResourcePermissions.get(type));
+        return checkResourcePermissions(email, type, resourceName, RESOURCE_EDIT_METADATA_PERMISSIONS.get(type));
     }
 
     @Override
     public boolean checkResourceDeletePermissions(final String email, final String resourceType, final String resourceName) {
-        final Map<ResourceTypeEnum, String> deleteResourcePermissions =
-                Map.of(ResourceTypeEnum.IMAGE, "E8_US66_DELETE_RESOURCE_IMAGE",
-                        ResourceTypeEnum.STYLESHEET, "E8_US66_2_DELETE_RESOURCE_STYLESHEET",
-                        ResourceTypeEnum.FONT, "E8_US66_1_DELETE_RESOURCE_FONT");
         final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
 
-        return checkResourcePermissions(email, type, resourceName, deleteResourcePermissions.get(type));
+        return checkResourcePermissions(email, type, resourceName, RESOURCE_DELETE_PERMISSIONS.get(type));
     }
 
 

@@ -51,16 +51,6 @@ import static java.util.Collections.singleton;
 
 @Service
 public class DataCollectionServiceImpl extends AbstractService implements DataCollectionService {
-
-    private static final String PERMISSION_NAME_FOR_EDIT_DATA_COLLECTION_METADATA = "E6_US34_EDIT_DATA_COLLECTION_METADATA";
-    private static final String PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON = "E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON";
-    private static final String PERMISSION_NAME_FOR_ROLL_BACK_OF_THE_DATA_COLLECTION = "E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION";
-    private static final String PERMISSION_NAME_FOR_DELETE_DATA_COLLECTION = "E6_US38_DELETE_DATA_COLLECTION";
-    private static final String PERMISSION_NAME_FOR_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE = "E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE";
-    private static final String PERMISSION_NAME_FOR_EDIT_SAMPLE_METADATA = "E7_US47_EDIT_SAMPLE_METADATA";
-    private static final String PERMISSION_NAME_FOR_CREATE_NEW_VERSION_OF_DATA_SAMPLE = "E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE";
-    private static final String PERMISSION_NAME_FOR_DELETE_DATA_SAMPLE = "E7_US50_DELETE_DATA_SAMPLE";
-
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
     private final DataCollectionFileRepository dataCollectionFileRepository;

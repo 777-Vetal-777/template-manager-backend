@@ -82,6 +82,7 @@ public interface ResourceController {
     ResponseEntity<byte[]> getFile(@Parameter(name = FILE_UUID_PATH_VARIABLE, description = "Encoded with base64 file uuid", required = true) @PathVariable(FILE_UUID_PATH_VARIABLE) String name);
 
     @PostMapping(path = FONTS_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionHandlerImpl.checkResourceCreatePermissionByType(authentication, #type)")
     @Operation(summary = "Save new fonts.", description = "Api for saving new fonts (.ttf)",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -92,13 +93,12 @@ public interface ResourceController {
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
     ResponseEntity<ResourceDTO> createFont(Principal principal,
-            @Parameter(name = "name", description = "Resource name", style = ParameterStyle.FORM) @RequestPart String name,
-            @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM, required = true) @RequestPart String type,
-            @Parameter(name = "regular", description = "File: regular font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("regular") MultipartFile regular,
-            @Parameter(name = "bold", description = "File: bold font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold") MultipartFile bold,
-            @Parameter(name = "italic", description = "File: italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("italic") MultipartFile italic,
-            @Parameter(name = "bold_italic", description = "File: bold italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold_italic") MultipartFile boldItalic);
-
+                                           @Parameter(name = "name", description = "Resource name", style = ParameterStyle.FORM) @RequestPart String name,
+                                           @Parameter(name = "type", description = "Resource type, e.g. image, font, style sheet", style = ParameterStyle.FORM, required = true) @RequestPart String type,
+                                           @Parameter(name = "regular", description = "File: regular font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("regular") MultipartFile regular,
+                                           @Parameter(name = "bold", description = "File: bold font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold") MultipartFile bold,
+                                           @Parameter(name = "italic", description = "File: italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("italic") MultipartFile italic,
+                                           @Parameter(name = "bold_italic", description = "File: bold italic font with .ttf file extension.", style = ParameterStyle.FORM, required = true) @RequestPart("bold_italic") MultipartFile boldItalic);
 
     @GetMapping(RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAnyAuthority('E8_US_64_RESOURCE_VERSIONS_HISTORY_IMAGE', 'E8_US101_RESOURCE_NAVIGATION_MENU')")
@@ -165,7 +165,7 @@ public interface ResourceController {
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@permissionHandlerImpl.checkResourceCommonPermissionByType(authentication, #type)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceCreatePermissionByType(authentication, #type)")
     @Operation(summary = "Save new resource.", description = "Api for loading images, fonts, stylesheets.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -228,7 +228,7 @@ public interface ResourceController {
             @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content),
     })
     ResponseEntity<Void> delete(Principal principal,
-            @Parameter(name = "resource-name", description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
+                                @Parameter(name = "resource-name", description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+                                @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
 }

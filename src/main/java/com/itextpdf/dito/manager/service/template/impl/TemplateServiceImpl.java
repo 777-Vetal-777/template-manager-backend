@@ -47,16 +47,6 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class TemplateServiceImpl extends AbstractService implements TemplateService {
-    private static final String PERMISSION_NAME_FOR_EDIT_TEMPLATE_METADATA = "E9_US75_EDIT_TEMPLATE_METADATA_STANDARD";
-    private static final String PERMISSION_NAME_FOR_CREATE_A_NEW_VERSION_OF_TEMPLATE = "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD";
-    private static final String PERMISSION_NAME_FOR_ROLL_BACK_OF_THE_TEMPLATE = "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE";
-    private static final String PERMISSION_NAME_FOR_PREVIEW_TEMPLATE = "E9_US81_PREVIEW_TEMPLATE_STANDARD";
-    private static final String PERMISSION_NAME_FOR_EXPORT_TEMPLATE = "E9_US24_EXPORT_TEMPLATE_DATA";
-    private static final String PERMISSION_NAME_FOR_CREATE_TEMPLATE_WITH_DATA = "E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD";
-    private static final String PERMISSION_NAME_FOR_CREATE_TEMPLATE_WITHOUT_DATA = "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA";
-    private static final String PERMISSION_NAME_FOR_MANAGE_TEMPLATE_PERMISSIONS = "E9_US84_MANAGE_TEMPLATE_PERMISSIONS";
-
-
     private final TemplateFileRepository templateFileRepository;
     private final TemplateRepository templateRepository;
     private final InstanceRepository instanceRepository;
@@ -270,7 +260,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public TemplateEntity applyRole(final String templateName, final String roleName, final List<String> permissions, final String email) {
         final TemplateEntity templateEntity = findByName(templateName);
-        final UserEntity userEntity = userService.findByEmail(email);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, templateEntity);
         if (slaveRoleEntity == null) {
@@ -300,7 +289,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public TemplateEntity detachRole(final String templateName, final String roleName, final String email) {
         final TemplateEntity templateEntity = findByName(templateName);
-        final UserEntity userEntity = userService.findByEmail(email);
 
         final RoleEntity roleEntity = roleService.getSlaveRole(roleName, templateEntity);
 
