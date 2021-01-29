@@ -133,7 +133,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         Date editedOnStartDate = null;
         Date editedOnEndDate = null;
-        final List<String> editedOnDateRange = templateFilter.getEditedOn();
+        final List<String> editedOnDateRange = templateFilter.getModifiedOn();
         if (editedOnDateRange != null) {
             if (editedOnDateRange.size() != 2) {
                 throw new InvalidDateRangeException();
