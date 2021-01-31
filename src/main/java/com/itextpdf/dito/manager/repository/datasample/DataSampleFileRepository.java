@@ -34,7 +34,8 @@ public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEn
     String SEARCH_CONDITION = "and ( CAST(file.version as string) like CONCAT('%',:search,'%') " +
             "or LOWER(file.comment) like CONCAT('%',:search,'%') " +
             "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%')) " +
-            "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ) ";
+            "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') ) " +
+            "or LOWER(stages.name) like CONCAT('%',:search,'%')";
 
     String GROUP_BY_VERSION = "group by file.version";
 
