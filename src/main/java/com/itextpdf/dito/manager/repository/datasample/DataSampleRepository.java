@@ -28,13 +28,13 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     String DATA_SAMPLE_TABLE_FILTER_CONDITION = "and (:name='' or LOWER(ds.name) like CONCAT('%',:name,'%')) "
             + "and (:modifiedBy='' or LOWER(CONCAT(lastLog.author.firstName, ' ',lastLog.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or ds.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (:description='' or LOWER(ds.description) like CONCAT('%',:description,'%'))"
+            + "and (:description='' or LOWER(latestFile.comment) like CONCAT('%',:description,'%'))"
             + "and (:isDefault=null or ds.isDefault IS :isDefault) ";
 
     String DATA_SAMPLE_TABLE_SEARCH_CONDITION = " and (CAST(ds.modifiedOn as string) like CONCAT('%',:search,'%') "
-            + "or LOWER(ds.description) like CONCAT('%',:search,'%') "
+            + "or LOWER(latestFile.comment) like CONCAT('%',:search,'%') "
             + "or LOWER(ds.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(CONCAT(ds.author.firstName, ' ', ds.author.lastName)) like LOWER(CONCAT('%',:search,'%')))";
+            + "or LOWER(CONCAT(lastLog.author.firstName, ' ', lastLog.author.lastName)) like LOWER(CONCAT('%',:search,'%')))";
 
     @Query(value = DATA_SAMPLE_TABLE_SELECT_CLAUSE + DATA_SAMPLE_TABLE_FILTER_CONDITION)
     Page<DataSampleEntity> filter(Pageable pageable,
