@@ -153,7 +153,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		Sort newSort = Sort.by(pageable.getSort().stream()
 				.map(sortParam -> {
 					if (sortParam.getProperty().equals("modifiedBy")) {
-						sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
+						sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.author.firstName");
 					}
 					if (sortParam.getProperty().equals("comment")) {
 						sortParam = new Sort.Order(sortParam.getDirection(), "latestFile.comment");
