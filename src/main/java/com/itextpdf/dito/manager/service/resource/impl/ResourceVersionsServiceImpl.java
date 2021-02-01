@@ -77,7 +77,7 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
                     })
                     .collect(Collectors.toList()));
         } else {
-            newSort = Sort.by("version").ascending();
+            newSort = Sort.by("version").descending();
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }

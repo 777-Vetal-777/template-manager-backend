@@ -198,17 +198,22 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
      * @return pageable with updated sort params
      */
     private Pageable updateSort(Pageable pageable) {
-        Sort newSort = Sort.by(pageable.getSort().stream()
-                .map(sortParam -> {
-                    if (sortParam.getProperty().equals("users")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "users.size");
-                    }
-                    if (sortParam.getProperty().equals("permissions")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "permissions.size");
-                    }
-                    return sortParam;
-                })
-                .collect(Collectors.toList()));
+        Sort newSort;
+        if (pageable.getSort().isSorted()) {
+            newSort = Sort.by(pageable.getSort().stream()
+                    .map(sortParam -> {
+                        if (sortParam.getProperty().equals("users")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "users.size");
+                        }
+                        if (sortParam.getProperty().equals("permissions")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "permissions.size");
+                        }
+                        return sortParam;
+                    })
+                    .collect(Collectors.toList()));
+        } else {
+            newSort = Sort.by("type").descending().and(Sort.by("name").ascending());
+        }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 }

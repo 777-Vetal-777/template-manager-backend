@@ -44,6 +44,7 @@ import static com.itextpdf.dito.manager.controller.resource.ResourceController.F
 import static com.itextpdf.dito.manager.controller.resource.ResourceController.RESOURCE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -554,15 +555,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("content").value(hasSize(6)))
-                .andExpect(jsonPath("$.content[0].version").value(1))
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2, 3, 4, 5, 6)))
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
                 .andExpect(jsonPath("$.content[0].stage").value("Development"))
-                .andExpect(jsonPath("$.content[1].version").value(2))
-                .andExpect(jsonPath("$.content[2].version").value(3))
-                .andExpect(jsonPath("$.content[3].version").value(4))
-                .andExpect(jsonPath("$.content[4].version").value(5))
                 .andExpect(jsonPath("$.content[4].stage").value("Development"));
     }
 
@@ -589,15 +586,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                         IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
-                .andExpect(jsonPath("$.content[0].version").value(1))
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2, 3, 4, 5, 6, 7)))
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
-                .andExpect(jsonPath("$.content[0].stage").isEmpty())
-                .andExpect(jsonPath("$.content[1].version").value(2))
-                .andExpect(jsonPath("$.content[2].version").value(3))
-                .andExpect(jsonPath("$.content[3].version").value(4))
-                .andExpect(jsonPath("$.content[4].version").value(5));
+                .andExpect(jsonPath("$.content[0].stage").isEmpty());
     }
 
     @Test

@@ -75,7 +75,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
                     })
                     .collect(Collectors.toList()));
         } else {
-            newSort = Sort.by("version").ascending();
+            newSort = Sort.by("version").descending();
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
