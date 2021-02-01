@@ -29,7 +29,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     Optional<ResourceFileEntity> findFirstByUuid(String uuid);
 
     String SELECT_CLAUSE = "select file.version as version, max(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
-            + " max(file.createdOn) as modifiedOn, max(file.comment) as comment, max(file.stage.name) as stage,  max(file.author.firstName) as firstName, max(file.author.lastName) as lastName"
+            + " max(file.createdOn) as modifiedOn, max(file.comment) as comment, max(file.stage.name) as stage,  max(file.author.firstName) as firstName"
             + " from ResourceFileEntity file "
             + " left join file.stage"
             + " where file.resource.id = :id and ";

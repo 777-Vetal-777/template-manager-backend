@@ -68,7 +68,7 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
             newSort = Sort.by(pageable.getSort().stream()
                     .map(sortParam -> {
                         if (sortParam.getProperty().equals("modifiedBy")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "file.author.firstName");
+                            sortParam = new Sort.Order(sortParam.getDirection(), "firstName");
                         }
                         if (sortParam.getProperty().equals("stage")) {
                             sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
