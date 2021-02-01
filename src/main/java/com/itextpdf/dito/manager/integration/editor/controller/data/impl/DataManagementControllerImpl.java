@@ -48,10 +48,10 @@ public class DataManagementControllerImpl extends AbstractController implements 
     @Override
     public DataSampleDescriptor createOrUpdate(final Principal principal, final String dataSampleId,
             final DataSampleDescriptor descriptor,
-            final InputStream data) {
+            final String data) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
         final DataSampleEntity dataSampleEntity = dataSampleService
-                .createNewVersion(decodedDataSampleId, inputStreamToString(data), decodedDataSampleId,
+                .createNewVersion(decodedDataSampleId, data, decodedDataSampleId,
                         principal.getName(), null);
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }

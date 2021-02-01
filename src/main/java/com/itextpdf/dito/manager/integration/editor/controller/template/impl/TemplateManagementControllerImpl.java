@@ -37,10 +37,10 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public InputStream get(final String templateId) {
+    public byte[] get(final String templateId) {
         final String decodedTemplateId = decodeBase64(templateId);
         final TemplateEntity templateEntity = templateService.get(decodedTemplateId);
-        return new ByteArrayInputStream(templateEntity.getLatestFile().getData());
+        return templateEntity.getLatestFile().getData();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     @Override
     public TemplateDescriptor add(final Principal principal, final String workspaceId,
             @Valid final TemplateAddDescriptor descriptor,
-            final InputStream data) {
+            final byte[] data) {
         final String email = principal.getName();
         final TemplateEntity templateEntity = templateService
                 .create(descriptor.getName(), TemplateTypeEnum.STANDARD, null, email);
