@@ -219,4 +219,58 @@
 			<where>name='E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD'</where>
 		</update>
 	</changeSet>
+
+    <changeSet id="020-create-index-data-collection-id-and-date-on-table-data-collection-log" author="Sergey_Nemets">
+        <createIndex tableName="data_collection_log" indexName="data_collection_log_data_collection_id_date_ix">
+            <column name="data_collection_id" />
+            <column name="date" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="021-create-index-data-sample-id-and-date-on-table-data-sample-log" author="Sergey_Nemets">
+        <createIndex tableName="data_sample_log" indexName="data_sample_log_data_sample_id_date_ix">
+            <column name="data_sample_id" />
+            <column name="date" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="022-create-index-data-sample-id-and-version-on-table-data-sample-file" author="Sergey_Nemets">
+        <createIndex tableName="data_sample_file" indexName="data_sample_file_data_sample_id_version_ix">
+            <column name="data_sample_id" />
+            <column name="version" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="023-create-index-resource-id-and-date-on-table-resource-log" author="Sergey_Nemets">
+        <createIndex tableName="resource_log" indexName="resource_log_resource_id_date_ix">
+            <column name="resource_id" />
+            <column name="date" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="024-create-index-resource-id-and-version-on-table-resource-file" author="Sergey_Nemets">
+        <createIndex tableName="resource_file" indexName="resource_file_resource_id_version_ix">
+            <column name="resource_id" />
+            <column name="version" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="025-create-index-template-id-and-date-on-table-template-log" author="Sergey_Nemets">
+        <createIndex tableName="template_log" indexName="template_log_template_id_date_ix">
+            <column name="template_id" />
+            <column name="date" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="026-create-index-template-id-and-version-on-table-template-file" author="Sergey_Nemets">
+        <createIndex tableName="template_file" indexName="template_file_template_id_version_ix">
+            <column name="template_id" />
+            <column name="version" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="027-create-foreign-key-for-template_id-on-table-template-log" author="Sergey_Nemets">
+        <addForeignKeyConstraint baseTableName="template_log" baseColumnNames="template_id" constraintName="fk_template_log_to_template" referencedTableName="template"
+                                 referencedColumnNames="id"/>
+    </changeSet>
 </databaseChangeLog>
