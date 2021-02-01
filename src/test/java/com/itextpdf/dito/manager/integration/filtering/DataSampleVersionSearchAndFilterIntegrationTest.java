@@ -20,6 +20,8 @@ import org.springframework.http.MediaType;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.VERSIONS_ENDPOINT;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -83,8 +85,7 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].version").value("6"))
-                .andExpect(jsonPath("$.content[1].version").value("7"));
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(6, 7)));
 
     }
 
@@ -96,15 +97,13 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].version").value("6"))
-                .andExpect(jsonPath("$.content[1].version").value("7"));
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(6, 7)));
 
         mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
                 .param("search", "comment")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(7)));
-
     }
 
     @Override

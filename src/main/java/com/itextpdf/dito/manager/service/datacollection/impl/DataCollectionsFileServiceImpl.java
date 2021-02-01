@@ -90,7 +90,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
                     })
                     .collect(Collectors.toList()));
         } else {
-            newSort = Sort.by("version").ascending();
+            newSort = Sort.by("version").descending();
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
