@@ -1,54 +1,41 @@
 package com.itextpdf.dito.manager.integration.editor.controller.resource.impl;
 
-import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.ImageDescriptor;
-import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.StylesheetDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
-import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.resource.ResourceManagementController;
 import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
-import com.itextpdf.dito.manager.service.resource.ResourceService;
+import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ResourceManagementControllerImpl extends AbstractController implements ResourceManagementController {
-    private final ResourceService resourceService;
+    private final ResourceManagementService resourceManagementService;
     private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
 
-    public ResourceManagementControllerImpl(final ResourceService resourceService,
+    public ResourceManagementControllerImpl(final ResourceManagementService resourceManagementService,
             final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper) {
-        this.resourceService = resourceService;
+        this.resourceManagementService = resourceManagementService;
         this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
     }
 
     @Override
     public InputStream getResourceDirectoryContentById(final String resourceId) {
-        ByteArrayInputStream result = null;
-
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        final ResourceEntity resourceEntity = resourceService.get(resourceIdDTO.getName(), resourceIdDTO.getType());
-        final Optional<ResourceFileEntity> resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
-        if (resourceFileEntity.isPresent()) {
-            result = new ByteArrayInputStream(resourceFileEntity.get().getFile());
-        }
-
-        return result;
+        return resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType());
     }
 
     @Override
     public List<ResourceLeafDescriptor> getWorkspaceResources(final String workspaceId) {
-        final List<ResourceEntity> resourceEntities = resourceService.list();
+        final List<ResourceEntity> resourceEntities = resourceManagementService.list();
         return resourceLeafDescriptorMapper.map(resourceEntities);
     }
 
@@ -57,32 +44,26 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
             final ResourceLeafDescriptor descriptor,
             final InputStream data) throws IOException {
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        final ResourceEntity resourceEntity = resourceService
-                .createNewVersion(resourceIdDTO.getName(), resourceIdDTO.getType(), data.readAllBytes(),
-                        resourceIdDTO.getName(), principal.getName(), null);
+        final String name = resourceIdDTO.getName();
+        final ResourceTypeEnum type = resourceIdDTO.getType();
+        final byte[] bytes = data.readAllBytes();
+        final String email = principal.getName();
+        final ResourceEntity resourceEntity = resourceManagementService
+                .createNewVersion(name, type, bytes, name, email);
         return resourceLeafDescriptorMapper.map(resourceEntity);
     }
 
     @Override
     public List<ResourceLeafDescriptor> add(final Principal principal, final ResourceLeafDescriptor descriptor,
             final InputStream data) throws IOException {
-        final ResourceTypeEnum resourceTypeEnum;
-        if (descriptor instanceof ImageDescriptor) {
-            resourceTypeEnum = ResourceTypeEnum.IMAGE;
-        } else if (descriptor instanceof StylesheetDescriptor) {
-            resourceTypeEnum = ResourceTypeEnum.STYLESHEET;
-        } else {
-            resourceTypeEnum = ResourceTypeEnum.FONT;
-        }
-        final ResourceEntity resourceEntity = resourceService
-                .create(descriptor.getDisplayName(), resourceTypeEnum, data.readAllBytes(), descriptor.getDisplayName(),
-                        principal.getName());
+        final ResourceEntity resourceEntity = resourceManagementService
+                .create(descriptor, data.readAllBytes(), descriptor.getDisplayName(), principal.getName());
         return Collections.singletonList(resourceLeafDescriptorMapper.map(resourceEntity));
     }
 
     @Override
     public void deleteResourceById(final Principal principal, final String resourceId) {
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        resourceService.delete(resourceIdDTO.getName(), resourceIdDTO.getType(), principal.getName());
+        resourceManagementService.delete(resourceIdDTO.getName(), resourceIdDTO.getType(), principal.getName());
     }
 }

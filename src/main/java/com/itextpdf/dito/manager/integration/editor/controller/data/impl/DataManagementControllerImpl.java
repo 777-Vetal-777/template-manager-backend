@@ -2,44 +2,38 @@ package com.itextpdf.dito.manager.integration.editor.controller.data.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.data.DataManagementController;
 import com.itextpdf.dito.manager.integration.editor.mapper.datasample.DataSampleDescriptorMapper;
-import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-import com.itextpdf.dito.manager.service.datasample.DataSampleService;
-import org.springframework.web.bind.annotation.RestController;
+import com.itextpdf.dito.manager.integration.editor.service.data.DataManagementService;
 
 import java.security.Principal;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DataManagementControllerImpl extends AbstractController implements DataManagementController {
-    private final DataSampleService dataSampleService;
-    private final DataCollectionService dataCollectionService;
+    private final DataManagementService dataManagementService;
     private final DataSampleDescriptorMapper dataSampleDescriptorMapper;
 
-    public DataManagementControllerImpl(final DataSampleService dataSampleService,
-            final DataCollectionService dataCollectionService,
+    public DataManagementControllerImpl(final DataManagementService dataManagementService,
             final DataSampleDescriptorMapper dataSampleDescriptorMapper) {
-        this.dataSampleService = dataSampleService;
-        this.dataCollectionService = dataCollectionService;
+        this.dataManagementService = dataManagementService;
         this.dataSampleDescriptorMapper = dataSampleDescriptorMapper;
     }
 
     @Override
     public DataSampleDescriptor getDataSampleById(final String dataSampleId) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
-        final DataSampleEntity dataSampleEntity = dataSampleService.get(decodedDataSampleId);
+        final DataSampleEntity dataSampleEntity = dataManagementService.get(decodedDataSampleId);
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
 
     @Override
     public byte[] fetchDataSampleById(final String dataSampleId) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
-        final DataSampleEntity dataSampleEntity = dataSampleService.get(decodedDataSampleId);
+        final DataSampleEntity dataSampleEntity = dataManagementService.get(decodedDataSampleId);
         return dataSampleEntity.getLatestVersion().getData();
     }
 
@@ -48,9 +42,8 @@ public class DataManagementControllerImpl extends AbstractController implements 
             final DataSampleDescriptor descriptor,
             final String data) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
-        final DataSampleEntity dataSampleEntity = dataSampleService
-                .createNewVersion(decodedDataSampleId, data, decodedDataSampleId,
-                        principal.getName(), null);
+        final DataSampleEntity dataSampleEntity = dataManagementService
+                .createNewVersion(decodedDataSampleId, data, decodedDataSampleId, principal.getName());
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
 
@@ -58,26 +51,24 @@ public class DataManagementControllerImpl extends AbstractController implements 
     public DataSampleDescriptor add(final Principal principal, final DataSampleDescriptor descriptor,
             final String data) {
         final String decodedDataCollectionId = decodeBase64(descriptor.getCollectionIdList().get(0));
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodedDataCollectionId);
-        final DataSampleEntity dataSampleEntity = dataSampleService
-                .create(dataCollectionEntity, descriptor.getDisplayName(), descriptor.getDisplayName(),
-                        data, null, principal.getName());
+        final String displayName = descriptor.getDisplayName();
+        final DataSampleEntity dataSampleEntity = dataManagementService.create(decodedDataCollectionId,
+                displayName, displayName, data, principal.getName());
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
 
     @Override
     public DataSampleDescriptor deleteDataSampleById(final String dataSampleId) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
-        final List<DataSampleEntity> deletedDataSample = dataSampleService
-                .delete(Collections.singletonList(decodedDataSampleId));
-        return dataSampleDescriptorMapper.map(deletedDataSample.get(0));
+        final DataSampleEntity deletedDataSample = dataManagementService.delete(decodedDataSampleId);
+        return dataSampleDescriptorMapper.map(deletedDataSample);
     }
 
     @Override
     public List<DataSampleDescriptor> getDataSamplesByCollectionId(final String collectionId) {
         final String decodedDataCollectionId = decodeBase64(collectionId);
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodedDataCollectionId);
-        final Collection<DataSampleEntity> dataSampleEntities = dataCollectionEntity.getDataSamples();
+        final Collection<DataSampleEntity> dataSampleEntities = dataManagementService
+                .getDataSamplesByCollectionId(collectionId);
         return dataSampleDescriptorMapper.map(dataSampleEntities);
     }
 }
