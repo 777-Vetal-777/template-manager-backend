@@ -6,16 +6,19 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceL
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.resource.ResourceManagementController;
 import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,14 +33,23 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public List<ResourceLeafDescriptor> getResourceDirectoryContentById(final String resourceId) {
-        final List<ResourceEntity> resourceEntities = resourceService.list();
-        return resourceLeafDescriptorMapper.map(resourceEntities);
+    public InputStream getResourceDirectoryContentById(final String resourceId) {
+        ByteArrayInputStream result = null;
+
+        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
+        final ResourceEntity resourceEntity = resourceService.get(resourceIdDTO.getName(), resourceIdDTO.getType());
+        final Optional<ResourceFileEntity> resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
+        if (resourceFileEntity.isPresent()) {
+            result = new ByteArrayInputStream(resourceFileEntity.get().getFile());
+        }
+
+        return result;
     }
 
     @Override
     public List<ResourceLeafDescriptor> getWorkspaceResources(final String workspaceId) {
-        return getResourceDirectoryContentById(null);
+        final List<ResourceEntity> resourceEntities = resourceService.list();
+        return resourceLeafDescriptorMapper.map(resourceEntities);
     }
 
     @Override
