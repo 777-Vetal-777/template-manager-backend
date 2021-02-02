@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class TemplateCreateRequestDTO {
     @NotBlank
@@ -15,6 +16,8 @@ public class TemplateCreateRequestDTO {
     private TemplateTypeEnum type;
     @Schema(example = "some-data-collection")
     private String dataCollectionName;
+
+    private List<TemplatePartDTO> templateParts;
 
     public String getName() {
         return name;
@@ -38,5 +41,13 @@ public class TemplateCreateRequestDTO {
 
     public void setDataCollectionName(String dataCollectionName) {
         this.dataCollectionName = dataCollectionName;
+    }
+
+    public List<TemplatePartDTO> getTemplateParts() {
+        return templateParts;
+    }
+
+    public void setTemplateParts(List<TemplatePartDTO> templateParts) {
+        this.templateParts = templateParts;
     }
 }

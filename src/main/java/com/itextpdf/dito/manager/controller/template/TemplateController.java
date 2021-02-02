@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
+import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,6 +60,7 @@ public interface TemplateController {
     String PAGEABLE_ENDPOINT = "/pageable";
     String PROMOTE_ENDPOINT = "/promote";
     String UNDEPLOY_ENDPOINT = "/undeploy";
+    String SEARCH_ENDPOINT = "/search";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
@@ -90,9 +92,15 @@ public interface TemplateController {
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get template list", description = "Get templates",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<TemplateDTO>> listTemplateTypes(Pageable pageable,
-                                                        @ParameterObject TemplateFilter templateFilter,
-                                                        @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<TemplateDTO>> listTemplates(Pageable pageable,
+                                                    @ParameterObject TemplateFilter templateFilter,
+                                                    @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam);
+
+    @GetMapping(SEARCH_ENDPOINT)
+    @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
+    @Operation(summary = "Get template list", description = "Get templates, return all templates satisfying the filter",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<TemplateDTO>> listTemplates(@ParameterObject TemplateListFilter templateListFilter);
 
     @GetMapping(TEMPLATE_TYPES_ENDPOINT)
     @Operation(summary = "Get template type list", description = "Get all template types",
@@ -165,7 +173,7 @@ public interface TemplateController {
     ResponseEntity<TemplateDTO> create(Principal principal,
                                        @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                        @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
-                                       @Parameter(name = "template", description = "Template file", required = false, style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
+                                       @Parameter(name = "template", description = "Template file", style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAnyAuthority('E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
