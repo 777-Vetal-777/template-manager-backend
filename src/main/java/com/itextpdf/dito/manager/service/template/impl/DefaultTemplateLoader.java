@@ -12,7 +12,7 @@ public class DefaultTemplateLoader implements TemplateLoader {
 
     @PostConstruct
     public void init() throws IOException {
-        data = this.getClass().getClassLoader().getResourceAsStream("templates/template.html").readAllBytes();
+        data = this.getClass().getClassLoader().getResourceAsStream("templates/default.html").readAllBytes();
     }
 
     @Override
