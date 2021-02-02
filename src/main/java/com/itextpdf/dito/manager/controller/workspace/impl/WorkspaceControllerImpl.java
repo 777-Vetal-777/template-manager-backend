@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
+import java.security.Principal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +30,9 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     }
 
     @Override
-    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO) {
+    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO, final Principal principal) {
         WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO),
-                workspaceCreateRequestDTO.getMainDevelopmentInstanceName());
+                workspaceCreateRequestDTO.getMainDevelopmentInstanceSocket(), principal.getName());
         return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.CREATED);
     }
 

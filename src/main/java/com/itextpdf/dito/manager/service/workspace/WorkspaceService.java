@@ -11,7 +11,7 @@ public interface WorkspaceService {
 
     List<WorkspaceEntity> getAll();
 
-    WorkspaceEntity create(WorkspaceEntity workspace, String mainDevelopmentInstanceName);
+    WorkspaceEntity create(WorkspaceEntity workspace, String mainDevelopmentInstanceSocket, final String userEmail);
 
     WorkspaceEntity update(String name, WorkspaceEntity workspace);
 

@@ -4,12 +4,18 @@ import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
+import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourceMapperImpl implements ResourceMapper {
     private final RoleMapper roleMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ResourceMapperImpl(final RoleMapper roleMapper) {
         this.roleMapper = roleMapper;
@@ -41,7 +48,8 @@ public class ResourceMapperImpl implements ResourceMapper {
         final Collection<ResourceFileEntity> files = entity.getLatestFile();
         if (Objects.nonNull(files) && !files.isEmpty()) {
             final ResourceFileEntity fileEntity = files.stream().findFirst().get();
-            final List<FileMetaInfoDTO> fileMetaInfoDTOS = files.stream().map(file-> map(file)).collect(Collectors.toList());
+            final List<FileMetaInfoDTO> fileMetaInfoDTOS = files.stream().map(file -> map(file))
+                    .collect(Collectors.toList());
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
             result.setDeployed(fileEntity.getDeployed());
@@ -85,5 +93,52 @@ public class ResourceMapperImpl implements ResourceMapper {
         fileMetaInfoDTO.setFontType(file.getFontName());
         return fileMetaInfoDTO;
     }
+    //TODO In the future, replace this code with an integration code.
+    @Override
+    public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum) {
+        String result;
 
+        final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
+        resourceIdDTO.setName(name);
+        resourceIdDTO.setType(resourceTypeEnum);
+        final String json = serialize(resourceIdDTO);
+        result = encode(json);
+
+        return result;
+    }
+
+    //TODO In the future, replace this code with an integration code.
+    @Override
+    public ResourceIdDTO deserialize(final String data) {
+        ResourceIdDTO result = null;
+        try {
+            result = objectMapper.readValue(data, ResourceIdDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new TemplatePreviewGenerationException( new StringBuilder("Exception when writing resources from the template. Exception: ").append(e.getMessage()).toString());
+        }
+        return result;
+    }
+    //TODO In the future, replace this code with an integration code.
+    @Override
+    public String serialize(final Object data) {
+        String result = null;
+
+        try {
+            result = objectMapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            throw new TemplatePreviewGenerationException( new StringBuilder("Exception when reading resources from the template. Exception: ").append(e.getMessage()).toString());
+        }
+
+        return result;
+    }
+
+    @Override
+    public String encode(final String name) {
+        return Base64.getUrlEncoder().encodeToString(name.getBytes());
+    }
+
+    @Override
+    public String decode(final String name) {
+        return new String(Base64.getUrlDecoder().decode(name));
+    }
 }

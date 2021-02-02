@@ -46,29 +46,33 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public WorkspaceEntity create(final WorkspaceEntity workspace, final String mainDevelopmentInstanceName) {
+    public WorkspaceEntity create(final WorkspaceEntity workspace, final String mainDevelopmentInstanceSocket, final String userEmail) {
         // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
         if (!workspaceRepository.findAll().isEmpty()) {
             throw new OnlyOneWorkspaceAllowedException();
         }
 
         throwExceptionIfNameIsAlreadyInUse(workspace.getName());
+        final WorkspaceEntity savedWorkspaceEntity =  workspaceRepository.save(workspace);
 
-        final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(mainDevelopmentInstanceName);
-        workspace.setPromotionPath(promotionPathEntity);
+        final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(mainDevelopmentInstanceSocket, userEmail);
+        savedWorkspaceEntity.setPromotionPath(promotionPathEntity);
 
-        return workspaceRepository.save(workspace);
+        return workspaceRepository.save(savedWorkspaceEntity);
     }
 
-    private PromotionPathEntity buildDefaultPromotionPath(final String instanceName) {
+    private PromotionPathEntity buildDefaultPromotionPath(final String mainDevelopmentInstanceSocket, final String userEmail) {
         final PromotionPathEntity promotionPathEntity;
 
-        final InstanceEntity instanceEntity = instanceService.get(instanceName);
+        final InstanceEntity instanceEntity = new InstanceEntity();
+        instanceEntity.setName("DEV-instance");
+        instanceEntity.setSocket(mainDevelopmentInstanceSocket);
+        final InstanceEntity savedInstance = instanceService.save(instanceEntity, userEmail);
 
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setName("Development");
         stageEntity.setSequenceOrder(Integer.valueOf(0));
-        stageEntity.addInstance(instanceEntity);
+        stageEntity.addInstance(savedInstance);
 
         promotionPathEntity = new PromotionPathEntity();
         promotionPathEntity.addStage(stageEntity);

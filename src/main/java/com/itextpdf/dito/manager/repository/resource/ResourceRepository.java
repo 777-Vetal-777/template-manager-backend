@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.repository.resource;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -61,5 +62,12 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
                                 @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
                                 @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
                                 @Param("search") @Nullable String searchParam);
+
+    @Query(value = "select resource from ResourceEntity resource "
+            + "join resource.latestFile lastFiles "
+            + "left join lastFiles.templateFiles templatesFiles "
+            + "left join templatesFiles.template template "
+            + "where template.id = :id")
+    List<ResourceEntity> findAllResourceByTemplateId(@Param("id") Long templateId);
 
 }
