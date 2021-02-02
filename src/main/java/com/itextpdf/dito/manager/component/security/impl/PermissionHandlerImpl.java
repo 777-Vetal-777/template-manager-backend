@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -109,7 +110,13 @@ public class PermissionHandlerImpl implements PermissionHandler {
 
     private ResourceTypeEnum fromPluralNameOrParse(final String type) {
         return Optional.ofNullable(ResourceTypeEnum.getFromPluralName(type))
-                .orElseGet(() -> ResourceTypeEnum.valueOf(type));
+                .orElseGet(() -> {
+                    try {
+                        return ResourceTypeEnum.valueOf(type);
+                    } catch (IllegalArgumentException e) {
+                        throw new NoSuchResourceTypeException(type);
+                    }
+                });
     }
 
     @Override
