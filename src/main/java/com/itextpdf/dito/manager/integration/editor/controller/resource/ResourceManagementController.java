@@ -19,7 +19,7 @@ public interface ResourceManagementController {
     String CREATE_RESOURCE_URL = "/resources";
 
     @GetMapping(RESOURCE_URL)
-    List<ResourceLeafDescriptor> getResourceDirectoryContentById(@PathVariable("resource-id") String resourceId);
+    InputStream getResourceDirectoryContentById(@PathVariable("resource-id") String resourceId);
 
     @GetMapping(WORKSPACE_RESOURCES_URL)
     List<ResourceLeafDescriptor> getWorkspaceResources(@PathVariable("workspace-id") String workspaceId);
@@ -29,7 +29,8 @@ public interface ResourceManagementController {
             @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data) throws IOException;
 
     @PostMapping(CREATE_RESOURCE_URL)
-    List<ResourceLeafDescriptor> add(Principal principal, @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data)
+    List<ResourceLeafDescriptor> add(Principal principal,
+            @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data)
             throws IOException;
 
     @DeleteMapping(RESOURCE_URL)
