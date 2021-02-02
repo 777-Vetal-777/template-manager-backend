@@ -8,14 +8,12 @@ import com.itextpdf.dito.manager.integration.editor.controller.data.DataManageme
 import com.itextpdf.dito.manager.integration.editor.mapper.datasample.DataSampleDescriptorMapper;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DataManagementControllerImpl extends AbstractController implements DataManagementController {
@@ -39,10 +37,10 @@ public class DataManagementControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public InputStream fetchDataSampleById(final String dataSampleId) {
+    public byte[] fetchDataSampleById(final String dataSampleId) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
         final DataSampleEntity dataSampleEntity = dataSampleService.get(decodedDataSampleId);
-        return new ByteArrayInputStream(dataSampleEntity.getLatestVersion().getData());
+        return dataSampleEntity.getLatestVersion().getData();
     }
 
     @Override
@@ -58,12 +56,12 @@ public class DataManagementControllerImpl extends AbstractController implements 
 
     @Override
     public DataSampleDescriptor add(final Principal principal, final DataSampleDescriptor descriptor,
-            final InputStream data) {
+            final String data) {
         final String decodedDataCollectionId = decodeBase64(descriptor.getCollectionIdList().get(0));
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodedDataCollectionId);
         final DataSampleEntity dataSampleEntity = dataSampleService
                 .create(dataCollectionEntity, descriptor.getDisplayName(), descriptor.getDisplayName(),
-                        inputStreamToString(data), null, principal.getName());
+                        data, null, principal.getName());
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
 

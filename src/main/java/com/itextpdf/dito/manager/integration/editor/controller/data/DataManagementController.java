@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 
-import java.io.InputStream;
 import java.security.Principal;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public interface DataManagementController {
     DataSampleDescriptor getDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @GetMapping(DATA_SAMPLE_URL)
-    InputStream fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
+    byte[] fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @PutMapping(DATA_SAMPLE_URL)
     DataSampleDescriptor createOrUpdate(Principal principal, @PathVariable("sample-id") String dataSampleId,
@@ -30,7 +29,7 @@ public interface DataManagementController {
 
     @PostMapping(CREATE_DATA_SAMPLE_URL)
     DataSampleDescriptor add(Principal principal, @RequestPart DataSampleDescriptor descriptor,
-            @RequestPart InputStream data);
+            @RequestPart String data);
 
     @DeleteMapping(DATA_SAMPLE_URL)
     DataSampleDescriptor deleteDataSampleById(@PathVariable("sample-id") String dataSampleId);
