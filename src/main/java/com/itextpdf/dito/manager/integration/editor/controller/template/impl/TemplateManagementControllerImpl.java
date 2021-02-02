@@ -10,9 +10,7 @@ import com.itextpdf.dito.manager.integration.editor.controller.template.Template
 import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDescriptorMapper;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
@@ -52,15 +50,13 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     @Override
     public TemplateDescriptor update(final Principal principal, final String templateId,
             final TemplateUpdateDescriptor descriptor,
-            final InputStream data) throws IOException {
+            final byte[] data) throws IOException {
         final String email = principal.getName();
         final String decodedTemplateId = decodeBase64(templateId);
         final String newName = descriptor.getName();
-        final byte[] dataAsByteArray = new byte[data.available()];
-        data.read(dataAsByteArray);
 
         final TemplateEntity templateEntity = templateService
-                .createNewVersion(decodedTemplateId, dataAsByteArray, email, null, newName);
+                .createNewVersion(decodedTemplateId, data, email, null, newName);
 
         return templateDescriptorMapper.map(templateEntity);
     }
