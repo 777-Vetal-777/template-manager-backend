@@ -2,5 +2,5 @@
   "name": "workspace-test-resource",
   "language": "ENG",
   "timezone": "America/Sao_Paulo",
-  "mainDevelopmentInstanceName": "resource_test_instance"
+  "mainDevelopmentInstanceSocket": "http://10.10.15.110:9090"
 }

@@ -273,4 +273,11 @@
         <addForeignKeyConstraint baseTableName="template_log" baseColumnNames="template_id" constraintName="fk_template_log_to_template" referencedTableName="template"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="028-add-register-token-column-to-instance-table" author="Ivan_Semenov">
+        <addColumn tableName="instance">
+            <column name="register_token" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

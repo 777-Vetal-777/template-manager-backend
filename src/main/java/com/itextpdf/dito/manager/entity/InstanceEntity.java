@@ -35,6 +35,8 @@ public class InstanceEntity {
     private StageEntity stage;
     @ManyToMany(mappedBy = "instance")
     private List<TemplateFileEntity> templateFile;
+    @Column(name = "register_token")
+    private String registerToken;
 
     @PrePersist
     public void onPrePersist() {
@@ -95,5 +97,13 @@ public class InstanceEntity {
 
     public void setTemplateFile(List<TemplateFileEntity> templateFile) {
         this.templateFile = templateFile;
+    }
+
+    public String getRegisterToken() {
+        return registerToken;
+    }
+
+    public void setRegisterToken(String registerToken) {
+        this.registerToken = registerToken;
     }
 }

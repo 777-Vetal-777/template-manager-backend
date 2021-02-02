@@ -4,9 +4,9 @@ ditomanager:
 
 spring:
   datasource:
-    url: jdbc:postgresql://<socket>/dito
-    username: <username>
-    password: <password>
+    url:  jdbc:postgresql://${DITO_MANAGER_DATABASE_URL}/${DITO_MANAGER_DATABASE_NAME}
+    username: ${DITO_MANAGER_DATABASE_USERNAME}
+    password: ${DITO_MANAGER_DATABASE_PASSWORD}
   mail:
     host: ${DITO_MANAGER_SMTP_HOST}
     port: ${DITO_MANAGER_SMTP_PORT}

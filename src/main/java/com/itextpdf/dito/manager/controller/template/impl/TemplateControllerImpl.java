@@ -3,7 +3,6 @@ package com.itextpdf.dito.manager.controller.template.impl;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
-import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
@@ -24,6 +23,7 @@ import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
+import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
 import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -46,7 +46,6 @@ import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 @RestController
 public class TemplateControllerImpl extends AbstractController implements TemplateController {
     private final TemplateService templateService;
-    private final TemplatePreviewGenerator templatePreviewGenerator;
     private final TemplateMapper templateMapper;
     private final DependencyMapper dependencyMapper;
     private final TemplateVersionsService templateVersionsService;
@@ -54,18 +53,20 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final PermissionMapper permissionMapper;
     private final TemplateDependencyService templateDependencyService;
     private final FileVersionMapper fileVersionMapper;
+    private final TemplateDeploymentService templateDeploymentService;
+    private final TemplatePreviewGenerator templatePreviewGenerator;
 
     public TemplateControllerImpl(final TemplateService templateService,
-                                  final TemplatePreviewGenerator templatePreviewGenerator,
                                   final TemplateMapper templateMapper,
                                   final DependencyMapper dependencyMapper,
                                   final TemplateVersionsService templateVersionsService,
                                   final TemplatePermissionService templatePermissionService,
                                   final PermissionMapper permissionMapper,
                                   final TemplateDependencyService templateDependencyService,
-                                  final FileVersionMapper fileVersionMapper) {
+                                  final FileVersionMapper fileVersionMapper,
+                                  final TemplateDeploymentService templateDeploymentService,
+                                  final TemplatePreviewGenerator templatePreviewGenerator) {
         this.templateService = templateService;
-        this.templatePreviewGenerator = templatePreviewGenerator;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
         this.templateVersionsService = templateVersionsService;
@@ -73,6 +74,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.permissionMapper = permissionMapper;
         this.fileVersionMapper = fileVersionMapper;
         this.templateDependencyService = templateDependencyService;
+        this.templateDeploymentService = templateDeploymentService;
+        this.templatePreviewGenerator = templatePreviewGenerator;
     }
 
     @Override
@@ -139,7 +142,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<byte[]> preview(final String templateName) {
         final String decodedTemplateName = decodeBase64(templateName);
         final ByteArrayOutputStream pdfStream = (ByteArrayOutputStream) templatePreviewGenerator
-                .generate(decodedTemplateName);
+                .generatePreview(decodedTemplateName);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -190,5 +193,17 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<TemplateMetadataDTO> unblock(final Principal principal, final String name) {
         return new ResponseEntity<>(templateMapper.mapToMetadata(templateService.unblock(principal.getName(), decodeBase64(name))), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> promote(final String name, final Long version) {
+        templateDeploymentService.promote(decodeBase64(name), version);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> undeploy(final String name, final Long version) {
+        templateDeploymentService.undeploy(decodeBase64(name), version);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

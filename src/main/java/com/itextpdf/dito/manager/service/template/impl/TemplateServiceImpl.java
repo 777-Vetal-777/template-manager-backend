@@ -24,6 +24,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
+import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -55,6 +56,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final DataCollectionRepository dataCollectionRepository;
     private final RoleService roleService;
     private final PermissionService permissionService;
+    private final TemplateDeploymentService templateDeploymentService;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -63,7 +65,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final DataCollectionRepository dataCollectionRepository,
                                final RoleService roleService,
                                final PermissionService permissionService,
-                               final InstanceRepository instanceRepository) {
+                               final InstanceRepository instanceRepository,
+                               final TemplateDeploymentService templateDeploymentService) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -72,6 +75,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.roleService = roleService;
         this.permissionService = permissionService;
         this.instanceRepository = instanceRepository;
+        this.templateDeploymentService = templateDeploymentService;
     }
 
     @Override
@@ -110,7 +114,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         templateFileEntity.getInstance().addAll(developerStageInstances);
 
-        return templateRepository.save(templateEntity);
+        final TemplateEntity savedTemplate = templateRepository.save(templateEntity);
+        templateDeploymentService.promoteOnDefaultStage(savedTemplate.getName());
+        return savedTemplate;
     }
 
     private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final UserEntity author) {
@@ -230,7 +236,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         existingTemplateEntity.setLatestLogRecord(logEntity);
         existingTemplateEntity.setLatestFile(fileEntity);
 
-        return templateRepository.save(existingTemplateEntity);
+        templateRepository.save(existingTemplateEntity);
+        templateDeploymentService.promoteOnDefaultStage(existingTemplateEntity.getName());
+        return existingTemplateEntity;
     }
 
     private TemplateFileEntity createTemplateFileEntity(final byte[] data,

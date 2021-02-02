@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.repository.template;
 
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity, Long> {
@@ -59,4 +61,6 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
                                   @Param("comment") @Nullable String comment,
                                   @Param("stage") @Nullable String stageName,
                                   @Param("search") @Nullable String search);
+
+    Optional<TemplateFileEntity> findByVersionAndTemplate(Long version, TemplateEntity templateEntity);
 }

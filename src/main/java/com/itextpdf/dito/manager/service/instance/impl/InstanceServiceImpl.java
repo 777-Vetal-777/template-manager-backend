@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.instance.impl;
 
+import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -35,26 +36,34 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 public class InstanceServiceImpl extends AbstractService implements InstanceService {
     private final UserService userService;
     private final InstanceRepository instanceRepository;
+    private final InstanceClient instanceClient;
 
-    public InstanceServiceImpl(final UserService userService, final InstanceRepository instanceRepository) {
+    public InstanceServiceImpl(final UserService userService,
+                               final InstanceRepository instanceRepository,
+                               final InstanceClient instanceClient) {
         this.userService = userService;
         this.instanceRepository = instanceRepository;
+        this.instanceClient = instanceClient;
     }
 
 
     @Override
-    public List<InstanceEntity> save(final List<InstanceEntity> instances, final String creatorEmail) {
+    public InstanceEntity save(final InstanceEntity instance, final String creatorEmail) {
         final UserEntity userEntity = userService.findByEmail(creatorEmail);
+        if (instanceRepository.findByName(instance.getName()).isPresent()) {
+            throw new InstanceAlreadyExistsException(instance.getName());
+        }
+        final String instanceToken = instanceClient.register(instance.getSocket()).getToken();
+        instance.setCreatedBy(userEntity);
+        instance.setRegisterToken(instanceToken);
+        return instanceRepository.save(instance);
+    }
 
-        instances.forEach(instanceEntity ->
-        {
-            if (instanceRepository.findByName(instanceEntity.getName()).isPresent()) {
-                throw new InstanceAlreadyExistsException(instanceEntity.getName());
-            }
-            instanceEntity.setCreatedBy(userEntity);
-        });
-
-        return instanceRepository.saveAll(instances);
+    @Override
+    public List<InstanceEntity> save(final List<InstanceEntity> instances, final String creatorEmail) {
+        return instances.stream()
+                .map(instance->save(instance, creatorEmail))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -110,7 +119,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         if (templateFileEntities != null && !templateFileEntities.isEmpty()) {
             throw new InstanceHasAttachedTemplateException();
         }
-
+        instanceClient.unregister(instanceEntity.getSocket(), instanceEntity.getRegisterToken());
         instanceRepository.deleteByName(name);
     }
 

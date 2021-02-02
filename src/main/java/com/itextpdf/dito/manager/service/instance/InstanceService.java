@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 public interface InstanceService {
     List<InstanceEntity> save(List<InstanceEntity> instances, String creatorEmail);
 
+    InstanceEntity save(InstanceEntity instance, String creatorEmail);
+
     InstanceEntity get(String name);
 
     List<InstanceEntity> getAll();

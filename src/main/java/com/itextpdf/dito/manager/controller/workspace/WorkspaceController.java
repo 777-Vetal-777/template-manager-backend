@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -44,7 +46,7 @@ public interface WorkspaceController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = WorkspaceDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
     })
-    ResponseEntity<WorkspaceDTO> create(@Valid @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequestDTO);
+    ResponseEntity<WorkspaceDTO> create(@Valid @RequestBody WorkspaceCreateRequestDTO workspaceCreateRequestDTO, Principal principal);
 
     @GetMapping
     @Operation(summary = "Get all workspaces", description = "Get workspaces",

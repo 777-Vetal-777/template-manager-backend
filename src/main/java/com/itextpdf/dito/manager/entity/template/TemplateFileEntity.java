@@ -172,5 +172,6 @@ public class TemplateFileEntity {
 
     public void setStage(StageEntity stage) {
         this.stage = stage;
+        this.instance = new HashSet<>(stage.getInstances());
     }
 }

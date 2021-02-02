@@ -185,8 +185,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         final byte[] data = getFileBytes(multipartFile);
         final String originalFilename = multipartFile.getOriginalFilename();
 
-        final ResourceEntity resourceEntity = resourceService
-                .create(name, resourceType, data, originalFilename, principal.getName());
+        final ResourceEntity resourceEntity = resourceService.create(name, resourceType, data, originalFilename, principal.getName());
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
     }
 

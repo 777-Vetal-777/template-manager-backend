@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,15 +51,21 @@ public interface TemplateController {
 
     String TEMPLATE_TYPES_ENDPOINT = "/types";
     String TEMPLATE_PATH_VARIABLE = "template-name";
+    String TEMPLATE_VERSION_PATH_VARIABLE = "template-version";
     String ROLE_PATH_VARIABLE = "role-name";
     String TEMPLATE_VERSION_ENDPOINT = "/versions";
     String TEMPLATE_BLOCK_ENDPOINT = "/block";
     String TEMPLATE_UNBLOCK_ENDPOINT = "/unblock";
     String PAGEABLE_ENDPOINT = "/pageable";
+    String PROMOTE_ENDPOINT = "/promote";
+    String UNDEPLOY_ENDPOINT = "/undeploy";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
-    String TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}" + TEMPLATE_BLOCK_ENDPOINT;
-    String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}" + TEMPLATE_UNBLOCK_ENDPOINT;
+    String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
+    String TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_BLOCK_ENDPOINT;
+    String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_UNBLOCK_ENDPOINT;
+    String TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + PROMOTE_ENDPOINT;
+    String TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + UNDEPLOY_ENDPOINT;
     //Dependencies
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
     String TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
@@ -145,7 +152,7 @@ public interface TemplateController {
     ResponseEntity<byte[]> preview(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
-    @PostMapping(TEMPLATE_VERSION_ENDPOINT)
+    @PostMapping(value = TEMPLATE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     @Operation(summary = "Create new version of template", description = "Make a new version of a template: upload a new template file and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
@@ -207,4 +214,29 @@ public interface TemplateController {
             @ApiResponse(responseCode = "403", description = "Template can't be unblocked")
     })
     ResponseEntity<TemplateMetadataDTO> unblock(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+
+    @GetMapping(TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Promote template version to next stage", description = "Promote template version to next stage",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template version promoted successfully."),
+            @ApiResponse(responseCode = "404", description = "Template version not found."),
+            @ApiResponse(responseCode = "403", description = "Template already blocked")
+    })
+    ResponseEntity<Void> promote(
+            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+            @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
+
+
+    @GetMapping(TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Undeploy template version from promotion path", description = "Undeploy template version from promotion path",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template version undeployed successfully."),
+            @ApiResponse(responseCode = "404", description = "Template version not found.")
+    })
+    ResponseEntity<Void> undeploy(
+            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
+            @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
+
 }

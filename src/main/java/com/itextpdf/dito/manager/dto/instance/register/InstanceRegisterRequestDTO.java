@@ -1,0 +1,13 @@
+package com.itextpdf.dito.manager.dto.instance.register;
+
+public class InstanceRegisterRequestDTO {
+    private String subject;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+}

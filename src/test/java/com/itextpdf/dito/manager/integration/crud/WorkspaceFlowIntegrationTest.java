@@ -91,10 +91,11 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void testUpdateWorkspace() throws Exception {
         final String INSTANCE_NAME = "MY-DEV-INSTANCE1";
+        final String INSTANCE_SOCKET = "localhost:8090";
         InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
         InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName(INSTANCE_NAME);
-        instanceDTO.setSocket("localhost:8080");
+        instanceDTO.setSocket(INSTANCE_SOCKET);
         instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
@@ -105,7 +106,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         WorkspaceCreateRequestDTO createRequest = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
-        createRequest.setMainDevelopmentInstanceName(INSTANCE_NAME);
+        createRequest.setMainDevelopmentInstanceSocket(INSTANCE_SOCKET);
         mockMvc.perform(post(WorkspaceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(createRequest))
                 .contentType(MediaType.APPLICATION_JSON)
