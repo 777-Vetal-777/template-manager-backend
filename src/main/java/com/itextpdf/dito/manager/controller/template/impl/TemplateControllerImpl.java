@@ -18,10 +18,10 @@ import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
+import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
-import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
@@ -40,7 +40,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
+
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @RestController
@@ -88,11 +90,16 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<Page<TemplateDTO>> listTemplateTypes(final Pageable pageable,
-                                                               final TemplateFilter templateFilter,
-                                                               final String searchParam) {
+    public ResponseEntity<Page<TemplateDTO>> listTemplates(final Pageable pageable,
+                                                           final TemplateFilter templateFilter,
+                                                           final String searchParam) {
         return new ResponseEntity<>(templateMapper.map(templateService.getAll(pageable, templateFilter, searchParam)),
                 HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<TemplateDTO>> listTemplates(TemplateListFilter templateListFilter) {
+        return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Override
