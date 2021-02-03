@@ -47,7 +47,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
 
     @Override
     public TemplateEntity create(final String name, final String email) {
-        return templateService.create(name, TemplateTypeEnum.STANDARD, null, email);
+        return templateService.create(name, TemplateTypeEnum.STANDARD, null, email, null);
     }
 
     @Override

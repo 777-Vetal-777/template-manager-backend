@@ -57,6 +57,7 @@ public interface DataCollectionController {
     String VERSIONS_ENDPOINT = "/versions";
     String DATA_SAMPLE_ENDPOINT = "/datasamples";
     String PAGEABLE_ENDPOINT = "/pageable";
+    String SEARCH_ENDPOINT = "/search";
     String DATA_SAMPLE_WITH_PATH_VARIABLE = "/{" + DATA_SAMPLE_PATH_VARIABLE + "}";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
@@ -86,7 +87,7 @@ public interface DataCollectionController {
     @PreAuthorize("hasAnyAuthority('E6_US41_TABLE_OF_DATA_COLLECTION_DEPENDENCIES', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get a list of dependencies of one data collection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Information about one data collection dependencies is prepared according to the specified conditions.")
-    ResponseEntity<List<DependencyDTO>> list(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
+    ResponseEntity<List<DependencyDTO>> listDependencies(@Parameter(name = "name", description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
 
     @PostMapping(path = VERSIONS_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), #name, 'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
@@ -109,6 +110,13 @@ public interface DataCollectionController {
     @Operation(summary = "Get list of data collections",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DataCollectionDTO>> list(Pageable pageable, @ParameterObject DataCollectionFilter filter,
+                                                 @RequestParam(name = "search", required = false) String searchParam);
+
+    @GetMapping(SEARCH_ENDPOINT)
+    @PreAuthorize("hasAnyAuthority('E6_US30_TABLE_OF_DATA_COLLECTIONS', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
+    @Operation(summary = "Get list of data collections",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<DataCollectionDTO>> list(@ParameterObject DataCollectionFilter filter,
                                                  @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
@@ -192,7 +200,7 @@ public interface DataCollectionController {
 	@GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE)
 	@PreAuthorize("hasAuthority('E7_US42_TABLE_OF_DATA_SAMPLES')")
 	@Operation(summary = "Get list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-	ResponseEntity<Page<DataSampleDTO>> list(
+	ResponseEntity<Page<DataSampleDTO>> listDataSamples(
 			@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			Pageable pageable, @ParameterObject DataSampleFilter filter,
 			@RequestParam(name = "search", required = false) String searchParam);

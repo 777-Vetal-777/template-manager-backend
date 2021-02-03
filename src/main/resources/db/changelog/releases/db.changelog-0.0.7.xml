@@ -33,4 +33,63 @@
         <createSequence sequenceName="license_sequence"/>
     </changeSet>
 
+
+    <changeSet id="004-create-template-file-part-sequence" author="Sergey_Nemets">
+        <createSequence sequenceName="template_file_part_sequence"/>
+    </changeSet>
+
+    <changeSet id="005-create-template-file-part-table" author="Sergey_Nemets">
+        <createTable tableName="template_file_part">
+            <column name="id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="template_file_part_id_not_null_constraint"
+                             primaryKey="true" primaryKeyName="template_file_part_pk"/>
+            </column>
+            <column name="template_file_id" type="bigint">
+                <constraints nullable="false"
+                             notNullConstraintName="template_file_part_template_file_id_not_null_constraint"
+                             foreignKeyName="fk_template_file_part_to_template_file_composition"
+                             references="template_file(id)"/>
+            </column>
+            <column name="template_file_part_id" type="bigint">
+                <constraints nullable="false"
+                             notNullConstraintName="template_file_part_template_file_part_id_not_null_constraint"
+                             foreignKeyName="fk_template_file_part_to_template_file_part"
+                             references="template_file(id)"/>
+            </column>
+            <column name="condition" type="varchar(255)"/>
+            <column name="settings" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-create-index-template-file-id-on-table-template-file-part" author="Sergey_Nemets">
+        <createIndex tableName="template_file_part" indexName="template_file_part_template_file_id_ix">
+            <column name="template_file_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="007-create-index-template-file-part-id-on-table-template-file-part" author="Sergey_Nemets">
+        <createIndex tableName="template_file_part" indexName="template_file_part_template_file_part_id_ix">
+            <column name="template_file_part_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="008-add-e9-us102-create-new-template-without-data-composition-default-permission" author="Sergey_Nemets">
+        <insert tableName="permission">
+            <column name="id" value="98"/>
+            <column name="name" value="E9_US102_CREATE_NEW_TEMPLATE_WITHOUT_DATA_COMPOSITION"/>
+            <column name="optional_for_custom_role" value="true"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

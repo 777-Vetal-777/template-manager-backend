@@ -190,6 +190,29 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     @Override
+    public List<DataCollectionEntity> list(final DataCollectionFilter dataCollectionFilter, final String searchParam) {
+        final String name = getStringFromFilter(dataCollectionFilter.getName());
+        final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
+
+        Date modifiedOnStartDate = null;
+        Date modifiedOnEndDate = null;
+        final List<String> modifiedOnDateRange = dataCollectionFilter.getModifiedOn();
+        if (modifiedOnDateRange != null) {
+            if (modifiedOnDateRange.size() != 2) {
+                throw new InvalidDateRangeException();
+            }
+            modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
+            modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
+        }
+
+        final List<DataCollectionType> types = dataCollectionFilter.getType();
+
+        return StringUtils.isEmpty(searchParam)
+                ? dataCollectionRepository.filter(name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types)
+                : dataCollectionRepository.search(name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types, searchParam.toLowerCase());
+    }
+
+    @Override
     public DataCollectionEntity get(final String name) {
         return findByName(name);
     }

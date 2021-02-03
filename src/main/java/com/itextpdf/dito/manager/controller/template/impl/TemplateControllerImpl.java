@@ -40,7 +40,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
@@ -85,7 +84,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                               final Principal principal) {
         final TemplateEntity templateEntity = templateService
                 .create(templateCreateRequestDTO.getName(), templateCreateRequestDTO.getType(),
-                        templateCreateRequestDTO.getDataCollectionName(), principal.getName());
+                        templateCreateRequestDTO.getDataCollectionName(), principal.getName(), templateCreateRequestDTO.getTemplateParts());
         return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.CREATED);
     }
 
@@ -98,8 +97,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<List<TemplateDTO>> listTemplates(TemplateListFilter templateListFilter) {
-        return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<List<TemplateDTO>> listTemplates(final TemplateListFilter templateListFilter) {
+        return new ResponseEntity<>(templateMapper.map(templateService.getAll(templateListFilter)), HttpStatus.OK);
     }
 
     @Override
@@ -159,10 +158,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<TemplateDTO> create(final Principal principal,
-                                              final String name,
-                                              final String comment,
-                                              final MultipartFile templateFile) {
+    public ResponseEntity<TemplateDTO> createVersion(final Principal principal,
+                                                     final String name,
+                                                     final String comment,
+                                                     final MultipartFile templateFile) {
         final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService
                 .createNewVersion(name, data, principal.getName(),

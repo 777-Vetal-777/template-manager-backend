@@ -5,6 +5,9 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import org.springframework.data.domain.Page;
 
+import java.util.Collection;
+import java.util.List;
+
 public interface DataCollectionMapper {
     DataCollectionEntity map(DataCollectionUpdateRequestDTO dto);
 
@@ -13,5 +16,7 @@ public interface DataCollectionMapper {
     DataCollectionDTO mapWithFile(final DataCollectionEntity entity);
 
     Page<DataCollectionDTO> map(Page<DataCollectionEntity> entities);
+
+    List<DataCollectionDTO> map(Collection<DataCollectionEntity> entities);
 
 }

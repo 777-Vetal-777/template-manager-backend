@@ -18,6 +18,8 @@ public interface DataCollectionService {
 
     Page<DataCollectionEntity> list(Pageable pageable, DataCollectionFilter filter, String searchParam);
 
+    List<DataCollectionEntity> list(DataCollectionFilter filter, String searchParam);
+
     DataCollectionEntity get(String name);
 
     DataCollectionEntity getByTemplateName(String name);

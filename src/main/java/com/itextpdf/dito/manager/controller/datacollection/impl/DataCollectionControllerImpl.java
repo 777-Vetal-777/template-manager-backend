@@ -99,7 +99,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<List<DependencyDTO>> list(final String name) {
+    public ResponseEntity<List<DependencyDTO>> listDependencies(final String name) {
         final String decodedName = decodeBase64(name);
         final List<DependencyDTO> dependencyDTOs = dependencyMapper.map(dataCollectionDependencyService.list(decodedName));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
@@ -119,6 +119,12 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                                         final String searchParam) {
 
         final Page<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(pageable, filter, searchParam);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<DataCollectionDTO>> list(DataCollectionFilter filter, String searchParam) {
+        final List<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(filter, searchParam);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
     }
 
@@ -211,8 +217,8 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<Page<DataSampleDTO>> list(final String dataCollectionName, final Pageable pageable,
-                                                    final DataSampleFilter filter, final String searchParam) {
+    public ResponseEntity<Page<DataSampleDTO>> listDataSamples(final String dataCollectionName, final Pageable pageable,
+                                                               final DataSampleFilter filter, final String searchParam) {
         final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
         return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, dataCollection.getId(), filter, searchParam)),
                 HttpStatus.OK);
@@ -282,5 +288,4 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
         return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
     }
-
 }

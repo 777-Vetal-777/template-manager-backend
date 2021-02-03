@@ -1,23 +1,32 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
+import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
+import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
+import com.itextpdf.dito.manager.integration.editor.mapper.resource.impl.ResourceLeafDescriptorMapperImpl;
+import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -30,6 +39,8 @@ import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +53,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,6 +74,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final PermissionService permissionService;
     private final TemplateDeploymentService templateDeploymentService;
     private final TemplateLogRepository templateLogRepository;
+
+    private final Logger log = LogManager.getLogger(this.getClass());
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -88,6 +104,13 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Transactional
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
                                  final String dataCollectionName, final String email) {
+        return create(templateName, templateTypeEnum, dataCollectionName, email, null);
+    }
+
+    @Override
+    @Transactional
+    public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
+                                 final String dataCollectionName, final String email, List<TemplatePartDTO> templatePartDTOs) {
         throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         final TemplateEntity templateEntity = new TemplateEntity();
@@ -113,6 +136,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             templateFileEntity.setDataCollectionFile(dataCollectionEntity.getLatestVersion());
         }
 
+        if (TemplateTypeEnum.COMPOSITION.equals(templateTypeEnum) && Objects.nonNull(templatePartDTOs)) {
+            createTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
+        }
+
         templateEntity.setFiles(Collections.singletonList(templateFileEntity));
         templateEntity.setLatestFile(templateFileEntity);
         templateEntity.setTemplateLogs(Collections.singletonList(logEntity));
@@ -123,6 +150,55 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateEntity savedTemplate = templateRepository.save(templateEntity);
         templateDeploymentService.promoteOnDefaultStage(savedTemplate.getName());
         return savedTemplate;
+    }
+
+    private void createTemplatePartsForTemplateFileEntity(final String dataCollectionName,
+                                                          final List<TemplatePartDTO> templatePartDTOs,
+                                                          final TemplateFileEntity templateFileEntity) {
+        final List<TemplateEntity> templatePartList = templateRepository.getTemplatesWithLatestFileByName(templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).collect(Collectors.toList()));
+        final Map<String, TemplateFileEntity> templateFilePartMap = templatePartList.stream().collect(Collectors.toMap(TemplateEntity::getName, TemplateEntity::getLatestFile, (templateFileEntity1, templateFileEntity2) -> templateFileEntity1));
+
+        //checks that all templates exists
+        final List<String> missedTemplateNames = templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).filter(partName -> !templateFilePartMap.containsKey(partName)).collect(Collectors.toList());
+        if (missedTemplateNames.size() > 0) {
+            throw new TemplateNotFoundException(missedTemplateNames.get(0));
+        }
+
+        //checks that all templates has the same (or absent dataCollection)
+        if (!templatePartList.stream().allMatch(entity -> {
+            final String dataCollection = Optional.ofNullable(entity.getLatestFile().getDataCollectionFile()).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
+            return Objects.equals(dataCollectionName, dataCollection) || Objects.equals(null, dataCollection);
+        })) {
+            throw new TemplateHasWrongStructureException("Template parts belongs to different Data Collections");
+        }
+
+        //checks that exists at most one HEADER and FOOTER
+        if (templatePartList.stream().filter(entity -> TemplateTypeEnum.HEADER.equals(entity.getType())).count() > 1) {
+            throw new TemplateHasWrongStructureException("Template parts have more than one header");
+        }
+        if (templatePartList.stream().filter(entity -> TemplateTypeEnum.FOOTER.equals(entity.getType())).count() > 1) {
+            throw new TemplateHasWrongStructureException("Template parts have more than one header");
+        }
+
+        final List<TemplateFilePartEntity> parts = templateFileEntity.getParts();
+        for (TemplatePartDTO templatePart : templatePartDTOs) {
+            final TemplateFilePartEntity templateFilePartEntity = new TemplateFilePartEntity();
+            templateFilePartEntity.setComposition(templateFileEntity);
+            templateFilePartEntity.setPart(templateFilePartMap.get(templatePart.getTemplateName()));
+            templateFilePartEntity.setCondition(templatePart.getCondition());
+
+            final PartSettings partSettings = new PartSettings();
+            Optional.ofNullable(templatePart.getStartOnNewPage()).ifPresent(setting -> partSettings.setStartOnNewPage(setting));
+            try {
+                templateFilePartEntity.setSettings(objectMapper.writeValueAsString(partSettings));
+            } catch (JsonProcessingException e) {
+                log.error(e);
+            }
+
+            parts.add(templateFilePartEntity);
+
+            templateFilePartMap.get(templatePart.getTemplateName()).getCompositions().add(templateFilePartEntity);
+        }
     }
 
     private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final UserEntity author) {
@@ -165,6 +241,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public List<TemplateEntity> getAll() {
         return templateRepository.findAll();
+    }
+
+    @Override
+    public List<TemplateEntity> getAll(final TemplateListFilter templateListFilter) {
+        return templateRepository.getListTemplates(templateListFilter.getType(), templateListFilter.getDataCollection());
     }
 
     @Override

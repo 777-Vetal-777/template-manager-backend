@@ -10,6 +10,10 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
 
@@ -59,5 +63,11 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
     public Page<DataCollectionDTO> map(final Page<DataCollectionEntity> entities) {
         return entities.map(this::map);
     }
+
+    @Override
+    public List<DataCollectionDTO> map(final Collection<DataCollectionEntity> entities) {
+        return entities.stream().map(this::map).collect(Collectors.toList());
+    }
+
 
 }
