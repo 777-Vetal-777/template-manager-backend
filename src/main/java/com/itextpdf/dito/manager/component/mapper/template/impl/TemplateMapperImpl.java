@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
+import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -126,11 +127,15 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     @Override
-    public TemplateDescriptorDTO mapToDescriptor(final TemplateEntity templateEntity) {
-        final TemplateFileEntity templateFileEntity = templateEntity.getLatestFile();
+    public TemplateDescriptorDTO mapToDescriptor(final TemplateFileEntity templateFileEntity, final boolean versionAliasRequired) {
+
         final TemplateDescriptorDTO result = new TemplateDescriptorDTO();
-        result.setTemplateName(templateEntity.getName());
-        result.setAlias(templateEntity.getName());
+        final String templateName = templateFileEntity.getTemplate().getName();
+        final String templateAlias = versionAliasRequired
+                ? TemplateDeploymentUtils.getTemplateAliasForDefaultInstance(templateFileEntity)
+                : templateName;
+        result.setTemplateName(templateName);
+        result.setAlias(templateAlias);
         result.setVersion(templateFileEntity.getVersion().toString());
         return result;
     }

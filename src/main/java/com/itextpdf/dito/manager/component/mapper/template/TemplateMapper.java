@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface TemplateMapper {
 
     TemplateMetadataDTO mapToMetadata(TemplateEntity entity);
 
-    TemplateDescriptorDTO mapToDescriptor(TemplateEntity templateEntity);
+    TemplateDescriptorDTO mapToDescriptor(TemplateFileEntity templateFileEntity, boolean versionAliasRequired);
 
     List<TemplateDTO> map(List<TemplateEntity> entities);
 

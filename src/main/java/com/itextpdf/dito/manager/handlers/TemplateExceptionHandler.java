@@ -31,7 +31,7 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(TemplateDeploymentException.class)
     public ResponseEntity<ErrorResponseDTO> templateDeploymentExceptionHandler(final TemplateDeploymentException ex) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(TemplatePreviewGenerationException.class)
