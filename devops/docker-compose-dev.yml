@@ -31,6 +31,8 @@ services:
       - DITO_MANAGER_SENTRY_ENVIRONMENT
     depends_on:
       - db
+    ports:
+      - "8000:8000"
   #=========== DATABASE ===============
   db:
     container_name: db
