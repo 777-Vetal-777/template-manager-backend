@@ -1,6 +1,9 @@
 package com.itextpdf.dito.manager.dto.instance;
 
 
+import com.itextpdf.dito.manager.dto.template.version.TemplateInstanceVersionDTO;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,7 +13,7 @@ public class InstanceDTO {
     private String createdBy;
     private Date createdOn;
     private String stage;
-    private List<String> templates;
+    private List<TemplateInstanceVersionDTO> templates = new ArrayList<>();
 
     public String getCreatedBy() {
         return createdBy;
@@ -44,10 +47,6 @@ public class InstanceDTO {
         this.socket = socket;
     }
 
-    public List<String> getTemplates() {
-        return templates;
-    }
-
     public String getStage() {
         return stage;
     }
@@ -56,7 +55,11 @@ public class InstanceDTO {
         this.stage = stage;
     }
 
-    public void setTemplates(List<String> templates) {
+    public List<TemplateInstanceVersionDTO> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(List<TemplateInstanceVersionDTO> templates) {
         this.templates = templates;
     }
 }

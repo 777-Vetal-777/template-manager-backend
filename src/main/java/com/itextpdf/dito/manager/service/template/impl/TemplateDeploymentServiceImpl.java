@@ -19,6 +19,9 @@ import com.itextpdf.dito.manager.service.template.TemplateProjectGenerator;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
+
+import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.FileSystemResource;
@@ -45,9 +48,9 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     private final TemplateRepository templateRepository;
 
     public TemplateDeploymentServiceImpl(final TemplateMapper templateMapper,
-            final TemplateFileRepository templateFileRepository,
-            final TemplateProjectGenerator templateProjectGenerator,
-            final TemplateRepository templateRepository) {
+                                         final TemplateFileRepository templateFileRepository,
+                                         final TemplateProjectGenerator templateProjectGenerator,
+                                         final TemplateRepository templateRepository) {
         this.templateMapper = templateMapper;
         this.templateFileRepository = templateFileRepository;
         this.templateProjectGenerator = templateProjectGenerator;
@@ -55,34 +58,63 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         webClient = WebClient.create();
     }
 
+    /**
+     * Promote template on default DEV-stage.
+     * When template is promoted on default stage it should have alias <template_name>_version-<version-number> in order to allow multiple versions of template on DEV-stage.
+     *
+     * @param templateName name of template to be promoted
+     */
     @Override
     public void promoteOnDefaultStage(final String templateName) {
+        final boolean isDefaultStage = true;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = templateEntity.getLatestFile();
 
         for (final InstanceEntity instanceEntity : templateFileEntity.getInstance()) {
-            promoteTemplateToInstance(instanceEntity, templateEntity);
+            promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
         }
     }
 
+    /**
+     * Promote template to all instances of next stage.
+     * When template is promoted on all stages beside DEV-stage it has alias which is equal to template name.
+     *
+     * @param templateName template name to be promoted
+     * @param version      version of template to be promoted
+     */
     @Override
     public void promote(final String templateName, final Long version) {
+        final boolean isDefaultStage = false;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
         final StageEntity nextStage = getNextStage(templateFileEntity);
         for (final InstanceEntity instanceEntity : nextStage.getInstances()) {
-            promoteTemplateToInstance(instanceEntity, templateEntity);
+            promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
         }
         for (final InstanceEntity instanceEntity : templateFileEntity.getInstance()) {
-            undeployTemplateFromInstance(instanceEntity.getRegisterToken(), instanceEntity.getSocket(), templateName);
+            removeTemplateFromInstance(instanceEntity.getRegisterToken(), instanceEntity.getSocket(), templateFileEntity);
+        }
+        final Optional<TemplateFileEntity> previousStageTemplateVersion = templateFileRepository.findByStageAndTemplate(nextStage, templateEntity);
+        if (previousStageTemplateVersion.isPresent()) {
+            final TemplateFileEntity previouslyDeployedTemplateVersion = previousStageTemplateVersion.get();
+            previouslyDeployedTemplateVersion.setStage(getDefaultStage(previouslyDeployedTemplateVersion));
+            previouslyDeployedTemplateVersion.setDeployed(false);
+            templateFileRepository.save(previouslyDeployedTemplateVersion);
         }
         templateFileEntity.setDeployed(true);
         templateFileEntity.setStage(nextStage);
         templateFileRepository.save(templateFileEntity);
     }
 
+    /**
+     * Un-deploy template from stage back to default DEV-stage
+     *
+     * @param templateName template name to be un-deployed.
+     * @param version      template version to be un-deployed.
+     */
     @Override
     public void undeploy(final String templateName, final Long version) {
+        final boolean isDefaultStage = true;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
         final StageEntity defaultStageEntity = getDefaultStage(templateFileEntity);
@@ -93,30 +125,29 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         for (final InstanceEntity instance : currentStageEntity.getInstances()) {
             final String instanceSocket = instance.getSocket();
             final String instanceRegisterToken = instance.getRegisterToken();
-            undeployTemplateFromInstance(instanceRegisterToken, instanceSocket, templateName);
+            removeTemplateFromInstance(instanceRegisterToken, instanceSocket, templateFileEntity);
         }
         for (final InstanceEntity instanceEntity : defaultStageEntity.getInstances()) {
-            promoteTemplateToInstance(instanceEntity, templateEntity);
+            promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
         }
         templateFileEntity.setDeployed(false);
         templateFileEntity.setStage(defaultStageEntity);
         templateFileRepository.save(templateFileEntity);
     }
 
-
-
-    private void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateEntity templateEntity) {
+    private void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {
+        final TemplateEntity templateEntity = templateFileEntity.getTemplate();
         final String instanceSocket = instanceEntity.getSocket();
         final String instanceRegisterToken = instanceEntity.getRegisterToken();
-        final TemplateDescriptorDTO templateDescriptorDTO = templateMapper.mapToDescriptor(templateEntity);
+        final TemplateDescriptorDTO templateDescriptorDTO = templateMapper.mapToDescriptor(templateFileEntity, isDefaultInstance);
         final File templateProjectFile = templateProjectGenerator.generateZipByTemplateName(templateEntity);
         promoteTemplateToInstance(instanceRegisterToken, instanceSocket, templateDescriptorDTO, templateProjectFile);
     }
 
     private TemplateDeploymentDTO promoteTemplateToInstance(final String instanceRegisterToken,
-            final String instanceSocket,
-            final TemplateDescriptorDTO descriptorDTO,
-            final File templateProject) {
+                                                            final String instanceSocket,
+                                                            final TemplateDescriptorDTO descriptorDTO,
+                                                            final File templateProject) {
         final String forceDeployParam = "?forceReplace=true";
         final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT).append(forceDeployParam).toString();
@@ -136,9 +167,12 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         return response.block();
     }
 
-    private TemplateDeploymentDTO undeployTemplateFromInstance(final String instanceRegisterToken,
-            final String instanceSocket,
-            final String templateAlias) {
+    private TemplateDeploymentDTO removeTemplateFromInstance(final String instanceRegisterToken,
+                                                             final String instanceSocket,
+                                                             final TemplateFileEntity templateFileEntity) {
+        final String templateAlias = isOnDefaultStage(templateFileEntity)
+                ? TemplateDeploymentUtils.getTemplateAliasForDefaultInstance(templateFileEntity)
+                : templateFileEntity.getTemplate().getName();
         final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT)
                 .append("/")
@@ -159,11 +193,15 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     }
 
     private MultiValueMap<String, HttpEntity<?>> fromFile(final TemplateDescriptorDTO templateDescriptorDTO,
-            final File templateZipFile) {
+                                                          final File templateZipFile) {
         final MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("template_project", new FileSystemResource(templateZipFile), MediaType.APPLICATION_OCTET_STREAM);
         builder.part("descriptor", templateDescriptorDTO, MediaType.APPLICATION_JSON);
         return builder.build();
+    }
+
+    private boolean isOnDefaultStage(final TemplateFileEntity templateFileEntity) {
+        return templateFileEntity.getStage() == getDefaultStage(templateFileEntity);
     }
 
     private StageEntity getDefaultStage(final TemplateFileEntity templateFileEntity) {

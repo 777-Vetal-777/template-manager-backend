@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.repository.template;
 
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
@@ -63,4 +64,6 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
                                   @Param("search") @Nullable String search);
 
     Optional<TemplateFileEntity> findByVersionAndTemplate(Long version, TemplateEntity templateEntity);
+
+    Optional<TemplateFileEntity> findByStageAndTemplate(StageEntity stageEntity, TemplateEntity templateEntity);
 }
