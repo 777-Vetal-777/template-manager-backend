@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.controller.workspace.impl;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
+import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
@@ -12,10 +13,13 @@ import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
 import java.security.Principal;
 import java.util.List;
+
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Validated
 @RestController
@@ -79,4 +83,14 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
         return new ResponseEntity<>(stageNames, HttpStatus.OK);
 
     }
+
+	@Override
+	public ResponseEntity<Void> uploadLisence(MultipartFile multipartFile, Principal principal) {
+		throw new NotImplementedException("Method not implemented yet");
+	}
+
+	@Override
+	public ResponseEntity<LicenseDTO> getLisence(String workspaceName, Principal principal) {
+		throw new NotImplementedException("Method not implemented yet");
+	}
 }
