@@ -7,4 +7,4 @@ RUN mvn clean install
 FROM adoptopenjdk/openjdk11:jdk-11.0.9.1_1-alpine
 COPY --from=builder /src/target/template-manager*.jar template-manager.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "template-manager.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000", "-jar", "template-manager.jar"]
