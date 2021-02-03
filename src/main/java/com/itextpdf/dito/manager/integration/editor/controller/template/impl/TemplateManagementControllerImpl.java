@@ -13,10 +13,13 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import javax.validation.Valid;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TemplateManagementControllerImpl extends AbstractController implements TemplateManagementController {
+    private static final Logger log = LogManager.getLogger(TemplateManagementControllerImpl.class);
     private final TemplateManagementService templateManagementService;
     private final TemplateDescriptorMapper templateDescriptorMapper;
 
@@ -28,6 +31,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public TemplateDescriptor getDescriptor(final String templateId) {
+        log.info("Request to get descriptor by template id {}.",templateId);
         final String decodedTemplateId = decodeBase64(templateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
         return templateDescriptorMapper.map(templateEntity);
@@ -35,13 +39,16 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public byte[] get(final String templateId) {
+        log.info("Request to get template file by template id {}.",templateId);
         final String decodedTemplateId = decodeBase64(templateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
+        log.info("Response on get template file by template id {} successfully processed.",templateId);
         return templateEntity.getLatestFile().getData();
     }
 
     @Override
     public List<TemplateDescriptor> getAllDescriptors(final String workspaceId) {
+        log.info("Request to get all descriptors by workspace id {}.",workspaceId);
         // At now we support only single workspace, that's why all templates will be returned.
         return templateDescriptorMapper.map(templateManagementService.getAll());
     }
@@ -50,12 +57,13 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     public TemplateDescriptor update(final Principal principal, final String templateId,
             final TemplateUpdateDescriptor descriptor,
             final byte[] data) throws IOException {
+        log.info("Request to create new version of template with id {} received.",templateId);
         final String email = principal.getName();
         final String id = decodeBase64(templateId);
         final String newName = descriptor.getName();
 
         final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName);
-
+        log.info("Response to create new version of template with id {} processed.",templateId);
         return templateDescriptorMapper.map(templateEntity);
     }
 
@@ -63,17 +71,19 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     public TemplateDescriptor add(final Principal principal, final String workspaceId,
             @Valid final TemplateAddDescriptor descriptor,
             final byte[] data) {
+        log.info("Request to create new template with name {} received.",descriptor.getName());
         final String email = principal.getName();
         final TemplateEntity templateEntity = templateManagementService.create(descriptor.getName(), email);
+        log.info("Response to create new template received with name {} processed. Created template id {}",descriptor.getName(),templateEntity.getId());
         return templateDescriptorMapper.map(templateEntity);
     }
 
     @Override
     public TemplateDescriptor delete(final String templateId) {
         final String decodedTemplateId = decodeBase64(templateId);
-
+        log.info("Request to delete template with id {} received.",decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.delete(decodedTemplateId);
-
+        log.info("Responce to delete template with id {} successfully processed.",decodedTemplateId);
         return templateDescriptorMapper.map(templateEntity);
     }
 }
