@@ -93,20 +93,20 @@ public interface WorkspaceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<List<String>> getStageNames(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
     
-    @PostMapping(path = WORKSPACE_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
-    @Operation(summary = "Upload license",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully uploaded", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Invalid license", content = @Content),
-    })
-    ResponseEntity<Void> uploadLisence(@Parameter(description = "license XML file", required = true, style = ParameterStyle.FORM) @RequestPart("license") MultipartFile multipartFile, Principal principal);
+	@PostMapping(path = WORKSPACE_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
+	@Operation(summary = "Upload license", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successfully uploaded", content = @Content),
+			@ApiResponse(responseCode = "400", description = "Invalid license", content = @Content), })
+	ResponseEntity<Void> uploadLisence(
+			@Parameter(description = "license XML file", required = true, style = ParameterStyle.FORM) @RequestPart("license") MultipartFile multipartFile,
+			Principal principal);
 
-    @GetMapping(path = WORKSPACE_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
-    @Operation(summary = "Get license information",
-            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<LicenseDTO> getLisence(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName, Principal principal);
+	@GetMapping(path = WORKSPACE_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
+	@Operation(summary = "Get license information", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+	ResponseEntity<LicenseDTO> getLisence(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
+			Principal principal);
 
 }
