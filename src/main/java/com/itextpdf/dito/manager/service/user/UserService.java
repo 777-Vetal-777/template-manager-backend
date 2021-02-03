@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.user;
 
+import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
@@ -10,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-    UserEntity create(UserEntity request, List<String> roles);
+    UserEntity create(UserEntity request, List<String> roles, UserEntity currentUser);
 
     UserEntity findByEmail(String email);
 
@@ -30,4 +31,8 @@ public interface UserService {
                                       UpdateUsersRolesActionEnum actionEnum);
 
     Integer calculateCountOfUsersWithOnlyOneRole(String roleName);
+
+    void forgotPassword(String email);
+
+    void resetPassword(ResetPasswordDTO resetPasswordDTO);
 }

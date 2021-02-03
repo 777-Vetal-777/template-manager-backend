@@ -11,6 +11,9 @@ security:
     editor-token:
       id: editor
       time-to-live: 86400
+    reset-password-token:
+      id: resetPassword
+      time-to-live: 86400
   login:
     failure:
       max-attempts: 5

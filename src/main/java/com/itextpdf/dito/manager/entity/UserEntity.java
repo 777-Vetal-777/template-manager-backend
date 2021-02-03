@@ -39,6 +39,8 @@ public class UserEntity implements UserDetails {
     private Boolean locked;
     @Column(name = "modified_at")
     private Date modifiedAt;
+    @Column(name = "reset_password_token_date")
+    private Date resetPasswordTokenDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -156,6 +158,18 @@ public class UserEntity implements UserDetails {
 
     public void setModifiedAt(Date modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public Date getResetPasswordTokenDate() {
+        return resetPasswordTokenDate;
+    }
+
+    public void setResetPasswordTokenDate(Date resetPasswordTokenDate) {
+        this.resetPasswordTokenDate = resetPasswordTokenDate;
     }
 }
 

@@ -1,12 +1,14 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
+import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.role.AttemptToAttachGlobalAdministratorRoleException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
+import com.itextpdf.dito.manager.exception.token.InvalidResetPasswordTokenException;
 import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
@@ -17,6 +19,7 @@ import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
+import com.itextpdf.dito.manager.service.token.TokenService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,6 +34,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,15 +48,18 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final FailedLoginRepository failedLoginRepository;
     private final PasswordEncoder encoder;
     private MailClient mailClient;
+    private final TokenService tokenService;
 
     public UserServiceImpl(final UserRepository userRepository,
                            final RoleRepository roleRepository,
                            final FailedLoginRepository failedLoginRepository,
-                           final PasswordEncoder encoder) {
+                           final PasswordEncoder encoder,
+                           final TokenService tokenService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
         this.encoder = encoder;
+        this.tokenService = tokenService;
     }
 
 
@@ -72,7 +79,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserEntity create(final UserEntity userEntity, final List<String> roles) {
+    public UserEntity create(final UserEntity userEntity, final List<String> roles, final UserEntity currentUser) {
         if (userRepository.findByEmailAndActiveTrue(userEntity.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException(userEntity.getEmail());
         }
@@ -88,7 +95,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         userEntity.setRoles(persistedRoles);
         UserEntity savedUser = userRepository.save(userEntity);
         if (mailClient != null) {
-            mailClient.sendRegistrationMessage(userEntity.getEmail(), password);
+            mailClient.sendRegistrationMessage(savedUser, password, currentUser);
         }
         return savedUser;
     }
@@ -248,5 +255,24 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Autowired(required = false)
     public void setMailClient(final MailClient mailClient) {
         this.mailClient = mailClient;
+    }
+
+    @Override
+    public void forgotPassword(final String email) {
+        final Optional<UserEntity> userEntity = userRepository.findByEmail(email);
+        if (userEntity.isPresent()) {
+            final String token = tokenService.generateResetPasswordToken(email);
+            mailClient.sendResetMessage(userEntity.get(), token);
+        }
+    }
+
+    @Override
+    public void resetPassword(final ResetPasswordDTO resetPasswordDTO) {
+        final UserEntity userEntity = tokenService.checkResetPasswordToken(resetPasswordDTO.getToken())
+                .orElseThrow(() -> new InvalidResetPasswordTokenException());
+        userEntity.setPassword(encoder.encode(resetPasswordDTO.getPassword()));
+        userEntity.setModifiedAt(new Date());
+        userEntity.setResetPasswordTokenDate(null);
+        userRepository.save(userEntity);
     }
 }
