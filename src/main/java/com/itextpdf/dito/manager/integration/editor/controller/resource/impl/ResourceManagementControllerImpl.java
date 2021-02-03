@@ -46,11 +46,11 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
         return resourceLeafDescriptorMapper.map(resourceEntities);
     }
 
-    @Override
-    public List<ResourceLeafDescriptor> getResources() {
-        log.info("Request to get resources received.");
-        return getWorkspaceResources(null);
-    }
+//    @Override
+//    public List<ResourceLeafDescriptor> getResources() {
+//        log.info("Request to get resources received.");
+//        return getWorkspaceResources(null);
+//    }
 
     @Override
     public ResourceLeafDescriptor createOrUpdate(final Principal principal, final String resourceId,
