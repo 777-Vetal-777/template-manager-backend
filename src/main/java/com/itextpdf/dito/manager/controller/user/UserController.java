@@ -1,6 +1,8 @@
 package com.itextpdf.dito.manager.controller.user;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
+import com.itextpdf.dito.manager.dto.user.EmailDTO;
+import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -45,6 +47,8 @@ public interface UserController {
     String CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
     String UPDATE_USERS_ROLES_ENDPOINT = "/roles";
+    String FORGOT_PASSWORD = "/forgot-password";
+    String RESET_PASSWORD = "/reset-password";
 
     @PostMapping
     @PreAuthorize("hasAuthority('E3_US10_CREATE_NEW_USER')")
@@ -55,7 +59,7 @@ public interface UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or user already exists", content = @Content),
     })
-    ResponseEntity<UserDTO> create(@RequestBody UserCreateRequestDTO userCreateRequestDTO);
+    ResponseEntity<UserDTO> create(@RequestBody UserCreateRequestDTO userCreateRequestDTO, Principal principal);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E3_US_9_USERS_TABLE', 'E2_US6_SETTINGS_PANEL')")
@@ -118,4 +122,21 @@ public interface UserController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<List<UserDTO>> updateUsersRoles(
             @RequestBody final UserRolesUpdateRequestDTO userRolesUpdateRequestDTO);
+
+    @PatchMapping(FORGOT_PASSWORD)
+    @Operation(summary = "Forgot user`s password", description = "Forgot user`s password",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully sent link to email", content = @Content)
+    })
+    ResponseEntity<Void> forgotPassword(@RequestBody EmailDTO emailDTO);
+
+    @PatchMapping(RESET_PASSWORD)
+    @Operation(summary = "Reset user`s password", description = "Reset user`s password",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully updated password", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Token is not valid", content = @Content)
+    })
+    ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO);
 }

@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.service.token;
 
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.token.InvalidRefreshTokenException;
 
 import java.util.Date;
+import java.util.Optional;
 
 public interface TokenService {
     String generateAccessToken(String subject);
@@ -14,4 +16,8 @@ public interface TokenService {
     boolean isTokenIssuedAfterUserChanges(String token, Date userChangesDate);
 
     String getTokenForEditor(String subject);
+
+    String generateResetPasswordToken(String subject);
+
+    Optional<UserEntity> checkResetPasswordToken(String token);
 }

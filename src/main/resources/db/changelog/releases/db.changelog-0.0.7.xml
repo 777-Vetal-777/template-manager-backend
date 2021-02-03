@@ -1,0 +1,11 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="001-add-column-reset-password-token-date-to-user-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="user">
+            <column name="reset_password_token_date" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

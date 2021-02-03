@@ -3,6 +3,8 @@ package com.itextpdf.dito.manager.controller.user.impl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.user.UserController;
+import com.itextpdf.dito.manager.dto.user.EmailDTO;
+import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -35,9 +37,10 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO) {
+    public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO, Principal principal) {
+        final UserEntity currentUser = userService.findByEmail(principal.getName());
         final UserEntity user = userService
-                .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles());
+                .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles(), currentUser);
         return new ResponseEntity<>(userMapper.map(user), HttpStatus.CREATED);
     }
 
@@ -93,4 +96,15 @@ public class UserControllerImpl extends AbstractController implements UserContro
         return new ResponseEntity<>(userMapper.map(userEntities), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<Void> forgotPassword(final @Valid EmailDTO emailDTO) {
+        userService.forgotPassword(emailDTO.getEmail());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    public ResponseEntity<Void> resetPassword(final @Valid ResetPasswordDTO resetPasswordDTO) {
+        userService.resetPassword(resetPasswordDTO);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
