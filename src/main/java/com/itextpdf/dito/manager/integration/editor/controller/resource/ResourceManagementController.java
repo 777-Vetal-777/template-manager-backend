@@ -24,6 +24,9 @@ public interface ResourceManagementController {
     @GetMapping(WORKSPACE_RESOURCES_URL)
     List<ResourceLeafDescriptor> getWorkspaceResources(@PathVariable("workspace-id") String workspaceId);
 
+    @GetMapping(CREATE_RESOURCE_URL)
+    List<ResourceLeafDescriptor> getResources();
+
     @PutMapping(RESOURCE_URL)
     ResourceLeafDescriptor createOrUpdate(Principal principal, @PathVariable("resource-id") String resourceId,
             @RequestPart ResourceLeafDescriptor descriptor, @RequestPart InputStream data) throws IOException;

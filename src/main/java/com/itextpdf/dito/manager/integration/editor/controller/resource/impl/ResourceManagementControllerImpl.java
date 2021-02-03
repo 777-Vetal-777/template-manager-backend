@@ -40,6 +40,11 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
+    public List<ResourceLeafDescriptor> getResources() {
+        return getWorkspaceResources(null);
+    }
+
+    @Override
     public ResourceLeafDescriptor createOrUpdate(final Principal principal, final String resourceId,
             final ResourceLeafDescriptor descriptor,
             final InputStream data) throws IOException {
