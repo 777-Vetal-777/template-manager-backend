@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.exception.instance.deployment.InstanceDeploymen
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
+import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import com.itextpdf.dito.manager.exception.template.TemplateVersionNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,11 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(TemplatePreviewGenerationException.class)
     public ResponseEntity<ErrorResponseDTO> templatePreviewGenerationExceptionHandler(final TemplatePreviewGenerationException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(TemplateHasWrongStructureException.class)
+    public ResponseEntity<ErrorResponseDTO> templateHasWrongStructureExceptionHandler(final TemplateHasWrongStructureException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TemplateDeleteException.class)

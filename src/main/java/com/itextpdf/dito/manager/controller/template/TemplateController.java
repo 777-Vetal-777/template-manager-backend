@@ -173,10 +173,10 @@ public interface TemplateController {
             @ApiResponse(responseCode = "400", description = "The file cannot be read."),
             @ApiResponse(responseCode = "400", description = "File extension not supported.")
     })
-    ResponseEntity<TemplateDTO> create(Principal principal,
-                                       @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
-                                       @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
-                                       @Parameter(name = "template", description = "Template file", style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
+    ResponseEntity<TemplateDTO> createVersion(Principal principal,
+                                              @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
+                                              @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
+                                              @Parameter(name = "template", description = "Template file", style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAnyAuthority('E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")

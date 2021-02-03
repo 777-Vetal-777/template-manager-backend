@@ -7,7 +7,6 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import org.hibernate.annotations.JoinFormula;
 
-import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -18,10 +17,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "template_file")
@@ -68,6 +71,19 @@ public class TemplateFileEntity {
             "join {h-schema}stage instanceStage on instanceStage.id = instance.stage_id " +
             "where toInstance.template_file_id = id) )")
     private StageEntity stage;
+
+    @OneToMany(
+            mappedBy = "composition",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<TemplateFilePartEntity> parts = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part",
+            cascade = CascadeType.MERGE
+    )
+    private List<TemplateFilePartEntity> compositions = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -174,4 +190,13 @@ public class TemplateFileEntity {
         this.stage = stage;
         this.instance = new HashSet<>(stage.getInstances());
     }
+
+    public List<TemplateFilePartEntity> getParts() {
+        return parts;
+    }
+
+    public List<TemplateFilePartEntity> getCompositions() {
+        return compositions;
+    }
+
 }

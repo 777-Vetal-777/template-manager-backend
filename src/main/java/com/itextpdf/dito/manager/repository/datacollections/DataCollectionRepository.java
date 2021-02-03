@@ -53,4 +53,20 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
                                       @Param("types") @Nullable List<DataCollectionType> types,
                                       @Param("search") String searchParam);
 
+    @Query(value = SELECT_CLAUSE + FILTER_CONDITION)
+    List<DataCollectionEntity> filter(@Param("name") @Nullable String name,
+                                      @Param("modifiedBy") @Nullable String modifiedBy,
+                                      @Param("startDate") @Nullable @Temporal Date modificationStartDate,
+                                      @Param("endDate") @Nullable @Temporal Date modificationEndDate,
+                                      @Param("types") @Nullable List<DataCollectionType> types);
+
+    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION)
+    List<DataCollectionEntity> search(@Param("name") @Nullable String name,
+                                      @Param("modifiedBy") @Nullable String modifiedBy,
+                                      @Param("startDate") @Nullable @Temporal Date modificationStartDate,
+                                      @Param("endDate") @Nullable @Temporal Date modificationEndDate,
+                                      @Param("types") @Nullable List<DataCollectionType> types,
+                                      @Param("search") String searchParam);
+
+
 }

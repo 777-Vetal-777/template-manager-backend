@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.security.impl;
 
+import com.google.common.base.Predicates;
 import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
@@ -30,9 +31,10 @@ import static java.util.stream.Collectors.toMap;
 public class PermissionHandlerImpl implements PermissionHandler {
 
     private final Map<TemplateTypeEnum, Predicate<String>> templateCommonPermissionsByType = Map.of(
-            TemplateTypeEnum.STANDARD, "E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals,
-            TemplateTypeEnum.HEADER, "E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"::equals,
-            TemplateTypeEnum.FOOTER, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals);
+            TemplateTypeEnum.STANDARD, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
+            TemplateTypeEnum.HEADER, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
+            TemplateTypeEnum.FOOTER, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
+            TemplateTypeEnum.COMPOSITION, Predicates.or("E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"::equals, "E9_US102_CREATE_NEW_TEMPLATE_WITHOUT_DATA_COMPOSITION"::equals));
 
     private static final Map<ResourceTypeEnum, Predicate<String>> RESOURCE_VIEW_PERMISSIONS = Map.of(
             ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,

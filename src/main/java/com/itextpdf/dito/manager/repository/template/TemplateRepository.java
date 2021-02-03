@@ -73,6 +73,14 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             " or (LOWER(dependencyTypes) like CONCAT('%',:search,'%'))" +
             " or (LOWER(stage) like CONCAT('%',:search,'%'))";
 
+    String TEMPLATE_TABLE_LIST_SELECT_CLAUSE = "select template from TemplateEntity template "
+            + " join fetch template.latestFile templateFile "
+            + " left join fetch templateFile.dataCollectionFile dataCollectionFile "
+            + " left join fetch dataCollectionFile.dataCollection dataCollection ";
+
+    String FILTER_LIST_CONDITION = "(COALESCE(:types) is null or template.type in (:types)) "
+            + " and (dataCollection.name is null or dataCollection.name = :dataCollectionName)";
+
     Optional<TemplateEntity> findByName(String name);
 
     @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + " where " + FILTER_CONDITION)
@@ -148,5 +156,13 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Modifying
     @Query("update TemplateEntity t set t.blockedBy = null, t.blockedAt=null where t.blockedAt< :blockExpirationDate")
     void unlockTemplatesWithExpiredBlockTime(@Param("blockExpirationDate") @Temporal Date blockExpirationDate);
+
+    @Query(TEMPLATE_TABLE_LIST_SELECT_CLAUSE + " where " + FILTER_LIST_CONDITION)
+    List<TemplateEntity> getListTemplates(@Param("types") @Nullable List<TemplateTypeEnum> types,
+                                          @Param("dataCollectionName") @Nullable String dataCollectionName);
+
+    @Query(TEMPLATE_TABLE_LIST_SELECT_CLAUSE
+            + " where template.name in (:names)")
+    List<TemplateEntity> getTemplatesWithLatestFileByName(List<String> names);
 
 }
