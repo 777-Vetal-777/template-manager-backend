@@ -46,7 +46,7 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
         final Pageable pageWithSort = updateSort(pageable);
         final Long version = getLongFromFilter(filter.getVersion());
         final String depend = getStringFromFilter(filter.getName());
-        final String stageName = getStringFromFilter(filter.getStageName());
+        final String stageName = getStringFromFilter(filter.getStage());
         final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d ->  d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
         final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
         if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType().contains(DependencyType.TEMPLATE)) {

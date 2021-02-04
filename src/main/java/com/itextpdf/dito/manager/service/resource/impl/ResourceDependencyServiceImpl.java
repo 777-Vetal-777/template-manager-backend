@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
-import static com.itextpdf.dito.manager.dto.dependency.DependencyType.IMAGE;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -53,7 +52,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
             final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
-            final String stage = getStringFromFilter(filter.getStageName());
+            final String stage = getStringFromFilter(filter.getStage());
             final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD
             if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) || TEMPLATE_DEPENDENCY_TYPE.contains(searchParam.toLowerCase()))) {
