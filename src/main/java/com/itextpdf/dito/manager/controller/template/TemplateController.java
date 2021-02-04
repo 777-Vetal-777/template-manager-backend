@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -225,7 +226,7 @@ public interface TemplateController {
     })
     ResponseEntity<TemplateMetadataDTO> unblock(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
-    @GetMapping(TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE)
+    @PutMapping(TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Promote template version to next stage", description = "Promote template version to next stage",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -238,7 +239,7 @@ public interface TemplateController {
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
 
-    @GetMapping(TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE)
+    @PutMapping(TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Undeploy template version from promotion path", description = "Undeploy template version from promotion path",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -260,5 +261,16 @@ public interface TemplateController {
             Principal principal,
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
+
+    @DeleteMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Delete template", description = "Delete template by name - the template cannot be deleted if it has promoted versions or dependencies.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template successfully deleted.", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The template can't be deleted: it has outbound dependencies or promoted versions.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Template not found", content = @Content),
+    })
+    ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
+
 
 }

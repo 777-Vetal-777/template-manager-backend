@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.instance.deployment.InstanceDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
+import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import com.itextpdf.dito.manager.exception.template.TemplateVersionNotFoundException;
@@ -36,6 +37,11 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(TemplatePreviewGenerationException.class)
     public ResponseEntity<ErrorResponseDTO> templatePreviewGenerationExceptionHandler(final TemplatePreviewGenerationException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(TemplateDeleteException.class)
+    public ResponseEntity<ErrorResponseDTO> templateDeleteExceptionHandler(final TemplateDeleteException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
     }
 }

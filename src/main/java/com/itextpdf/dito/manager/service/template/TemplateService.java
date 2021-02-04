@@ -41,7 +41,7 @@ public interface TemplateService {
 
     TemplateEntity detachRole(String templateName, String roleName, String email);
 
-    TemplateEntity delete(String templateName);
+    void delete(String templateName);
 
     TemplateEntity block(String userEmail, String templateName);
 

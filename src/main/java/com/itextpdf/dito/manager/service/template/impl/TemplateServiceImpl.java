@@ -14,12 +14,14 @@ import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
+import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateLogRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
@@ -40,6 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -57,6 +60,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final RoleService roleService;
     private final PermissionService permissionService;
     private final TemplateDeploymentService templateDeploymentService;
+    private final TemplateLogRepository templateLogRepository;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -66,7 +70,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final RoleService roleService,
                                final PermissionService permissionService,
                                final InstanceRepository instanceRepository,
-                               final TemplateDeploymentService templateDeploymentService) {
+                               final TemplateDeploymentService templateDeploymentService,
+                               final TemplateLogRepository templateLogRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -76,6 +81,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.permissionService = permissionService;
         this.instanceRepository = instanceRepository;
         this.templateDeploymentService = templateDeploymentService;
+        this.templateLogRepository = templateLogRepository;
     }
 
     @Override
@@ -328,10 +334,23 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public TemplateEntity delete(String templateName) {
+    public void delete(final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
+        final Optional<TemplateFileEntity> deployedTemplateVersion = templateEntity.getFiles().stream()
+                .filter(TemplateFileEntity::getDeployed)
+                .findAny();
+        if (deployedTemplateVersion.isPresent()){
+            throw new TemplateDeleteException("Template has deployed versions that should be un-deployed first");
+        }
+        //TODO implement check for outbound dependencies when template composition is completed DTM-1614
+        final boolean hasOutBoundDependencies = false;
+        if (hasOutBoundDependencies){
+            throw new TemplateDeleteException("Template has outbound dependencies");
+        }
+        templateDeploymentService.removeAllVersionsFromDefaultStage(templateName);
+        templateLogRepository.deleteAll(templateEntity.getTemplateLogs());
+        templateFileRepository.deleteAll(templateEntity.getFiles());
         templateRepository.delete(templateEntity);
-        return templateEntity;
     }
 
     @Override
