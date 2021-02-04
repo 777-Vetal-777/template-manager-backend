@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.repository.resource;
 
-import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
@@ -69,7 +68,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("stage") @Nullable String stageName,
                                   @Param("search") @Nullable String search);
 
-    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, max(templateFiles.version) as version, max(stage.name) as stageName) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
@@ -81,14 +80,15 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "file.resource.id = :id "
             + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
             + "and (:version=0l or templateFiles.version is null or templateFiles.version=:version) "
-            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ")
+            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) "
+            + "group by template.name")
     Page<DependencyModel> filter(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
                                  @Param("stage") @Nullable String stage);
 
-    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
+    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, max(templateFiles.version) as version, max(stage.name) as stageName) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
@@ -105,7 +105,8 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or CAST(templateFiles.version as string) like CONCAT('%',:search,'%') "
             + "or 'template' like CONCAT('%',:search,'%') "
-            + "or LOWER(stage.name) like CONCAT('%',:search,'%'))")
+            + "or LOWER(stage.name) like CONCAT('%',:search,'%')) "
+            + "group by template.name")
     Page<DependencyModel> search(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
@@ -113,13 +114,14 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("stage") @Nullable String stage,
                                  @Param("search") @Nullable String search);
 
-    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, templateFiles.version, stage.name) "
+    @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, max(templateFiles.version) as version, max(stage.name) as stageName) "
             + "from ResourceEntity resource "
             + "join resource.latestFile file "
             + "join file.templateFiles templateFiles "
             + "left join templateFiles.instance instance "
             + "left join instance.stage stage "
             + "left join templateFiles.template template "
-            + "where resource.id = :id ")
+            + "where resource.id = :id "
+            + "group by template.name ")
     List<DependencyModel> searchDependencies(@Param("id") Long resourceId);
 }
