@@ -334,7 +334,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public void delete(final String templateName) {
+    public TemplateEntity delete(final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
         final Optional<TemplateFileEntity> deployedTemplateVersion = templateEntity.getFiles().stream()
                 .filter(TemplateFileEntity::getDeployed)
@@ -351,6 +351,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateLogRepository.deleteAll(templateEntity.getTemplateLogs());
         templateFileRepository.deleteAll(templateEntity.getFiles());
         templateRepository.delete(templateEntity);
+        return templateEntity;
     }
 
     @Override
