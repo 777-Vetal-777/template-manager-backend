@@ -13,6 +13,7 @@ spring:
     username: ${DITO_MANAGER_SMTP_USERNAME}
     password: ${DITO_MANAGER_SMTP_PASSWORD}
     front-redirect: ${DITO_MANAGER_FRONTEND_APP_BASE_URL}
+    privacy-information: ${DITO_MANAGER_PRIVACY_INFORMATION_APP_URL:}
     properties:
       mail:
         smtp:
@@ -33,4 +34,3 @@ jpa:
       show_sql: true
       format_sql: true
 
-privacy-information: ${DITO_MANAGER_PRIVACY_INFORMATION_APP_URL:}
