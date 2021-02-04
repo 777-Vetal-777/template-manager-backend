@@ -102,10 +102,10 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "and (:version=0l or templateFiles.version is null or templateFiles.version=:version) "
             + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) "
             //search
-            + "and LOWER(template.name) like CONCAT('%',:search,'%') "
+            + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or CAST(templateFiles.version as string) like CONCAT('%',:search,'%') "
             + "or 'template' like CONCAT('%',:search,'%') "
-            + "or LOWER(stage.name) like CONCAT('%',:search,'%')")
+            + "or LOWER(stage.name) like CONCAT('%',:search,'%'))")
     Page<DependencyModel> search(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
