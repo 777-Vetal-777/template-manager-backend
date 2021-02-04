@@ -222,6 +222,15 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), comment, oldVersion + 1);
     }
 
+    @Override
+    public TemplateEntity rollbackTemplate(final TemplateEntity existingTemplateEntity,
+                                           final TemplateFileEntity templateVersionToBeRevertedTo,
+                                           final UserEntity userEntity) {
+        final TemplateFileEntity currentTemplateFile = existingTemplateEntity.getLatestFile();
+        final String comment = new StringBuilder().append("Rollback to version: ").append(templateVersionToBeRevertedTo.getVersion()).toString();
+        return createNewVersion(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), comment, currentTemplateFile.getVersion() + 1);
+    }
+
     private TemplateEntity createNewVersion(final TemplateEntity existingTemplateEntity,
                                             final TemplateFileEntity fileEntityToCopyDependencies,
                                             final UserEntity userEntity,

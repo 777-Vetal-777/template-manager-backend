@@ -71,9 +71,9 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
     public TemplateEntity rollbackVersion(final String templateName, final Long version, final String userEmail) {
         final UserEntity currentUser = userService.findByEmail(userEmail);
         final TemplateEntity templateEntity = templateService.get(templateName);
-        final TemplateFileEntity templateFileEntityToBeRevertedTo =  templateFileRepository.findByVersionAndTemplate(version, templateEntity)
+        final TemplateFileEntity templateFileEntityToBeRevertedTo = templateFileRepository.findByVersionAndTemplate(version, templateEntity)
                 .orElseThrow(() -> new TemplateVersionNotFoundException(String.valueOf(version)));
-        return templateService.createNewVersionAsCopy(templateFileEntityToBeRevertedTo, currentUser, "");
+        return templateService.rollbackTemplate(templateEntity,templateFileEntityToBeRevertedTo,currentUser);
     }
 
     private Pageable updateSort(final Pageable pageable) {

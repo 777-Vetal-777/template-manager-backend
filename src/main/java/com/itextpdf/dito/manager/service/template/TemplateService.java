@@ -32,6 +32,9 @@ public interface TemplateService {
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #fileEntityToCopy.getTemplate(), 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #existingTemplateEntity, 'E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE')")
+    TemplateEntity rollbackTemplate(TemplateEntity existingTemplateEntity, TemplateFileEntity templateVersionToBeRevertedTo, UserEntity userEntity);
+
     Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);
 
     TemplateEntity applyRole(String templateName, String roleName, List<String> permissions, String email);
