@@ -21,7 +21,7 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(InstanceDeploymentException.class)
     public ResponseEntity<ErrorResponseDTO> instanceDeploymentExceptionHandler(final InstanceDeploymentException ex) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TemplateVersionNotFoundException.class)
@@ -31,7 +31,7 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(TemplateDeploymentException.class)
     public ResponseEntity<ErrorResponseDTO> templateDeploymentExceptionHandler(final TemplateDeploymentException ex) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TemplatePreviewGenerationException.class)
