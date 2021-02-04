@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.auth.TokenAuthorizationFilter;
 import com.itextpdf.dito.manager.controller.login.AuthenticationController;
 import com.itextpdf.dito.manager.controller.token.TokenController;
 
+import com.itextpdf.dito.manager.controller.user.UserController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +59,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
             "/swagger-ui.html",
             // auth endpoint
             AuthenticationController.BASE_NAME,
+            UserController.BASE_NAME + UserController.FORGOT_PASSWORD,
+            UserController.BASE_NAME + UserController.RESET_PASSWORD,
             TokenController.BASE_NAME + TokenController.REFRESH_ENDPOINT
     };
 
