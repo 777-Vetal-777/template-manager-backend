@@ -11,6 +11,10 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
+import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 
 
 public abstract class AbstractController {
@@ -37,4 +41,25 @@ public abstract class AbstractController {
 
         return result.toString();
     }
+    
+    protected byte[] getBytesFromMultipart(final MultipartFile multipartFile){
+        if (multipartFile.isEmpty()) {
+        	throwEmptyFleException();
+        }
+        byte[] data = null;
+        try {
+            data = multipartFile.getBytes();
+        } catch (IOException e) {
+        	throwUnreadableFleException(multipartFile.getOriginalFilename());
+        }
+        return data;
+    }
+
+	protected RuntimeException throwEmptyFleException() {
+		throw new EmptyDataCollectionFileException();
+	}
+
+	protected RuntimeException throwUnreadableFleException(String fileName) {
+		throw new UnreadableDataCollectionException(fileName);
+	}
 }

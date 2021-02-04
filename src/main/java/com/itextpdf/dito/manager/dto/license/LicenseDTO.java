@@ -6,6 +6,7 @@ public class LicenseDTO {
     private String type;
     private Date expirationDate;
     private Long volumeLeft;
+    private String volumeLimit;
     private String fileName;
     
 	public String getType() {
@@ -31,6 +32,12 @@ public class LicenseDTO {
 	}
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+	public String getVolumeLimit() {
+		return volumeLimit;
+	}
+	public void setVolumeLimit(String volumeLimit) {
+		this.volumeLimit = volumeLimit;
 	}
     
 }
