@@ -5,4 +5,7 @@ import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 
 public interface LicenseService {
 	LicenseEntity uploadLicense(WorkspaceEntity workspaceEntity, byte[] data, String fileName);
+
+	LicenseEntity getWorkspaceLicense(WorkspaceEntity workspaceEntity);
+
 }
