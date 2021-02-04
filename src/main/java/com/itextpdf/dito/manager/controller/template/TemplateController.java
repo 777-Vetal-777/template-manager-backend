@@ -61,6 +61,7 @@ public interface TemplateController {
     String PROMOTE_ENDPOINT = "/promote";
     String UNDEPLOY_ENDPOINT = "/undeploy";
     String SEARCH_ENDPOINT = "/search";
+    String ROLLBACK_ENDPOINT = "/rollback";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
@@ -68,6 +69,7 @@ public interface TemplateController {
     String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_UNBLOCK_ENDPOINT;
     String TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + PROMOTE_ENDPOINT;
     String TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + UNDEPLOY_ENDPOINT;
+    String TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + ROLLBACK_ENDPOINT;
     //Dependencies
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
     String TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
@@ -244,6 +246,18 @@ public interface TemplateController {
             @ApiResponse(responseCode = "404", description = "Template version not found.")
     })
     ResponseEntity<Void> undeploy(
+            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
+            @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
+
+    @PostMapping(TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Rollback template to selected version", description = "Rollback template to selected version",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Template rollback was successful."),
+            @ApiResponse(responseCode = "404", description = "Template or template version not found.")
+    })
+    ResponseEntity<TemplateDTO> rollbackVersion(
+            Principal principal,
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
