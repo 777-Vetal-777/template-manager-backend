@@ -10,7 +10,7 @@ public class DependencyFilter {
     private String name;
     private Long version;
     private List<DependencyType> dependencyType;
-    private String stageName;
+    private String stage;
     private List<DependencyDirectionType> directionType;
 
     public String getName() {
@@ -37,12 +37,12 @@ public class DependencyFilter {
         this.dependencyType = dependencyType;
     }
 
-    public String getStageName() {
-        return stageName;
+    public String getStage() {
+        return stage;
     }
 
-    public void setStageName(String stageName) {
-        this.stageName = stageName;
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
     public List<DependencyDirectionType> getDirectionType() {
