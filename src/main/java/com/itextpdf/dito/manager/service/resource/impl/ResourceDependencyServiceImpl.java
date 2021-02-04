@@ -80,7 +80,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
                         sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
                     }
                     if (sortParam.getProperty().equals("version")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "templateFiles.version");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "version");
                     }
                     if (sortParam.getProperty().equals("directionType")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
@@ -89,7 +89,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
                         sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
                     }
                     if (sortParam.getProperty().equals("stage")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "stageName");
                     }
                     return sortParam;
                 })
