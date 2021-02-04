@@ -11,16 +11,21 @@ import com.itextpdf.dito.sdk.core.preprocess.asset.TemplateAssetRetriever;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TemplateManagementServiceImpl implements TemplateManagementService {
     private final TemplateService templateService;
+    private final TemplateAssetRetriever resourceAssetRetriever;
+    private final TemplateAssetRetriever templateAssetRetriever;
 
-    public TemplateManagementServiceImpl(final TemplateService templateService) {
+    public TemplateManagementServiceImpl(final TemplateService templateService,
+            final TemplateAssetRetriever resourceAssetRetriever,
+            final TemplateAssetRetriever templateAssetRetriever) {
         this.templateService = templateService;
+        this.resourceAssetRetriever = resourceAssetRetriever;
+        this.templateAssetRetriever = templateAssetRetriever;
     }
 
 
@@ -59,28 +64,4 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
             e.printStackTrace();
         }
     }
-
-    private static TemplateAssetRetriever templateAssetRetriever = new TemplateAssetRetriever() {
-        @Override
-        public InputStream getResourceAsStream(String s) throws IOException {
-            return null;
-        }
-
-        @Override
-        public boolean isUriSupported(String s) {
-            return false;
-        }
-    };
-
-    private static TemplateAssetRetriever resourceAssetRetriever = new TemplateAssetRetriever() {
-        @Override
-        public InputStream getResourceAsStream(String s) throws IOException {
-            return null;
-        }
-
-        @Override
-        public boolean isUriSupported(String s) {
-            return false;
-        }
-    };
 }
