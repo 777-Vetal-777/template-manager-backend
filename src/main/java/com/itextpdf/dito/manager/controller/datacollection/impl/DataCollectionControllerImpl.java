@@ -21,9 +21,7 @@ import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionFileSizeExceedLimitException;
-import com.itextpdf.dito.manager.exception.datacollection.EmptyDataCollectionFileException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
-import com.itextpdf.dito.manager.exception.datacollection.UnreadableDataCollectionException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
@@ -47,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -154,19 +151,6 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final String dataCollectionName = decodeBase64(name);
         final Page<FileVersionModel> dataCollectionVersionEntities = dataCollectionFileService.list(pageable, dataCollectionName, versionFilter, searchParam);
         return new ResponseEntity<>(fileVersionMapper.map(dataCollectionVersionEntities), HttpStatus.OK);
-    }
-
-    private byte[] getBytesFromMultipart(final MultipartFile multipartFile) {
-        if (multipartFile.isEmpty()) {
-            throw new EmptyDataCollectionFileException();
-        }
-        byte[] data;
-        try {
-            data = multipartFile.getBytes();
-        } catch (IOException e) {
-            throw new UnreadableDataCollectionException(multipartFile.getOriginalFilename());
-        }
-        return data;
     }
 
     private DataCollectionType getDataCollectionTypeFromPath(final String dataCollectionType) {

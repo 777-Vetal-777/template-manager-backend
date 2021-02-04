@@ -97,16 +97,26 @@ public interface WorkspaceController {
 	@PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
 	@Operation(summary = "Upload license", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Successfully uploaded", content = @Content),
-			@ApiResponse(responseCode = "400", description = "Invalid license", content = @Content), })
-	ResponseEntity<Void> uploadLisence(
+			@ApiResponse(responseCode = "200", description = "Successfully uploaded", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = LicenseDTO.class)) }),
+			@ApiResponse(responseCode = "400", description = "Invalid license", content = @Content),
+			@ApiResponse(responseCode = "400", description = "License's file couldn't be empty"),
+			@ApiResponse(responseCode = "400", description = "License's file is unreadable") })
+	ResponseEntity<LicenseDTO> uploadLisence(
+			@Parameter(description = "Workspace name encoded with base64.", required = true) @PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
 			@Parameter(description = "license XML file", required = true, style = ParameterStyle.FORM) @RequestPart("license") MultipartFile multipartFile,
 			Principal principal);
 
-	@GetMapping(path = WORKSPACE_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@GetMapping(path = WORKSPACE_LICENSE_ENDPOINT)
 	@PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
 	@Operation(summary = "Get license information", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-	ResponseEntity<LicenseDTO> getLisence(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Success", content = {
+					@Content(mediaType = "application/json", schema = @Schema(implementation = LicenseDTO.class)) }),
+			@ApiResponse(responseCode = "400", description = "Invalid license", content = @Content),
+			@ApiResponse(responseCode = "404", description = "No licenses found", content = @Content)})
+	ResponseEntity<LicenseDTO> getLisence(
+			@Parameter(description = "Workspace name encoded with base64.", required = true) @PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName,
 			Principal principal);
 
 }

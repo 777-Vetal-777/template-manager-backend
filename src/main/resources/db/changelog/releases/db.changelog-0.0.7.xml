@@ -3,9 +3,34 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
     <changeSet id="001-add-column-reset-password-token-date-to-user-table" author="Yaroslav_Maievskij">
         <addColumn tableName="user">
             <column name="reset_password_token_date" type="timestamp"/>
         </addColumn>
     </changeSet>
+
+	<changeSet id="002-create-license-table" author="Denys_Kovbii">
+        <createTable tableName="license">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="license_pk"/>
+            </column>
+             <column name="file_name" type="varchar(255)">
+                <constraints notNullConstraintName="license_file_name_not_null_constraint" nullable="false"/>
+            </column>
+            <column name="data" type="${blob}">
+                <constraints nullable="false" notNullConstraintName="license_data_not_null_constraint"/>
+            </column>
+           <column name="workspace_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="license_workspace_id_not_null_constraint"
+                             foreignKeyName="fk_license_to_workspace"
+                             references="workspace(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-license-sequence" author="Denys_Kovbii">
+        <createSequence sequenceName="license_sequence"/>
+    </changeSet>
+
 </databaseChangeLog>

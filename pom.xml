@@ -131,7 +131,7 @@
             <artifactId>sentry-spring-boot-starter</artifactId>
             <version>${sentry.version}</version>
         </dependency>
-        <dependency>
+     	<dependency>
             <groupId>com.itextpdf.dito</groupId>
             <artifactId>editor-api</artifactId>
             <version>${itext.editor-api.version}</version>

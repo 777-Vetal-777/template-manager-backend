@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.workspace.impl;
 
+import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
@@ -9,6 +10,9 @@ import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
+import com.itextpdf.dito.manager.exception.license.EmptyLicenseFileException;
+import com.itextpdf.dito.manager.exception.license.UnreadableLicenseException;
+import com.itextpdf.dito.manager.service.license.LicenseService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
 import java.security.Principal;
@@ -27,11 +31,16 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     private final WorkspaceService workspaceService;
     private final WorkspaceMapper workspaceMapper;
+    private final LicenseService licenseService;
+    private final LicenseMapper licenseMapper;
 
-    public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper) {
-        this.workspaceService = workspaceService;
-        this.workspaceMapper = workspaceMapper;
-    }
+	public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper,
+			final LicenseService licenseService, final LicenseMapper licenseMapper) {
+		this.workspaceService = workspaceService;
+		this.workspaceMapper = workspaceMapper;
+		this.licenseService = licenseService;
+		this.licenseMapper = licenseMapper;
+	}
 
     @Override
     public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO, final Principal principal) {
@@ -85,12 +94,27 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     }
 
 	@Override
-	public ResponseEntity<Void> uploadLisence(MultipartFile multipartFile, Principal principal) {
-		throw new NotImplementedException("Method not implemented yet");
+	public ResponseEntity<LicenseDTO> uploadLisence(final String workspaceName, final MultipartFile multipartFile,
+			final Principal principal) {
+		final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
+		final byte[] data = getBytesFromMultipart(multipartFile);
+		final String fileName = multipartFile.getOriginalFilename();
+		return new ResponseEntity<>(licenseMapper.map(licenseService.uploadLicense(workspaceEntity, data, fileName)),
+				HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<LicenseDTO> getLisence(String workspaceName, Principal principal) {
+	public ResponseEntity<LicenseDTO> getLisence(final String workspaceName, final Principal principal) {
 		throw new NotImplementedException("Method not implemented yet");
+	}
+	
+	@Override
+	protected RuntimeException throwEmptyFleException() {
+		throw new EmptyLicenseFileException();
+	}
+
+	@Override
+	protected RuntimeException throwUnreadableFleException(String fileName) {
+		throw new UnreadableLicenseException(fileName);
 	}
 }
