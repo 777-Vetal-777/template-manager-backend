@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.template.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.dito.manager.component.template.CompositeTemplateBuilder;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
@@ -25,7 +26,6 @@ import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
-import com.itextpdf.dito.manager.integration.editor.mapper.resource.impl.ResourceLeafDescriptorMapperImpl;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
@@ -73,6 +73,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final RoleService roleService;
     private final PermissionService permissionService;
     private final TemplateDeploymentService templateDeploymentService;
+    private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateLogRepository templateLogRepository;
 
     private final Logger log = LogManager.getLogger(this.getClass());
@@ -87,6 +88,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final PermissionService permissionService,
                                final InstanceRepository instanceRepository,
                                final TemplateDeploymentService templateDeploymentService,
+                               final CompositeTemplateBuilder compositeTemplateConstructor,
                                final TemplateLogRepository templateLogRepository) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
@@ -97,6 +99,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.permissionService = permissionService;
         this.instanceRepository = instanceRepository;
         this.templateDeploymentService = templateDeploymentService;
+        this.compositeTemplateConstructor = compositeTemplateConstructor;
         this.templateLogRepository = templateLogRepository;
     }
 
@@ -136,8 +139,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             templateFileEntity.setDataCollectionFile(dataCollectionEntity.getLatestVersion());
         }
 
-        if (TemplateTypeEnum.COMPOSITION.equals(templateTypeEnum) && Objects.nonNull(templatePartDTOs)) {
-            createTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
+        if (TemplateTypeEnum.COMPOSITION.equals(templateTypeEnum)) {
+            if (Objects.nonNull(templatePartDTOs)) {
+                createTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
+            }
+            templateFileEntity.setData(compositeTemplateConstructor.build(templateFileEntity));
         }
 
         templateEntity.setFiles(Collections.singletonList(templateFileEntity));
@@ -159,46 +165,42 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final Map<String, TemplateFileEntity> templateFilePartMap = templatePartList.stream().collect(Collectors.toMap(TemplateEntity::getName, TemplateEntity::getLatestFile, (templateFileEntity1, templateFileEntity2) -> templateFileEntity1));
 
         //checks that all templates exists
-        final List<String> missedTemplateNames = templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).filter(partName -> !templateFilePartMap.containsKey(partName)).collect(Collectors.toList());
-        if (missedTemplateNames.size() > 0) {
-            throw new TemplateNotFoundException(missedTemplateNames.get(0));
-        }
+        throwExceptionIfSomeTemplatesAreNotFound(templatePartDTOs, templateFilePartMap);
 
         //checks that all templates has the same (or absent dataCollection)
-        if (!templatePartList.stream().allMatch(entity -> {
-            final String dataCollection = Optional.ofNullable(entity.getLatestFile().getDataCollectionFile()).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
-            return Objects.equals(dataCollectionName, dataCollection) || Objects.equals(null, dataCollection);
-        })) {
-            throw new TemplateHasWrongStructureException("Template parts belongs to different Data Collections");
-        }
+        throwExceptionIfTemplatesHaveAnotherDataCollections(templatePartList, dataCollectionName);
 
         //checks that exists at most one HEADER and FOOTER
-        if (templatePartList.stream().filter(entity -> TemplateTypeEnum.HEADER.equals(entity.getType())).count() > 1) {
-            throw new TemplateHasWrongStructureException("Template parts have more than one header");
-        }
-        if (templatePartList.stream().filter(entity -> TemplateTypeEnum.FOOTER.equals(entity.getType())).count() > 1) {
-            throw new TemplateHasWrongStructureException("Template parts have more than one header");
-        }
+        throwExceptionIfTooMuchType(templatePartList, TemplateTypeEnum.HEADER);
+        throwExceptionIfTooMuchType(templatePartList, TemplateTypeEnum.FOOTER);
 
         final List<TemplateFilePartEntity> parts = templateFileEntity.getParts();
-        for (TemplatePartDTO templatePart : templatePartDTOs) {
-            final TemplateFilePartEntity templateFilePartEntity = new TemplateFilePartEntity();
-            templateFilePartEntity.setComposition(templateFileEntity);
-            templateFilePartEntity.setPart(templateFilePartMap.get(templatePart.getTemplateName()));
-            templateFilePartEntity.setCondition(templatePart.getCondition());
-
-            final PartSettings partSettings = new PartSettings();
-            Optional.ofNullable(templatePart.getStartOnNewPage()).ifPresent(setting -> partSettings.setStartOnNewPage(setting));
-            try {
-                templateFilePartEntity.setSettings(objectMapper.writeValueAsString(partSettings));
-            } catch (JsonProcessingException e) {
-                log.error(e);
-            }
+        for (final TemplatePartDTO templatePart : templatePartDTOs) {
+            final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getTemplateName());
+            final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(templateFileEntity, partTemplateFileEntity, templatePart);
 
             parts.add(templateFilePartEntity);
 
-            templateFilePartMap.get(templatePart.getTemplateName()).getCompositions().add(templateFilePartEntity);
+            partTemplateFileEntity.getCompositions().add(templateFilePartEntity);
         }
+    }
+
+    private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity compositionTemplateFileEntity,
+                                                                final TemplateFileEntity partTemplateFileEntity,
+                                                                final TemplatePartDTO templatePart) {
+        final TemplateFilePartEntity templateFilePartEntity = new TemplateFilePartEntity();
+        templateFilePartEntity.setComposition(compositionTemplateFileEntity);
+        templateFilePartEntity.setPart(partTemplateFileEntity);
+        templateFilePartEntity.setCondition(templatePart.getCondition());
+
+        final PartSettings partSettings = new PartSettings();
+        Optional.ofNullable(templatePart.getStartOnNewPage()).ifPresent(partSettings::setStartOnNewPage);
+        try {
+            templateFilePartEntity.setSettings(objectMapper.writeValueAsString(partSettings));
+        } catch (JsonProcessingException e) {
+            log.error(e);
+        }
+        return templateFilePartEntity;
     }
 
     private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final UserEntity author) {
@@ -462,6 +464,28 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
             throw new TemplateAlreadyExistsException(templateName);
+        }
+    }
+
+    private void throwExceptionIfTooMuchType(final List<TemplateEntity> templatePartList, final TemplateTypeEnum checkedType) {
+        if (templatePartList.stream().filter(entity -> checkedType.equals(entity.getType())).count() > 1) {
+            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than one ").append(checkedType).toString());
+        }
+    }
+
+    private void throwExceptionIfTemplatesHaveAnotherDataCollections(final List<TemplateEntity> templatePartList, final String dataCollectionName) {
+        if (!templatePartList.stream().allMatch(entity -> {
+            final String dataCollection = Optional.ofNullable(entity.getLatestFile().getDataCollectionFile()).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
+            return Objects.equals(dataCollectionName, dataCollection) || Objects.equals(null, dataCollection);
+        })) {
+            throw new TemplateHasWrongStructureException("Template parts belongs to different Data Collections");
+        }
+    }
+
+    private void throwExceptionIfSomeTemplatesAreNotFound(final List<TemplatePartDTO> templatePartDTOs, final Map<String, TemplateFileEntity> templateFilePartMap) {
+        final List<String> missedTemplateNames = templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).filter(partName -> !templateFilePartMap.containsKey(partName)).collect(Collectors.toList());
+        if (!missedTemplateNames.isEmpty()) {
+            throw new TemplateNotFoundException(missedTemplateNames.get(0));
         }
     }
 
