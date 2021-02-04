@@ -261,7 +261,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public void forgotPassword(final String email) {
         final Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         if (userEntity.isPresent()) {
-            final String token = tokenService.generateResetPasswordToken(email);
+            String token = tokenService.generateResetPasswordToken(userEntity.get());
             mailClient.sendResetMessage(userEntity.get(), token);
         }
     }
