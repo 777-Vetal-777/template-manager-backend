@@ -8,14 +8,13 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDescriptorMapper;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
-import javax.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.security.Principal;
+import java.util.List;
 
 @RestController
 public class TemplateManagementControllerImpl extends AbstractController implements TemplateManagementController {
@@ -56,7 +55,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     @Override
     public TemplateDescriptor update(final Principal principal, final String templateId,
             final TemplateUpdateDescriptor descriptor,
-            final byte[] data) throws IOException {
+            final byte[] data) {
         log.info("Request to create new version of template with id {} received.",templateId);
         final String email = principal.getName();
         final String id = decodeBase64(templateId);
