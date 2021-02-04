@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.Base64;
 import java.util.Optional;
 
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,6 +80,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(description)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty());
 
@@ -86,6 +88,14 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         String encodedTemplateName = Base64.getEncoder().encodeToString(request.getName().getBytes());
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk());
+
+        //Rollback version
+        final Long currentVersion = 2L;
+        mockMvc.perform(post(TemplateController.BASE_NAME + TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("3"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty());
     }
 
     @Test

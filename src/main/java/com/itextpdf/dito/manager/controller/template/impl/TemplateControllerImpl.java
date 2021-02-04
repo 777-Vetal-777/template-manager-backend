@@ -213,4 +213,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         templateDeploymentService.undeploy(decodeBase64(name), version);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<TemplateDTO> rollbackVersion(final Principal principal, final String templateName, final Long templateVersion) {
+        final TemplateEntity updatedTemplateEntity = templateVersionsService.rollbackVersion(decodeBase64(templateName), templateVersion, principal.getName());
+        return new ResponseEntity<>(templateMapper.map(updatedTemplateEntity), HttpStatus.OK);
+    }
 }
