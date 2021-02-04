@@ -4,11 +4,10 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceL
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 
-import java.io.InputStream;
 import java.util.List;
 
 public interface ResourceManagementService {
-    InputStream get(String name, ResourceTypeEnum type);
+    byte[] get(String name, ResourceTypeEnum type);
 
     List<ResourceEntity> list();
 

@@ -8,12 +8,10 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
+import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceManagementServiceImpl implements ResourceManagementService {
@@ -25,14 +23,11 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
 
     @Override
-    public InputStream get(final String name, final ResourceTypeEnum type) {
-        InputStream result = null;
+    public byte[] get(final String name, final ResourceTypeEnum type) {
         final ResourceEntity resourceEntity = resourceService.get(name, type);
         final Optional<ResourceFileEntity> resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
-        if (resourceFileEntity.isPresent()) {
-            result = new ByteArrayInputStream(resourceFileEntity.get().getFile());
-        }
-        return result;
+
+        return resourceFileEntity.get().getFile();
     }
 
     @Override
@@ -42,14 +37,14 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
     @Override
     public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data,
-            final String fileName,
-            final String email) {
+                                           final String fileName,
+                                           final String email) {
         return resourceService.createNewVersion(name, type, data, fileName, email, null);
     }
 
     @Override
     public ResourceEntity create(final ResourceLeafDescriptor descriptor, final byte[] data, final String fileName,
-            final String email) {
+                                 final String email) {
         final ResourceTypeEnum resourceTypeEnum;
         if (descriptor instanceof ImageDescriptor) {
             resourceTypeEnum = ResourceTypeEnum.IMAGE;

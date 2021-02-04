@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -41,7 +40,7 @@ public interface TemplateManagementController {
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
                               @RequestPart TemplateUpdateDescriptor descriptor,
-                              @RequestPart byte[] data) throws IOException;
+                              @RequestPart byte[] data);
 
     @DeleteMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     TemplateDescriptor delete(@PathVariable("template-id") String templateId);
