@@ -14,6 +14,7 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,8 +84,8 @@ public class MailClientImpl implements MailClient {
         final String mailBody = generateResetPasswordHtml(userEntity, token);
         try {
             send(MAIL_FROM, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
-        } catch (MessagingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new MailingException(e.getMessage());
         }
     }
 
@@ -103,7 +104,7 @@ public class MailClientImpl implements MailClient {
             }
             message = stringBuilder.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read html resetPasswordEmail.html");
         }
         return message;
     }
@@ -126,7 +127,7 @@ public class MailClientImpl implements MailClient {
             }
             message = stringBuilder.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read html registrationEmail.html");
         }
         return message;
     }
@@ -149,7 +150,7 @@ public class MailClientImpl implements MailClient {
         client.setUsername(username);
         client.setPassword(password);
 
-        Properties props = client.getJavaMailProperties();
+        final Properties props = client.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", auth);
         props.put("mail.smtp.starttls.enable", tls);

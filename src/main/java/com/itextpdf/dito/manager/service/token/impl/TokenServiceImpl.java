@@ -94,9 +94,8 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String generateResetPasswordToken(final String subject) {
-        final UserEntity userEntity = userRepository.findByEmail(subject).get();
-        final String token = resetPasswordTokenBuilder.build(subject);
+    public String generateResetPasswordToken(final UserEntity userEntity) {
+        final String token = resetPasswordTokenBuilder.build(userEntity.getEmail());
         final Claims claims = getTokenBody(token);
         userEntity.setResetPasswordTokenDate(claims.getIssuedAt());
         userRepository.save(userEntity);
@@ -110,6 +109,7 @@ public class TokenServiceImpl implements TokenService {
         final Date createdDateToken = body.getIssuedAt();
         final String email = body.getSubject();
         final Optional<UserEntity> userEntity = userRepository.findByEmail(email);
+        boolean activeToken = false;
         if (userEntity.isPresent()) {
             Date createdDateTokenDb = userEntity.get().getResetPasswordTokenDate();
             if (createdDateTokenDb == null) {
@@ -120,10 +120,13 @@ public class TokenServiceImpl implements TokenService {
             createdDateTokenDb = Date.from(instant);
 
             if (createdDateTokenDb.equals(createdDateToken) && expirationDate.after(new Date())) {
-                return userEntity;
+                activeToken = true;
             }
         }
-        return Optional.empty();
+
+        return activeToken
+                ? userEntity
+                : Optional.empty();
     }
 
     private Claims getTokenBody(final String token) {

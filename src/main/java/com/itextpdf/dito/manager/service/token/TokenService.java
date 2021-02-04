@@ -17,7 +17,7 @@ public interface TokenService {
 
     String getTokenForEditor(String subject);
 
-    String generateResetPasswordToken(String subject);
+    String generateResetPasswordToken(UserEntity userEntity);
 
     Optional<UserEntity> checkResetPasswordToken(String token);
 }
