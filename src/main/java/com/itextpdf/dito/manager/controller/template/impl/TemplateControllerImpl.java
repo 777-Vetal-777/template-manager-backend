@@ -219,4 +219,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final TemplateEntity updatedTemplateEntity = templateVersionsService.rollbackVersion(decodeBase64(templateName), templateVersion, principal.getName());
         return new ResponseEntity<>(templateMapper.map(updatedTemplateEntity), HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<Void> delete(final String templateName) {
+        templateService.delete(decodeBase64(templateName));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -1,11 +1,13 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.exception.instance.DefaultInstanceException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
 
 import com.itextpdf.dito.manager.exception.instance.deployment.InstanceRegistrationException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,6 +31,12 @@ public class InstanceExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> instanceHasAttachedTemplateExceptionHandler(
             final InstanceHasAttachedTemplateException ex) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DefaultInstanceException.class)
+    public ResponseEntity<ErrorResponseDTO> defaultInstanceExceptionHandler(
+            final WorkspaceHasNoDevelopmentStageException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InstanceRegistrationException.class)

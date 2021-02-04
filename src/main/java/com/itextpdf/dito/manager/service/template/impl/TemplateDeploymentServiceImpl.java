@@ -8,10 +8,13 @@ import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.exception.instance.DefaultInstanceException;
 import com.itextpdf.dito.manager.exception.stage.NoNextStageOnPromotionPathException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateVersionNotFoundException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
+import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
@@ -29,6 +32,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -46,15 +50,18 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     private final TemplateFileRepository templateFileRepository;
     private final TemplateProjectGenerator templateProjectGenerator;
     private final TemplateRepository templateRepository;
+    private final StageRepository stageRepository;
 
     public TemplateDeploymentServiceImpl(final TemplateMapper templateMapper,
                                          final TemplateFileRepository templateFileRepository,
                                          final TemplateProjectGenerator templateProjectGenerator,
-                                         final TemplateRepository templateRepository) {
+                                         final TemplateRepository templateRepository,
+                                         final StageRepository stageRepository) {
         this.templateMapper = templateMapper;
         this.templateFileRepository = templateFileRepository;
         this.templateProjectGenerator = templateProjectGenerator;
         this.templateRepository = templateRepository;
+        this.stageRepository = stageRepository;
         webClient = WebClient.create();
     }
 
@@ -97,7 +104,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final Optional<TemplateFileEntity> previousStageTemplateVersion = templateFileRepository.findByStageAndTemplate(nextStage, templateEntity);
         if (previousStageTemplateVersion.isPresent()) {
             final TemplateFileEntity previouslyDeployedTemplateVersion = previousStageTemplateVersion.get();
-            previouslyDeployedTemplateVersion.setStage(getDefaultStage(previouslyDeployedTemplateVersion));
+            previouslyDeployedTemplateVersion.setStage(getDefaultStage());
             previouslyDeployedTemplateVersion.setDeployed(false);
             templateFileRepository.save(previouslyDeployedTemplateVersion);
         }
@@ -117,7 +124,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final boolean isDefaultStage = true;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
-        final StageEntity defaultStageEntity = getDefaultStage(templateFileEntity);
+        final StageEntity defaultStageEntity = getDefaultStage();
         final StageEntity currentStageEntity = templateFileEntity.getStage();
         if (currentStageEntity.getSequenceOrder() == 0) {
             throw new TemplateDeploymentException("Template cannot be undeployed from DEV stage");
@@ -133,6 +140,19 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         templateFileEntity.setDeployed(false);
         templateFileEntity.setStage(defaultStageEntity);
         templateFileRepository.save(templateFileEntity);
+    }
+
+    /**
+     * This method should be used only when templated is deleted.
+     *
+     * @param templateName template name to be deleted from system.
+     */
+    @Override
+    public void removeAllVersionsFromDefaultStage(final String templateName) {
+        final TemplateEntity templateEntity = getTemplateByName(templateName);
+        final List<TemplateFileEntity> templateVersions = templateEntity.getFiles();
+        final InstanceEntity defaultInstance = getDefaultInstance();
+        templateVersions.forEach(templateVersion -> removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersion));
     }
 
     private void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {
@@ -201,12 +221,20 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     }
 
     private boolean isOnDefaultStage(final TemplateFileEntity templateFileEntity) {
-        return templateFileEntity.getStage() == getDefaultStage(templateFileEntity);
+        return templateFileEntity.getStage() == getDefaultStage();
     }
 
-    private StageEntity getDefaultStage(final TemplateFileEntity templateFileEntity) {
-        final PromotionPathEntity promotionPath = templateFileEntity.getStage().getPromotionPath();
-        return promotionPath.getStages().get(0);
+    private StageEntity getDefaultStage() {
+        return stageRepository.findDefaultStage().orElseThrow(WorkspaceHasNoDevelopmentStageException::new);
+    }
+
+    private InstanceEntity getDefaultInstance() {
+        final StageEntity defaultStage = getDefaultStage();
+        final List<InstanceEntity> instances = defaultStage.getInstances();
+        if (CollectionUtils.isEmpty(instances) || instances.size() > 1) {
+            throw new DefaultInstanceException();
+        }
+        return instances.get(0);
     }
 
     private StageEntity getNextStage(final TemplateFileEntity templateFileEntity) {
