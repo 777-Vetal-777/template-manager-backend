@@ -18,7 +18,6 @@ import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 import java.security.Principal;
 import java.util.List;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -105,7 +104,9 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
 	@Override
 	public ResponseEntity<LicenseDTO> getLisence(final String workspaceName, final Principal principal) {
-		throw new NotImplementedException("Method not implemented yet");
+		final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
+		return new ResponseEntity<>(licenseMapper.map(licenseService.getWorkspaceLicense(workspaceEntity)),
+				HttpStatus.OK);
 	}
 	
 	@Override
