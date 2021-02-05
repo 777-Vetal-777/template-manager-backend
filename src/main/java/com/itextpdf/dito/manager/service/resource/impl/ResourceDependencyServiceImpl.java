@@ -73,10 +73,10 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     }
 
     private Pageable updateSort(final Pageable pageable) {
-        Sort newSort = Sort.by(pageable.getSort().stream()
+        final Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("name")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "name");
                     }
                     if (sortParam.getProperty().equals("version")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "version");
@@ -88,7 +88,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
                         sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
                     }
                     if (sortParam.getProperty().equals("stage")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "stageName");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "stage");
                     }
                     return sortParam;
                 })
