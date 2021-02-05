@@ -165,4 +165,13 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + " where template.name in (:names)")
     List<TemplateEntity> getTemplatesWithLatestFileByName(List<String> names);
 
+
+    @Query("select template from TemplateEntity template "
+            + "join fetch template.latestFile file "
+            + "join fetch file.compositions compositions "
+            + "join fetch compositions.composition composition "
+            + "left join fetch file.dataCollectionFile dataCollectionFile "
+            + "left join fetch dataCollectionFile.dataCollection dataCollection "
+            + "where composition.template.id = :id")
+    List<TemplateEntity> getTemplatesPartsByTemplateId(@Param("id") Long templateId);
 }

@@ -26,6 +26,8 @@ public interface TemplateService {
 
     List<TemplateEntity> getAll(TemplateListFilter templateListFilter);
 
+    List<TemplateEntity> getAll(String templateName);
+
     TemplateEntity get(String name);
 
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);

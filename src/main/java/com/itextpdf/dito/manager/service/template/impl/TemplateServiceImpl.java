@@ -251,6 +251,12 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    public List<TemplateEntity> getAll(final String templateName) {
+        final TemplateEntity templateEntity = findByName(templateName);
+        return templateRepository.getTemplatesPartsByTemplateId(templateEntity.getId());
+    }
+
+    @Override
     public TemplateEntity get(final String name) {
         return findByName(name);
     }
@@ -505,5 +511,4 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
-
 }

@@ -57,6 +57,7 @@ public interface TemplateController {
     String TEMPLATE_VERSION_PATH_VARIABLE = "template-version";
     String ROLE_PATH_VARIABLE = "role-name";
     String TEMPLATE_VERSION_ENDPOINT = "/versions";
+    String TEMPLATE_PARTS_ENDPOINT = "/parts";
     String TEMPLATE_BLOCK_ENDPOINT = "/block";
     String TEMPLATE_UNBLOCK_ENDPOINT = "/unblock";
     String PAGEABLE_ENDPOINT = "/pageable";
@@ -75,8 +76,8 @@ public interface TemplateController {
     //Dependencies
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
     String TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
-    String TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE =
-            TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_VERSION_ENDPOINT;
+    String TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_VERSION_ENDPOINT;
+    String TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_PARTS_ENDPOINT;
     String TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/preview";
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/roles";
     String TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME = TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE + "/{" + ROLE_PATH_VARIABLE + "}";
@@ -91,6 +92,11 @@ public interface TemplateController {
             @ApiResponse(responseCode = "400", description = "Invalid input or template already exists", content = @Content)})
     ResponseEntity<TemplateDTO> create(@RequestBody TemplateCreateRequestDTO templateCreateRequestDTO,
                                        Principal principal);
+
+    @GetMapping(value = TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US74_VIEW_TEMPLATE_METADATA_STANDARD')")
+    @Operation(summary = "Get nested templates in template by name.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<TemplateDTO>> listCompositionTemplates(@Parameter(description = "The name of the template, which will be used to search for parts. ") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
@@ -273,6 +279,4 @@ public interface TemplateController {
             @ApiResponse(responseCode = "404", description = "Template not found", content = @Content),
     })
     ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
-
-
 }
