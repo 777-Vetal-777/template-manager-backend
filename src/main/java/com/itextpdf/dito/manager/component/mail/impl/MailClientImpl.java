@@ -1,14 +1,14 @@
 package com.itextpdf.dito.manager.component.mail.impl;
 
-import com.google.common.io.Files;
 import com.itextpdf.dito.manager.component.mail.MailClient;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.exception.mail.MailingException;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStreamReader;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
@@ -19,7 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -91,46 +90,47 @@ public class MailClientImpl implements MailClient {
     }
 
     private String generateResetPasswordHtml(final UserEntity userEntity, final String token) {
-        String message = null;
-        try {
-            final File file = new ClassPathResource("templates/resetPasswordEmail.html").getFile();
-            List<String> list = Files.readLines(file, StandardCharsets.UTF_8);
-            list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
-            list.set(35, String.format(list.get(35), FRONT_URL.concat("/forgot_password?token=").concat(token)));
-            list.set(48, String.format(list.get(48), Year.now().getValue()));
-            list.set(51, String.format(list.get(51), PRIVACY_INFORMATION_URL));
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String str2 : list) {
-                stringBuilder.append(str2);
-            }
-            message = stringBuilder.toString();
-        } catch (IOException e) {
-            log.error("Failed to read html resetPasswordEmail.html");
+        final List<String> list = readFile("templates/resetPasswordEmail.html");
+        list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
+        list.set(35, String.format(list.get(35), FRONT_URL.concat("/forgot_password?token=").concat(token)));
+        list.set(48, String.format(list.get(48), Year.now().getValue()));
+        list.set(51, String.format(list.get(51), PRIVACY_INFORMATION_URL));
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String str2 : list) {
+            stringBuilder.append(str2);
         }
-        return message;
+        return stringBuilder.toString();
     }
 
     private String generateRegistrationHtml(final UserEntity userEntity, final String password, final UserEntity currentUser) {
-        String message = null;
-        try {
-        final File file = new ClassPathResource("templates/registrationEmail.html").getFile();
-            List<String> list = Files.readLines(file, StandardCharsets.UTF_8);
-            list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
-            list.set(29, String.format(list.get(29), currentUser.getFirstName() + " " + currentUser.getLastName()));
-            list.set(41, String.format(list.get(41), userEntity.getFirstName()));
-            list.set(45, String.format(list.get(45), password));
-            list.set(49, String.format(list.get(49), FRONT_URL.concat("/login")));
-            list.set(65, String.format(list.get(65), PRIVACY_INFORMATION_URL));
-            list.set(62, String.format(list.get(62), Year.now().getValue()));
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String str2 : list) {
-                stringBuilder.append(str2);
-            }
-            message = stringBuilder.toString();
-        } catch (IOException e) {
-            log.error("Failed to read html registrationEmail.html");
+        final List<String> list = readFile("templates/registrationEmail.html");
+        list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
+        list.set(29, String.format(list.get(29), currentUser.getFirstName() + " " + currentUser.getLastName()));
+        list.set(41, String.format(list.get(41), userEntity.getFirstName()));
+        list.set(45, String.format(list.get(45), password));
+        list.set(49, String.format(list.get(49), FRONT_URL.concat("/login")));
+        list.set(65, String.format(list.get(65), PRIVACY_INFORMATION_URL));
+        list.set(62, String.format(list.get(62), Year.now().getValue()));
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String str2 : list) {
+            stringBuilder.append(str2);
         }
-        return message;
+        return stringBuilder.toString();
+    }
+
+    private List<String> readFile(final String file) {
+        final InputStreamReader inputStreamReader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(file));
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        final List<String> list = new ArrayList<>();
+        String line;
+        try {
+            while ((line = bufferedReader.readLine()) != null) {
+                list.add(line);
+            }
+        } catch (IOException e) {
+            log.error("Failed to read html" + file);
+        }
+        return list;
     }
 
     private void send(final String from, final String to, final String subject, final String text)
