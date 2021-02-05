@@ -27,7 +27,7 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
             + " left join file.stage "
             + " where file.template.id = :id and ";
 
-    String FILTER_CONDITION = "(:version=0l or file.version is null or file.version=:version) "
+    String FILTER_CONDITION = "(:version = OL or file.version is null or file.version=:version) "
             + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:stage='' or LOWER(file.stage.name) like CONCAT('%',:stage,'%')) "

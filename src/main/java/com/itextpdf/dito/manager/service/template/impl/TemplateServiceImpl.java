@@ -20,8 +20,8 @@ import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
-import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
+import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -171,8 +172,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         throwExceptionIfTemplatesHaveAnotherDataCollections(templatePartList, dataCollectionName);
 
         //checks that exists at most one HEADER and FOOTER
-        throwExceptionIfTooMuchType(templatePartList, TemplateTypeEnum.HEADER);
-        throwExceptionIfTooMuchType(templatePartList, TemplateTypeEnum.FOOTER);
+        throwExceptionIfPartsSizeAreIncorrect(templatePartList);
 
         final List<TemplateFilePartEntity> parts = templateFileEntity.getParts();
         for (final TemplatePartDTO templatePart : templatePartDTOs) {
@@ -423,12 +423,12 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final Optional<TemplateFileEntity> deployedTemplateVersion = templateEntity.getFiles().stream()
                 .filter(TemplateFileEntity::getDeployed)
                 .findAny();
-        if (deployedTemplateVersion.isPresent()){
+        if (deployedTemplateVersion.isPresent()) {
             throw new TemplateDeleteException("Template has deployed versions that should be un-deployed first");
         }
         //TODO implement check for outbound dependencies when template composition is completed DTM-1614
         final boolean hasOutBoundDependencies = false;
-        if (hasOutBoundDependencies){
+        if (hasOutBoundDependencies) {
             throw new TemplateDeleteException("Template has outbound dependencies");
         }
         templateDeploymentService.removeAllVersionsFromDefaultStage(templateName);
@@ -468,9 +468,24 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
     }
 
-    private void throwExceptionIfTooMuchType(final List<TemplateEntity> templatePartList, final TemplateTypeEnum checkedType) {
-        if (templatePartList.stream().filter(entity -> checkedType.equals(entity.getType())).count() > 1) {
+    private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplateEntity> templatePartList) {
+        final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartList.stream().collect(
+                Collectors.groupingBy(TemplateEntity::getType,
+                        Collectors.collectingAndThen(Collectors.toSet(), Set::size)));
+        throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.HEADER);
+        throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.FOOTER);
+        throwExceptionIfTooFewForType(mapOfPartsCount, TemplateTypeEnum.STANDARD);
+    }
+
+    private void throwExceptionIfTooManyForType(final Map<TemplateTypeEnum, Integer> mapOfPartsCount, final TemplateTypeEnum checkedType) {
+        if (mapOfPartsCount.getOrDefault(checkedType, 0) > 1) {
             throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than one ").append(checkedType).toString());
+        }
+    }
+
+    private void throwExceptionIfTooFewForType(final Map<TemplateTypeEnum, Integer> mapOfPartsCount, final TemplateTypeEnum checkedType) {
+        if (mapOfPartsCount.getOrDefault(checkedType, 0) < 1) {
+            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have too few of ").append(checkedType).append(" templates").toString());
         }
     }
 
