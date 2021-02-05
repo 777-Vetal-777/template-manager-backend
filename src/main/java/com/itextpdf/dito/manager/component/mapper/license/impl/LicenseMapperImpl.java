@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.component.mapper.license.impl;
 
 import java.io.ByteArrayInputStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
@@ -14,7 +15,7 @@ import com.itextpdf.dito.sdk.license.DitoLicenseInfo;
 
 @Component
 public class LicenseMapperImpl implements LicenseMapper{
-
+	
 	@Override
 	public LicenseDTO map(final LicenseEntity entity) {
 		final LicenseDTO dto = new LicenseDTO();
@@ -24,8 +25,16 @@ public class LicenseMapperImpl implements LicenseMapper{
 		dto.setFileName(entity.getFileName());
 		dto.setType(ditoLicenseInfo.getType());
 		dto.setExpirationDate(ditoLicenseInfo.parseExpire());
-		dto.setVolumeLeft(serverWrapper.getRemainingPdfProduceEvents());
-		dto.setVolumeLimit(ditoLicenseInfo.getLimits().getLimit(DitoEventType.PRODUCE));
+		if (StringUtils.isNumeric(ditoLicenseInfo.getLimits().getLimit(DitoEventType.PRODUCE))) {
+			dto.setVolumeLimit(Long.parseLong(ditoLicenseInfo.getLimits().getLimit(DitoEventType.PRODUCE)));
+			dto.setVolumeUsed(dto.getVolumeLimit() - serverWrapper.getRemainingPdfProduceEvents());
+			dto.setIsUnlimited(false);
+		} else {
+			dto.setVolumeUsed(0L);
+			dto.setVolumeLimit(0L);
+			dto.setIsUnlimited(true);
+		}
+
 		return dto;
 	}
 
