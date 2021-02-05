@@ -70,7 +70,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String FILTER_AND_SEARCH_DEPENDENCIES = DEPENDENCY_QUERY + FILTER_DEPENDENCIES + " and (name like CONCAT('%',:search,'%')) " +
             " or (LOWER(directionType) like CONCAT('%',:search,'%'))" +
             " or (CAST(version as VARCHAR(10)) like CONCAT('%',:search,'%'))" +
-            " or (LOWER(dependencyTypes) like CONCAT('%',:search,'%'))" +
+            " or (LOWER(dependencyType) like CONCAT('%',:search,'%'))" +
             " or (LOWER(stage) like CONCAT('%',:search,'%'))";
 
     String TEMPLATE_TABLE_LIST_SELECT_CLAUSE = "select template from TemplateEntity template "
