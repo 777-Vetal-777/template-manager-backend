@@ -47,6 +47,28 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') "
             + "or LOWER(file.stage.name) like CONCAT('%',:search,'%') ) ";
 
+    String SELECT_CLAUSE_DEPENDENCY = "select name as name, version as version, stage as stage, 'HARD' as directionType, 'TEMPLATE' as dependencyType " +
+            " from (select template.name as name, max(temFile.version) as version, max(stage.name) as stage" +
+            " from manager.resource resource" +
+            " join manager.resource_file file on file.resource_id = resource.id" +
+            " join manager.resource_file_template_file resFilTemFil on resFilTemFil.resource_file_id = file.id" +
+            " join manager.template_file temFile on resFilTemFil.template_file_id = temFile.id" +
+            " left outer join manager.template_file_instance tempFInstance" +
+            " on temFile.id = tempFInstance.template_file_id" +
+            " left outer join manager.instance instance on tempFInstance.instance_id = instance.id" +
+            " left outer join manager.stage stage on instance.stage_id = stage.id" +
+            " left outer join manager.template template on temFile.template_id = template.id" +
+            " where resource.id = :id group by template.name) as dependency";
+
+    String FILTER_CONDITION_DEPENDENCY = " where (:depend = '' or LOWER(name) like CONCAT('%', :depend, '%'))" +
+            " and (:version = 0 or version is null or version = :version)" +
+            " and (:stage = '' or LOWER(stage) like CONCAT('%', :stage, '%'))";
+
+    String SEARCH_CONDITION_DEPENDENCY = " and ((LOWER(name) like CONCAT('%', :search, '%')" +
+            " or CAST(version as VARCHAR(10)) like CONCAT('%', :search, '%')" +
+            " or 'template' like CONCAT('%', :search, '%')" +
+            " or LOWER(stage) like CONCAT('%', :search, '%')))";
+
     @Query(value = SELECT_CLAUSE + FILTER_CONDITION + GROUP_BY_VERSION)
     Page<FileVersionModel> filter(Pageable pageable,
                                   @Param("id") Long resourceId,
@@ -68,45 +90,14 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("stage") @Nullable String stageName,
                                   @Param("search") @Nullable String search);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, max(templateFiles.version) as version, max(stage.name) as stageName) "
-            + "from ResourceEntity resource "
-            + "join resource.latestFile file "
-            + "join file.templateFiles templateFiles "
-            + "left join templateFiles.instance instance "
-            + "left join instance.stage stage "
-            + "left join templateFiles.template template "
-            + "where "
-            //filtering
-            + "file.resource.id = :id "
-            + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
-            + "and (:version=0l or templateFiles.version is null or templateFiles.version=:version) "
-            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) "
-            + "group by template.name")
+    @Query(value = SELECT_CLAUSE_DEPENDENCY + FILTER_CONDITION_DEPENDENCY, nativeQuery = true)
     Page<DependencyModel> filter(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
                                  @Param("stage") @Nullable String stage);
 
-    @Query(value = "select new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, max(templateFiles.version) as version, max(stage.name) as stageName) "
-            + "from ResourceEntity resource "
-            + "join resource.latestFile file "
-            + "join file.templateFiles templateFiles "
-            + "left join templateFiles.instance instance "
-            + "left join instance.stage stage "
-            + "left join templateFiles.template template "
-            + "where "
-            //filtering
-            + "resource.id = :id "
-            + "and (:depend='' or LOWER(template.name) like CONCAT('%',:depend,'%')) "
-            + "and (:version=0l or templateFiles.version is null or templateFiles.version=:version) "
-            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) "
-            //search
-            + "and (LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or CAST(templateFiles.version as string) like CONCAT('%',:search,'%') "
-            + "or 'template' like CONCAT('%',:search,'%') "
-            + "or LOWER(stage.name) like CONCAT('%',:search,'%')) "
-            + "group by template.name")
+    @Query(value = SELECT_CLAUSE_DEPENDENCY + FILTER_CONDITION_DEPENDENCY + SEARCH_CONDITION_DEPENDENCY, nativeQuery = true)
     Page<DependencyModel> search(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
