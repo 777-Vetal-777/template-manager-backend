@@ -49,15 +49,15 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
 
     String SELECT_CLAUSE_DEPENDENCY = "select name as name, version as version, stage as stage, 'HARD' as directionType, 'TEMPLATE' as dependencyType " +
             " from (select template.name as name, max(temFile.version) as version, max(stage.name) as stage" +
-            " from manager.resource resource" +
-            " join manager.resource_file file on file.resource_id = resource.id" +
-            " join manager.resource_file_template_file resFilTemFil on resFilTemFil.resource_file_id = file.id" +
-            " join manager.template_file temFile on resFilTemFil.template_file_id = temFile.id" +
-            " left outer join manager.template_file_instance tempFInstance" +
+            " from {h-schema}resource resource" +
+            " join {h-schema}resource_file file on file.resource_id = resource.id" +
+            " join {h-schema}resource_file_template_file resFilTemFil on resFilTemFil.resource_file_id = file.id" +
+            " join {h-schema}template_file temFile on resFilTemFil.template_file_id = temFile.id" +
+            " left outer join {h-schema}template_file_instance tempFInstance" +
             " on temFile.id = tempFInstance.template_file_id" +
-            " left outer join manager.instance instance on tempFInstance.instance_id = instance.id" +
-            " left outer join manager.stage stage on instance.stage_id = stage.id" +
-            " left outer join manager.template template on temFile.template_id = template.id" +
+            " left outer join {h-schema}instance instance on tempFInstance.instance_id = instance.id" +
+            " left outer join {h-schema}stage stage on instance.stage_id = stage.id" +
+            " left outer join {h-schema}template template on temFile.template_id = template.id" +
             " where resource.id = :id group by template.name) as dependency";
 
     String FILTER_CONDITION_DEPENDENCY = " where (:depend = '' or LOWER(name) like CONCAT('%', :depend, '%'))" +
