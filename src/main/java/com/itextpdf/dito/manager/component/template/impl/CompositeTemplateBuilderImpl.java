@@ -1,10 +1,13 @@
 package com.itextpdf.dito.manager.component.template.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.template.CompositeTemplateBuilder;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
+import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.styledxmlparser.jsoup.Jsoup;
 import com.itextpdf.styledxmlparser.jsoup.nodes.Document;
@@ -23,12 +26,13 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
     private static final String DATA_DITO_ELEMENT = "data-dito-element";
     private static final String DATA_DITO_VERTICAL_ALIGN = "data-dito-page-margin-vertical-align";
     final TemplateLoader templateLoader;
+    final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Map<TemplateTypeEnum, BiFunction<Element, String, Element>> methods = Map.of(
+    private final Map<TemplateTypeEnum, BiFunction<Element, TemplateFilePartEntity, Element>> methods = Map.of(
             TemplateTypeEnum.FOOTER, this::addFooter,
             TemplateTypeEnum.HEADER, this::addHeader,
             TemplateTypeEnum.STANDARD, this::addChildObject
-            );
+    );
 
     public CompositeTemplateBuilderImpl(final TemplateLoader templateLoader) {
         this.templateLoader = templateLoader;
@@ -38,31 +42,50 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
         return new String(Base64.getUrlEncoder().encode(value.getBytes()));
     }
 
-    private Element addChildObject(final Element parent, final String childName) {
-        final String encodedChildName = encodeToBase64(childName);
+    private Element addChildObject(final Element parent, final TemplateFilePartEntity templateFilePartEntity) {
+        final String encodedChildName = encodeToBase64(templateFilePartEntity.getPart().getTemplate().getName());
 
         final Element child = new Element(Tag.valueOf("object"), parent.baseUri());
 
         child.attr(DATA_DITO_ELEMENT, "fragment");
         child.attr("data-dito-fragment", new StringBuilder("dito-asset://").append(encodedChildName).toString());
+        processSettings(child, templateFilePartEntity);
 
         return parent.appendChild(child);
     }
 
-    private Element addHeader(final Element parent, final String childName) {
+    private void processSettings(final Element child, final TemplateFilePartEntity templateFilePartEntity) {
+        final PartSettings settings = parseSettings(templateFilePartEntity);
+        if (settings != null) {
+            if (settings.getStartOnNewPage()) {
+                child.attr("style", "page-break-before:always");
+            }
+        }
+    }
+
+    private Element addHeader(final Element parent, final TemplateFilePartEntity templateFilePartEntity) {
         final Element child = new Element(Tag.valueOf("header"), parent.baseUri());
         child.attr(DATA_DITO_ELEMENT, "page-header");
         child.attr(DATA_DITO_VERTICAL_ALIGN, "middle");
 
-        return parent.appendChild(addChildObject(child, childName));
+        return parent.appendChild(addChildObject(child, templateFilePartEntity));
     }
 
-    private Element addFooter(final Element parent, final String childName) {
+    private Element addFooter(final Element parent, final TemplateFilePartEntity templateFilePartEntity) {
         final Element child = new Element(Tag.valueOf("footer"), parent.baseUri());
         child.attr(DATA_DITO_ELEMENT, "page-footer");
         child.attr(DATA_DITO_VERTICAL_ALIGN, "middle");
 
-        return parent.appendChild(addChildObject(child, childName));
+        return parent.appendChild(addChildObject(child, templateFilePartEntity));
+    }
+
+    private PartSettings parseSettings(final TemplateFilePartEntity part) {
+        try {
+            return objectMapper.readValue(part.getSettings(), PartSettings.class);
+        } catch (JsonProcessingException e) {
+            //settings field was broken for some reasons, nothing will be processed
+            return null;
+        }
     }
 
     @Override
@@ -73,8 +96,7 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
         if (parts != null) {
             for (TemplateFilePartEntity part : parts) {
                 final TemplateEntity templateEntity = part.getPart().getTemplate();
-                methods.get(templateEntity.getType())
-                        .apply(templateData.body(), templateEntity.getName());
+                methods.get(templateEntity.getType()).apply(templateData.body(), part);
             }
         }
 
