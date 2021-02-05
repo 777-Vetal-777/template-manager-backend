@@ -59,7 +59,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
         log.info("Request to create new version of template with id {} received.",templateId);
         final String email = principal.getName();
         final String id = decodeBase64(templateId);
-        final String newName = descriptor.getName();
+        final String newName = descriptor != null ? descriptor.getName() : null;
 
         final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName);
         log.info("Response to create new version of template with id {} processed.",templateId);

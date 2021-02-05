@@ -39,7 +39,7 @@ public interface TemplateManagementController {
     @PutMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
-                              @RequestPart TemplateUpdateDescriptor descriptor,
+                              @RequestPart(required = false) TemplateUpdateDescriptor descriptor,
                               @RequestPart byte[] data);
 
     @DeleteMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
