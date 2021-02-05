@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -90,9 +91,9 @@ public class MailClientImpl implements MailClient {
     }
 
     private String generateResetPasswordHtml(final UserEntity userEntity, final String token) {
-        final File file = new File("src/main/resources/templates/resetPasswordEmail.html");
         String message = null;
         try {
+            final File file = new ClassPathResource("templates/resetPasswordEmail.html").getFile();
             List<String> list = Files.readLines(file, StandardCharsets.UTF_8);
             list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
             list.set(35, String.format(list.get(35), FRONT_URL.concat("/forgot_password?token=").concat(token)));
@@ -110,9 +111,9 @@ public class MailClientImpl implements MailClient {
     }
 
     private String generateRegistrationHtml(final UserEntity userEntity, final String password, final UserEntity currentUser) {
-        final File file = new File("src/main/resources/templates/registrationEmail.html");
         String message = null;
         try {
+        final File file = new ClassPathResource("templates/registrationEmail.html").getFile();
             List<String> list = Files.readLines(file, StandardCharsets.UTF_8);
             list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
             list.set(29, String.format(list.get(29), currentUser.getFirstName() + " " + currentUser.getLastName()));
