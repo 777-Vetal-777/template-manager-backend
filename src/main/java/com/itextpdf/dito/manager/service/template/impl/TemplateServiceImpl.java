@@ -326,6 +326,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                             final byte[] data,
                                             final String comment,
                                             final Long newVersion) {
+        final TemplateEntity result;
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
 
         final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, newVersion, fileEntityToCopyDependencies);
@@ -334,9 +335,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         existingTemplateEntity.setLatestLogRecord(logEntity);
         existingTemplateEntity.setLatestFile(fileEntity);
 
-        templateRepository.save(existingTemplateEntity);
+        result = templateRepository.save(existingTemplateEntity);
         templateDeploymentService.promoteOnDefaultStage(existingTemplateEntity.getName());
-        return existingTemplateEntity;
+        return result;
     }
 
     private TemplateFileEntity createTemplateFileEntity(final byte[] data,
