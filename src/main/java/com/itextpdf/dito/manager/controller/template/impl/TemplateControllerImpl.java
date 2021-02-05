@@ -14,6 +14,7 @@ import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
@@ -161,7 +162,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<TemplateDTO> createVersion(final Principal principal,
                                                      final String name,
                                                      final String comment,
-                                                     final MultipartFile templateFile) {
+                                                     List<TemplatePartDTO> templatePartDTOs, final MultipartFile templateFile) {
         final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService
                 .createNewVersion(name, data, principal.getName(),
