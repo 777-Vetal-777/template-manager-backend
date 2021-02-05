@@ -165,7 +165,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService
                 .createNewVersion(name, data, principal.getName(),
-                        comment);
+                        comment, null);
         return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.OK);
     }
 

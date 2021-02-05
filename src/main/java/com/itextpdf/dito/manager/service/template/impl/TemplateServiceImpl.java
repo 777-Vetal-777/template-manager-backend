@@ -280,17 +280,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String templateName) {
-        final TemplateEntity templateEntity = createNewVersion(name, data, email, comment);
-        if (templateName != null) {
-            templateEntity.setName(templateName);
-        }
-        return templateRepository.save(templateEntity);
-    }
-
-    @Override
-    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment) {
+    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName) {
         final TemplateEntity existingTemplateEntity = findByName(name);
+        if (newTemplateName != null) {
+            existingTemplateEntity.setName(newTemplateName);
+        }
         final UserEntity userEntity = userService.findByEmail(email);
 
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
