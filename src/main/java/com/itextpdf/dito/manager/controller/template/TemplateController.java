@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
+import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
@@ -65,6 +66,7 @@ public interface TemplateController {
     String UNDEPLOY_ENDPOINT = "/undeploy";
     String SEARCH_ENDPOINT = "/search";
     String ROLLBACK_ENDPOINT = "/rollback";
+    String NEXT_STAGE_ENDPOINT = "/next-stage";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
@@ -72,6 +74,7 @@ public interface TemplateController {
     String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_UNBLOCK_ENDPOINT;
     String TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + PROMOTE_ENDPOINT;
     String TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + UNDEPLOY_ENDPOINT;
+    String TEMPLATE_NEXT_STAGE_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + NEXT_STAGE_ENDPOINT;
     String TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + ROLLBACK_ENDPOINT;
     //Dependencies
     String TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + "/dependencies";
@@ -244,6 +247,17 @@ public interface TemplateController {
     })
     ResponseEntity<Void> promote(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+            @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
+
+    @PutMapping(TEMPLATE_NEXT_STAGE_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Get next stage for template version", description = "Get next stage for template version",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Next stage received."),
+            @ApiResponse(responseCode = "404", description = "No further stage of promotion path exists.")
+    })
+    ResponseEntity<StageDTO> getNextStage(
+            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
 

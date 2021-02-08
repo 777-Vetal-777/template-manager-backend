@@ -26,7 +26,7 @@ public class WorkspaceExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(NoNextStageOnPromotionPathException.class)
     public ResponseEntity<ErrorResponseDTO> noNextStageOnPromotionPathExceptionHandler(final NoNextStageOnPromotionPathException ex) {
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
     }
 
 }

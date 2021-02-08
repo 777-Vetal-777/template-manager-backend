@@ -155,6 +155,13 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         templateVersions.forEach(templateVersion -> removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersion));
     }
 
+    @Override
+    public StageEntity getNextStage(final String templateName, final Long version) {
+        final TemplateEntity templateEntity = getTemplateByName(templateName);
+        final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
+        return getNextStage(templateFileEntity);
+    }
+
     private void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {
         final TemplateEntity templateEntity = templateFileEntity.getTemplate();
         final String instanceSocket = instanceEntity.getSocket();

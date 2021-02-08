@@ -4,12 +4,14 @@ import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
+import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
+import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
@@ -57,6 +59,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final FileVersionMapper fileVersionMapper;
     private final TemplateDeploymentService templateDeploymentService;
     private final TemplatePreviewGenerator templatePreviewGenerator;
+    private final WorkspaceMapper workspaceMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
                                   final TemplateMapper templateMapper,
@@ -67,7 +70,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplateDependencyService templateDependencyService,
                                   final FileVersionMapper fileVersionMapper,
                                   final TemplateDeploymentService templateDeploymentService,
-                                  final TemplatePreviewGenerator templatePreviewGenerator) {
+                                  final TemplatePreviewGenerator templatePreviewGenerator,
+                                  final WorkspaceMapper workspaceMapper) {
         this.templateService = templateService;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
@@ -78,6 +82,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateDependencyService = templateDependencyService;
         this.templateDeploymentService = templateDeploymentService;
         this.templatePreviewGenerator = templatePreviewGenerator;
+        this.workspaceMapper = workspaceMapper;
     }
 
     @Override
@@ -230,5 +235,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<Void> delete(final String templateName) {
         templateService.delete(decodeBase64(templateName));
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<StageDTO> getNextStage(final String templateName, final Long templateVersion) {
+        return new ResponseEntity<>(workspaceMapper.map(templateDeploymentService.getNextStage(decodeBase64(templateName), templateVersion)), HttpStatus.OK);
     }
 }
