@@ -92,4 +92,8 @@
             <column name="permission_id" value="98"/>
         </insert>
     </changeSet>
+
+    <changeSet id="009-add-unique-constraint-to-name-and-type-columns-in-resource-table" author="Vadim_Sorokin">
+        <addUniqueConstraint tableName="resource" columnNames="name, type" constraintName="resource_name_and_type_unique_constraint"/>
+    </changeSet>
 </databaseChangeLog>
