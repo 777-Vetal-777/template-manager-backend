@@ -81,7 +81,7 @@ public class TemplateFileEntity {
 
     @OneToMany(
             mappedBy = "part",
-            cascade = CascadeType.MERGE
+            cascade = CascadeType.PERSIST
     )
     private List<TemplateFilePartEntity> compositions = new ArrayList<>();
 

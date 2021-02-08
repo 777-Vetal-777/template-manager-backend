@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.template.CompositeTemplateBuilder;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
@@ -22,12 +20,10 @@ import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
-import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
-import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -37,11 +33,10 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
+import com.itextpdf.dito.manager.service.template.TemplateFilePartService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,7 +49,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -77,9 +71,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final TemplateDeploymentService templateDeploymentService;
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateLogRepository templateLogRepository;
-
-    private final Logger log = LogManager.getLogger(this.getClass());
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final TemplateFilePartService templateFilePartService;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -91,7 +83,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final InstanceRepository instanceRepository,
                                final TemplateDeploymentService templateDeploymentService,
                                final CompositeTemplateBuilder compositeTemplateConstructor,
-                               final TemplateLogRepository templateLogRepository) {
+                               final TemplateLogRepository templateLogRepository,
+                               final TemplateFilePartService templateFilePartService) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -103,6 +96,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.templateDeploymentService = templateDeploymentService;
         this.compositeTemplateConstructor = compositeTemplateConstructor;
         this.templateLogRepository = templateLogRepository;
+        this.templateFilePartService = templateFilePartService;
     }
 
     @Override
@@ -163,55 +157,13 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private void fillTemplatePartsForTemplateFileEntity(final String dataCollectionName,
                                                         final List<TemplatePartDTO> templatePartDTOs,
                                                         final TemplateFileEntity templateFileEntity) {
-        final List<TemplateFilePartEntity> parts = createTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
-
+        final List<TemplateFilePartEntity> parts = templateFilePartService.createTemplatePartEntities(dataCollectionName, templatePartDTOs);
+        final List<TemplateFilePartEntity> templateFileParts = templateFileEntity.getParts();
         for (final TemplateFilePartEntity templatePart : parts) {
-            parts.add(templatePart);
-            templatePart.getPart().getCompositions().add(templatePart);
+            templatePart.setComposition(templateFileEntity);
+            templateFileParts.add(templatePart);
         }
 
-    }
-
-    private List<TemplateFilePartEntity> createTemplatePartsForTemplateFileEntity(final String dataCollectionName,
-                                                                                  final List<TemplatePartDTO> templatePartDTOs,
-                                                                                  final TemplateFileEntity templateFileEntity) {
-        final List<TemplateEntity> templatePartList = templateRepository.getTemplatesWithLatestFileByName(templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).collect(Collectors.toList()));
-        final Map<String, TemplateFileEntity> templateFilePartMap = templatePartList.stream().collect(Collectors.toMap(TemplateEntity::getName, TemplateEntity::getLatestFile, (templateFileEntity1, templateFileEntity2) -> templateFileEntity1));
-
-        //checks that all templates exists
-        throwExceptionIfSomeTemplatesAreNotFound(templatePartDTOs, templateFilePartMap);
-
-        //checks that all templates has the same (or absent dataCollection)
-        throwExceptionIfTemplatesHaveAnotherDataCollections(templatePartList, dataCollectionName);
-
-        //checks that exists at most one HEADER and FOOTER
-        throwExceptionIfPartsSizeAreIncorrect(templatePartList);
-
-        final List<TemplateFilePartEntity> parts = templatePartDTOs.stream().map(templatePart -> {
-            final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getTemplateName());
-            final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(templateFileEntity, partTemplateFileEntity, templatePart);
-            return templateFilePartEntity;
-        }).collect(Collectors.toList());
-
-        return parts;
-    }
-
-    private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity compositionTemplateFileEntity,
-                                                                final TemplateFileEntity partTemplateFileEntity,
-                                                                final TemplatePartDTO templatePart) {
-        final TemplateFilePartEntity templateFilePartEntity = new TemplateFilePartEntity();
-        templateFilePartEntity.setComposition(compositionTemplateFileEntity);
-        templateFilePartEntity.setPart(partTemplateFileEntity);
-        templateFilePartEntity.setCondition(templatePart.getCondition());
-
-        final PartSettings partSettings = new PartSettings();
-        Optional.ofNullable(templatePart.getStartOnNewPage()).ifPresent(partSettings::setStartOnNewPage);
-        try {
-            templateFilePartEntity.setSettings(objectMapper.writeValueAsString(partSettings));
-        } catch (JsonProcessingException e) {
-            log.error(e);
-        }
-        return templateFilePartEntity;
     }
 
     private TemplateLogEntity createLogEntity(final TemplateEntity templateEntity, final UserEntity author) {
@@ -297,6 +249,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    @Transactional
     public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName, List<TemplatePartDTO> templateParts) {
         final TemplateEntity existingTemplateEntity = findByName(name);
         if (newTemplateName != null) {
@@ -311,6 +264,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    @Transactional
     public TemplateEntity createNewVersionAsCopy(final TemplateFileEntity fileEntityToCopy,
                                                  final UserEntity userEntity,
                                                  final String comment) {
@@ -328,7 +282,55 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                            final UserEntity userEntity) {
         final TemplateFileEntity currentTemplateFile = existingTemplateEntity.getLatestFile();
         final String comment = new StringBuilder().append("Rollback to version: ").append(templateVersionToBeRevertedTo.getVersion()).toString();
-        return createNewVersion(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), Collections.emptyList(), comment, currentTemplateFile.getVersion() + 1);
+        return createVersionForTemplateEntity(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
+    }
+
+    private TemplateEntity createVersionForTemplateEntity(final TemplateEntity existingTemplateEntity,
+                                                          final TemplateFileEntity fileEntityToCopyDependencies,
+                                                          final UserEntity userEntity,
+                                                          final byte[] data,
+                                                          final List<TemplateFilePartEntity> templateParts,
+                                                          final String comment,
+                                                          final Long newVersion) {
+        final TemplateEntity result;
+        final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
+        final TemplateFileEntity fileEntity = createTemplateFileEntity((TemplateTypeEnum.COMPOSITION.equals(existingTemplateEntity.getType()) ? compositeTemplateConstructor.build(templateParts) : data),
+                comment, existingTemplateEntity, userEntity,
+                fileEntityToCopyDependencies.getDataCollectionFile(),
+                fileEntityToCopyDependencies.getResourceFiles(),
+                templateParts,
+                newVersion);
+
+        existingTemplateEntity.getFiles().add(fileEntity);
+        existingTemplateEntity.getTemplateLogs().add(logEntity);
+        existingTemplateEntity.setLatestLogRecord(logEntity);
+        existingTemplateEntity.setLatestFile(fileEntity);
+
+        result = templateRepository.save(existingTemplateEntity);
+        templateDeploymentService.promoteOnDefaultStage(existingTemplateEntity.getName());
+
+        final List<TemplateFileEntity> updatedVersions = createNewVersionForDependentCompositions(result, fileEntityToCopyDependencies, userEntity);
+        templateFileRepository.saveAll(updatedVersions);
+
+        return result;
+    }
+
+    private List<TemplateFileEntity> createNewVersionForDependentCompositions(final TemplateEntity templateEntity,
+                                                                              final TemplateFileEntity previousVersionFileEntity,
+                                                                              final UserEntity userEntity) {
+        final TemplateFileEntity templateEntityLatestFile = templateEntity.getLatestFile();
+        final List<TemplateEntity> compositions = templateRepository.getTemplateCompositionsByTemplateId(templateEntity.getId());
+        final List<TemplateFileEntity> updatedVersions = compositions.stream().map(composition -> {
+            final TemplateFileEntity latestFile = composition.getLatestFile();
+            final TemplateEntity updatedComposition = createVersionForTemplateEntity(composition, latestFile, userEntity, null, latestFile.getParts(), "", latestFile.getVersion() + 1);
+            final TemplateFileEntity updatedLatestFile = updatedComposition.getLatestFile();
+            final List<TemplateFilePartEntity> updatedLatestFileParts = updatedLatestFile.getParts();
+            final List<TemplateFilePartEntity> updatedParts = updatedLatestFileParts.stream().filter(part -> part.getPart().equals(previousVersionFileEntity)).map(part -> templateFilePartService.updatePart(part, templateEntityLatestFile)).collect(Collectors.toList());
+            updatedLatestFileParts.removeIf(part -> part.getPart().equals(previousVersionFileEntity));
+            updatedLatestFileParts.addAll(updatedParts);
+            return updatedLatestFile;
+        }).collect(Collectors.toList());
+        return updatedVersions;
     }
 
     private TemplateEntity createNewVersion(final TemplateEntity existingTemplateEntity,
@@ -338,25 +340,21 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                             final List<TemplatePartDTO> templateParts,
                                             final String comment,
                                             final Long newVersion) {
-        final TemplateEntity result;
-        final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
-        final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, fileEntityToCopyDependencies.getDataCollectionFile(), fileEntityToCopyDependencies.getResourceFiles(), newVersion);
+        final List<TemplateFilePartEntity> templatePartsForTemplateFileEntity;
 
-        if (TemplateTypeEnum.COMPOSITION.equals(existingTemplateEntity.getType())) {
-            if (Objects.nonNull(templateParts)) {
-                fillTemplatePartsForTemplateFileEntity(fileEntityToCopyDependencies.getDataCollectionFile().getDataCollection().getName(), templateParts, fileEntity);
-            }
-            fileEntity.setData(compositeTemplateConstructor.build(fileEntity));
+        if (TemplateTypeEnum.COMPOSITION.equals(existingTemplateEntity.getType()) && Objects.nonNull(templateParts)) {
+            templatePartsForTemplateFileEntity = templateFilePartService.createTemplatePartEntities(fileEntityToCopyDependencies.getDataCollectionFile().getDataCollection().getName(), templateParts);
+        } else {
+            templatePartsForTemplateFileEntity = Collections.emptyList();
         }
 
-        existingTemplateEntity.getFiles().add(fileEntity);
-        existingTemplateEntity.getTemplateLogs().add(logEntity);
-        existingTemplateEntity.setLatestLogRecord(logEntity);
-        existingTemplateEntity.setLatestFile(fileEntity);
-
-        result = templateRepository.save(existingTemplateEntity);
-        templateDeploymentService.promoteOnDefaultStage(existingTemplateEntity.getName());
-        return result;
+        return createVersionForTemplateEntity(existingTemplateEntity,
+                fileEntityToCopyDependencies,
+                userEntity,
+                data,
+                templatePartsForTemplateFileEntity,
+                comment,
+                newVersion);
     }
 
     private TemplateFileEntity createTemplateFileEntity(final byte[] data,
@@ -365,6 +363,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                                         final UserEntity userEntity,
                                                         final DataCollectionFileEntity dataCollectionFileEntity,
                                                         final Set<ResourceFileEntity> resourceFileEntities,
+                                                        final List<TemplateFilePartEntity> templateFilePartEntities,
                                                         final Long versionNumber) {
         //Imitation of new file upload (which will be performed from Editor)
         final TemplateFileEntity fileEntity = new TemplateFileEntity();
@@ -377,6 +376,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         fileEntity.setModifiedOn(new Date());
         fileEntity.setDataCollectionFile(dataCollectionFileEntity);
         fileEntity.getResourceFiles().addAll(resourceFileEntities);
+        if (templateFilePartEntities != null) {
+            fileEntity.getParts().addAll(templateFilePartEntities.stream().map(part -> templateFilePartService.updateComposition(part, fileEntity)).collect(Collectors.toList()));
+        }
         if (data != null) {
             fileEntity.setData(data);
         } else {
@@ -488,42 +490,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
     }
 
-    private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplateEntity> templatePartList) {
-        final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartList.stream().collect(
-                Collectors.groupingBy(TemplateEntity::getType,
-                        Collectors.collectingAndThen(Collectors.toSet(), Set::size)));
-        throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.HEADER);
-        throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.FOOTER);
-        throwExceptionIfTooFewForType(mapOfPartsCount, TemplateTypeEnum.STANDARD);
-    }
-
-    private void throwExceptionIfTooManyForType(final Map<TemplateTypeEnum, Integer> mapOfPartsCount, final TemplateTypeEnum checkedType) {
-        if (mapOfPartsCount.getOrDefault(checkedType, 0) > 1) {
-            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than one ").append(checkedType).toString());
-        }
-    }
-
-    private void throwExceptionIfTooFewForType(final Map<TemplateTypeEnum, Integer> mapOfPartsCount, final TemplateTypeEnum checkedType) {
-        if (mapOfPartsCount.getOrDefault(checkedType, 0) < 1) {
-            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have too few of ").append(checkedType).append(" templates").toString());
-        }
-    }
-
-    private void throwExceptionIfTemplatesHaveAnotherDataCollections(final List<TemplateEntity> templatePartList, final String dataCollectionName) {
-        if (!templatePartList.stream().allMatch(entity -> {
-            final String dataCollection = Optional.ofNullable(entity.getLatestFile().getDataCollectionFile()).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
-            return Objects.equals(dataCollectionName, dataCollection) || Objects.equals(null, dataCollection);
-        })) {
-            throw new TemplateHasWrongStructureException("Template parts belongs to different Data Collections");
-        }
-    }
-
-    private void throwExceptionIfSomeTemplatesAreNotFound(final List<TemplatePartDTO> templatePartDTOs, final Map<String, TemplateFileEntity> templateFilePartMap) {
-        final List<String> missedTemplateNames = templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).filter(partName -> !templateFilePartMap.containsKey(partName)).collect(Collectors.toList());
-        if (!missedTemplateNames.isEmpty()) {
-            throw new TemplateNotFoundException(missedTemplateNames.get(0));
-        }
-    }
 
     private TemplateEntity findByName(final String name) {
         return templateRepository.findByName(name).orElseThrow(() -> new TemplateNotFoundException(name));

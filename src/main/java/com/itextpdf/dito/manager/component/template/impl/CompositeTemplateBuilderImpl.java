@@ -9,10 +9,13 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
+import com.itextpdf.dito.manager.service.template.impl.TemplateFilePartServiceImpl;
 import com.itextpdf.styledxmlparser.jsoup.Jsoup;
 import com.itextpdf.styledxmlparser.jsoup.nodes.Document;
 import com.itextpdf.styledxmlparser.jsoup.nodes.Element;
 import com.itextpdf.styledxmlparser.jsoup.parser.Tag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
@@ -25,8 +28,11 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
 
     private static final String DATA_DITO_ELEMENT = "data-dito-element";
     private static final String DATA_DITO_VERTICAL_ALIGN = "data-dito-page-margin-vertical-align";
-    final TemplateLoader templateLoader;
-    final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final Logger LOG = LogManager.getLogger(CompositeTemplateBuilderImpl.class);
+
+    private final TemplateLoader templateLoader;
+    private final ObjectMapper objectMapper;
 
     private final Map<TemplateTypeEnum, BiFunction<Element, TemplateFilePartEntity, Element>> methods = Map.of(
             TemplateTypeEnum.FOOTER, this::addFooter,
@@ -34,8 +40,10 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
             TemplateTypeEnum.STANDARD, this::addChildObject
     );
 
-    public CompositeTemplateBuilderImpl(final TemplateLoader templateLoader) {
+    public CompositeTemplateBuilderImpl(final TemplateLoader templateLoader,
+                                        final ObjectMapper objectMapper) {
         this.templateLoader = templateLoader;
+        this.objectMapper = objectMapper;
     }
 
     private String encodeToBase64(final String value) {
@@ -57,7 +65,7 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
     private void processSettings(final Element child, final TemplateFilePartEntity templateFilePartEntity) {
         final PartSettings settings = parseSettings(templateFilePartEntity);
         if (settings != null) {
-            if (settings.getStartOnNewPage()) {
+            if (Boolean.TRUE.equals(settings.getStartOnNewPage())) {
                 child.attr("style", "page-break-before:always");
             }
         }
@@ -84,17 +92,22 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
             return objectMapper.readValue(part.getSettings(), PartSettings.class);
         } catch (JsonProcessingException e) {
             //settings field was broken for some reasons, nothing will be processed
+            LOG.warn("Error reading settings from JSON string {}", part.getSettings());
             return null;
         }
     }
 
     @Override
     public byte[] build(final TemplateFileEntity entity) {
+        return  build(entity.getParts());
+    }
+
+    @Override
+    public byte[] build(final List<TemplateFilePartEntity> entities) {
         final Document templateData = Jsoup.parse(new String(templateLoader.load()));
 
-        final List<TemplateFilePartEntity> parts = entity.getParts();
-        if (parts != null) {
-            for (TemplateFilePartEntity part : parts) {
+        if (entities != null) {
+            for (TemplateFilePartEntity part : entities) {
                 final TemplateEntity templateEntity = part.getPart().getTemplate();
                 methods.get(templateEntity.getType()).apply(templateData.body(), part);
             }
@@ -102,5 +115,4 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
 
         return templateData.outerHtml().getBytes();
     }
-
 }

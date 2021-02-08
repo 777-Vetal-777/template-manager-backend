@@ -186,7 +186,7 @@ public interface TemplateController {
     ResponseEntity<TemplateDTO> createVersion(Principal principal,
                                               @Parameter(name = "name", description = "Name of an existing template", required = true, style = ParameterStyle.FORM) @RequestPart String name,
                                               @Parameter(name = "comment", description = "Comment on the new version of the template", style = ParameterStyle.FORM) @RequestPart(required = false) String comment,
-                                              @Parameter(name = "templateParts", description = "parts of composition templates that should be in new version", style = ParameterStyle.FORM) @RequestPart(required = false) List<TemplatePartDTO> templatePartDTOs,
+                                              @Parameter(name = "templateParts", description = "parts of composition templates that should be in new version", style = ParameterStyle.FORM) @RequestPart(required = false) List<TemplatePartDTO> templateParts,
                                               @Parameter(name = "template", description = "Template file", style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
