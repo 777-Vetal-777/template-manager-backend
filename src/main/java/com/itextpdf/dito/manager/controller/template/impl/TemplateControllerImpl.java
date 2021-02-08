@@ -173,11 +173,12 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<TemplateDTO> createVersion(final Principal principal,
                                                      final String name,
                                                      final String comment,
-                                                     List<TemplatePartDTO> templatePartDTOs, final MultipartFile templateFile) {
+                                                     List<TemplatePartDTO> templateParts,
+                                                     final MultipartFile templateFile) {
         final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService
                 .createNewVersion(name, data, principal.getName(),
-                        comment, null, templatePartDTOs);
+                        comment, null, templateParts);
         return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.OK);
     }
 

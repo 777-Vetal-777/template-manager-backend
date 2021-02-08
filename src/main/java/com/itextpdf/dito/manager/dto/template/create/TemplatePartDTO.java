@@ -7,20 +7,20 @@ import javax.validation.constraints.NotBlank;
 
 public class TemplatePartDTO {
     @NotBlank
-    @Schema(example = "Header for composition template")
-    private String templateName;
+    @Schema(example = "Standard template name")
+    private String name;
     private String condition;
 
     //settings
-    @JsonProperty("new_page")
+    @JsonProperty("newPage")
     private Boolean startOnNewPage;
 
-    public String getTemplateName() {
-        return templateName;
+    public String getName() {
+        return name;
     }
 
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getCondition() {
