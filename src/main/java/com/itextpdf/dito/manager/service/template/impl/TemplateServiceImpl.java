@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
@@ -142,7 +143,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         if (TemplateTypeEnum.COMPOSITION.equals(templateTypeEnum)) {
             if (Objects.nonNull(templatePartDTOs)) {
-                createTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
+                fillTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
             }
             templateFileEntity.setData(compositeTemplateConstructor.build(templateFileEntity));
         }
@@ -159,9 +160,21 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return savedTemplate;
     }
 
-    private void createTemplatePartsForTemplateFileEntity(final String dataCollectionName,
-                                                          final List<TemplatePartDTO> templatePartDTOs,
-                                                          final TemplateFileEntity templateFileEntity) {
+    private void fillTemplatePartsForTemplateFileEntity(final String dataCollectionName,
+                                                        final List<TemplatePartDTO> templatePartDTOs,
+                                                        final TemplateFileEntity templateFileEntity) {
+        final List<TemplateFilePartEntity> parts = createTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
+
+        for (final TemplateFilePartEntity templatePart : parts) {
+            parts.add(templatePart);
+            templatePart.getPart().getCompositions().add(templatePart);
+        }
+
+    }
+
+    private List<TemplateFilePartEntity> createTemplatePartsForTemplateFileEntity(final String dataCollectionName,
+                                                                                  final List<TemplatePartDTO> templatePartDTOs,
+                                                                                  final TemplateFileEntity templateFileEntity) {
         final List<TemplateEntity> templatePartList = templateRepository.getTemplatesWithLatestFileByName(templatePartDTOs.stream().map(TemplatePartDTO::getTemplateName).collect(Collectors.toList()));
         final Map<String, TemplateFileEntity> templateFilePartMap = templatePartList.stream().collect(Collectors.toMap(TemplateEntity::getName, TemplateEntity::getLatestFile, (templateFileEntity1, templateFileEntity2) -> templateFileEntity1));
 
@@ -174,15 +187,13 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         //checks that exists at most one HEADER and FOOTER
         throwExceptionIfPartsSizeAreIncorrect(templatePartList);
 
-        final List<TemplateFilePartEntity> parts = templateFileEntity.getParts();
-        for (final TemplatePartDTO templatePart : templatePartDTOs) {
+        final List<TemplateFilePartEntity> parts = templatePartDTOs.stream().map(templatePart -> {
             final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getTemplateName());
             final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(templateFileEntity, partTemplateFileEntity, templatePart);
+            return templateFilePartEntity;
+        }).collect(Collectors.toList());
 
-            parts.add(templateFilePartEntity);
-
-            partTemplateFileEntity.getCompositions().add(templateFilePartEntity);
-        }
+        return parts;
     }
 
     private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity compositionTemplateFileEntity,
@@ -286,7 +297,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName) {
+    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName, List<TemplatePartDTO> templateParts) {
         final TemplateEntity existingTemplateEntity = findByName(name);
         if (newTemplateName != null) {
             existingTemplateEntity.setName(newTemplateName);
@@ -296,7 +307,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, comment, oldVersion + 1);
+        return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts, comment, oldVersion + 1);
     }
 
     @Override
@@ -308,7 +319,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), comment, oldVersion + 1);
+        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), Collections.emptyList(), comment, oldVersion + 1);
     }
 
     @Override
@@ -317,19 +328,27 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                            final UserEntity userEntity) {
         final TemplateFileEntity currentTemplateFile = existingTemplateEntity.getLatestFile();
         final String comment = new StringBuilder().append("Rollback to version: ").append(templateVersionToBeRevertedTo.getVersion()).toString();
-        return createNewVersion(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), comment, currentTemplateFile.getVersion() + 1);
+        return createNewVersion(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), Collections.emptyList(), comment, currentTemplateFile.getVersion() + 1);
     }
 
     private TemplateEntity createNewVersion(final TemplateEntity existingTemplateEntity,
                                             final TemplateFileEntity fileEntityToCopyDependencies,
                                             final UserEntity userEntity,
                                             final byte[] data,
+                                            final List<TemplatePartDTO> templateParts,
                                             final String comment,
                                             final Long newVersion) {
         final TemplateEntity result;
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
+        final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, fileEntityToCopyDependencies.getDataCollectionFile(), fileEntityToCopyDependencies.getResourceFiles(), newVersion);
 
-        final TemplateFileEntity fileEntity = createTemplateFileEntity(data, comment, existingTemplateEntity, userEntity, newVersion, fileEntityToCopyDependencies);
+        if (TemplateTypeEnum.COMPOSITION.equals(existingTemplateEntity.getType())) {
+            if (Objects.nonNull(templateParts)) {
+                fillTemplatePartsForTemplateFileEntity(fileEntityToCopyDependencies.getDataCollectionFile().getDataCollection().getName(), templateParts, fileEntity);
+            }
+            fileEntity.setData(compositeTemplateConstructor.build(fileEntity));
+        }
+
         existingTemplateEntity.getFiles().add(fileEntity);
         existingTemplateEntity.getTemplateLogs().add(logEntity);
         existingTemplateEntity.setLatestLogRecord(logEntity);
@@ -344,8 +363,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                                         final String comment,
                                                         final TemplateEntity existingTemplateEntity,
                                                         final UserEntity userEntity,
-                                                        final Long versionNumber,
-                                                        final TemplateFileEntity entityToCopyDependencies) {
+                                                        final DataCollectionFileEntity dataCollectionFileEntity,
+                                                        final Set<ResourceFileEntity> resourceFileEntities,
+                                                        final Long versionNumber) {
         //Imitation of new file upload (which will be performed from Editor)
         final TemplateFileEntity fileEntity = new TemplateFileEntity();
         fileEntity.setTemplate(existingTemplateEntity);
@@ -355,8 +375,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         fileEntity.setCreatedOn(new Date());
         fileEntity.setDeployed(false);
         fileEntity.setModifiedOn(new Date());
-        fileEntity.setDataCollectionFile(entityToCopyDependencies.getDataCollectionFile());
-        fileEntity.getResourceFiles().addAll(entityToCopyDependencies.getResourceFiles());
+        fileEntity.setDataCollectionFile(dataCollectionFileEntity);
+        fileEntity.getResourceFiles().addAll(resourceFileEntities);
         if (data != null) {
             fileEntity.setData(data);
         } else {
