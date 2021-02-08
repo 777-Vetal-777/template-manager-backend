@@ -249,7 +249,7 @@ public interface TemplateController {
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
-    @PutMapping(TEMPLATE_NEXT_STAGE_ENDPOINT_WITH_PATH_VARIABLE)
+    @GetMapping(TEMPLATE_NEXT_STAGE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Get next stage for template version", description = "Get next stage for template version",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
