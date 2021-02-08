@@ -95,8 +95,8 @@ public class MailClientImpl implements MailClient {
         list.set(35, String.format(list.get(35), FRONT_URL.concat("/forgot_password?token=").concat(token)));
         list.set(48, String.format(list.get(48), Year.now().getValue()));
         list.set(51, String.format(list.get(51), PRIVACY_INFORMATION_URL));
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String str2 : list) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (final String str2 : list) {
             stringBuilder.append(str2);
         }
         return stringBuilder.toString();
@@ -111,8 +111,8 @@ public class MailClientImpl implements MailClient {
         list.set(49, String.format(list.get(49), FRONT_URL.concat("/login")));
         list.set(65, String.format(list.get(65), PRIVACY_INFORMATION_URL));
         list.set(62, String.format(list.get(62), Year.now().getValue()));
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String str2 : list) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (final String str2 : list) {
             stringBuilder.append(str2);
         }
         return stringBuilder.toString();
@@ -120,15 +120,14 @@ public class MailClientImpl implements MailClient {
 
     private List<String> readFile(final String file) {
         final InputStreamReader inputStreamReader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(file));
-        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         final List<String> list = new ArrayList<>();
         String line;
-        try {
+        try (BufferedReader bufferedReader = new BufferedReader(inputStreamReader)){
             while ((line = bufferedReader.readLine()) != null) {
                 list.add(line);
             }
         } catch (IOException e) {
-            log.error("Failed to read html" + file);
+            log.error("Failed to read html {}", file);
         }
         return list;
     }
