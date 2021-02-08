@@ -42,7 +42,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     @Override
     public TemplateEntity createNewVersion(final String name, final byte[] data, final String email,
             final String newName) {
-        return templateService.createNewVersion(name, data, email, null, newName);
+        return templateService.createNewVersion(name, data, email, null, newName, null);
     }
 
     @Override

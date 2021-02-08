@@ -33,7 +33,7 @@ public interface TemplateService {
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
 
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#email, #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
-    TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String templateName);
+    TemplateEntity createNewVersion(String name, byte[] data, String email, String comment, String templateName, List<TemplatePartDTO> templateParts);
 
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #fileEntityToCopy.getTemplate(), 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
