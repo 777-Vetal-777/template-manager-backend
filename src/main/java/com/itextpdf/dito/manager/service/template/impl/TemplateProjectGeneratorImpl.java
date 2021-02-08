@@ -5,7 +5,7 @@ import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
-import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
+import com.itextpdf.dito.manager.exception.template.TemplateProjectGenerationException;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.service.template.TemplateProjectGenerator;
@@ -87,12 +87,12 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
             return createdZip;
         } catch (IOException exception) {
             log.error(exception);
-            throw new TemplateDeploymentException(exception.getMessage());
+            throw new TemplateProjectGenerationException(exception.getMessage());
         } finally {
             try {
                 FileUtils.deleteDirectory(new File(TEMP_DIRECTORY + "/" + templateEntity.getName()));
             } catch (IOException exception) {
-                throw new TemplateDeploymentException(exception.getMessage());
+                throw new TemplateProjectGenerationException(exception.getMessage());
             }
         }
     }
@@ -106,7 +106,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
             Files.write(newFile, file, CREATE);
         } catch (IOException exception) {
             log.error(exception);
-            throw new TemplateDeploymentException(exception.getMessage());
+            throw new TemplateProjectGenerationException(exception.getMessage());
         }
     }
 }
