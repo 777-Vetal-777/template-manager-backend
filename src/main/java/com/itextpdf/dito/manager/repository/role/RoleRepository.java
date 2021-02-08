@@ -81,16 +81,16 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     @Query(value = "select role from RoleEntity role "
             + "left join role.users user "
             + "where  "
-            //search
-            + "((LOWER(user.email) like  LOWER(CONCAT('%',:search,'%')) "
-            + " or LOWER(role.type) like  LOWER(CONCAT('%',:search,'%')) "
-            + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%'))) "
-            + " and role.master = true)"
             //filtering
-            + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%')) "
+            + " (:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
+            + " and (COALESCE(:types) is null or role.type in (:types)) "
+            + " and role.master = true"
+            //search
+            + " and (LOWER(user.email) like  LOWER(CONCAT('%',:search,'%')) "
+            + " or LOWER(role.type) like  LOWER(CONCAT('%',:search,'%')) "
             + "or (LOWER(role.name) = 'global_administrator' and 'global administrator' like CONCAT('%',:search,'%')) "
             + "or (LOWER(role.name) = 'template_designer' and 'template designer' like CONCAT('%',:search,'%')) "
-            + "and (COALESCE(:types) is null or role.type in (:types)) "
+            + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%'))) "
             + "group by (role.id, role.type)")
     Page<RoleEntity> search(Pageable pageable,
                             @Param("name") @Nullable String name,
