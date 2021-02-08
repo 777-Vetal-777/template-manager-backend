@@ -70,9 +70,6 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
                         if (sortParam.getProperty().equals("modifiedBy")) {
                             sortParam = new Sort.Order(sortParam.getDirection(), "firstName");
                         }
-                        if (sortParam.getProperty().equals("stage")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
-                        }
                         return sortParam;
                     })
                     .collect(Collectors.toList()));
