@@ -61,6 +61,11 @@ public class PermissionHandlerImpl implements PermissionHandler {
                     ResourceTypeEnum.STYLESHEET, "E8_US66_2_DELETE_RESOURCE_STYLESHEET",
                     ResourceTypeEnum.FONT, "E8_US66_1_DELETE_RESOURCE_FONT");
 
+    private static final Map<ResourceTypeEnum, String> RESOURCE_ROLLBACK_PERMISSIONS =
+            Map.of(ResourceTypeEnum.IMAGE, "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE",
+                    ResourceTypeEnum.STYLESHEET, "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET",
+                    ResourceTypeEnum.FONT, "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT");
+
     private final UserService userService;
     private final TemplateService templateService;
     private final DataCollectionService dataCollectionService;
@@ -142,6 +147,13 @@ public class PermissionHandlerImpl implements PermissionHandler {
         return checkResourcePermissions(email, type, resourceName, RESOURCE_DELETE_PERMISSIONS.get(type));
     }
 
+
+    @Override
+    public boolean checkResourceRollbackPermissions(final String email, final String resourceType, final String resourceName) {
+        final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
+
+        return checkResourcePermissions(email, type, resourceName, RESOURCE_ROLLBACK_PERMISSIONS.get(type));
+    }
 
     private boolean checkResourcePermissions(final String email, final ResourceTypeEnum resourceType, final String resourceName, final String checkingPermission) {
         final ResourceEntity resourceEntity = resourceService.getResource(resourceName, resourceType);

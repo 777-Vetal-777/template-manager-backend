@@ -100,7 +100,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String type,
-            final MultipartFile regular, final MultipartFile bold, final MultipartFile italic, final MultipartFile boldItalic) {
+                                                  final MultipartFile regular, final MultipartFile bold, final MultipartFile italic, final MultipartFile boldItalic) {
         final ResourceTypeEnum typeEnum = parseResourceType(type);
         if (typeEnum != FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -119,7 +119,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<Page<FileVersionDTO>> getVersions(final Principal principal, final Pageable pageable,
-            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
+                                                            final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
         final Page<FileVersionDTO> versionsDTOs = fileVersionMapper.map(resourceVersionsService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
@@ -144,7 +144,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
-            final String searchParam, final DependencyFilter filter) {
+                                                    final String searchParam, final DependencyFilter filter) {
         final String decodedName = decodeBase64(resource);
         final Page<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
@@ -162,7 +162,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<Page<ResourceDTO>> list(final Pageable pageable,
-            final ResourceFilter filter, final String searchParam) {
+                                                  final ResourceFilter filter, final String searchParam) {
         final Page<ResourceDTO> dtos = resourceMapper.map(resourceService.list(pageable, filter, searchParam));
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
@@ -191,7 +191,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> update(final String name, @Valid final ResourceUpdateRequestDTO updateRequestDTO,
-            final Principal principal) {
+                                              final Principal principal) {
         final ResourceEntity entity = resourceService
                 .update(decodeBase64(name), resourceMapper.map(updateRequestDTO), principal.getName());
         final ResourceDTO dto = resourceMapper.map(entity);
@@ -200,7 +200,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> applyRole(final String name, final String type,
-            @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+                                                 @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
         final ResourceEntity resourceEntity = resourceService
                 .applyRole(decodeBase64(name), parseResourceTypeFromPath(type),
                         applyRoleRequestDTO.getRoleName(),
@@ -210,7 +210,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<Page<ResourcePermissionDTO>> getRoles(final Pageable pageable, final String name,
-            final String type, final ResourcePermissionFilter filter, final String search) {
+                                                                final String type, final ResourcePermissionFilter filter, final String search) {
         final Page<ResourcePermissionModel> resourcePermissions = resourcePermissionService
                 .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter, search);
         return new ResponseEntity<>(permissionMapper.mapResourcePermissions(resourcePermissions), HttpStatus.OK);
@@ -218,7 +218,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<ResourceDTO> deleteRole(final String name, final String type,
-            final String roleName) {
+                                                  final String roleName) {
         final ResourceEntity resourceEntity = resourceService
                 .detachRole(decodeBase64(name), parseResourceTypeFromPath(type), decodeBase64(roleName));
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
@@ -228,6 +228,12 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<Void> delete(final Principal principal, final String name, final String type) {
         resourceService.delete(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ResourceDTO> rollbackVersion(final Principal principal, final String name, final String type, final Long version) {
+        final ResourceEntity rollBackEntity = resourceVersionsService.rollbackVersion(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName(), version);
+        return new ResponseEntity<>(resourceMapper.map(rollBackEntity), HttpStatus.OK);
     }
 
     private void checkFileSizeIsNotExceededLimit(final ResourceTypeEnum resourceType, final Long fileSize) {
