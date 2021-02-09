@@ -11,15 +11,12 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
@@ -49,18 +46,17 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
         if ((Objects.isNull(dependenciesType) || dependenciesType.contains(TEMPLATE)) &&
                 (Objects.isNull(directionsType) || directionsType.contains(HARD))) {
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
-            final Pageable pageWithSort = updateSort(pageable);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
             final String stage = getStringFromFilter(filter.getStage());
             final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD
             if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) || TEMPLATE_DEPENDENCY_TYPE.contains(searchParam.toLowerCase()))) {
-                searchResult = resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, stage);
+                searchResult = resourceFileRepository.filter(pageable, resourceEntity.getId(), depend, version, stage);
             } else {
                 searchResult = isSearchEmpty
-                        ? resourceFileRepository.filter(pageWithSort, resourceEntity.getId(), depend, version, stage)
-                        : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, stage, searchParam.toLowerCase());
+                        ? resourceFileRepository.filter(pageable, resourceEntity.getId(), depend, version, stage)
+                        : resourceFileRepository.search(pageable, resourceEntity.getId(), depend, version, stage, searchParam.toLowerCase());
             }
         }
         return searchResult;
@@ -70,30 +66,6 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
     public List<DependencyModel> list(final String name, final ResourceTypeEnum type) {
         final ResourceEntity resourceEntity = resourceService.getResource(name, type);
         return resourceFileRepository.searchDependencies(resourceEntity.getId());
-    }
-
-    private Pageable updateSort(final Pageable pageable) {
-        final Sort newSort = Sort.by(pageable.getSort().stream()
-                .map(sortParam -> {
-                    if (sortParam.getProperty().equals("name")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "name");
-                    }
-                    if (sortParam.getProperty().equals("version")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "version");
-                    }
-                    if (sortParam.getProperty().equals("directionType")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
-                    }
-                    if (sortParam.getProperty().equals("dependencyType")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "template.name");
-                    }
-                    if (sortParam.getProperty().equals("stage")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "stage");
-                    }
-                    return sortParam;
-                })
-                .collect(Collectors.toList()));
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
     @Override
