@@ -233,6 +233,12 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
+    public ResponseEntity<List<DataSampleDTO>> listDataSamplesByTemplateName(final String templateName) {
+        final List<DataSampleEntity> listByTemplateName = dataSampleService.getListByTemplateName(decodeBase64(templateName));
+        return new ResponseEntity<>(dataSampleMapper.map(listByTemplateName), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))),
                 HttpStatus.OK);

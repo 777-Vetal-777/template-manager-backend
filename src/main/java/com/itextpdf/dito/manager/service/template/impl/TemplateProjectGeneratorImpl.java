@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,16 +52,19 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
      * @return .zip template project file
      */
     @Override
-    public File generateZipByTemplateName(final TemplateEntity templateEntity) {
+    public File generateZipByTemplateName(final TemplateEntity templateEntity, final DataSampleFileEntity sampleFileEntity) {
         try {
             final String templateName = templateEntity.getName();
             final Map<String, Path> directories = createTemplateDirectoryForPreview(templateName);
             //If data sample exist -> write to root of tmp folder
-            dataSampleRepository.findDataSampleByTemplateId(templateEntity.getId()).ifPresent(sample -> {
-                final DataSampleFileEntity file = sample.getLatestVersion();
-                createFile(DATA_FOLDER, file.getFileName(), file.getData(), directories);
-            });
-
+            if(Objects.nonNull(sampleFileEntity)){
+                createFile(DATA_FOLDER, sampleFileEntity.getFileName(), sampleFileEntity.getData(), directories);
+            }else {
+                dataSampleRepository.findDataSampleByTemplateId(templateEntity.getId()).ifPresent(sample -> {
+                    final DataSampleFileEntity file = sample.getLatestVersion();
+                    createFile(DATA_FOLDER, file.getFileName(), file.getData(), directories);
+                });
+            }
             createFile(TEMPLATES_FOLDER, templateName, templateEntity.getLatestFile().getData(), directories);
             //can drop file already exist exception, need to check/rewrite query
             final List<ResourceEntity> resource = resourceRepository

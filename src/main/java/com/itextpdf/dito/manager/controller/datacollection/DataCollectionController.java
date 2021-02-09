@@ -52,6 +52,7 @@ public interface DataCollectionController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/datacollections";
     String DATA_COLLECTION_PATH_VARIABLE = "data-collection-name";
+    String TEMPLATE_PATH_VARIABLE = "template-name";
     String ROLE_PATH_VARIABLE = "role-name";
     String DATA_SAMPLE_PATH_VARIABLE = "data-sample-name";
     String VERSIONS_ENDPOINT = "/versions";
@@ -61,8 +62,10 @@ public interface DataCollectionController {
     String DATA_SAMPLE_WITH_PATH_VARIABLE = "/{" + DATA_SAMPLE_PATH_VARIABLE + "}";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
+    String DATA_COLLECTION_WITH_TEMPLATE_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
     String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT;
+    String DATA_COLLECTION_DATA_SAMPLES_WITH_TEMPLATE_NAME_PATH_VARIABLE = DATA_SAMPLE_ENDPOINT + DATA_COLLECTION_WITH_TEMPLATE_PATH_VARIABLE;
     String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT +PAGEABLE_ENDPOINT;
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE;
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE + "/setasdefault";
@@ -209,8 +212,12 @@ public interface DataCollectionController {
 	@Operation(summary = "Get list of data samples", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<List<DataSampleDTO>> listDataSamples(@Parameter(description = "Base64-encoded name of the data collection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName);
 
+    @GetMapping(DATA_COLLECTION_DATA_SAMPLES_WITH_TEMPLATE_NAME_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E7_US42_TABLE_OF_DATA_SAMPLES')")
+    @Operation(summary = "Get list of data samples by template name", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<List<DataSampleDTO>> listDataSamplesByTemplateName(@Parameter(description = "Base64-encoded name of the template.", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
 
-	@GetMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
+    @GetMapping(DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE)
 	@PreAuthorize("hasAnyAuthority('E7_US46_VIEW_SAMPLE_METADATA', 'E7_US43_DATA_SAMPLE_NAVIGATION_MENU')")
 	@Operation(summary = "Get data sample by name", description = "Get data sample by name", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	ResponseEntity<DataSampleDTO> getDataSample(

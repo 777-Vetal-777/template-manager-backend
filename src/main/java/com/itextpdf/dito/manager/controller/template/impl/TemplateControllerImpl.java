@@ -157,10 +157,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<byte[]> preview(final String templateName) {
+    public ResponseEntity<byte[]> preview(final String templateName, final String dataSampleName) {
         final String decodedTemplateName = decodeBase64(templateName);
         final ByteArrayOutputStream pdfStream = (ByteArrayOutputStream) templatePreviewGenerator
-                .generatePreview(decodedTemplateName);
+                .generatePreview(decodedTemplateName, dataSampleName);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
