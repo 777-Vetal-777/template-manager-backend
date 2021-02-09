@@ -1,0 +1,23 @@
+{
+  "name": "composite-template",
+  "type": "COMPOSITION",
+  "dataCollection": null,
+  "templateParts": [
+    {
+      "name": "some-template"
+    },
+    {
+      "name": "some-header-template"
+    },
+    {
+      "name": "some-template-with-data-collection",
+      "newPage": true
+    },
+    {
+      "name": "another-footer-template"
+    },
+    {
+      "name": "some-footer-template"
+    }
+  ]
+}

@@ -130,7 +130,7 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
             final String dataCollection = Optional.ofNullable(entity.getLatestFile().getDataCollectionFile()).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
             return Objects.equals(dataCollectionName, dataCollection) || Objects.equals(null, dataCollection);
         })) {
-            throw new TemplateHasWrongStructureException("Template parts belongs to different Data Collections");
+            throw new TemplateHasWrongStructureException("Template parts belong to different Data Collections");
         }
     }
 

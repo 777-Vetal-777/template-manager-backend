@@ -489,7 +489,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
     }
 
-
     private TemplateEntity findByName(final String name) {
         return templateRepository.findByName(name).orElseThrow(() -> new TemplateNotFoundException(name));
     }

@@ -1,0 +1,5 @@
+{
+  "name": "some-template-with-data-collection",
+  "type": "STANDARD",
+  "dataCollectionName": "test-data-collection"
+}
