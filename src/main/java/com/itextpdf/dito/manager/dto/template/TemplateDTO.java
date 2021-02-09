@@ -1,9 +1,11 @@
 package com.itextpdf.dito.manager.dto.template;
 
+import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.List;
 
 public class TemplateDTO {
     private String name;
@@ -19,6 +21,7 @@ public class TemplateDTO {
     private Date createdOn;
     private String createdBy;
     private String comment;
+    private List<TemplateDeployedVersionDTO> deployedVersions;
 
     public Long getVersion() {
         return version;
@@ -90,5 +93,13 @@ public class TemplateDTO {
 
     public void setDataCollection(String dataCollection) {
         this.dataCollection = dataCollection;
+    }
+
+    public List<TemplateDeployedVersionDTO> getDeployedVersions() {
+        return deployedVersions;
+    }
+
+    public void setDeployedVersions(List<TemplateDeployedVersionDTO> deployedVersions) {
+        this.deployedVersions = deployedVersions;
     }
 }

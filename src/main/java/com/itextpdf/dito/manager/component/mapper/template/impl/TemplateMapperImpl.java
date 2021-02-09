@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
@@ -57,6 +59,14 @@ public class TemplateMapperImpl implements TemplateMapper {
             final TemplateFileEntity fileEntity = files.stream().findFirst().get();
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
+
+            result.setDeployedVersions(files.stream().map(templateFileEntity -> {
+                final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
+                templateDeployedVersionDTO.setStageName(templateFileEntity.getStage().getName());
+                templateDeployedVersionDTO.setVersion(templateFileEntity.getVersion());
+                templateDeployedVersionDTO.setDeployed(templateFileEntity.getDeployed());
+                return templateDeployedVersionDTO;
+            }).collect(Collectors.toList()));
         }
         final TemplateFileEntity latestFile = entity.getLatestFile();
         if (Objects.nonNull(latestFile)) {
