@@ -51,9 +51,11 @@ public interface ResourceController {
     String RESOURCE_PATH_VARIABLE = "resource-name";
     String RESOURCE_TYPE_PATH_VARIABLE = "resource-type";
     String ROLE_PATH_VARIABLE = "role-name";
+    String VERSION_PATH_VARIABLE = "resource-version";
     String FILE_UUID_PATH_VARIABLE = "file-uuid";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + RESOURCE_PATH_VARIABLE + "}";
     String RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE = "/{" + RESOURCE_TYPE_PATH_VARIABLE + "}";
+    String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + VERSION_PATH_VARIABLE + "}";
     String RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE;
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String RESOURCE_VERSION_ENDPOINT = "/versions";
@@ -61,10 +63,12 @@ public interface ResourceController {
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
     String FONTS_ENDPOINT = "/fonts";
     String FILE_ENDPOINT = "/file";
+    String RESOURCE_ROLLBACK_ENDPOINT = "/rollback";
     //File
     String RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE = FILE_ENDPOINT + "/{" + FILE_UUID_PATH_VARIABLE + "}";
     //Versions
     String RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_VERSION_ENDPOINT;
+    String RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + VERSION_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_ROLLBACK_ENDPOINT;
     //Dependencies
     String RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT;
     String RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE = RESOURCE_ENDPOINT_WITH_RESOURCE_TYPE_VARIABLE + RESOURCE_ENDPOINT_WITH_PATH_VARIABLE + RESOURCE_DEPENDENCIES_ENDPOINT + PAGEABLE_ENDPOINT;
@@ -230,5 +234,19 @@ public interface ResourceController {
     ResponseEntity<Void> delete(Principal principal,
                                 @Parameter(name = "resource-name", description = "Resource name encoded with base64.", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
                                 @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
+
+    @PostMapping(RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("@permissionHandlerImpl.checkResourceRollbackPermissions(#principal.name, #type, #name)")
+    @Operation(summary = "Rollback resource to selected version", description = "Rollback resource to selected version",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Resource rollback was successful."),
+            @ApiResponse(responseCode = "404", description = "Resource or resource version not found.")
+    })
+    ResponseEntity<ResourceDTO> rollbackVersion(
+            Principal principal,
+            @Parameter(name = "resource-name", description = "Encoded with base64 resource name", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
+            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
+            @Parameter(name = "resource-version", description = "Resource version number", required = true) @PathVariable(VERSION_PATH_VARIABLE) Long version);
 
 }

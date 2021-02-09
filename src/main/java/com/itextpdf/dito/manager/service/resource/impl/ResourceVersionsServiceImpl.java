@@ -2,6 +2,8 @@ package com.itextpdf.dito.manager.service.resource.impl;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
+import com.itextpdf.dito.manager.exception.resource.ResourceVersionNotFoundException;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
@@ -60,6 +62,15 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
         return StringUtils.isEmpty(searchParam)
                 ? resourceFileRepository.filter(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName)
                 : resourceFileRepository.search(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam.toLowerCase());
+    }
+
+    @Override
+    public ResourceEntity rollbackVersion(final String resourceName, final ResourceTypeEnum resourceType, final String userEmail, final Long version) {
+        final ResourceEntity resourceEntity = resourceService.getResource(resourceName, resourceType);
+        final ResourceFileEntity resourceFileEntityToBeRevertedTo = resourceFileRepository.findByVersionAndResource(version, resourceEntity)
+                .orElseThrow(() -> new ResourceVersionNotFoundException(String.valueOf(version)));
+        final String comment = new StringBuilder().append("Rollback to version: ").append(resourceFileEntityToBeRevertedTo.getVersion()).toString();
+        return resourceService.createNewVersion(resourceName, resourceType, resourceFileEntityToBeRevertedTo.getFile(), resourceFileEntityToBeRevertedTo.getFileName(), userEmail, comment);
     }
 
     private Pageable updateSort(final Pageable pageable) {

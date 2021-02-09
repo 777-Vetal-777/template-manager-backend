@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.repository.resource;
 
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
@@ -115,4 +116,6 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + "where resource.id = :id "
             + "group by template.name ")
     List<DependencyModel> searchDependencies(@Param("id") Long resourceId);
+
+    Optional<ResourceFileEntity> findByVersionAndResource(Long version, ResourceEntity resourceEntity);
 }
