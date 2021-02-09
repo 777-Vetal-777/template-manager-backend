@@ -9,7 +9,6 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
-import com.itextpdf.dito.manager.service.template.impl.TemplateFilePartServiceImpl;
 import com.itextpdf.styledxmlparser.jsoup.Jsoup;
 import com.itextpdf.styledxmlparser.jsoup.nodes.Document;
 import com.itextpdf.styledxmlparser.jsoup.nodes.Element;
@@ -99,7 +98,7 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
 
     @Override
     public byte[] build(final TemplateFileEntity entity) {
-        return  build(entity.getParts());
+        return build(entity.getParts());
     }
 
     @Override

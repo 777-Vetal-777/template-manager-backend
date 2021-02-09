@@ -161,7 +161,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                  @Param("directionType") String directionType,
                                  @Param("dependencyTypes") List<String> dependencyType);
 
-
     @Query(value = FILTER_AND_SEARCH_DEPENDENCIES,
             nativeQuery = true)
     Page<DependencyModel> search(Pageable pageable,
@@ -187,7 +186,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + " where template.name in (:names)")
     List<TemplateEntity> getTemplatesWithLatestFileByName(List<String> names);
 
-
     @Query("select template from TemplateEntity template "
             + "join fetch template.latestFile file "
             + "join fetch file.compositions compositions "
@@ -196,7 +194,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "left join fetch dataCollectionFile.dataCollection dataCollection "
             + "where composition.template.id = :id")
     List<TemplateEntity> getTemplatesPartsByTemplateId(@Param("id") Long templateId);
-
 
     @Query("select template from TemplateEntity template "
             + "join fetch template.latestFile file "

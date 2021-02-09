@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -23,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.File;
 import java.net.URI;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
@@ -173,11 +175,76 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-
     @Test
     public void testGetAllTemplateTypes() throws Exception {
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT))
                 .andExpect(status().isOk());
+    }
+
+    private void performCreateTemplateRequest(final String pathname) throws Exception {
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File(pathname), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void testCreateCompositionTemplateWithoutDataCollection() throws Exception {
+        dataCollectionService.create("test-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer2.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-with-data-collection2.json");
+
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        request.getTemplateParts().removeIf(part -> "some-footer-template".equals(part.getName()));
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        request.getTemplateParts().removeIf(part -> "some-template-with-data-collection".equals(part.getName()));
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void testCreateCompositionTemplateWithDataCollection() throws Exception {
+        dataCollectionService.create("test-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer2.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-with-data-collection2.json");
+
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition-wth-data-collection.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        request.getTemplateParts().removeIf(part -> "some-footer-template".equals(part.getName()));
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
     }
 
 }
