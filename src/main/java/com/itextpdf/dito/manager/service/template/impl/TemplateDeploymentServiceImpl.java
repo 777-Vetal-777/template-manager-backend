@@ -167,7 +167,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final String instanceSocket = instanceEntity.getSocket();
         final String instanceRegisterToken = instanceEntity.getRegisterToken();
         final TemplateDescriptorDTO templateDescriptorDTO = templateMapper.mapToDescriptor(templateFileEntity, isDefaultInstance);
-        final File templateProjectFile = templateProjectGenerator.generateZipByTemplateName(templateEntity);
+        final File templateProjectFile = templateProjectGenerator.generateZipByTemplateName(templateEntity, null);
         promoteTemplateToInstance(instanceRegisterToken, instanceSocket, templateDescriptorDTO, templateProjectFile);
     }
 

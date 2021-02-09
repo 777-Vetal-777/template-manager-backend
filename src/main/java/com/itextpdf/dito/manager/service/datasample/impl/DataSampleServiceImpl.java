@@ -21,20 +21,18 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -178,7 +176,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		dataSampleRepository.saveAll(list);
 		return dataSampleEntity;
 	}
-	
+
 	@Override
 	public List<DataSampleEntity> delete(final List<String> dataSamplesList) {
 		final List<DataSampleEntity> dataSampleListToDelete = dataSamplesList.stream().map(e->get(e)).collect(Collectors.toList());
@@ -236,7 +234,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		dataSampleEntity.setLastDataSampleLog(logDataSample);
 		return logDataSample;
 	}
-	
+
 	@Override
 	@Transactional
 	public DataSampleEntity update(final String name, final DataSampleEntity updatedEntity, final String userEmail) {
@@ -264,5 +262,14 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		sampleEntity.setLastDataSampleLog(logDataSample);
 		dataSampleLogRepository.save(logDataSample);
 	}
-	
+
+    @Override
+    public Optional<DataSampleEntity> findDataSampleByTemplateId(final Long templateId) {
+        return dataSampleRepository.findDataSampleByTemplateId(templateId);
+    }
+
+	@Override
+	public List<DataSampleEntity> getListByTemplateName(final String templateName) {
+		return dataSampleRepository.findDataSamplesByTemplateName(templateName);
+	}
 }

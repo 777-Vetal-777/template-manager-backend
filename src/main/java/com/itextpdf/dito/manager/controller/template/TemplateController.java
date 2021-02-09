@@ -171,7 +171,7 @@ public interface TemplateController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
     ResponseEntity<byte[]> preview(
-            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name, @Parameter(description = "Optional name of date sample for generating pdf preview. ") @RequestParam(name = "dataSampleName", required = false) String dataSampleName);
 
     @PostMapping(value = TEMPLATE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
