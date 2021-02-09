@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
+import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -62,7 +63,8 @@ public class TemplateMapperImpl implements TemplateMapper {
 
             result.setDeployedVersions(files.stream().map(templateFileEntity -> {
                 final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
-                templateDeployedVersionDTO.setStageName(templateFileEntity.getStage().getName());
+                final StageEntity stageEntity = templateFileEntity.getStage();
+                templateDeployedVersionDTO.setStageName(stageEntity != null ? stageEntity.getName() : null);
                 templateDeployedVersionDTO.setVersion(templateFileEntity.getVersion());
                 templateDeployedVersionDTO.setDeployed(templateFileEntity.getDeployed());
                 return templateDeployedVersionDTO;
