@@ -448,8 +448,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (deployedTemplateVersion.isPresent()) {
             throw new TemplateDeleteException("Template has deployed versions that should be un-deployed first");
         }
-        //TODO implement check for outbound dependencies when template composition is completed DTM-1614
-        final boolean hasOutBoundDependencies = false;
+        final boolean hasOutBoundDependencies = templateFileRepository.countTemplateVersionsUsedInCompositions(templateName) > 0;
         if (hasOutBoundDependencies) {
             throw new TemplateDeleteException("Template has outbound dependencies");
         }

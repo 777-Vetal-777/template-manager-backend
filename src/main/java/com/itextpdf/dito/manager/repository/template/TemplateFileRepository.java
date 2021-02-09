@@ -66,4 +66,8 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
     Optional<TemplateFileEntity> findByVersionAndTemplate(Long version, TemplateEntity templateEntity);
 
     Optional<TemplateFileEntity> findByStageAndTemplate(StageEntity stageEntity, TemplateEntity templateEntity);
+
+    @Query(value = "select count(templateFile) from TemplateFileEntity templateFile "
+            + "where templateFile.compositions.size > 0 and templateFile.template.name=:name")
+    Integer countTemplateVersionsUsedInCompositions(String name);
 }
