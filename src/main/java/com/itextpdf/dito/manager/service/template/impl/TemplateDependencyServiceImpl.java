@@ -39,11 +39,12 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
         final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
         final String directionType = getDirectionAsString(filter.getDirectionType());
         final String depend = getStringFromFilter(filter.getName());
+        final String stage = getStringFromFilter(filter.getStage());
         final Long version = getLongFromFilter(filter.getVersion());
 
         return StringUtils.isEmpty(search)
-                ? templateRepository.filter(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes)
-                : templateRepository.search(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, search.toLowerCase());
+                ? templateRepository.filter(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, stage)
+                : templateRepository.search(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, stage, search.toLowerCase());
     }
 
     @Override

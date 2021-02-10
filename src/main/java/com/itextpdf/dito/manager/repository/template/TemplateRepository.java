@@ -87,6 +87,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
             " and (:version = 0 or version=:version) " +
             " and (:directionType='' or LOWER(directionType) like LOWER(CONCAT('%',:directionType,'%')))" +
+            " and (:stage = '' or LOWER(stage) like CONCAT('%',:stage,'%'))" +
             " and (COALESCE(:dependencyTypes) is null or dependencyType in (:dependencyTypes)))";
 
     String FILTER_AND_SEARCH_DEPENDENCIES = DEPENDENCY_QUERY + FILTER_DEPENDENCIES + " and ( LOWER(name) like CONCAT('%',:search,'%') " +
@@ -159,7 +160,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                  @Param("depend") String depend,
                                  @Param("version") Long version,
                                  @Param("directionType") String directionType,
-                                 @Param("dependencyTypes") List<String> dependencyType);
+                                 @Param("dependencyTypes") List<String> dependencyType,
+                                 @Param("stage") String stage);
 
     @Query(value = FILTER_AND_SEARCH_DEPENDENCIES,
             nativeQuery = true)
@@ -169,6 +171,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                  @Param("version") Long version,
                                  @Param("directionType") String directionType,
                                  @Param("dependencyTypes") List<String> dependencyType,
+                                 @Param("stage") String stage,
                                  @Param("search") String search);
 
     @Query(value = DEPENDENCY_QUERY, nativeQuery = true)
