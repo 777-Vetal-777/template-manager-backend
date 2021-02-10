@@ -37,8 +37,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String SEARCH_CONDITION = "(LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
             + "or LOWER(template.type) like CONCAT('%',:search,'%') "
-            + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%')) "
-            + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%') ";
+            + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%') "
+            + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%')) ";
 
     String DEPENDENCY_QUERY = "select version, name, directionType, dependencyType, stage from (select max(resourceFile.version) as version, max(resource.name) as name, 'SOFT' as directionType, max(resource.type) as dependencyType,  max(stage.name) as stage" +
             " from {h-schema}template as template" +
@@ -85,15 +85,15 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             ") as dependency";
 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
-            " and (:version = 0 or version is null or version=:version) " +
+            " and (:version = 0 or version=:version) " +
             " and (:directionType='' or LOWER(directionType) like LOWER(CONCAT('%',:directionType,'%')))" +
             " and (COALESCE(:dependencyTypes) is null or dependencyType in (:dependencyTypes)))";
 
-    String FILTER_AND_SEARCH_DEPENDENCIES = DEPENDENCY_QUERY + FILTER_DEPENDENCIES + " and (name like CONCAT('%',:search,'%')) " +
-            " or (LOWER(directionType) like CONCAT('%',:search,'%'))" +
-            " or (CAST(version as VARCHAR(10)) like CONCAT('%',:search,'%'))" +
-            " or (LOWER(dependencyType) like CONCAT('%',:search,'%'))" +
-            " or (LOWER(stage) like CONCAT('%',:search,'%'))";
+    String FILTER_AND_SEARCH_DEPENDENCIES = DEPENDENCY_QUERY + FILTER_DEPENDENCIES + " and ( LOWER(name) like CONCAT('%',:search,'%') " +
+            " or LOWER(directionType) like CONCAT('%',:search,'%')" +
+            " or CAST(version as VARCHAR(10)) like CONCAT('%',:search,'%')" +
+            " or LOWER(dependencyType) like CONCAT('%',:search,'%')" +
+            " or LOWER(stage) like CONCAT('%',:search,'%') )";
 
     String TEMPLATE_TABLE_LIST_SELECT_CLAUSE = "select template from TemplateEntity template "
             + " join fetch template.latestFile templateFile "
