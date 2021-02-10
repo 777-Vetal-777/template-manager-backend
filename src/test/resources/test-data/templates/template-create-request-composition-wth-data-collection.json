@@ -1,7 +1,7 @@
 {
   "name": "composite-template",
   "type": "COMPOSITION",
-  "dataCollectionName": "test-data-collection",
+  "dataCollectionName": "new-data-collection",
   "templateParts": [
     {
       "name": "some-template"
