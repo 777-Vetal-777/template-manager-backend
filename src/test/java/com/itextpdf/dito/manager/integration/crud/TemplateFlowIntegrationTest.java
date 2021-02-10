@@ -4,14 +4,13 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
-import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.File;
 import java.net.URI;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
@@ -47,7 +45,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataCollectionService dataCollectionService;
 
-    @AfterEach
+    @BeforeEach
     public void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
@@ -149,7 +147,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("description").isNotEmpty());
     }
 
-
     @Test
     public void createTemplate_WhenTemplateWithSameNameExists_ThenResponseIsBadRequest() throws Exception {
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
@@ -191,7 +188,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testCreateCompositionTemplateWithoutDataCollection() throws Exception {
-        dataCollectionService.create("test-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+        dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
@@ -223,7 +220,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testCreateCompositionTemplateWithDataCollection() throws Exception {
-        dataCollectionService.create("test-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+        dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");

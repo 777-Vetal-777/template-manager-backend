@@ -43,7 +43,6 @@ public class TemplateEntity {
     @JoinColumn(name = "blocked_by")
     private UserEntity blockedBy;
 
-
     @OneToMany(
             mappedBy = "template",
             cascade = CascadeType.ALL,

@@ -81,7 +81,8 @@ public class TemplateFileEntity {
 
     @OneToMany(
             mappedBy = "part",
-            cascade = CascadeType.PERSIST
+            cascade = CascadeType.PERSIST,
+            orphanRemoval = true
     )
     private List<TemplateFilePartEntity> compositions = new ArrayList<>();
 
