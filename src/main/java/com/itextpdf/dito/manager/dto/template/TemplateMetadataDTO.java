@@ -1,8 +1,10 @@
 package com.itextpdf.dito.manager.dto.template;
 
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class TemplateMetadataDTO{
@@ -17,6 +19,7 @@ public class TemplateMetadataDTO{
     private Long version;
     private Boolean blocked;
     private Set<RoleDTO> appliedRoles;
+    private List<TemplateDeployedVersionDTO> deployedVersions;
 
     public Set<RoleDTO> getAppliedRoles() { return appliedRoles; }
 
@@ -92,5 +95,13 @@ public class TemplateMetadataDTO{
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public List<TemplateDeployedVersionDTO> getDeployedVersions() {
+        return deployedVersions;
+    }
+
+    public void setDeployedVersions(List<TemplateDeployedVersionDTO> deployedVersions) {
+        this.deployedVersions = deployedVersions;
     }
 }

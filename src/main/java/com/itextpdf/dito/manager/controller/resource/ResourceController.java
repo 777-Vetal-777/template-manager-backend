@@ -236,7 +236,7 @@ public interface ResourceController {
                                 @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
     @PostMapping(RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("@permissionHandlerImpl.checkResourceRollbackPermissions(#principal.name, #type, #name)")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceRollbackPermissions(#principal.name, #type, new String(T(java.util.Base64).getUrlDecoder().decode(#name)))")
     @Operation(summary = "Rollback resource to selected version", description = "Rollback resource to selected version",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
