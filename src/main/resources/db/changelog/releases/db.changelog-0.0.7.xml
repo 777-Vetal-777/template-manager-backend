@@ -105,15 +105,15 @@
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="1"/>
-            <column name="permission_id" value="98"/>
+            <column name="permission_id" value="99"/>
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="2"/>
-            <column name="permission_id" value="98"/>
+            <column name="permission_id" value="99"/>
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="3"/>
-            <column name="permission_id" value="98"/>
+            <column name="permission_id" value="99"/>
         </insert>
     </changeSet>
 
@@ -125,15 +125,15 @@
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="1"/>
-            <column name="permission_id" value="98"/>
+            <column name="permission_id" value="100"/>
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="2"/>
-            <column name="permission_id" value="98"/>
+            <column name="permission_id" value="100"/>
         </insert>
         <insert tableName="role_permission">
             <column name="role_id" value="3"/>
-            <column name="permission_id" value="98"/>
+            <column name="permission_id" value="100"/>
         </insert>
     </changeSet>
 </databaseChangeLog>
