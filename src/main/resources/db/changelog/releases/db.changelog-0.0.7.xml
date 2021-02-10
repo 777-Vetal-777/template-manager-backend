@@ -96,4 +96,44 @@
     <changeSet id="009-add-unique-constraint-to-name-and-type-columns-in-resource-table" author="Vadim_Sorokin">
         <addUniqueConstraint tableName="resource" columnNames="name, type" constraintName="resource_name_and_type_unique_constraint"/>
     </changeSet>
+
+    <changeSet id="010-add-e9-us127-delete-template-composition-default-permission" author="Sergey_Nemets">
+        <insert tableName="permission">
+            <column name="id" value="99"/>
+            <column name="name" value="E9_US127_DELETE_TEMPLATE_COMPOSITION"/>
+            <column name="optional_for_custom_role" value="true"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="011-add-e9-us126-delete-template-standard-default-permission" author="Sergey_Nemets">
+        <insert tableName="permission">
+            <column name="id" value="100"/>
+            <column name="name" value="E9_US126_DELETE_TEMPLATE_STANDARD"/>
+            <column name="optional_for_custom_role" value="true"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" value="98"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
