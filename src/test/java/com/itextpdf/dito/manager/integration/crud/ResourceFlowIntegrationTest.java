@@ -45,6 +45,7 @@ import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.resource.ResourceController.FONTS_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.resource.ResourceController.RESOURCE_VERSION_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -326,6 +327,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
                         IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk());
+
+
+        //Create new version with error
+        final Long currentVersion = 1L;
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()), 100L))
+                .andExpect(status().isNotFound());
+
+        //Create new version successfully
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()), currentVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty());
+
 
         //DELETE by name
         mockMvc.perform(
