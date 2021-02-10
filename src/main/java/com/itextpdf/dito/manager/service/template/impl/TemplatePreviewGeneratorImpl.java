@@ -25,9 +25,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -61,15 +61,22 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
     public OutputStream generatePreview(final String templateName, final String dataSampleName) {
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         File zippedProject = null;
-        final File temporaryPreviewFolder = createFolderIfExistDelete(new StringBuilder(FilesUtils.TEMP_DIRECTORY.toString()).append("/preview_").append(templateName).toString());
+
+        final File temporaryPreviewFolder;
+        try {
+            temporaryPreviewFolder = Files.createTempDirectory(FilesUtils.TEMP_DIRECTORY.toPath(),"preview_".concat(templateName)).toFile();
+        } catch (IOException e) {
+            throw new TemplatePreviewGenerationException(e.getMessage());
+        }
+
         try (final OutputStream pdfOutputStream = new ByteArrayOutputStream()) {
             try {
                 //get data sample file by template id to transfer it to SDK
-                DataSampleEntity sampleForPreview;
+                final DataSampleEntity sampleForPreview;
                 if(Objects.isNull(dataSampleName)){
                     //specially made for case, when template without data collection
                     final Optional<DataSampleEntity> dataSampleByTemplateId = dataSampleService.findDataSampleByTemplateId(templateEntity.getId());
-                    sampleForPreview = dataSampleByTemplateId.isPresent() ? dataSampleByTemplateId.get() : null;
+                    sampleForPreview = dataSampleByTemplateId.orElse(null);
                 }else {
                     sampleForPreview = dataSampleService.get(dataSampleName);
                 }
@@ -90,18 +97,6 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
             log.error(ex);
             throw new TemplatePreviewGenerationException("Error while generating PDF preview for template");
         }
-    }
-
-    private File createFolderIfExistDelete(final String filePath) {
-        final File temporaryPreviewFolder = new File(filePath);
-        if (temporaryPreviewFolder.exists()) {
-            try {
-                FileUtils.deleteDirectory(temporaryPreviewFolder);
-            } catch (IOException e) {
-                log.error("Error at the stage of deleting the temporary folder. Exception message :".concat(e.getMessage()));
-            }
-        }
-        return temporaryPreviewFolder;
     }
 
     private void generatePdfPreview(final File temporaryPreviewFolder, final OutputStream pdfOutputStream,
