@@ -68,7 +68,6 @@ public class ResourceMapperImpl implements ResourceMapper {
         }
 
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
-
         return result;
     }
 
@@ -95,12 +94,13 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
     //TODO In the future, replace this code with an integration code.
     @Override
-    public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum) {
+    public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
         String result;
 
         final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
         resourceIdDTO.setName(name);
         resourceIdDTO.setType(resourceTypeEnum);
+        resourceIdDTO.setSubName(subName);
         final String json = serialize(resourceIdDTO);
         result = encode(json);
 

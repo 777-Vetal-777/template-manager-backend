@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,11 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
 
         final String name = resourceEntity.getName();
         final ResourceTypeEnum type = resourceEntity.getType();
-        final String id = encodeId(name, type);
+        String fontName = null;
+        if(Objects.equals(ResourceTypeEnum.FONT, resourceEntity.getType())) {
+        	fontName = resourceEntity.getLatestFile().get(0).getFontName();
+        }
+        final String id = encodeId(name, type, fontName);
         switch (type) {
             case IMAGE:
                 resourceLeafDescriptor = new ImageDescriptor(id);
@@ -58,12 +63,13 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         return deserialize(decode(id));
     }
 
-    private String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum) {
+    private String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
         String result;
 
         final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
         resourceIdDTO.setName(name);
         resourceIdDTO.setType(resourceTypeEnum);
+        resourceIdDTO.setSubName(subName);
         final String json = serialize(resourceIdDTO);
         result = encode(json);
 

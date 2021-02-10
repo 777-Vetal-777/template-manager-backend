@@ -15,7 +15,7 @@ public interface ResourceMapper {
     Page<ResourceDTO> map(Page<ResourceEntity> entities);
 
     //TODO REPLACE TO INTEGRATION ResourceLeafDescriptorMapperImpl
-    String encodeId(String name, ResourceTypeEnum type);
+    String encodeId(String name, ResourceTypeEnum type, String additionals);
 
     //TODO REPLACE TO INTEGRATION ResourceLeafDescriptorMapperImpl
     ResourceIdDTO deserialize(String data);
