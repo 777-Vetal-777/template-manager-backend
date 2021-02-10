@@ -23,10 +23,7 @@ public final class FilesUtils {
     public static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
     public static final String TEMPLATES_FOLDER = "templates";
     public static final String DATA_FOLDER = "data";
-    public static final String RESOURCES_FOLDER = "resources";
-    public static final String RESOURCES_IMAGES_FOLDER = "img";
-    public static final String RESOURCES_FONTS_FOLDER = "font";
-    public static final String RESOURCES_STYLESHEETS_FOLDER = "stylesheet";
+
 
     public static byte[] getFileBytes(final MultipartFile file) {
         byte[] data;
@@ -41,14 +38,10 @@ public final class FilesUtils {
     public static Map<String, Path> createTemplateDirectoryForPreview(final String templateName) throws IOException {
         final Map<String, Path> folders = new HashMap<>();
 
-        final Path rootFolder = createTempDirectory(templateName);
+        final Path rootFolder = createTempDirectory(TEMP_DIRECTORY.toPath() ,templateName);
         folders.put(templateName, rootFolder);
         createFolderInSubDirectory(folders, rootFolder, TEMPLATES_FOLDER);
         createFolderInSubDirectory(folders, rootFolder, DATA_FOLDER);
-        createFolderInSubDirectory(folders, rootFolder, RESOURCES_FOLDER);
-        createFolderInSubDirectory(folders, folders.get(RESOURCES_FOLDER), RESOURCES_IMAGES_FOLDER);
-        createFolderInSubDirectory(folders, folders.get(RESOURCES_FOLDER), RESOURCES_FONTS_FOLDER);
-        createFolderInSubDirectory(folders, folders.get(RESOURCES_FOLDER), RESOURCES_STYLESHEETS_FOLDER);
         return folders;
     }
 

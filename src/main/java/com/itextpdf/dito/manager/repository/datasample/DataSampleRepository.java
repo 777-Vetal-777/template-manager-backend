@@ -72,7 +72,6 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     DataSampleFileEntity findLastByDataSampleAndVersionMax(@Param("id") long id);
 
     @Query("select sample from DataSampleEntity sample "
-            + "join sample.lastDataSampleLog lastLog "
             + "join sample.latestVersion latestFile "
             + "join sample.dataCollection collection "
             + "join collection.latestVersion version "
@@ -82,7 +81,6 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
     Optional<DataSampleEntity> findDataSampleByTemplateId(@Param("templateId") Long templateId);
 
     @Query("select sample from DataSampleEntity sample "
-            + "join sample.lastDataSampleLog lastLog "
             + "join sample.latestVersion latestFile "
             + "left join sample.dataCollection collection "
             + "left join collection.latestVersion version "
