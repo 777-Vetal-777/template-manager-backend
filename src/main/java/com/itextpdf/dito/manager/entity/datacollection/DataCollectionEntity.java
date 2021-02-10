@@ -93,7 +93,8 @@ public class DataCollectionEntity {
                     name = "role_id"))
     private Set<RoleEntity> appliedRoles = new HashSet<>();
 
-    @OneToMany(mappedBy = "dataCollection")
+    @OneToMany(mappedBy = "dataCollection", cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Collection<DataSampleEntity> dataSamples;
 
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
