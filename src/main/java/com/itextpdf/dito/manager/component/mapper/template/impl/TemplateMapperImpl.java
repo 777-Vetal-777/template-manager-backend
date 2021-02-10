@@ -81,6 +81,7 @@ public class TemplateMapperImpl implements TemplateMapper {
     public TemplateMetadataDTO mapToMetadata(final TemplateEntity entity) {
         final TemplateMetadataDTO result = new TemplateMetadataDTO();
         result.setName(entity.getName());
+        result.setType(entity.getType());
         final List<TemplateFileEntity> templateFiles = entity.getFiles();
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
         final Collection<TemplateFileEntity> files = entity.getFiles();

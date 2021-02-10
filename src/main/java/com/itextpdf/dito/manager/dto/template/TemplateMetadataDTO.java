@@ -2,7 +2,9 @@ package com.itextpdf.dito.manager.dto.template;
 
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +12,8 @@ import java.util.Set;
 public class TemplateMetadataDTO{
 
     private String name;
+    @JsonProperty("type")
+    private TemplateTypeEnum type;
     private String dataCollection;
     private String createdBy;
     private Date createdOn;
@@ -20,6 +24,14 @@ public class TemplateMetadataDTO{
     private Boolean blocked;
     private Set<RoleDTO> appliedRoles;
     private List<TemplateDeployedVersionDTO> deployedVersions;
+
+    public TemplateTypeEnum getType() {
+        return type;
+    }
+
+    public void setType(TemplateTypeEnum type) {
+        this.type = type;
+    }
 
     public Set<RoleDTO> getAppliedRoles() { return appliedRoles; }
 
