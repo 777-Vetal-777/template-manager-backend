@@ -11,7 +11,7 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionReposi
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataCollectionService dataCollectionService;
 
-    @BeforeEach
+    @AfterEach
     public void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
