@@ -228,7 +228,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer2.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-with-data-collection2.json");
 
-        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition-wth-data-collection.json"), TemplateCreateRequestDTO.class);
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition-with-data-collection.json"), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -241,6 +241,34 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-    }
 
+        final TemplateCreateRequestDTO compositionRequest = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        final String encodedTemplateName = encodeStringToBase64(compositionRequest.getName());
+
+        //get preview
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(compositionRequest.getName()))
+                .andExpect(jsonPath("dataCollection").isEmpty())
+                .andExpect(jsonPath("createdBy").isNotEmpty())
+                .andExpect(jsonPath("createdOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty());
+
+        //Update existing composing template
+        final TemplateUpdateRequestDTO updateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-update-request.json"), TemplateUpdateRequestDTO.class);
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
+                .content(objectMapper.writeValueAsString(updateRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(updateRequestDTO.getName()))
+                .andExpect(jsonPath("dataCollection").isEmpty())
+                .andExpect(jsonPath("createdBy").isNotEmpty())
+                .andExpect(jsonPath("createdOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").value(updateRequestDTO.getDescription()));
+    }
 }
