@@ -22,6 +22,8 @@ public interface ResourceService {
     ResourceEntity createNewVersion(String name, ResourceTypeEnum type, byte[] data, String fileName, String email, String comment);
 
     ResourceEntity get(String name, ResourceTypeEnum type);
+    
+    ResourceEntity get(String name, ResourceTypeEnum type, String fontName);
 
     ResourceEntity update(String name, ResourceEntity entity, String mail);
     

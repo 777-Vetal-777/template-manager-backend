@@ -7,7 +7,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import java.util.List;
 
 public interface ResourceManagementService {
-    byte[] get(String name, ResourceTypeEnum type);
+    byte[] get(String name, ResourceTypeEnum type, String subName);
 
     List<ResourceEntity> list();
 

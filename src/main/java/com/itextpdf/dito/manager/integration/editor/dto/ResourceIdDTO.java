@@ -2,12 +2,10 @@ package com.itextpdf.dito.manager.integration.editor.dto;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 
-import java.util.List;
-
 public class ResourceIdDTO {
     private String name;
     private ResourceTypeEnum type;
-    private List<String> subResources;
+    private String subName;
 
     public String getName() {
         return name;
@@ -25,11 +23,12 @@ public class ResourceIdDTO {
         this.type = type;
     }
 
-    public List<String> getSubResources() {
-        return subResources;
-    }
+	public String getSubName() {
+		return subName;
+	}
 
-    public void setSubResources(List<String> subResources) {
-        this.subResources = subResources;
-    }
+	public void setSubName(String subName) {
+		this.subName = subName;
+	}
+
 }

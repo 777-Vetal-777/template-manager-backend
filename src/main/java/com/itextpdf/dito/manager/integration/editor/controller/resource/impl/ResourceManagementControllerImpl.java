@@ -33,7 +33,7 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
         log.info("Request to get resource file by resourceId id {}.", resourceId);
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
         log.info("Response to get resource file by resourceId id {} processed.", resourceId);
-        return resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType());
+        return resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName());
     }
 
     @Override

@@ -27,6 +27,8 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +39,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -286,8 +290,30 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
+    @ReadOnlyProperty
     public List<ResourceEntity> list() {
-        return resourceRepository.findAll();
+		final List<ResourceEntity> resourceList = resourceRepository.findAll();
+		final List<ResourceEntity> resultResourceList = new ArrayList<>(resourceList);
+		final Iterator<ResourceEntity> it = resultResourceList.iterator();
+		while (it.hasNext()) {			
+			final ResourceEntity resourceEntity = it.next();
+			if (Objects.equals(resourceEntity.getType(), ResourceTypeEnum.FONT)) {
+				for (final ResourceFileEntity resourceFileEntity : resourceEntity.getLatestFile()) {
+					final ResourceEntity newEntity = new ResourceEntity();
+					final StringBuilder sb = new StringBuilder();
+					sb.append(resourceEntity.getName());
+					sb.append("_");
+					sb.append(resourceFileEntity.getFontName());
+					newEntity.setName(sb.toString());
+					newEntity.setId(resourceEntity.getId());
+					newEntity.setLatestFile(Arrays.asList(new ResourceFileEntity[] { resourceFileEntity }));
+					newEntity.setType(resourceEntity.getType());
+					resourceList.add(newEntity);
+				}
+				it.remove();
+			}
+		}
+		return resourceList;
     }
 
     @Override
@@ -332,7 +358,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity getResource(final String name, final ResourceTypeEnum type) {
         return resourceRepository.findByNameAndType(name, type).orElseThrow(() -> new ResourceNotFoundException(name));
     }
-
+     
+	@Override
+	@ReadOnlyProperty
+	public ResourceEntity get(final String name, final ResourceTypeEnum type, final String fontName) {
+		return resourceRepository.getByNameTypeAndFontName(name, type, fontName)
+				.orElseThrow(() -> new ResourceNotFoundException(name));
+	}
+    
     @Override
     public byte[] getFile(final String uuid) {
         final ResourceFileEntity file = resourceFileRepository.findFirstByUuid(uuid)

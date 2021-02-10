@@ -19,6 +19,10 @@ import java.util.Optional;
 @Repository
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "type", "modifiedBy", "modifiedOn", "comment");
+    
+	String SELECT_FONT = " select resource from  ResourceEntity resource"
+			+" join resource.latestFile latestFile"
+			+ " where resource.type = :type and resource.name = :name and latestFile.fontName = :fontName";
 
     String SELECT_CLAUSE = "select resource from ResourceEntity resource "
             + " join resource.latestFile latestFile "
@@ -69,5 +73,10 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
             + "left join templatesFiles.template template "
             + "where template.id = :id")
     List<ResourceEntity> findAllResourceByTemplateId(@Param("id") Long templateId);
+    
+	@Query(value = SELECT_FONT)
+	Optional<ResourceEntity> getByNameTypeAndFontName(@Param("name") String name, 
+													  @Param("type") ResourceTypeEnum type,
+													  @Param("fontName") String fontName);
 
 }

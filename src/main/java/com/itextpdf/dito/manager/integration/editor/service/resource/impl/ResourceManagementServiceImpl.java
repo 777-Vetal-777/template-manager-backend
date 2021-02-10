@@ -23,8 +23,14 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
 
     @Override
-    public byte[] get(final String name, final ResourceTypeEnum type) {
-        final ResourceEntity resourceEntity = resourceService.get(name, type);
+    public byte[] get(final String name, final ResourceTypeEnum type, final String subName) {
+    	//subName - it's a name of font for that realization
+    	ResourceEntity resourceEntity = null;
+		if (subName != null) {
+			resourceEntity = resourceService.get(name, type, subName);
+		} else {
+			resourceEntity = resourceService.get(name, type);
+		}
         final Optional<ResourceFileEntity> resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
 
         return resourceFileEntity.get().getFile();
