@@ -7,7 +7,6 @@ import java.util.Date;
 
 public class TemplateDTO {
     private String name;
-    @JsonProperty("type")
     private TemplateTypeEnum type;
     @JsonProperty("dataCollection")
     private String dataCollection;
