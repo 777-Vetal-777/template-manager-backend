@@ -33,6 +33,7 @@ services:
       - db
     ports:
       - "8000:8000"
+      - "9999:9999"
   #=========== DATABASE ===============
   db:
     container_name: db
