@@ -329,12 +329,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
 
-        //Create new version with error
+        //Rollback with not-existing version error
         final Long currentVersion = 1L;
         mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()), 100L))
                 .andExpect(status().isNotFound());
 
-        //Create new version successfully
+        //Rollback successfully
         mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()), currentVersion))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("version").value("2"))
@@ -423,6 +423,18 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
+
+        //Rollback with not-existing version error
+        final Long currentVersion = 1L;
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes()), 100L))
+                .andExpect(status().isNotFound());
+
+        //Rollback successfully
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes()), currentVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty());
 
         //UPDATE by name
         ResourceUpdateRequestDTO resourceUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/stylesheet_update_metadata.json"), ResourceUpdateRequestDTO.class);
