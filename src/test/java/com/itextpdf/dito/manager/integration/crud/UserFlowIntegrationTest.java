@@ -1,6 +1,11 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.manager.component.auth.token.builder.TokenBuilder;
+import com.itextpdf.dito.manager.component.auth.token.builder.impl.JwtResetPasswordTokenBuilder;
+import com.itextpdf.dito.manager.component.mail.MailClient;
 import com.itextpdf.dito.manager.controller.user.UserController;
+import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
+import com.itextpdf.dito.manager.dto.user.EmailDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
@@ -15,28 +20,36 @@ import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.FORGOT_PASSWORD;
+import static com.itextpdf.dito.manager.controller.user.UserController.RESET_PASSWORD;
 import static com.itextpdf.dito.manager.controller.user.UserController.UPDATE_USERS_ROLES_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACTIVATION_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,7 +57,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserFlowIntegrationTest extends AbstractIntegrationTest {
-
     @Autowired
     private UserRepository userRepository;
 
@@ -54,11 +66,21 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @MockBean
+    private MailClient mailClient;
+
+    @MockBean
+    private JwtResetPasswordTokenBuilder jwtResetPasswordTokenBuilder;
+
     private UserEntity user1;
     private UserEntity user2;
 
     @BeforeEach
     public void setup() {
+        //mailClient = new MailClientImpl("localhost", 505, "test", "12345", false, false, "localhost:8080",
+        //      "localhost:8080");
+        mailClient = mock(MailClient.class);
+        jwtResetPasswordTokenBuilder = mock(JwtResetPasswordTokenBuilder.class);
         RoleEntity role = roleRepository.findByNameAndMasterTrue("GLOBAL_ADMINISTRATOR").orElseThrow();
         user1 = new UserEntity();
         user1.setEmail("user1@email.com");
@@ -91,7 +113,9 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testCreateUser() throws Exception {
-        UserCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-create-request.json"), UserCreateRequestDTO.class);
+        UserCreateRequestDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/users/user-create-request.json"),
+                        UserCreateRequestDTO.class);
         mockMvc.perform(post(UserController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -120,8 +144,6 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
-
-
 
     @Test
     public void deactivateUsers() throws Exception {
@@ -193,7 +215,9 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void updateCurrentUser() throws Exception {
-        UserUpdateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-request.json"), UserUpdateRequestDTO.class);
+        UserUpdateRequestDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/users/user-update-request.json"),
+                        UserUpdateRequestDTO.class);
         MvcResult mvcResult = mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -207,7 +231,9 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(request.getLastName(), response.getLastName());
 
         //to revert default admin name and not affect other tests
-        request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-restore-default-request.json"), UserUpdateRequestDTO.class);
+        request = objectMapper
+                .readValue(new File("src/test/resources/test-data/users/user-update-restore-default-request.json"),
+                        UserUpdateRequestDTO.class);
         mvcResult = mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -232,7 +258,9 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(user1);
         failedLoginRepository.save(failedLoginAttemptEntity);
 
-        UsersUnblockRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-unblock-request.json"), UsersUnblockRequestDTO.class);
+        UsersUnblockRequestDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/users/user-unblock-request.json"),
+                        UsersUnblockRequestDTO.class);
         mockMvc.perform(patch(UserController.BASE_NAME + UserController.USERS_UNBLOCK_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -269,6 +297,56 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
         updated = userRepository.findByEmailAndActiveTrue(user1.getEmail()).orElseThrow();
         assertEquals(1, updated.getRoles().size());
+    }
+
+    @Test
+    public void shouldResetPasswordByForgetPasswordFunction() throws Exception {
+        String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhYmMxMUBpLmNvbSIsInR5cGUiOiJlZGl0b3IiLCJleHAiOjE2MTMxMjAzNDcsImlhdCI6MTYxMzAzMzk0N30.E7yqbUwv9yAE7jqYVLnT6qUEInAbZfeLD8wNUD2Z_9bULmmm2v4_BG_7nfqToA9MhXwkkPS09Pb59WlNW95GtA";
+        String email = "abc11@i.com";
+        String newPassword = "SpecialNewPassword123!";
+
+        final UserEntity setCustomEmailToUserEntity = userRepository.findByEmail(user2.getEmail()).get();
+        setCustomEmailToUserEntity.setEmail(email);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        Date parsedDate = formatter.parse("11-02-2021 10:59:07");
+        setCustomEmailToUserEntity.setResetPasswordTokenDate(parsedDate);
+        userRepository.save(setCustomEmailToUserEntity);
+
+        final EmailDTO emailDTO = new EmailDTO();
+        emailDTO.setEmail(email);
+
+
+        doNothing().when(mailClient).sendResetMessage(any(UserEntity.class), any(String.class));
+        when(jwtResetPasswordTokenBuilder.build(user2.getEmail())).thenReturn(token);
+
+        mockMvc.perform(patch(UserController.BASE_NAME + FORGOT_PASSWORD)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+
+        final Optional<UserEntity> userWhichForgotPassword = userRepository.findByEmail(email);
+        assertTrue(userWhichForgotPassword.isPresent());
+
+        final UserEntity userEntity = userWhichForgotPassword.get();
+        assertTrue(Objects.nonNull(userEntity.getResetPasswordTokenDate()));
+        final String oldPassword = userEntity.getPassword();
+
+        final ResetPasswordDTO request = new ResetPasswordDTO();
+        request.setPassword(newPassword);
+        request.setToken(token);
+
+        mockMvc.perform(patch(UserController.BASE_NAME + RESET_PASSWORD)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+
+        final Optional<UserEntity> userWhichUpdatedPassword = userRepository.findByEmail(email);
+        assertTrue(userWhichUpdatedPassword.isPresent());
+        final UserEntity userWhichUpdatedPasswordEntity = userWhichForgotPassword.get();
+        assertTrue(Objects.isNull(userWhichUpdatedPasswordEntity.getResetPasswordTokenDate()));
+        assertTrue(!userWhichUpdatedPasswordEntity.getPassword().equals(oldPassword));
     }
 
 }
