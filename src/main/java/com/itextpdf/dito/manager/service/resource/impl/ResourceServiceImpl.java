@@ -362,7 +362,12 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 	@Override
 	@ReadOnlyProperty
 	public ResourceEntity get(final String name, final ResourceTypeEnum type, final String fontName) {
-		return resourceRepository.getByNameTypeAndFontName(name, type, fontName)
+		//changing new font name back to db name
+		final StringBuilder sb = new StringBuilder();
+		sb.append("_");
+		sb.append(fontName);
+		sb.append("$");
+		return resourceRepository.getByNameTypeAndFontName(name.replaceFirst(sb.toString(), ""), type, fontName)
 				.orElseThrow(() -> new ResourceNotFoundException(name));
 	}
     
