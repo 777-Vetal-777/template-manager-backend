@@ -343,7 +343,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<TemplateFilePartEntity> templatePartsForTemplateFileEntity;
 
         if (TemplateTypeEnum.COMPOSITION.equals(existingTemplateEntity.getType()) && Objects.nonNull(templateParts)) {
-            templatePartsForTemplateFileEntity = templateFilePartService.createTemplatePartEntities(fileEntityToCopyDependencies.getDataCollectionFile().getDataCollection().getName(), templateParts);
+            final String dataCollectionName = Optional.ofNullable(fileEntityToCopyDependencies.getDataCollectionFile()).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
+            templatePartsForTemplateFileEntity = templateFilePartService.createTemplatePartEntities(dataCollectionName, templateParts);
         } else {
             templatePartsForTemplateFileEntity = Collections.emptyList();
         }
