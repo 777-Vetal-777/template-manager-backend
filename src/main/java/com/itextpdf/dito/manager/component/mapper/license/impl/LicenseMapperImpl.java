@@ -1,33 +1,25 @@
 package com.itextpdf.dito.manager.component.mapper.license.impl;
 
-import java.io.ByteArrayInputStream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.entity.LicenseEntity;
-import com.itextpdf.dito.sdk.aws.LicenseServerWrapper;
-import com.itextpdf.dito.sdk.event.DitoEventType;
-import com.itextpdf.dito.sdk.license.DitoLicense;
-import com.itextpdf.dito.sdk.license.DitoLicenseInfo;
 
 @Component
 public class LicenseMapperImpl implements LicenseMapper{
-	
+
 	@Override
 	public LicenseDTO map(final LicenseEntity entity) {
 		final LicenseDTO dto = new LicenseDTO();
-		final DitoLicense ditoLicense = DitoLicense.parseLicense(new ByteArrayInputStream(entity.getData()));
-		final LicenseServerWrapper serverWrapper = LicenseServerWrapper.create(ditoLicense);
-		final DitoLicenseInfo ditoLicenseInfo = ditoLicense.getInfo();
+		final DitoLicenseInfoHelper ditoHelper = getDitoHelper(entity.getData());
 		dto.setFileName(entity.getFileName());
-		dto.setType(ditoLicenseInfo.getType());
-		dto.setExpirationDate(ditoLicenseInfo.parseExpire());
-		if (StringUtils.isNumeric(ditoLicenseInfo.getLimits().getLimit(DitoEventType.PRODUCE))) {
-			dto.setVolumeLimit(Long.parseLong(ditoLicenseInfo.getLimits().getLimit(DitoEventType.PRODUCE)));
-			dto.setVolumeUsed(dto.getVolumeLimit() - serverWrapper.getRemainingPdfProduceEvents());
+		dto.setType(ditoHelper.getType());
+		dto.setExpirationDate(ditoHelper.getExpirationDate());
+		if (StringUtils.isNumeric(ditoHelper.getLimits())) {
+			dto.setVolumeLimit(Long.parseLong(ditoHelper.getLimits()));
+			dto.setVolumeUsed(dto.getVolumeLimit() - ditoHelper.getRemainingEvents());
 			dto.setIsUnlimited(false);
 		} else {
 			dto.setVolumeUsed(0L);
@@ -38,4 +30,7 @@ public class LicenseMapperImpl implements LicenseMapper{
 		return dto;
 	}
 
+	public DitoLicenseInfoHelper getDitoHelper(final byte[] data) {
+		return new DitoLicenseInfoHelper(data);
+	}
 }

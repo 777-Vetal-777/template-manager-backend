@@ -35,7 +35,7 @@ public class LicenseServiceImpl implements LicenseService {
 	public LicenseEntity uploadLicense(final WorkspaceEntity workspaceEntity, final byte[] data,
 			final String fileName) {
 		try {
-			DitoLicense.parseLicense(new ByteArrayInputStream(data));
+			checkDitoLicense(data);
 		} catch (DitoLicenseException e) {
 			throw new InvalidLicenseException();
 		}
@@ -53,12 +53,16 @@ public class LicenseServiceImpl implements LicenseService {
 
 	}
 
+	public void checkDitoLicense(final byte[] data) throws DitoLicenseException{
+		DitoLicense.parseLicense(new ByteArrayInputStream(data));
+	}
+	
 	@Override
 	public LicenseEntity getWorkspaceLicense(WorkspaceEntity workspaceEntity) {
 		final LicenseEntity entity = licenseRepository.findByWorkspace(workspaceEntity)
 				.orElseThrow(() -> new LicenseNotFoundException());
 		try {
-			DitoLicense.parseLicense(new ByteArrayInputStream(entity.getData()));
+			checkDitoLicense(entity.getData());
 		} catch (DitoLicenseException e) {
 			throw new InvalidLicenseException();
 		}
