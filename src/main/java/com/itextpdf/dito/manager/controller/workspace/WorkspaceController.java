@@ -1,8 +1,6 @@
 package com.itextpdf.dito.manager.controller.workspace;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
@@ -94,7 +92,7 @@ public interface WorkspaceController {
     ResponseEntity<List<String>> getStageNames(@PathVariable(WORKSPACE_PATH_VARIABLE) String workspaceName);
     
 	@PostMapping(path = WORKSPACE_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
+	@PreAuthorize("hasAuthority('E4_US19_UPLOAD_LICENSE')")
 	@Operation(summary = "Upload license", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Successfully uploaded", content = {
@@ -108,7 +106,7 @@ public interface WorkspaceController {
 			Principal principal);
 
 	@GetMapping(path = WORKSPACE_LICENSE_ENDPOINT)
-	@PreAuthorize("hasAuthority('E1_US1_LOG_IN_TO_THE_SYSTEM')")
+	@PreAuthorize("hasAuthority('E4_US20_SUBSCRIPTION_PLAN')")
 	@Operation(summary = "Get license information", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Success", content = {
