@@ -1,17 +1,14 @@
 package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
-import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
-import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
-import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
@@ -45,7 +42,6 @@ import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.resource.ResourceController.FONTS_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.resource.ResourceController.RESOURCE_VERSION_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 import static org.hamcrest.Matchers.containsInAnyOrder;
