@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -134,6 +135,35 @@ public class LicenseFlowIntegrationTest  extends AbstractIntegrationTest {
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(uri).file(file).contentType(MediaType.MULTIPART_FORM_DATA))
 				.andExpect(status().isBadRequest());
+
+	}
+	
+	@Test
+	public void test_subscription_plan() throws Exception {
+
+		Mockito.when(ditoHelper.getExpirationDate()).thenReturn(new Date());
+		Mockito.when(ditoHelper.getLimits()).thenReturn("50");
+		Mockito.when(ditoHelper.getRemainingEvents()).thenReturn(30L);
+		Mockito.when(ditoHelper.getType()).thenReturn("Limited");
+
+		final MockMultipartFile file = new MockMultipartFile("license", "volume-andersen.xml", "text/xml",
+				Files.readAllBytes(Paths.get("src/test/resources/test-data/license/volume-andersen.xml")));
+		final URI uri = UriComponentsBuilder
+				.fromUriString(WorkspaceController.BASE_NAME + "/" + WORKSPACE_BASE64_ENCODED_NAME + "/license").build()
+				.encode().toUri();
+
+		mockMvc.perform(MockMvcRequestBuilders.multipart(uri).file(file).contentType(MediaType.MULTIPART_FORM_DATA))
+				.andExpect(status().isOk());
+
+		final URI uriGet = UriComponentsBuilder
+				.fromUriString(WorkspaceController.BASE_NAME + "/" + WORKSPACE_BASE64_ENCODED_NAME + "/license").build()
+				.encode().toUri();
+
+		mockMvc.perform(get(uriGet)).andExpect(status().isOk()).andExpect(jsonPath("expirationDate").isNotEmpty())
+				.andExpect(jsonPath("volumeUsed").value(20))
+				.andExpect(jsonPath("fileName").value("volume-andersen.xml"))
+				.andExpect(jsonPath("volumeLimit").value(50))
+				.andExpect(jsonPath("isUnlimited").value(false));
 
 	}
 
