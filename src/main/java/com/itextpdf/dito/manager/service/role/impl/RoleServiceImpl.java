@@ -86,6 +86,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public RoleEntity create(final String name, final List<String> permissions, final Boolean master) {
+        checkSystemRole(name);
         if (roleRepository.countByNameAndMasterTrue(name) > 0) {
             throw new RoleAlreadyExistsException(name);
         }
@@ -215,5 +216,14 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
             newSort = Sort.by("type").descending().and(Sort.by("name").ascending());
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
+    }
+
+    private void checkSystemRole(final String roleName) {
+        final String role = roleName.toLowerCase().replaceAll("\\s+", "_");
+        if ("administrator".equals(role) ||
+                "global_administrator".equals(role) ||
+                "template_designer".equals(role)) {
+            throw new RoleAlreadyExistsException(role);
+        }
     }
 }
