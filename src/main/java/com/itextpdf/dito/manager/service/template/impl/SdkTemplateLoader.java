@@ -1,20 +1,21 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
+import com.itextpdf.dito.editor.server.common.service.template.defaultprovider.DefaultTemplateProvider;
+import com.itextpdf.dito.editor.server.common.service.template.defaultprovider.TemplateProvider;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 
 import java.io.IOException;
 import javax.annotation.PostConstruct;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-@ConditionalOnExpression("false")
 @Component
-public class DefaultTemplateLoader implements TemplateLoader {
+public class SdkTemplateLoader implements TemplateLoader {
+    private final TemplateProvider templateProvider = new DefaultTemplateProvider();
     private byte[] data;
 
     @PostConstruct
     public void init() throws IOException {
-        data = this.getClass().getClassLoader().getResourceAsStream("templates/default.html").readAllBytes();
+        data = templateProvider.provide().readAllBytes();
     }
 
     @Override
