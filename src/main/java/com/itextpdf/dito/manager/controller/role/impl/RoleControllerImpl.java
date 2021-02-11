@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
+import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
@@ -31,6 +32,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
 
     @Override
     public ResponseEntity<RoleDTO> create(@Valid final RoleCreateRequestDTO roleCreateRequestDTO) {
+        checkSystemRole(roleCreateRequestDTO.getName());
         final RoleEntity result = roleService
                 .create(roleCreateRequestDTO.getName(), roleCreateRequestDTO.getPermissions(), Boolean.TRUE);
         return new ResponseEntity<>(roleMapper.map(result), HttpStatus.CREATED);
@@ -57,5 +59,14 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
     public ResponseEntity<Void> delete(final String name) {
         roleService.deleteMasterRole(decodeBase64(name));
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private void checkSystemRole(final String roleName) {
+        final String role = roleName.toLowerCase().replaceAll("\\s+", "_");
+        if ("administrator".equals(role) ||
+                "global_administrator".equals(role) ||
+                "template_designer".equals(role)) {
+            throw new RoleAlreadyExistsException(role);
+        }
     }
 }
