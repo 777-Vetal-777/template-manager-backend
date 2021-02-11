@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
@@ -245,7 +246,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "404", description = "Template version not found."),
             @ApiResponse(responseCode = "403", description = "Template already blocked")
     })
-    ResponseEntity<Void> promote(
+    ResponseEntity<TemplateDeployedVersionDTO> promote(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
@@ -268,7 +269,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Template version undeployed successfully."),
             @ApiResponse(responseCode = "404", description = "Template version not found.")
     })
-    ResponseEntity<Void> undeploy(
+    ResponseEntity<TemplateDeployedVersionDTO> undeploy(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 

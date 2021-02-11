@@ -88,14 +88,10 @@ public class TemplateMapperImpl implements TemplateMapper {
         if (Objects.nonNull(files) && !files.isEmpty()) {
             final TemplateFileEntity fileEntity = files.stream().findFirst().get();
             result.setVersion(fileEntity.getVersion());
-            result.setDeployedVersions(files.stream().map(templateFileEntity -> {
-                final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
-                final StageEntity stageEntity = templateFileEntity.getStage();
-                templateDeployedVersionDTO.setStageName(stageEntity != null ? stageEntity.getName() : null);
-                templateDeployedVersionDTO.setVersion(templateFileEntity.getVersion());
-                templateDeployedVersionDTO.setDeployed(templateFileEntity.getDeployed());
-                return templateDeployedVersionDTO;
-            }).collect(Collectors.toList()));
+            result.setDeployedVersions(files.stream()
+                    .map(this::map)
+                    .filter(TemplateDeployedVersionDTO::getDeployed)
+                    .collect(Collectors.toList()));
         }
         if (!CollectionUtils.isEmpty(templateFiles)) {
             final TemplateLogEntity lastTemplateLog = templateLogs.get(0);
@@ -157,4 +153,13 @@ public class TemplateMapperImpl implements TemplateMapper {
         return entities.map(this::map);
     }
 
+    @Override
+    public TemplateDeployedVersionDTO map(final TemplateFileEntity templateFileEntity) {
+        final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
+        final StageEntity stageEntity = templateFileEntity.getStage();
+        templateDeployedVersionDTO.setStageName(stageEntity != null ? stageEntity.getName() : null);
+        templateDeployedVersionDTO.setVersion(templateFileEntity.getVersion());
+        templateDeployedVersionDTO.setDeployed(templateFileEntity.getDeployed());
+        return templateDeployedVersionDTO;
+    }
 }

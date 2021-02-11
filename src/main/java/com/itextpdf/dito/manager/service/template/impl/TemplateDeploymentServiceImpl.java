@@ -69,14 +69,11 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      * Promote template on default DEV-stage.
      * When template is promoted on default stage it should have alias <template_name>_version-<version-number> in order to allow multiple versions of template on DEV-stage.
      *
-     * @param templateName name of template to be promoted
+     * @param templateFileEntity to be promoted
      */
     @Override
-    public void promoteOnDefaultStage(final String templateName) {
+    public void promoteOnDefaultStage(final TemplateFileEntity templateFileEntity) {
         final boolean isDefaultStage = true;
-        final TemplateEntity templateEntity = getTemplateByName(templateName);
-        final TemplateFileEntity templateFileEntity = templateEntity.getLatestFile();
-
         for (final InstanceEntity instanceEntity : templateFileEntity.getInstance()) {
             promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
         }
@@ -90,7 +87,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      * @param version      version of template to be promoted
      */
     @Override
-    public void promote(final String templateName, final Long version) {
+    public TemplateFileEntity promote(final String templateName, final Long version) {
         final boolean isDefaultStage = false;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
@@ -110,7 +107,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         }
         templateFileEntity.setDeployed(true);
         templateFileEntity.setStage(nextStage);
-        templateFileRepository.save(templateFileEntity);
+        return templateFileRepository.save(templateFileEntity);
     }
 
     /**
@@ -120,7 +117,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      * @param version      template version to be un-deployed.
      */
     @Override
-    public void undeploy(final String templateName, final Long version) {
+    public TemplateFileEntity undeploy(final String templateName, final Long version) {
         final boolean isDefaultStage = true;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
@@ -139,7 +136,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         }
         templateFileEntity.setDeployed(false);
         templateFileEntity.setStage(defaultStageEntity);
-        templateFileRepository.save(templateFileEntity);
+        return templateFileRepository.save(templateFileEntity);
     }
 
     /**

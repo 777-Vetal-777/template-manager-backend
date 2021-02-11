@@ -18,8 +18,10 @@ import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
@@ -215,15 +217,15 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<Void> promote(final String name, final Long version) {
-        templateDeploymentService.promote(decodeBase64(name), version);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<TemplateDeployedVersionDTO> promote(final String name, final Long version) {
+        final TemplateFileEntity promotedVersion = templateDeploymentService.promote(decodeBase64(name), version);
+        return new ResponseEntity<>(templateMapper.map(promotedVersion), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> undeploy(final String name, final Long version) {
-        templateDeploymentService.undeploy(decodeBase64(name), version);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<TemplateDeployedVersionDTO> undeploy(final String name, final Long version) {
+        final TemplateFileEntity undeployedVersion = templateDeploymentService.undeploy(decodeBase64(name), version);
+        return new ResponseEntity<>(templateMapper.map(undeployedVersion), HttpStatus.OK);
     }
 
     @Override
