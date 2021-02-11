@@ -28,19 +28,19 @@ public class DataManagementControllerImpl extends AbstractController implements 
 
     @Override
     public DataSampleDescriptor getDataSampleById(final String dataSampleId) {
-        log.info("Request to get sample by data sample id {} received.",dataSampleId);
         final String decodedDataSampleId = decodeBase64(dataSampleId);
+        log.info("Request to get sample by data sample id {} received.", decodedDataSampleId);
         final DataSampleEntity dataSampleEntity = dataManagementService.get(decodedDataSampleId);
-        log.info("Response on get sample by data sample id {} processed.",dataSampleId);
+        log.info("Response on get sample by data sample id {} processed.",decodedDataSampleId);
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
 
     @Override
     public byte[] fetchDataSampleById(final String dataSampleId) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
-        log.info("Request to get sample by data sample id {} received.",dataSampleId);
+        log.info("Request to get sample by data sample id {} received.", decodedDataSampleId);
         final DataSampleEntity dataSampleEntity = dataManagementService.get(decodedDataSampleId);
-        log.info("Response on get sample by data sample id {} processed.",dataSampleId);
+        log.info("Response on get sample by data sample id {} processed.", decodedDataSampleId);
         return dataSampleEntity.getLatestVersion().getData();
     }
 
@@ -49,17 +49,17 @@ public class DataManagementControllerImpl extends AbstractController implements 
             final DataSampleDescriptor descriptor,
             final String data) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
-        log.info("Request to create or update data sample with id {} received.",dataSampleId);
+        log.info("Request to create or update data sample with id {} received.", decodedDataSampleId);
         final DataSampleEntity dataSampleEntity = dataManagementService
                 .createNewVersion(decodedDataSampleId, data, decodedDataSampleId, principal.getName());
-        log.info("Response to create or update data sample  by data sample id {} processed.",dataSampleId);
+        log.info("Response to create or update data sample  by data sample id {} processed.", decodedDataSampleId);
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
 
     @Override
     public DataSampleDescriptor add(final Principal principal, final DataSampleDescriptor descriptor,
             final String data) {
-        log.info("Request to create data sample with name {} received.",descriptor.getDisplayName());
+        log.info("Request to create data sample with name {} received.", descriptor.getDisplayName());
         final String decodedDataCollectionId = decodeBase64(descriptor.getCollectionIdList().get(0));
         final String displayName = descriptor.getDisplayName();
         final DataSampleEntity dataSampleEntity = dataManagementService.create(decodedDataCollectionId,
@@ -70,19 +70,19 @@ public class DataManagementControllerImpl extends AbstractController implements 
 
     @Override
     public DataSampleDescriptor deleteDataSampleById(final String dataSampleId) {
-        log.info("Request to delete resource with id {} received.",dataSampleId);
         final String decodedDataSampleId = decodeBase64(dataSampleId);
+        log.info("Request to delete resource with id {} received.", decodedDataSampleId);
         final DataSampleEntity deletedDataSample = dataManagementService.delete(decodedDataSampleId);
-        log.info("Response to delete resource with id {} processed.",dataSampleId);
+        log.info("Response to delete resource with id {} processed.", decodedDataSampleId);
         return dataSampleDescriptorMapper.map(deletedDataSample);
     }
 
     @Override
     public List<DataSampleDescriptor> getDataSamplesByCollectionId(final String collectionId) {
         final String decodedDataCollectionId = decodeBase64(collectionId);
-        log.info("Request to get data samples by collection with id {} received.",decodedDataCollectionId);
+        log.info("Request to get data samples by collection with id {} received.", decodedDataCollectionId);
         final Collection<DataSampleEntity> dataSampleEntities = dataManagementService.getDataSamplesByCollectionId(decodedDataCollectionId);
-        log.info("Response to get data samples by collection with id {} processed.",decodedDataCollectionId);
+        log.info("Response to get data samples by collection with id {} processed.", decodedDataCollectionId);
         return dataSampleDescriptorMapper.map(dataSampleEntities);
     }
 }

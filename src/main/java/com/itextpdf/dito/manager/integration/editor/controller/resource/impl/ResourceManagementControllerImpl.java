@@ -30,10 +30,11 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
 
     @Override
     public byte[] getResourceDirectoryContentById(final String resourceId) {
-        log.info("Request to get resource file by resourceId id {}.", resourceId);
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        log.info("Response to get resource file by resourceId id {} processed.", resourceId);
-        return resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName());
+        log.info("Request to get resource file by resourceId id {}.", resourceIdDTO);
+        byte[] result = resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName());
+        log.info("Response to get resource file by resourceId id {} processed.", resourceIdDTO);
+        return result;
     }
 
     @Override
@@ -54,15 +55,15 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     public ResourceLeafDescriptor createOrUpdate(final Principal principal, final String resourceId,
                                                  final ResourceLeafDescriptor descriptor,
                                                  final byte[] data) {
-        log.info("Request to create or update resource by resource id {} received.", resourceId);
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
+        log.info("Request to create or update resource by resource id {} received.", resourceIdDTO);
         final String name = resourceIdDTO.getName();
         final ResourceTypeEnum type = resourceIdDTO.getType();
         final byte[] bytes = data;
         final String email = principal.getName();
         final ResourceEntity resourceEntity = resourceManagementService
                 .createNewVersion(name, type, bytes, name, email);
-        log.info("Response to create or update resource by resource id {} processed.", resourceId);
+        log.info("Response to create or update resource by resource id {} processed.", resourceIdDTO);
         return resourceLeafDescriptorMapper.map(resourceEntity);
     }
 
@@ -78,9 +79,9 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
 
     @Override
     public void deleteResourceById(final Principal principal, final String resourceId) {
-        log.info("Request to delete resource with id {} received.", resourceId);
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        log.info("Response to delete resource with id {} processed.", resourceId);
+        log.info("Request to delete resource with id {} received.", resourceIdDTO);
         resourceManagementService.delete(resourceIdDTO.getName(), resourceIdDTO.getType(), principal.getName());
+        log.info("Response to delete resource with id {} processed.", resourceIdDTO);
     }
 }
