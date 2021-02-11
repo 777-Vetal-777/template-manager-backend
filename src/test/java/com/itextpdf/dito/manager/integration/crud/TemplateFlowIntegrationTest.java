@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Base64;
 import java.util.Optional;
 
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
@@ -218,6 +219,31 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+
+        final MockMultipartFile templateParts = new MockMultipartFile("templateParts", "templateParts", "application/json", objectMapper.writeValueAsString(request.getTemplateParts()).getBytes());
+        final MockMultipartFile comment = new MockMultipartFile("comment", "description", "text/plain", "test comment".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", request.getName().getBytes());
+        final URI uri = UriComponentsBuilder.fromUriString(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT).build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(name)
+                .file(comment)
+                .file(templateParts)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty());
+
+        //check dependencies
+        final String encodedTemplateName = encodeStringToBase64(request.getName());
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "SOFT", "SOFT")))
+                .andExpect(jsonPath("$.content[*].dependencyType", containsInAnyOrder("TEMPLATE", "TEMPLATE", "TEMPLATE")))
+                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("some-template", "some-header-template",  "another-footer-template")));
+
+
     }
 
     @Test
@@ -244,21 +270,20 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        final TemplateCreateRequestDTO compositionRequest = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
-        final String encodedTemplateName = encodeStringToBase64(compositionRequest.getName());
+        final String encodedTemplateName = encodeStringToBase64(request.getName());
 
         //get preview
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("name").value(compositionRequest.getName()))
-                .andExpect(jsonPath("dataCollection").isEmpty())
+                .andExpect(jsonPath("name").value(request.getName()))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("createdBy").isNotEmpty())
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("description").isEmpty());
 
-        //Update existing composing template
+        //Update existing composition template
         final TemplateUpdateRequestDTO updateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-update-request.json"), TemplateUpdateRequestDTO.class);
         mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
                 .content(objectMapper.writeValueAsString(updateRequestDTO))
@@ -266,7 +291,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value(updateRequestDTO.getName()))
-                .andExpect(jsonPath("dataCollection").isEmpty())
+                .andExpect(jsonPath("type").value("COMPOSITION"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("createdBy").isNotEmpty())
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
@@ -294,6 +320,24 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2)));
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2)))
+                .andExpect(jsonPath("$.content[*].comment", containsInAnyOrder(null, "test comment")));
+
+        //check dependencies
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(4)))
+                .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "SOFT", "SOFT", "SOFT")))
+                .andExpect(jsonPath("$.content[*].dependencyType", containsInAnyOrder("DATA_COLLECTION", "TEMPLATE", "TEMPLATE", "TEMPLATE")))
+                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", "some-template", "some-header-template",  "some-template-with-data-collection")));
+
+        final String encodedStandardTemplateName = Base64.getEncoder().encodeToString("some-template-with-data-collection".getBytes());
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedStandardTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "HARD")))
+                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", updateRequestDTO.getName())));
+
+
     }
 }

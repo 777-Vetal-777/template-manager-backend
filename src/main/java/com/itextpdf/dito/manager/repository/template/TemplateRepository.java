@@ -193,16 +193,18 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "join fetch template.latestFile file "
             + "join fetch file.compositions compositions "
             + "join fetch compositions.composition composition "
+            + "join composition.template compositionTemplate "
             + "left join fetch file.dataCollectionFile dataCollectionFile "
             + "left join fetch dataCollectionFile.dataCollection dataCollection "
-            + "where composition.template.id = :id")
+            + "where compositionTemplate.latestFile.version = composition.version and compositionTemplate.id = :id")
     List<TemplateEntity> getTemplatesPartsByTemplateId(@Param("id") Long templateId);
 
     @Query("select template from TemplateEntity template "
             + "join fetch template.latestFile file "
             + "join file.parts parts "
             + "join parts.part part "
-            + "where part.template.id = :id")
+            + "join part.template partTemplate"
+            + "where part.latestFile.version = part.version and TemplatepartTemplate.id = :id")
     List<TemplateEntity> getTemplateCompositionsByTemplateId(@Param("id") Long templateId);
 
 }
