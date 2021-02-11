@@ -7,4 +7,9 @@ public class InvalidResourceContentException extends RuntimeException {
     public InvalidResourceContentException() {
         super(message);
     }
+
+    public InvalidResourceContentException(Throwable e) {
+        super(message, e);
+    }
+
 }

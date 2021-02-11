@@ -28,7 +28,7 @@
         <kotlin-stdlib.version>1.4.0</kotlin-stdlib.version>
         <itext.editor-api.version>1.5.6-SNAPSHOT</itext.editor-api.version>
         <sentry.version>1.7.30</sentry.version>
-        <ph-css.version>6.2.3</ph-css.version>
+        <ph-css.version>0.9.29</ph-css.version>
 
         <license.report.path>${project.basedir}/license/generated-report.xml</license.report.path>
     </properties>
@@ -122,8 +122,8 @@
             <version>20201115</version>
         </dependency>
         <dependency>
-            <groupId>com.helger</groupId>
-            <artifactId>ph-css</artifactId>
+            <groupId>net.sourceforge.cssparser</groupId>
+            <artifactId>cssparser</artifactId>
             <version>${ph-css.version}</version>
         </dependency>
         <dependency>
