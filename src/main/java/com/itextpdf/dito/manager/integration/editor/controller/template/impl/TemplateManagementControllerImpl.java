@@ -30,24 +30,24 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public TemplateDescriptor getDescriptor(final String templateId) {
-        log.info("Request to get descriptor by template id {}.",templateId);
         final String decodedTemplateId = decodeBase64(templateId);
+        log.info("Request to get descriptor by template id {}.", decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
         return templateDescriptorMapper.map(templateEntity);
     }
 
     @Override
     public byte[] get(final String templateId) {
-        log.info("Request to get template file by template id {}.",templateId);
         final String decodedTemplateId = decodeBase64(templateId);
+        log.info("Request to get template file by template id {}.", decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
-        log.info("Response on get template file by template id {} successfully processed.",templateId);
+        log.info("Response on get template file by template id {} successfully processed.", decodedTemplateId);
         return templateEntity.getLatestFile().getData();
     }
 
     @Override
     public List<TemplateDescriptor> getAllDescriptors(final String workspaceId) {
-        log.info("Request to get all descriptors by workspace id {}.",workspaceId);
+        log.info("Request to get all descriptors by workspace id {}.", workspaceId);
         // At now we support only single workspace, that's why all templates will be returned.
         return templateDescriptorMapper.map(templateManagementService.getAll());
     }
@@ -56,13 +56,13 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     public TemplateDescriptor update(final Principal principal, final String templateId,
             final TemplateUpdateDescriptor descriptor,
             final byte[] data) {
-        log.info("Request to create new version of template with id {} received.",templateId);
         final String email = principal.getName();
         final String id = decodeBase64(templateId);
+        log.info("Request to create new version of template with id {} received.", id);
         final String newName = descriptor != null ? descriptor.getName() : null;
 
         final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName);
-        log.info("Response to create new version of template with id {} processed.",templateId);
+        log.info("Response to create new version of template with id {} processed.",id);
         return templateDescriptorMapper.map(templateEntity);
     }
 
@@ -70,10 +70,10 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     public TemplateDescriptor add(final Principal principal, final String workspaceId,
             @Valid final TemplateAddDescriptor descriptor,
             final byte[] data) {
-        log.info("Request to create new template with name {} received.",descriptor.getName());
+        log.info("Request to create new template with name {} received.", descriptor.getName());
         final String email = principal.getName();
         final TemplateEntity templateEntity = templateManagementService.create(descriptor.getName(), email);
-        log.info("Response to create new template received with name {} processed. Created template id {}",descriptor.getName(),templateEntity.getId());
+        log.info("Response to create new template received with name {} processed. Created template id {}", descriptor.getName(), templateEntity.getId());
         return templateDescriptorMapper.map(templateEntity);
     }
 
