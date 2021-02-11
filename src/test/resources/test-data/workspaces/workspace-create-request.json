@@ -2,5 +2,5 @@
   "name": "workspace-test",
   "language": "ENG",
   "timezone": "America/Sao_Paulo",
-  "mainDevelopmentInstanceSocket": "http://10.10.15.110:9090"
+  "mainDevelopmentInstanceSocket": "http://localhost:9999"
 }

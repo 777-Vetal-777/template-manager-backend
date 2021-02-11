@@ -149,9 +149,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         templateFileEntity.getInstance().addAll(developerStageInstances);
 
-        final TemplateEntity savedTemplate = templateRepository.save(templateEntity);
-        templateDeploymentService.promoteOnDefaultStage(savedTemplate.getName());
-        return savedTemplate;
+        templateDeploymentService.promoteOnDefaultStage(templateFileEntity);
+        return templateRepository.save(templateEntity);
     }
 
     private void fillTemplatePartsForTemplateFileEntity(final String dataCollectionName,
@@ -306,10 +305,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         existingTemplateEntity.setLatestLogRecord(logEntity);
         existingTemplateEntity.setLatestFile(fileEntity);
 
+        templateDeploymentService.promoteOnDefaultStage(fileEntity);
         result = templateRepository.save(existingTemplateEntity);
-        templateDeploymentService.promoteOnDefaultStage(existingTemplateEntity.getName());
 
         final List<TemplateFileEntity> updatedVersions = createNewVersionForDependentCompositions(result, fileEntityToCopyDependencies, userEntity);
+        updatedVersions.forEach(templateDeploymentService::promoteOnDefaultStage);
         templateFileRepository.saveAll(updatedVersions);
 
         return result;
