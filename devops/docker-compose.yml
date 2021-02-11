@@ -31,11 +31,15 @@ services:
       - DITO_MANAGER_SENTRY_ENVIRONMENT
     depends_on:
       - db
+    ports:
+      - "8000:8000"
   #=========== DATABASE ===============
   db:
     container_name: db
     restart: always
     image: ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
