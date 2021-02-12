@@ -47,7 +47,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
         final TemplateEntity template = templateService.get(name);
 
         final Pageable pageWithSort = updateSort(pageable);
-        final Long version = getLongFromFilter(filter.getVersion());
+        final Long version = filter.getVersion();
         final String modifiedBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
         final String stageName = getStringFromFilter(filter.getStage());
