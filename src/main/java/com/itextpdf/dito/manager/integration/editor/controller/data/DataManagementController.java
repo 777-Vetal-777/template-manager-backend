@@ -33,7 +33,7 @@ public interface DataManagementController {
     @PutMapping(DATA_SAMPLE_URL)
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     DataSampleDescriptor createOrUpdate(Principal principal, @PathVariable("sample-id") String dataSampleId,
-                                        @RequestPart DataSampleDescriptor descriptor, @RequestPart String data);
+                                        @RequestPart(required = false) DataSampleDescriptor descriptor, @RequestPart String data);
 
     @PostMapping(CREATE_DATA_SAMPLE_URL)
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
