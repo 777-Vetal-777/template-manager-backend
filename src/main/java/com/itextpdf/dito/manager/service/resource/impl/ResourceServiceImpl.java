@@ -293,8 +293,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @ReadOnlyProperty
     public List<ResourceEntity> list() {
 		final List<ResourceEntity> resourceList = resourceRepository.findAll();
-		final List<ResourceEntity> resultResourceList = new ArrayList<>(resourceList);
-		final Iterator<ResourceEntity> it = resultResourceList.iterator();
+		final List<ResourceEntity> resultResourceList = new ArrayList<>();
+		final Iterator<ResourceEntity> it = resourceList.iterator();
 		while (it.hasNext()) {			
 			final ResourceEntity resourceEntity = it.next();
 			if (Objects.equals(resourceEntity.getType(), ResourceTypeEnum.FONT)) {
@@ -302,18 +302,19 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 					final ResourceEntity newEntity = new ResourceEntity();
 					final StringBuilder sb = new StringBuilder();
 					sb.append(resourceEntity.getName());
-					sb.append("_");
+					sb.append("-");
 					sb.append(resourceFileEntity.getFontName());
 					newEntity.setName(sb.toString());
 					newEntity.setId(resourceEntity.getId());
 					newEntity.setLatestFile(Arrays.asList(new ResourceFileEntity[] { resourceFileEntity }));
 					newEntity.setType(resourceEntity.getType());
-					resourceList.add(newEntity);
+					resultResourceList.add(newEntity);
 				}
-				it.remove();
+			} else {
+				resultResourceList.add(resourceEntity);
 			}
 		}
-		return resourceList;
+		return resultResourceList;
     }
 
     @Override
@@ -364,7 +365,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 	public ResourceEntity get(final String name, final ResourceTypeEnum type, final String fontName) {
 		//changing new font name back to db name
 		final StringBuilder sb = new StringBuilder();
-		sb.append("_");
+		sb.append("-");
 		sb.append(fontName);
 		sb.append("$");
 		return resourceRepository.getByNameTypeAndFontName(name.replaceFirst(sb.toString(), ""), type, fontName)
