@@ -136,4 +136,15 @@
             <column name="permission_id" value="100"/>
         </insert>
     </changeSet>
+
+    <changeSet id="012-add-e8-us54-view-resource-metadata-image-to-system-roles" author="Vadim_Sorokin">
+        <insert tableName="role_permission">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" value="52"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" value="52"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
