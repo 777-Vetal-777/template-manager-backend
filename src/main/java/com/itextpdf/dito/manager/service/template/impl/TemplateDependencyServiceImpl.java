@@ -40,7 +40,7 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
         final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
         final String directionType = getDirectionAsString(filter.getDirectionType());
         final String depend = getStringFromFilter(filter.getName());
-        final List<String> stages = filter.getStage();
+        final List<String> stages = getListStringsFromFilter(filter.getStage());
         final Long version = getLongFromFilter(filter.getVersion());
 
         return StringUtils.isEmpty(search)
