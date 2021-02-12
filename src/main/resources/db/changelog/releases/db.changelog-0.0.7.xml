@@ -147,4 +147,16 @@
             <column name="permission_id" value="52"/>
         </insert>
     </changeSet>
+
+    <changeSet id="013-add-template-file-template-id-version-key-to-template-file-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="template_file" columnNames="template_id, version" constraintName="template_file_template_id_version_key" />
+    </changeSet>
+
+    <changeSet id="014-add-role-name-key-to-role-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="role" columnNames="name" constraintName="role_name_key" />
+    </changeSet>
+
+    <changeSet id="015-add-data-sample-file-data-sample-id-version-key-to-sata-sample-file-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="data_sample_file" columnNames="data_sample_id, version" constraintName="data_sample_file_data_sample_id_version_key" />
+    </changeSet>
 </databaseChangeLog>
