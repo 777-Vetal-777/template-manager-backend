@@ -41,7 +41,7 @@ public class TokenServiceImpl implements TokenService {
             final @Qualifier(JwtAccessTokenBuilder.BEAN_ID) TokenBuilder accessTokenBuilder,
             final @Qualifier(JwtRefreshTokenBuilder.BEAN_ID) TokenBuilder refreshTokenBuilder,
             final @Qualifier(JwtEditorTokenBuilder.BEAN_ID) TokenBuilder editorTokenBuilder,
-            final @Qualifier(JwtEditorTokenBuilder.BEAN_ID) TokenBuilder resetPasswordTokenBuilder,
+            final @Qualifier(JwtResetPasswordTokenBuilder.BEAN_ID) TokenBuilder resetPasswordTokenBuilder,
             final UserRepository userRepository) {
         this.refreshTokenHelper = refreshTokenHelper;
         this.accessTokenBuilder = accessTokenBuilder;
