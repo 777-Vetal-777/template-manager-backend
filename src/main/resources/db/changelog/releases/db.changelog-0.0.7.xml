@@ -159,4 +159,9 @@
     <changeSet id="015-add-data-sample-file-data-sample-id-version-key-to-sata-sample-file-table" author="Sergey_Nemets">
         <addUniqueConstraint tableName="data_sample_file" columnNames="data_sample_id, version" constraintName="data_sample_file_data_sample_id_version_key" />
     </changeSet>
+
+    <changeSet id="016-add-role-name-key-to-role-table" author="Sergey_Nemets">
+        <dropUniqueConstraint tableName="role" constraintName="role_name_key" />
+    </changeSet>
+
 </databaseChangeLog>
