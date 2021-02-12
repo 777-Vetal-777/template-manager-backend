@@ -63,7 +63,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
 
     String FILTER_CONDITION_DEPENDENCY = " where (:depend = '' or LOWER(name) like CONCAT('%', :depend, '%'))" +
             " and (:version = 0 or version is null or version = :version)" +
-            " and (:stage = '' or LOWER(stage) like CONCAT('%', :stage, '%'))";
+            " and (COALESCE(:stages) is null or stage in (:stages)) ";
 
     String SEARCH_CONDITION_DEPENDENCY = " and ((LOWER(name) like CONCAT('%', :search, '%')" +
             " or CAST(version as VARCHAR(10)) like CONCAT('%', :search, '%')" +
@@ -96,14 +96,14 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
-                                 @Param("stage") @Nullable String stage);
+                                 @Param("stages") @Nullable List<String> stages);
 
     @Query(value = SELECT_CLAUSE_DEPENDENCY + FILTER_CONDITION_DEPENDENCY + SEARCH_CONDITION_DEPENDENCY, nativeQuery = true)
     Page<DependencyModel> search(Pageable pageable,
                                  @Param("id") Long resourceId,
                                  @Param("depend") @Nullable String depend,
                                  @Param("version") @Nullable Long version,
-                                 @Param("stage") @Nullable String stage,
+                                 @Param("stages") @Nullable List<String> stages,
                                  @Param("search") @Nullable String search);
 
     @Query(value = "select distinct new com.itextpdf.dito.manager.model.resource.ResourceDependencyModel(template.name, max(templateFiles.version) as version, max(stage.name) as stageName) "

@@ -20,6 +20,7 @@ import java.util.Objects;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -48,15 +49,15 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
-            final String stage = getStringFromFilter(filter.getStage());
+            final List<String> stages = getListStringsFromFilter(filter.getStage());
             final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD
             if (!isSearchEmpty && (HARD_DEPENDENCY.contains(searchParam.toLowerCase()) || TEMPLATE_DEPENDENCY_TYPE.contains(searchParam.toLowerCase()))) {
-                searchResult = resourceFileRepository.filter(pageable, resourceEntity.getId(), depend, version, stage);
+                searchResult = resourceFileRepository.filter(pageable, resourceEntity.getId(), depend, version, stages);
             } else {
                 searchResult = isSearchEmpty
-                        ? resourceFileRepository.filter(pageable, resourceEntity.getId(), depend, version, stage)
-                        : resourceFileRepository.search(pageable, resourceEntity.getId(), depend, version, stage, searchParam.toLowerCase());
+                        ? resourceFileRepository.filter(pageable, resourceEntity.getId(), depend, version, stages)
+                        : resourceFileRepository.search(pageable, resourceEntity.getId(), depend, version, stages, searchParam.toLowerCase());
             }
         }
         return searchResult;

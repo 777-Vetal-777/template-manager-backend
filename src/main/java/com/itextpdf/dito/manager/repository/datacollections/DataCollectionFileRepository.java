@@ -50,7 +50,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
             + "and (:dependencyName='' or LOWER(template.name) like CONCAT('%',:dependencyName,'%')) "
             + "and (:version=0l or lastTemplateFile.version=:version) "
             + "and (CONCAT(:direction) is null or 'soft' in (:direction)) "
-            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ";
+            + "and (COALESCE(:stages) is null or stage.name in (:stages)) ";
 
     String SEARCH_DEPENDENCIES_CONDITION = "( LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or cast(lastTemplateFile.version as text) like CONCAT('%',:search,'%') "
@@ -87,7 +87,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                  @Param("dependencyName") @Nullable String dependencyName,
                                  @Param("version") @Nullable Long version,
                                  @Param("direction") @Nullable List<String> direction,
-                                 @Param("stage") @Nullable String stageName);
+                                 @Param("stages") @Nullable List<String> stages);
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + FILTERING_DEPENDENCIES_CONDITION + " and " + SEARCH_DEPENDENCIES_CONDITION)
     Page<DependencyModel> search(Pageable pageable,
@@ -95,7 +95,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
                                  @Param("dependencyName") @Nullable String dependencyName,
                                  @Param("version") @Nullable Long version,
                                  @Param("direction") @Nullable List<String> direction,
-                                 @Param("stage") @Nullable String stageName,
+                                 @Param("stages") @Nullable List<String> stages,
                                  @Param("search") @Nullable String search);
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + "file.dataCollection.id =:id ")

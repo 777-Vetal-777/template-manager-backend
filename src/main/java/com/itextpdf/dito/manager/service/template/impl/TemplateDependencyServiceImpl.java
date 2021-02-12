@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -39,12 +40,12 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
         final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
         final String directionType = getDirectionAsString(filter.getDirectionType());
         final String depend = getStringFromFilter(filter.getName());
-        final String stage = getStringFromFilter(filter.getStage());
+        final List<String> stages = filter.getStage();
         final Long version = getLongFromFilter(filter.getVersion());
 
         return StringUtils.isEmpty(search)
-                ? templateRepository.filter(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, stage)
-                : templateRepository.search(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, stage, search.toLowerCase());
+                ? templateRepository.filter(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, stages)
+                : templateRepository.search(pageable, templateEntity.getId(), depend, version, directionType, dependencyTypes, stages, search.toLowerCase());
     }
 
     @Override
