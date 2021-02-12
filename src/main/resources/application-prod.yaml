@@ -16,6 +16,9 @@ security:
     paths: ${DITO_MANAGER_CORS_ALLOWED_PATHS}
     origins: ${DITO_MANAGER_CORS_ALLOWED_ORIGINS}
     methods: ${DITO_MANAGER_CORS_ALLOWED_METHODS}
+  credentials:
+    admin-email: ${DITO_MANAGER_DEFAULT_ADMIN_EMAIL}
+    admin-password: ${DITO_MANAGER_DEFAULT_ADMIN_PASSWORD}
 
 spring:
   datasource:

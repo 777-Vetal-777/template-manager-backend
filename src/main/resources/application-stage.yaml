@@ -2,6 +2,11 @@ ditomanager:
   mailing:
     enabled: ${DITO_MANAGER_MAILING_ENABLE}
 
+security:
+  credentials:
+    admin-email: ${DITO_MANAGER_DEFAULT_ADMIN_EMAIL}
+    admin-password: ${DITO_MANAGER_DEFAULT_ADMIN_PASSWORD}
+
 spring:
   datasource:
     url:  jdbc:postgresql://${DITO_MANAGER_DATABASE_URL}/${DITO_MANAGER_DATABASE_NAME}
