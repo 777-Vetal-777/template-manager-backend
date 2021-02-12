@@ -91,7 +91,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
             " and (:version = 0 or version=:version) " +
             " and (:directionType='' or LOWER(directionType) like LOWER(CONCAT('%',:directionType,'%')))" +
-            " and (:stage = '' or LOWER(stage) like CONCAT('%',:stage,'%'))" +
+            " and (COALESCE(:stages) is null or stage in (:stages)) " +
             " and (COALESCE(:dependencyTypes) is null or dependencyType in (:dependencyTypes)))";
 
     String SEARCH_DEPENDENCIES = " and ( LOWER(name) like CONCAT('%',:search,'%') " +
@@ -166,7 +166,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                  @Param("version") Long version,
                                  @Param("directionType") String directionType,
                                  @Param("dependencyTypes") List<String> dependencyType,
-                                 @Param("stage") String stage);
+                                 @Param("stages") List<String> stages);
 
     @Query(value = DEPENDENCY_QUERY + FILTER_DEPENDENCIES + SEARCH_DEPENDENCIES
             , countQuery = DEPENDENCY_COUNT_QUERY + FILTER_DEPENDENCIES + SEARCH_DEPENDENCIES
@@ -177,7 +177,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                                  @Param("version") Long version,
                                  @Param("directionType") String directionType,
                                  @Param("dependencyTypes") List<String> dependencyType,
-                                 @Param("stage") String stage,
+                                 @Param("stages") List<String> stages,
                                  @Param("search") String search);
 
     @Query(value = DEPENDENCY_QUERY, countQuery = DEPENDENCY_COUNT_QUERY, nativeQuery = true)

@@ -4,11 +4,19 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.PromotionPathEntity;
+import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
+import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +28,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
@@ -46,12 +57,21 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private DataCollectionRepository dataCollectionRepository;
     @Autowired
     private DataCollectionService dataCollectionService;
+    @Autowired
+    private WorkspaceRepository workspaceRepository;
+    @Autowired
+    private InstanceRepository instanceRepository;
+    @Autowired
+    private StageRepository stageRepository;
 
     @BeforeEach
     public void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
         dataCollectionRepository.deleteAll();
+        workspaceRepository.deleteAll();
+        instanceRepository.deleteAll();
+        stageRepository.deleteAll();
     }
 
     @Test
@@ -232,14 +252,25 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty());
 
+
+        final List<TemplateFileEntity> files = new ArrayList<>();
+        files.add(templateRepository.findByName("some-template").get().getLatestFile());
+        files.add(templateRepository.findByName("some-header-template").get().getLatestFile());
+        files.add(templateRepository.findByName("some-footer-template").get().getLatestFile());
+        files.add(templateRepository.findByName("another-footer-template").get().getLatestFile());
+        files.add(templateRepository.findByName("some-template-with-data-collection").get().getLatestFile());
+        files.add(templateRepository.findByName("composite-template").get().getLatestFile());
+        generateStageEntity(files);
+
         //check dependencies
         final String encodedTemplateName = encodeStringToBase64(request.getName());
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION"))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION")
+                .param("stage", "STAGE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "SOFT", "SOFT")))
                 .andExpect(jsonPath("$.content[*].dependencyType", containsInAnyOrder("TEMPLATE", "TEMPLATE", "TEMPLATE")))
-                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("some-template", "some-header-template",  "another-footer-template")));
+                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("some-template", "some-header-template", "another-footer-template")));
 
 
     }
@@ -321,21 +352,54 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2)))
                 .andExpect(jsonPath("$.content[*].comment", containsInAnyOrder(null, "test comment")));
 
+        final List<TemplateFileEntity> files = new ArrayList<>();
+        files.add(templateRepository.findByName("some-template").get().getLatestFile());
+        files.add(templateRepository.findByName("some-header-template").get().getLatestFile());
+        files.add(templateRepository.findByName("some-footer-template").get().getLatestFile());
+        files.add(templateRepository.findByName("another-footer-template").get().getLatestFile());
+        files.add(templateRepository.findByName("some-template-with-data-collection").get().getLatestFile());
+        files.add(templateRepository.findByName("updated-template-name").get().getLatestFile());
+        generateStageEntity(files);
         //check dependencies
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION"))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION")
+                .param("stage", "STAGE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(4)))
                 .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "SOFT", "SOFT", "SOFT")))
                 .andExpect(jsonPath("$.content[*].dependencyType", containsInAnyOrder("DATA_COLLECTION", "TEMPLATE", "TEMPLATE", "TEMPLATE")))
-                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", "some-template", "some-header-template",  "some-template-with-data-collection")));
+                .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", "some-template", "some-header-template", "some-template-with-data-collection")));
 
         final String encodedStandardTemplateName = Base64.getEncoder().encodeToString("some-template-with-data-collection".getBytes());
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedStandardTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION"))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedStandardTemplateName).queryParam("dependencyType", "TEMPLATE", "DATA_COLLECTION")
+                .param("stage", "STAGE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "HARD")))
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", updateRequestDTO.getName())));
+    }
 
-
+    private void generateStageEntity(List<TemplateFileEntity> files) {
+        final StageEntity stageEntity = new StageEntity();
+        stageEntity.setSequenceOrder(1);
+        stageEntity.setName("STAGE");
+        final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
+        stageEntity.setPromotionPath(promotionPathEntity);
+        final WorkspaceEntity workspaceEntity = new WorkspaceEntity();
+        promotionPathEntity.setWorkspace(workspaceEntity);
+        workspaceEntity.setName("workspace");
+        workspaceEntity.setTimezone("Europe/Brussels");
+        workspaceEntity.setPromotionPath(promotionPathEntity);
+        workspaceRepository.save(workspaceEntity);
+        final InstanceEntity instanceEntity = new InstanceEntity();
+        instanceEntity.setName("instance");
+        instanceEntity.setSocket("socket");
+        instanceEntity.setStage(stageEntity);
+        instanceEntity.setTemplateFile(files);
+        stageEntity.setInstances(Arrays.asList(instanceEntity));
+        instanceRepository.save(instanceEntity);
+        for (TemplateFileEntity file : files) {
+            file.setStage(stageEntity);
+            templateFileRepository.save(file);
+        }
     }
 }
