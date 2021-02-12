@@ -62,7 +62,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             " where resource.id = :id group by template.name) as dependency";
 
     String FILTER_CONDITION_DEPENDENCY = " where (:depend = '' or LOWER(name) like CONCAT('%', :depend, '%'))" +
-            " and (:version = 0L or version = :version)" +
+            " and (:version = 0 or version = :version)" +
             " and (COALESCE(:stages) is null or stage in (:stages)) ";
 
     String SEARCH_CONDITION_DEPENDENCY = " and ((LOWER(name) like CONCAT('%', :search, '%')" +

@@ -89,7 +89,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String DEPENDENCY_QUERY = "select version, name, directionType, dependencyType, dependencyTypePluralName, stage from " + DEPENDENCY_SUBQUERY;
 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
-            " and (:version = 0L or version=:version) " +
+            " and (:version = 0 or version=:version) " +
             " and (:directionType='' or LOWER(directionType) like LOWER(CONCAT('%',:directionType,'%')))" +
             " and (COALESCE(:stages) is null or stage in (:stages)) " +
             " and (COALESCE(:dependencyTypes) is null or dependencyType in (:dependencyTypes)))";
