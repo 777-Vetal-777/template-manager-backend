@@ -34,7 +34,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             + " left join file.stage"
             + " where file.resource.id = :id and ";
 
-    String FILTER_CONDITION = " (:version=0l or file.version is null or file.version=:version) "
+    String FILTER_CONDITION = " (:version is null or file.version is null or file.version=:version) "
             + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))"
@@ -62,7 +62,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             " where resource.id = :id group by template.name) as dependency";
 
     String FILTER_CONDITION_DEPENDENCY = " where (:depend = '' or LOWER(name) like CONCAT('%', :depend, '%'))" +
-            " and (:version = 0 or version is null or version = :version)" +
+            " and (:version is null or version = :version)" +
             " and (COALESCE(:stages) is null or stage in (:stages)) ";
 
     String SEARCH_CONDITION_DEPENDENCY = " and ((LOWER(name) like CONCAT('%', :search, '%')" +
