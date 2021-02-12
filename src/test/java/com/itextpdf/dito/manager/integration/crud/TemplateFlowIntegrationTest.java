@@ -399,7 +399,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         instanceRepository.save(instanceEntity);
         for (final TemplateFileEntity file : files) {
             file.setStage(stageEntity);
-            //templateFileRepository.save(file);
         }
         templateFileRepository.saveAll(files);
     }
