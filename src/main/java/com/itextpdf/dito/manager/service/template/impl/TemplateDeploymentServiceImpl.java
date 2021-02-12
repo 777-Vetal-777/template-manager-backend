@@ -142,12 +142,10 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     /**
      * This method should be used only when templated is deleted.
      *
-     * @param templateName template name to be deleted from system.
+     * @param templateVersions to be deleted from system.
      */
     @Override
-    public void removeAllVersionsFromDefaultStage(final String templateName) {
-        final TemplateEntity templateEntity = getTemplateByName(templateName);
-        final List<TemplateFileEntity> templateVersions = templateEntity.getFiles();
+    public void removeAllVersionsFromDefaultStage(final List<TemplateFileEntity> templateVersions) {
         final InstanceEntity defaultInstance = getDefaultInstance();
         templateVersions.forEach(templateVersion -> removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersion));
     }

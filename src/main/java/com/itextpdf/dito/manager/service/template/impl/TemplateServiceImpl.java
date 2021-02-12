@@ -453,10 +453,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (hasOutBoundDependencies) {
             throw new TemplateDeleteException("Template has outbound dependencies");
         }
-        templateDeploymentService.removeAllVersionsFromDefaultStage(templateName);
-        templateLogRepository.deleteAll(templateEntity.getTemplateLogs());
-        templateFileRepository.deleteAll(templateEntity.getFiles());
+        final List<TemplateFileEntity> templateFileEntities = templateEntity.getFiles();
         templateRepository.delete(templateEntity);
+        templateDeploymentService.removeAllVersionsFromDefaultStage(templateFileEntities);
+
         return templateEntity;
     }
 
