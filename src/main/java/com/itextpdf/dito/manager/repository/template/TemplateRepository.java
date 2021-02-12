@@ -40,7 +40,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%') "
             + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%')) ";
 
-    String DEPENDENCY_SUBQUERY = "(select max(resourceFile.version) as version, max(resource.name) as name, 'SOFT' as directionType, max(resource.type) as dependencyType,  max(stage.name) as stage" +
+    String DEPENDENCY_SUBQUERY = "(select max(resourceFile.version) as version, max(resource.name) as name, 'SOFT' as directionType, max(resource.type) as dependencyType, max(resource.type) as dependencyTypePluralName,  max(stage.name) as stage" +
                 " from {h-schema}template as template" +
                 " join {h-schema}template_file templateFile ON templateFile.id = (select max(id) from manager.template_file tf where tf.template_id = template.id and tf.version = (select max(version) from manager.template_file tf2 where tf2.template_id = template.id))" +
                 " join {h-schema}resource_file_template_file rft on rft.template_file_id = templateFile.id" +
@@ -51,7 +51,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                 " left join {h-schema}stage stage on instance.stage_id = stage.id" +
                 " where template.id = :id group by resource.name" +
                 " union all" +
-                " select max(dataFile.version) as version, max(data.name) as name, 'SOFT' as directionType, 'DATA_COLLECTION' as dependencyType, max(stage.name) as stage" +
+                " select max(dataFile.version) as version, max(data.name) as name, 'SOFT' as directionType, 'DATA_COLLECTION' as dependencyType, 'data collection' as dependencyTypePluralName, max(stage.name) as stage" +
                 " from {h-schema}template as template" +
                 " join {h-schema}template_file as templateFile ON templateFile.id = (select max(id) from manager.template_file tf where tf.template_id = template.id and tf.version = (select max(version) from manager.template_file tf2 where tf2.template_id = template.id))" +
                 " join {h-schema}data_collection_file as dataFile on templateFile.data_collection_file_id = dataFile.id" +
@@ -61,7 +61,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                 " left join {h-schema}stage stage on instance.stage_id = stage.id" +
                 " where template.id = :id group by data.name" +
                 " union all" +
-                " select max(template_file2.version) as version, template2.name as name, 'SOFT' as directionType, 'TEMPLATE' as dependencyType, max(stage.name) as stage" +
+                " select max(template_file2.version) as version, template2.name as name, 'SOFT' as directionType, 'TEMPLATE' as dependencyType, 'TEMPLATE' as dependencyTypePluralName, max(stage.name) as stage" +
                 " from {h-schema}template" +
                 " join {h-schema}template_file templateFile ON templateFile.id = (select max(id) from {h-schema}template_file tf where tf.template_id = template.id and tf.version = (select max(version) from {h-schema}template_file tf2 where tf2.template_id = template.id))" +
                 " join {h-schema}template_file_part ON template_file_part.template_file_id = templateFile.id" +
@@ -72,7 +72,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                 " left join {h-schema}stage stage on instance.stage_id = stage.id" +
                 " where template.id = :id group by template2.name" +
                 " union all" +
-                " select max(template_file2.version) as version, template2.name as name, 'HARD' as directionType, 'TEMPLATE' as dependencyType, max(stage.name) as stage" +
+                " select max(template_file2.version) as version, template2.name as name, 'HARD' as directionType, 'TEMPLATE' as dependencyType, 'TEMPLATE' as dependencyTypePluralName, max(stage.name) as stage" +
                 " from {h-schema}template" +
                 " join {h-schema}template_file templateFile ON templateFile.id = (select max(id) from {h-schema}template_file tf where tf.template_id = template.id and tf.version = (select max(version) from {h-schema}template_file tf2 where tf2.template_id = template.id))" +
                 " join {h-schema}template_file_part ON template_file_part.template_file_part_id = templateFile.id" +
@@ -86,7 +86,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     String DEPENDENCY_COUNT_QUERY = "select count(*) from " + DEPENDENCY_SUBQUERY;
 
-    String DEPENDENCY_QUERY = "select version, name, directionType, dependencyType, stage from " + DEPENDENCY_SUBQUERY;
+    String DEPENDENCY_QUERY = "select version, name, directionType, dependencyType, dependencyTypePluralName, stage from " + DEPENDENCY_SUBQUERY;
 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
             " and (:version = 0 or version=:version) " +
@@ -97,7 +97,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String SEARCH_DEPENDENCIES = " and ( LOWER(name) like CONCAT('%',:search,'%') " +
             " or LOWER(directionType) like CONCAT('%',:search,'%')" +
             " or CAST(version as VARCHAR(10)) like CONCAT('%',:search,'%')" +
-            " or LOWER(dependencyType) like CONCAT('%',:search,'%')" +
+            " or LOWER(dependencyTypePluralName) like CONCAT('%',:search,'%')" +
             " or LOWER(stage) like CONCAT('%',:search,'%') )";
 
     String TEMPLATE_TABLE_LIST_SELECT_CLAUSE = "select template from TemplateEntity template "

@@ -107,6 +107,7 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartList.stream().collect(
                 Collectors.groupingBy(TemplateEntity::getType,
                         Collectors.collectingAndThen(Collectors.toList(), List::size)));
+        throwExceptionIfHaveCompositeParts(mapOfPartsCount);
         throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.HEADER);
         throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.FOOTER);
         throwExceptionIfTooFewForType(mapOfPartsCount, TemplateTypeEnum.STANDARD);
@@ -115,6 +116,12 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
     private void throwExceptionIfTooManyForType(final Map<TemplateTypeEnum, Integer> mapOfPartsCount, final TemplateTypeEnum checkedType) {
         if (mapOfPartsCount.getOrDefault(checkedType, 0) > 1) {
             throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than one ").append(checkedType).toString());
+        }
+    }
+
+    private void throwExceptionIfHaveCompositeParts(final Map<TemplateTypeEnum, Integer> mapOfPartsCount) {
+        if (mapOfPartsCount.containsKey(TemplateTypeEnum.COMPOSITION)) {
+            throw new TemplateHasWrongStructureException("Can not include composition template to another one");
         }
     }
 
