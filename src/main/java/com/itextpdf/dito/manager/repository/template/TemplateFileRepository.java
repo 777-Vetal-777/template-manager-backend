@@ -70,4 +70,11 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
     @Query(value = "select count(templateFile) from TemplateFileEntity templateFile "
             + "where size(templateFile.compositions) > 0 and templateFile.template.name=:name")
     Integer countTemplateVersionsUsedInCompositions(String name);
+
+    @Query("select template from TemplateEntity template "
+            + "join fetch template.latestFile file "
+            + "join file.parts parts "
+            + "join parts.part part "
+            + "where part.id = :id")
+    List<TemplateEntity> getTemplateCompositionsByTemplateFileId(@Param("id") Long templateFileId);
 }

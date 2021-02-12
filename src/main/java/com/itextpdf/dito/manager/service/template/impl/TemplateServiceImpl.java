@@ -324,7 +324,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                                                               final TemplateFileEntity previousVersionFileEntity,
                                                                               final UserEntity userEntity) {
         final TemplateFileEntity templateEntityLatestFile = templateEntity.getLatestFile();
-        final List<TemplateEntity> compositions = templateRepository.getTemplateCompositionsByTemplateId(templateEntity.getId());
+        final List<TemplateEntity> compositions = templateFileRepository.getTemplateCompositionsByTemplateFileId(previousVersionFileEntity.getId());
         final List<TemplateFileEntity> updatedVersions = compositions.stream().map(composition -> {
             final TemplateFileEntity latestFile = composition.getLatestFile();
             final TemplateEntity updatedComposition = createVersionForTemplateEntity(composition, latestFile, userEntity, null, latestFile.getParts(), "", latestFile.getVersion() + 1);
