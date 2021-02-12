@@ -51,8 +51,10 @@ public class DataManagementControllerImpl extends AbstractController implements 
             final String data) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
         log.info("Request to create or update data sample with id {} received.", decodedDataSampleId);
+        final String newName = descriptor != null ? descriptor.getDisplayName() : null;
+
         final DataSampleEntity dataSampleEntity = dataManagementService
-                .createNewVersion(decodedDataSampleId, data, decodedDataSampleId, principal.getName());
+                .createNewVersion(decodedDataSampleId, data, newName, principal.getName());
         log.info("Response to create or update data sample  by data sample id {} processed.", decodedDataSampleId);
         return dataSampleDescriptorMapper.map(dataSampleEntity);
     }
