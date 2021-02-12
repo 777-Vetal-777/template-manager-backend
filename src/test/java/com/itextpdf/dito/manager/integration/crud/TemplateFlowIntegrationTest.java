@@ -378,7 +378,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", updateRequestDTO.getName())));
     }
 
-    private void generateStageEntity(List<TemplateFileEntity> files) {
+    private void generateStageEntity(final List<TemplateFileEntity> files) {
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setSequenceOrder(1);
         stageEntity.setName("STAGE");
@@ -397,9 +397,10 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         instanceEntity.setTemplateFile(files);
         stageEntity.setInstances(Arrays.asList(instanceEntity));
         instanceRepository.save(instanceEntity);
-        for (TemplateFileEntity file : files) {
+        for (final TemplateFileEntity file : files) {
             file.setStage(stageEntity);
-            templateFileRepository.save(file);
+            //templateFileRepository.save(file);
         }
+        templateFileRepository.saveAll(files);
     }
 }
