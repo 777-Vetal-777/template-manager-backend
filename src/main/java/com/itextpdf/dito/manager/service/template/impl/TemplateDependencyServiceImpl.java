@@ -52,7 +52,7 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
     public List<DependencyModel> list(final String name) {
         final String templateName = decodeBase64(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
-        return templateRepository.list(templateEntity.getId());
+        return templateRepository.getTemplateHardRelations(templateEntity.getId());
     }
 
     private List<String> getDependencyAsString(final List<DependencyType> list) {
