@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,7 +106,7 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
     private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplateEntity> templatePartList) {
         final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartList.stream().collect(
                 Collectors.groupingBy(TemplateEntity::getType,
-                        Collectors.collectingAndThen(Collectors.toSet(), Set::size)));
+                        Collectors.collectingAndThen(Collectors.toList(), List::size)));
         throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.HEADER);
         throwExceptionIfTooManyForType(mapOfPartsCount, TemplateTypeEnum.FOOTER);
         throwExceptionIfTooFewForType(mapOfPartsCount, TemplateTypeEnum.STANDARD);

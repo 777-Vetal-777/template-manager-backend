@@ -284,6 +284,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return createVersionForTemplateEntity(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
     }
 
+    @Transactional
     private TemplateEntity createVersionForTemplateEntity(final TemplateEntity existingTemplateEntity,
                                                           final TemplateFileEntity fileEntityToCopyDependencies,
                                                           final UserEntity userEntity,
@@ -305,12 +306,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         existingTemplateEntity.setLatestLogRecord(logEntity);
         existingTemplateEntity.setLatestFile(fileEntity);
 
-        templateDeploymentService.promoteOnDefaultStage(fileEntity);
         result = templateRepository.save(existingTemplateEntity);
+        templateDeploymentService.promoteOnDefaultStage(result.getLatestFile());
 
-        final List<TemplateFileEntity> updatedVersions = createNewVersionForDependentCompositions(result, fileEntityToCopyDependencies, userEntity);
-        updatedVersions.forEach(templateDeploymentService::promoteOnDefaultStage);
-        templateFileRepository.saveAll(updatedVersions);
+        final List<TemplateFileEntity> updatedStandardTemplateFileEntities = templateFileRepository.saveAll(createNewVersionForDependentCompositions(result, fileEntityToCopyDependencies, userEntity));
+        updatedStandardTemplateFileEntities.forEach(templateDeploymentService::promoteOnDefaultStage);
 
         return result;
     }
