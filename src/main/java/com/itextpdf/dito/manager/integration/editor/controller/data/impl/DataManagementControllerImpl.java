@@ -19,6 +19,7 @@ public class DataManagementControllerImpl extends AbstractController implements 
     private static final Logger log = LogManager.getLogger(DataManagementControllerImpl.class);
     private final DataManagementService dataManagementService;
     private final DataSampleDescriptorMapper dataSampleDescriptorMapper;
+    private static final  String JSON_SUFFIX = ".json";
 
     public DataManagementControllerImpl(final DataManagementService dataManagementService,
             final DataSampleDescriptorMapper dataSampleDescriptorMapper) {
@@ -83,6 +84,8 @@ public class DataManagementControllerImpl extends AbstractController implements 
         log.info("Request to get data samples by collection with id {} received.", decodedDataCollectionId);
         final Collection<DataSampleEntity> dataSampleEntities = dataManagementService.getDataSamplesByCollectionId(decodedDataCollectionId);
         log.info("Response to get data samples by collection with id {} processed.", decodedDataCollectionId);
-        return dataSampleDescriptorMapper.map(dataSampleEntities);
+		final List<DataSampleDescriptor> descriptorList = dataSampleDescriptorMapper.map(dataSampleEntities);
+		descriptorList.forEach(dsd -> dsd.setDisplayName(dsd.getDisplayName().replaceAll(JSON_SUFFIX, "") + JSON_SUFFIX));
+		return descriptorList;
     }
 }
