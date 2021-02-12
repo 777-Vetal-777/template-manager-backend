@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -151,7 +152,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //get preview
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF));
 
         TemplateUpdateRequestDTO updateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-update-request.json"), TemplateUpdateRequestDTO.class);
         mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
@@ -301,7 +303,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         final String encodedTemplateName = encodeStringToBase64(request.getName());
 
-        //get preview
+        //get template
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value(request.getName()))
@@ -376,6 +378,11 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].directionType", containsInAnyOrder("SOFT", "HARD")))
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("new-data-collection", updateRequestDTO.getName())));
+
+        //get preview
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF));
     }
 
     private void generateStageEntity(final List<TemplateFileEntity> files) {
