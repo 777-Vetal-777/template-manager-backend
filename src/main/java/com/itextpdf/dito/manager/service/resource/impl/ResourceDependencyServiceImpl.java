@@ -47,7 +47,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
         if ((Objects.isNull(dependenciesType) || dependenciesType.contains(TEMPLATE)) &&
                 (Objects.isNull(directionsType) || directionsType.contains(HARD))) {
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
-            final Long version = filter.getVersion();
+            final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
             final List<String> stages = getListStringsFromFilter(filter.getStage());
             final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
