@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TemplateFilePartServiceImpl implements TemplateFilePartService {
@@ -52,15 +53,12 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         throwExceptionIfTemplatesHaveAnotherDataCollections(templatePartList, dataCollectionName);
 
         //checks that exists at most one HEADER and FOOTER
-        throwExceptionIfPartsSizeAreIncorrect(templatePartList);
+        throwExceptionIfPartsSizeAreIncorrect(templatePartDTOs, templateFilePartMap);
 
-        final List<TemplateFilePartEntity> parts = templatePartDTOs.stream().map(templatePart -> {
+        return templatePartDTOs.stream().map(templatePart -> {
             final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getName());
-            final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(partTemplateFileEntity, templatePart);
-            return templateFilePartEntity;
+            return createTemplateFilePartEntity(partTemplateFileEntity, templatePart);
         }).collect(Collectors.toList());
-
-        return parts;
     }
 
     private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity partTemplateFileEntity,
@@ -103,8 +101,8 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         return templateFilePartEntity;
     }
 
-    private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplateEntity> templatePartList) {
-        final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartList.stream().collect(
+    private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplatePartDTO> templatePartDTOs, final Map<String, TemplateFileEntity> templatePartMap) {
+        final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartDTOs.stream().flatMap(part -> Stream.of(templatePartMap.get(part.getName()).getTemplate())).collect(
                 Collectors.groupingBy(TemplateEntity::getType,
                         Collectors.collectingAndThen(Collectors.toList(), List::size)));
         throwExceptionIfHaveCompositeParts(mapOfPartsCount);
