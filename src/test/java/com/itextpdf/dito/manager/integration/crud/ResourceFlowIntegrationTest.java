@@ -24,6 +24,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -519,6 +520,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldCreateStylesheetVersionsAndReturnThem() throws Exception {
         //create test INSTANCE
         InstanceEntity instanceEntity = new InstanceEntity();
