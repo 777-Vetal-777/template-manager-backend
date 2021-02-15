@@ -98,7 +98,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<List<TemplateDTO>> listCompositionTemplates(final String name) {
-        final List<TemplateDTO> templateDTOS = templateMapper.map(templateService.getAll(decodeBase64(name)));
+        final List<TemplateDTO> templateDTOS = templateMapper.map(templateService.getAllParts(decodeBase64(name)));
         return new ResponseEntity<>(templateDTOS, HttpStatus.OK);
     }
 

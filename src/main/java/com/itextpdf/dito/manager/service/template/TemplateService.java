@@ -26,7 +26,7 @@ public interface TemplateService {
 
     List<TemplateEntity> getAll(TemplateListFilter templateListFilter);
 
-    List<TemplateEntity> getAll(String templateName);
+    List<TemplateEntity> getAllParts(String templateName);
 
     TemplateEntity get(String name);
 
