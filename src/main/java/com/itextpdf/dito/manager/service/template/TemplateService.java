@@ -24,6 +24,8 @@ public interface TemplateService {
 
     List<TemplateEntity> getAll();
 
+    List<TemplateEntity> getAll(List<TemplateTypeEnum> filter);
+
     List<TemplateEntity> getAll(TemplateListFilter templateListFilter);
 
     List<TemplateEntity> getAllParts(String templateName);

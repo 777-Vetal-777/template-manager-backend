@@ -105,7 +105,9 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + " left join fetch templateFile.dataCollectionFile dataCollectionFile "
             + " left join fetch dataCollectionFile.dataCollection dataCollection ";
 
-    String FILTER_LIST_CONDITION = "(COALESCE(:types) is null or template.type in (:types)) "
+    String FILTER_BY_TYPES_CONDITION = "(COALESCE(:types) is null or template.type in (:types)) ";
+
+    String FILTER_LIST_CONDITION = FILTER_BY_TYPES_CONDITION
             + " and (dataCollection.name is null or dataCollection.name = :dataCollectionName)";
 
     Optional<TemplateEntity> findByName(String name);
@@ -190,6 +192,9 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query(TEMPLATE_TABLE_LIST_SELECT_CLAUSE + " where " + FILTER_LIST_CONDITION)
     List<TemplateEntity> getListTemplates(@Param("types") @Nullable List<TemplateTypeEnum> types,
                                           @Param("dataCollectionName") @Nullable String dataCollectionName);
+
+    @Query(TEMPLATE_TABLE_LIST_SELECT_CLAUSE + " where " + FILTER_BY_TYPES_CONDITION)
+    List<TemplateEntity> getListTemplates(@Param("types") @Nullable List<TemplateTypeEnum> types);
 
     @Query(TEMPLATE_TABLE_LIST_SELECT_CLAUSE
             + " where template.name in (:names)")
