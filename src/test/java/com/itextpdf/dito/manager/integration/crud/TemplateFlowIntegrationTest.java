@@ -19,7 +19,6 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -42,6 +41,7 @@ import static com.itextpdf.dito.manager.controller.template.TemplateController.T
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -384,13 +384,21 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF));
+
+        //get preview
+        mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isOk());
     }
 
     private void generateStageEntity(final List<TemplateFileEntity> files) {
+        final StageEntity defaultStageEntity = new StageEntity();
+        defaultStageEntity.setSequenceOrder(0);
+        defaultStageEntity.setName("DEV");
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setSequenceOrder(1);
         stageEntity.setName("STAGE");
         final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
+        defaultStageEntity.setPromotionPath(promotionPathEntity);
         stageEntity.setPromotionPath(promotionPathEntity);
         final WorkspaceEntity workspaceEntity = new WorkspaceEntity();
         promotionPathEntity.setWorkspace(workspaceEntity);
@@ -402,12 +410,18 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         instanceEntity.setName("instance");
         instanceEntity.setSocket("socket");
         instanceEntity.setStage(stageEntity);
+        final InstanceEntity defaultInstanceEntity = new InstanceEntity();
+        defaultInstanceEntity.setName("default-instance");
+        defaultInstanceEntity.setSocket("socket-2");
+        defaultInstanceEntity.setStage(defaultStageEntity);
         instanceEntity.setTemplateFile(files);
         stageEntity.setInstances(Arrays.asList(instanceEntity));
         instanceRepository.save(instanceEntity);
+        instanceRepository.save(defaultInstanceEntity);
         for (final TemplateFileEntity file : files) {
             file.setStage(stageEntity);
         }
         templateFileRepository.saveAll(files);
+        stageRepository.save(defaultStageEntity);
     }
 }
