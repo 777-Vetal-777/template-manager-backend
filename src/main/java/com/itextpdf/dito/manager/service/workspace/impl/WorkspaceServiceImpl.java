@@ -4,11 +4,10 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
-import com.itextpdf.dito.manager.exception.workspace.WorkspaceAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.workspace.OnlyOneWorkspaceAllowedException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
-import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.stage.StageService;
@@ -46,6 +45,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public WorkspaceEntity create(final WorkspaceEntity workspace) {
+        // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
+        if (!workspaceRepository.findAll().isEmpty()) {
+            throw new OnlyOneWorkspaceAllowedException();
+        }
+
         throwExceptionIfNameIsAlreadyInUse(workspace.getName());
         return workspaceRepository.save(workspace);
     }
