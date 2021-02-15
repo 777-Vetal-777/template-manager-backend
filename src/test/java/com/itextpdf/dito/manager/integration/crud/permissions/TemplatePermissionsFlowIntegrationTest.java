@@ -126,7 +126,7 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
                 .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
-                        Stream.of("E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD")
+                        Stream.of("E9_US82_TABLE_OF_TEMPLATE_PERMISSIONS_STANDARD")
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList())
                 ))

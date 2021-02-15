@@ -191,7 +191,7 @@ public interface TemplateController {
                                               @Parameter(name = "template", description = "Template file", style = ParameterStyle.FORM) @RequestPart(value = "template", required = false) MultipartFile templateFile);
 
     @GetMapping(TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAnyAuthority('E9_US82_TEMPLATE_OF_TEMPLATE_PERMISSIONS_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
+    @PreAuthorize("hasAnyAuthority('E9_US82_TABLE_OF_TEMPLATE_PERMISSIONS_STANDARD', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get template's roles", description = "Retrieved attached roles.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplatePermissionDTO>> getRoles(Pageable pageable,
                                                          @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
