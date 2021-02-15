@@ -73,13 +73,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "health, info, env"
   endpoint:
     env:
       enabled: true
     health:
       show-details: always
 
-info:
-  db:
-    version: @project.version@
+springdoc:
+  show-actuator: true

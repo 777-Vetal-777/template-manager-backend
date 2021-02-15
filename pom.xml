@@ -189,6 +189,12 @@
                         <goals>
                             <goal>build-info</goal>
                         </goals>
+                        <configuration>
+                            <additionalProperties>
+                                <db.version>${project.version}</db.version>
+                                <java.version>${java.version}</java.version>
+                            </additionalProperties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
