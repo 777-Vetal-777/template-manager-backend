@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
+import com.itextpdf.dito.manager.dto.instance.create.InstanceBindToStageRequestDTO;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
@@ -18,6 +19,7 @@ import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 import java.security.Principal;
 import java.util.List;
 
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -42,10 +44,17 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 	}
 
     @Override
-    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO, final Principal principal) {
-        WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO),
-                workspaceCreateRequestDTO.getMainDevelopmentInstanceSocket(), principal.getName());
+    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO) {
+        final WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO));
         return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<WorkspaceDTO> setInstanceOnStage(@Valid final InstanceBindToStageRequestDTO requestDTO, final Principal principal) {
+        final WorkspaceEntity workspaceEntity = workspaceService
+                .bindInstanceToWorkspace(requestDTO.getWorkspaceName(), requestDTO.getInstanceName(),
+                        principal.getName());
+        return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.OK);
     }
 
     @Override

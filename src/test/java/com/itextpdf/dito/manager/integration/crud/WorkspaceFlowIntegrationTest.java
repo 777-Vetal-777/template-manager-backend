@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -70,7 +71,9 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, workspaceRepository.findAll().size());
     }
 
+    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
+    @Disabled
     void testCreateWorkspaceWithExistingName() throws Exception {
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
@@ -106,7 +109,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         WorkspaceCreateRequestDTO createRequest = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
-        createRequest.setMainDevelopmentInstanceSocket(INSTANCE_SOCKET);
+        //createRequest.setMainDevelopmentInstanceSocket(INSTANCE_SOCKET);
         mockMvc.perform(post(WorkspaceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(createRequest))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -166,7 +169,9 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     }
 
+    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
+    @Disabled
     void testGetPromotionPath() throws Exception {
         WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
 
@@ -177,7 +182,9 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("stages[0].name").value("Development"));
     }
 
+    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
+    @Disabled
     void testUpdatePromotionPath() throws Exception {
         WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
 

@@ -13,9 +13,6 @@ public class WorkspaceCreateRequestDTO {
     @NotBlank
     @Schema(example = "ENG")
     String language;
-    @NotBlank
-    @Schema(example = "http://10.10.15.110:9090")
-    String mainDevelopmentInstanceSocket;
 
     public String getName() {
         return name;
@@ -39,13 +36,5 @@ public class WorkspaceCreateRequestDTO {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public String getMainDevelopmentInstanceSocket() {
-        return mainDevelopmentInstanceSocket;
-    }
-
-    public void setMainDevelopmentInstanceSocket(String mainDevelopmentInstanceSocket) {
-        this.mainDevelopmentInstanceSocket = mainDevelopmentInstanceSocket;
     }
 }

@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
-import com.itextpdf.dito.manager.exception.workspace.OnlyOneWorkspaceAllowedException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
@@ -46,33 +46,31 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public WorkspaceEntity create(final WorkspaceEntity workspace, final String mainDevelopmentInstanceSocket, final String userEmail) {
-        // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
-        if (!workspaceRepository.findAll().isEmpty()) {
-            throw new OnlyOneWorkspaceAllowedException();
-        }
-
+    public WorkspaceEntity create(final WorkspaceEntity workspace) {
         throwExceptionIfNameIsAlreadyInUse(workspace.getName());
-        final WorkspaceEntity savedWorkspaceEntity =  workspaceRepository.save(workspace);
-
-        final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(mainDevelopmentInstanceSocket, userEmail);
-        savedWorkspaceEntity.setPromotionPath(promotionPathEntity);
-
-        return workspaceRepository.save(savedWorkspaceEntity);
+        return workspaceRepository.save(workspace);
     }
 
-    private PromotionPathEntity buildDefaultPromotionPath(final String mainDevelopmentInstanceSocket, final String userEmail) {
+    @Override
+    public WorkspaceEntity bindInstanceToWorkspace(final String workspaceName, final String instanceName, final String userEmail) {
+        final WorkspaceEntity workspaceEntity = getWorkspace(workspaceName);
+        final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(instanceService.get(instanceName));
+        workspaceEntity.setPromotionPath(promotionPathEntity);
+        return workspaceRepository.save(workspaceEntity);
+    }
+
+    private PromotionPathEntity buildDefaultPromotionPath(final InstanceEntity instanceEntity) {
         final PromotionPathEntity promotionPathEntity;
 
-        final InstanceEntity instanceEntity = new InstanceEntity();
-        instanceEntity.setName("DEV-instance");
-        instanceEntity.setSocket(mainDevelopmentInstanceSocket);
-        final InstanceEntity savedInstance = instanceService.save(instanceEntity, userEmail);
+//        final InstanceEntity instanceEntity = new InstanceEntity();
+//        instanceEntity.setName("DEV-instance");
+//        instanceEntity.setSocket(mainDevelopmentInstanceSocket);
+//        final InstanceEntity savedInstance = instanceService.save(instanceEntity, userEmail);
 
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setName("Development");
         stageEntity.setSequenceOrder(Integer.valueOf(0));
-        stageEntity.addInstance(savedInstance);
+        stageEntity.addInstance(instanceEntity);
 
         promotionPathEntity = new PromotionPathEntity();
         promotionPathEntity.addStage(stageEntity);
@@ -96,13 +94,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public PromotionPathEntity getPromotionPath(String workspace) {
+    public PromotionPathEntity getPromotionPath(final String workspace) {
         return get(workspace).getPromotionPath();
     }
 
     @Transactional(rollbackOn = Exception.class)
     @Override
-    public PromotionPathEntity updatePromotionPath(String workspace, PromotionPathEntity newPromotionPathEntity) {
+    public PromotionPathEntity updatePromotionPath(final String workspace, final PromotionPathEntity newPromotionPathEntity) {
 
         if (Optional.ofNullable(newPromotionPathEntity)
                 .map(PromotionPathEntity::getStages)
@@ -160,5 +158,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         if (workspaceRepository.existsByName(workspaceName)) {
             throw new WorkspaceNameAlreadyExistsException(workspaceName);
         }
+    }
+
+    private WorkspaceEntity getWorkspace(final String workspace) {
+        return workspaceRepository.findByName(workspace).orElseThrow(() -> new WorkspaceAlreadyExistsException(workspace));
     }
 }
