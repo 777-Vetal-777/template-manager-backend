@@ -213,7 +213,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		fileEntity.setDataSample(existingDataSampleEntity);
 		fileEntity.setVersion(lastEntity.getVersion() + 1);
 		fileEntity.setData(sample.getBytes());
-		fileEntity.setFileName(fileName);
+		fileEntity.setFileName(fileName == null ? lastEntity.getFileName() : fileName);
 		fileEntity.setCreatedOn(new Date());
 		fileEntity.setAuthor(userEntity);
 		fileEntity.setComment(comment);
