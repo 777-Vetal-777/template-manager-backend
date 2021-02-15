@@ -40,6 +40,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                                         .toString()));
     }
 
+    /**
+     * Default admin username and password should be set as env variables:
+     * ${DITO_MANAGER_DEFAULT_ADMIN_EMAIL} and ${DITO_MANAGER_DEFAULT_ADMIN_PASSWORD}.
+     * Otherwise default values from db.changelog-0.0.1.xml will be used.
+     */
     @PostConstruct
     public void updateAdminProperties() {
         final Long defaultAdminId = 1L;
