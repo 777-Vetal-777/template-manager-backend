@@ -4,8 +4,8 @@ ditomanager:
 
 security:
   credentials:
-    admin-email: ${DITO_MANAGER_DEFAULT_ADMIN_EMAIL}
-    admin-password: ${DITO_MANAGER_DEFAULT_ADMIN_PASSWORD}
+    admin-email: ${DITO_MANAGER_DEFAULT_ADMIN_EMAIL:#{null}}
+    admin-password: ${DITO_MANAGER_DEFAULT_ADMIN_PASSWORD:#{null}}
 
 spring:
   datasource:
