@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -12,10 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
@@ -23,6 +21,13 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @AfterEach
+    void after() {
+        final UserEntity userEntity = userRepository.findByEmail("admin@email.com").orElseThrow();
+        userEntity.setModifiedAt(null);
+        userRepository.save(userEntity);
+    }
 
     @Test
     public void success() throws Exception {
