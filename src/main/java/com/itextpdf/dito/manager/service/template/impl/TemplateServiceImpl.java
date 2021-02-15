@@ -72,6 +72,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateLogRepository templateLogRepository;
     private final TemplateFilePartService templateFilePartService;
+	private static final String DEFAULT_COMMENT_FOR_NEW_VERSION = "Default comment for the new version %s";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -264,8 +265,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts, comment, oldVersion + 1);
-    }
+		return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts,
+				(comment == null ? String.format(DEFAULT_COMMENT_FOR_NEW_VERSION, oldVersion + 1) : comment),
+				oldVersion + 1);
+	  }
 
     @Override
     @Transactional
