@@ -13,7 +13,7 @@ public interface WorkspaceService {
 
     WorkspaceEntity create(WorkspaceEntity workspace);
 
-    WorkspaceEntity bindInstanceToWorkspace(String workspace, String mainDevelopmentInstanceSocket, String userEmail);
+    WorkspaceEntity setInstanceAsDefault(String workspace, String mainDevelopmentInstanceSocket, String userEmail);
 
     WorkspaceEntity update(String name, WorkspaceEntity workspace);
 

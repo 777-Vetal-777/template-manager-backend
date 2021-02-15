@@ -42,7 +42,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 		this.licenseService = licenseService;
 		this.licenseMapper = licenseMapper;
 	}
-
+    //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
     @Override
     public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO) {
         final WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO));
@@ -50,9 +50,9 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     }
 
     @Override
-    public ResponseEntity<WorkspaceDTO> setInstanceOnStage(@Valid final InstanceBindToStageRequestDTO requestDTO, final Principal principal) {
+    public ResponseEntity<WorkspaceDTO> setDefaultInstance(@Valid final InstanceBindToStageRequestDTO requestDTO, final Principal principal) {
         final WorkspaceEntity workspaceEntity = workspaceService
-                .bindInstanceToWorkspace(requestDTO.getWorkspaceName(), requestDTO.getInstanceName(),
+                .setInstanceAsDefault(requestDTO.getWorkspaceName(), requestDTO.getInstanceName(),
                         principal.getName());
         return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.OK);
     }
