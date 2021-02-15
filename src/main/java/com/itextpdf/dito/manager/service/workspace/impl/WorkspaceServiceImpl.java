@@ -28,8 +28,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
 
     public WorkspaceServiceImpl(final InstanceService instanceService, final StageService stageService,
-                                final WorkspaceRepository workspaceRepository,
-                                final StageRepository stageRepository) {
+                                final WorkspaceRepository workspaceRepository) {
         this.instanceService = instanceService;
         this.stageService = stageService;
         this.workspaceRepository = workspaceRepository;
@@ -52,7 +51,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public WorkspaceEntity bindInstanceToWorkspace(final String workspaceName, final String instanceName, final String userEmail) {
+    public WorkspaceEntity setInstanceAsDefault(final String workspaceName, final String instanceName, final String userEmail) {
         final WorkspaceEntity workspaceEntity = getWorkspace(workspaceName);
         final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(instanceService.get(instanceName));
         workspaceEntity.setPromotionPath(promotionPathEntity);
@@ -60,19 +59,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     private PromotionPathEntity buildDefaultPromotionPath(final InstanceEntity instanceEntity) {
-        final PromotionPathEntity promotionPathEntity;
-
-//        final InstanceEntity instanceEntity = new InstanceEntity();
-//        instanceEntity.setName("DEV-instance");
-//        instanceEntity.setSocket(mainDevelopmentInstanceSocket);
-//        final InstanceEntity savedInstance = instanceService.save(instanceEntity, userEmail);
-
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setName("Development");
         stageEntity.setSequenceOrder(Integer.valueOf(0));
         stageEntity.addInstance(instanceEntity);
 
-        promotionPathEntity = new PromotionPathEntity();
+        final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
         promotionPathEntity.addStage(stageEntity);
 
         return promotionPathEntity;
@@ -161,6 +153,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     private WorkspaceEntity getWorkspace(final String workspace) {
-        return workspaceRepository.findByName(workspace).orElseThrow(() -> new WorkspaceAlreadyExistsException(workspace));
+        return workspaceRepository.findByName(workspace).orElseThrow(() -> new WorkspaceNotFoundException(workspace));
     }
 }

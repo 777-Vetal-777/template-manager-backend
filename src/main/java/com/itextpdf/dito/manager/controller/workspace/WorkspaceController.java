@@ -68,7 +68,7 @@ public interface WorkspaceController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = WorkspaceDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
     })
-    ResponseEntity<WorkspaceDTO> setInstanceOnStage(@Valid @RequestBody InstanceBindToStageRequestDTO instanceBindToStageRequestDTO, Principal principal);
+    ResponseEntity<WorkspaceDTO> setDefaultInstance(@Valid @RequestBody InstanceBindToStageRequestDTO instanceBindToStageRequestDTO, Principal principal);
 
 
     @GetMapping
