@@ -1,37 +1,25 @@
 package com.itextpdf.dito.manager.integration.crud.permissions;
 
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
-import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.controller.role.RoleController;
-import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
-import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
-import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionPermissionsRepository;
-import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
-import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
-import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Base64;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

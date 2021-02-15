@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
 import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImpl;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
+import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public abstract class AbstractIntegrationTest {
     protected MockMvc mockMvc;
     @Autowired
     private InstanceService instanceService;
+    @Autowired
+    private TemplateDeploymentService templateDeploymentService;
 
     protected InstanceClient instanceClientMock;
 
@@ -49,6 +52,7 @@ public abstract class AbstractIntegrationTest {
     public void initMocks(){
         instanceClientMock = mock(InstanceClientImpl.class);
         ReflectionTestUtils.setField(instanceService, "instanceClient", instanceClientMock);
+        ReflectionTestUtils.setField(templateDeploymentService, "instanceClient", instanceClientMock);
 
         InstanceRegisterResponseDTO sdkRegisterResponse = new InstanceRegisterResponseDTO();
         sdkRegisterResponse.setToken("test-token");
