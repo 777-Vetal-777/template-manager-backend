@@ -58,9 +58,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
 
     @Override
     public List<TemplateEntity> getAll() {
-        final TemplateListFilter templateListFilter = new TemplateListFilter();
-        templateListFilter.setType(List.of(TemplateTypeEnum.STANDARD, TemplateTypeEnum.HEADER, TemplateTypeEnum.FOOTER));
-        return templateService.getAll(templateListFilter);
+        return templateService.getAll(List.of(TemplateTypeEnum.STANDARD, TemplateTypeEnum.HEADER, TemplateTypeEnum.FOOTER));
     }
 
     @Override

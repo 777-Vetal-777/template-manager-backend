@@ -219,6 +219,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    public List<TemplateEntity> getAll(List<TemplateTypeEnum> filter) {
+        return templateRepository.getListTemplates(filter);
+    }
+
+    @Override
     public TemplateEntity get(final String name) {
         return findByName(name);
     }
