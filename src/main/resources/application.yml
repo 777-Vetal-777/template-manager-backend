@@ -61,7 +61,6 @@ template:
     execution-delay-in-millis: 3600000
     initial-delay-in-millis: 1000
 
-
 data-collection:
   json:
       size-limit: 8388608
@@ -69,3 +68,18 @@ data-collection:
 sentry:
   dsn: ${DITO_MANAGER_SENTRY_DSN:}
   environment: ${DITO_MANAGER_SENTRY_ENVIRONMENT:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      enabled: true
+    health:
+      show-details: always
+
+info:
+  db:
+    version: @project.version@
