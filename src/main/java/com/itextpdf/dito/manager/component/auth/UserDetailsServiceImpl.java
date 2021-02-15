@@ -44,7 +44,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public void updateAdminProperties() {
         final Long defaultAdminId = 1L;
         if (!StringUtils.isEmpty(defaultAdminEmail) && !StringUtils.isEmpty(defaultAdminPassword)) {
-            UserEntity userEntity = userRepository.findById(defaultAdminId).orElseThrow(() -> new UserNotFoundException("Admin user not found"));
+            final UserEntity userEntity = userRepository.findById(defaultAdminId).orElseThrow(() -> new UserNotFoundException("Admin user not found"));
             userEntity.setEmail(defaultAdminEmail);
             userEntity.setPassword(defaultAdminPassword);
             userRepository.save(userEntity);
