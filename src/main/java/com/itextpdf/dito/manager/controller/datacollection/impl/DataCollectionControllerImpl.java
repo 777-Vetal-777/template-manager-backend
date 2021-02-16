@@ -294,4 +294,10 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
         return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<DataCollectionDTO> rollback(final Principal principal, final String name, final Long version) {
+        final DataCollectionEntity result = dataCollectionService.rollbackVersion(decodeBase64(name), version, principal.getName());
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(result), HttpStatus.OK);
+    }
 }

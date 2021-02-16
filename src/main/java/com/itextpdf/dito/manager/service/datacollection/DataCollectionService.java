@@ -16,6 +16,8 @@ public interface DataCollectionService {
 
     DataCollectionEntity createNewVersion(String name, DataCollectionType type, byte[] data, String fileName, String email, String comment);
 
+    DataCollectionEntity rollbackVersion(String name, Long version, String email);
+
     Page<DataCollectionEntity> list(Pageable pageable, DataCollectionFilter filter, String searchParam);
 
     List<DataCollectionEntity> list(DataCollectionFilter filter, String searchParam);
