@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.export.TemplateExportDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -68,8 +69,10 @@ public interface TemplateController {
     String SEARCH_ENDPOINT = "/search";
     String ROLLBACK_ENDPOINT = "/rollback";
     String NEXT_STAGE_ENDPOINT = "/next-stage";
+    String EXPORT_ENDPOINT = "/export";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
+    String TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + EXPORT_ENDPOINT;
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
     String TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_BLOCK_ENDPOINT;
     String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_UNBLOCK_ENDPOINT;
@@ -294,4 +297,15 @@ public interface TemplateController {
             @ApiResponse(responseCode = "404", description = "Template not found", content = @Content),
     })
     ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
+
+    @GetMapping(TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE)
+    @Operation(summary = "Export template", description = "Export template as zipped DITO project",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Exported template is in response.", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
+            @ApiResponse(responseCode = "404", description = "Template not found"),
+            @ApiResponse(responseCode = "422", description = "Could not proceed template export.")
+    })
+    ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
+                  @Parameter(description = "Additional settings", required = false) @ParameterObject TemplateExportDTO settings);
 }

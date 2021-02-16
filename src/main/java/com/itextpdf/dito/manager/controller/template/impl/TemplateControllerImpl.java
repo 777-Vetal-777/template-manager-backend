@@ -17,6 +17,7 @@ import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.export.TemplateExportDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -243,5 +244,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<StageDTO> getNextStage(final String templateName, final Long templateVersion) {
         return new ResponseEntity<>(workspaceMapper.map(templateDeploymentService.getNextStage(decodeBase64(templateName), templateVersion)), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> export(final String templateName, final TemplateExportDTO settings) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }
