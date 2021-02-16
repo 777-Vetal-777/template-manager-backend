@@ -94,7 +94,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldCreateNewVersionOfDataCollection() throws Exception {
+    public void shouldCreateAndRollbackVersionOfDataCollection() throws Exception {
         //CREATE NEW DATA COLLECTION
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
                 "{\"file\":\"data\"}".getBytes());
@@ -131,6 +131,22 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("type").value("JSON"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("description").isEmpty())
+                .andExpect(jsonPath("fileName").value(file.getOriginalFilename()))
+                .andExpect(jsonPath("createdOn").isNotEmpty());
+
+        //ROLLBACK VERSION failure
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE ,encodeStringToBase64(NAME), 100L))
+                .andExpect(status().isNotFound());
+
+        //ROLLBACK VERSION success
+        final Long currentVersion = 2L;
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE ,encodeStringToBase64(NAME), currentVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(NAME))
+                .andExpect(jsonPath("version").value(3))
+                .andExpect(jsonPath("type").value("JSON"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("comment").value("Rollback to version: 2"))
                 .andExpect(jsonPath("fileName").value(file.getOriginalFilename()))
                 .andExpect(jsonPath("createdOn").isNotEmpty());
     }

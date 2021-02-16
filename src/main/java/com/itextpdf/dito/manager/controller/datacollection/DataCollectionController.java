@@ -53,26 +53,30 @@ public interface DataCollectionController {
     String BASE_NAME = MAJOR_VERSION + "/datacollections";
     String DATA_COLLECTION_PATH_VARIABLE = "data-collection-name";
     String TEMPLATE_PATH_VARIABLE = "template-name";
+    String VERSION_PATH_VARIABLE = "version";
     String ROLE_PATH_VARIABLE = "role-name";
     String DATA_SAMPLE_PATH_VARIABLE = "data-sample-name";
     String VERSIONS_ENDPOINT = "/versions";
     String DATA_SAMPLE_ENDPOINT = "/datasamples";
     String PAGEABLE_ENDPOINT = "/pageable";
     String SEARCH_ENDPOINT = "/search";
+    String ROLLBACK_ENDPOINT = "/rollback";
     String DATA_SAMPLE_WITH_PATH_VARIABLE = "/{" + DATA_SAMPLE_PATH_VARIABLE + "}";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_PATH_VARIABLE = "/{" + DATA_COLLECTION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_WITH_TEMPLATE_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
+    String DATA_COLLECTION_VERSION_PATH_VARIABLE = "/{" + VERSION_PATH_VARIABLE + "}";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + "/dependencies";
     String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT;
     String DATA_COLLECTION_DATA_SAMPLES_WITH_TEMPLATE_NAME_PATH_VARIABLE = DATA_SAMPLE_ENDPOINT + DATA_COLLECTION_WITH_TEMPLATE_PATH_VARIABLE;
-    String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT +PAGEABLE_ENDPOINT;
+    String DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT;
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE;
     String DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + DATA_SAMPLE_WITH_PATH_VARIABLE + "/setasdefault";
     String DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE = DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE + "/all";
     String DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE = DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE + PAGEABLE_ENDPOINT;
     String RESOURCE_APPLIED_ROLES_ENDPOINT = "/roles";
     String DATA_COLLECTION_VERSIONS_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + VERSIONS_ENDPOINT;
+    String DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_COLLECTION_VERSION_PATH_VARIABLE + ROLLBACK_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + RESOURCE_APPLIED_ROLES_ENDPOINT;
     String DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES = DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_PATH_VARIABLE + ROLE_ENDPOINT_WITH_PATH_VARIABLE;
     String DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE = DATA_COLLECTION_WITH_PATH_VARIABLE + DATA_SAMPLE_ENDPOINT + VERSIONS_ENDPOINT;
@@ -279,11 +283,24 @@ public interface DataCollectionController {
 			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
 			@RequestBody DataSampleCreateRequestDTO dataSampleCreateRequestDTO, Principal principal);
 
-	@GetMapping(DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE)
-	@PreAuthorize("hasAnyAuthority('E7_US49_DATA_SAMPLE_VERSION_HISTORY')")
-	@Operation(summary = "Get a list of versions of data sample by name", description = "Get a list of data sample versions using the data sample name, sorting and filters.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-	ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(Pageable pageable,
-			@Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
-			@PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name, VersionFilter versionFilter,
-			@RequestParam(value = "search", required = false) String searchParam);
+    @GetMapping(DATA_SAMPLES_VERSIONS_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAnyAuthority('E7_US49_DATA_SAMPLE_VERSION_HISTORY')")
+    @Operation(summary = "Get a list of versions of data sample by name", description = "Get a list of data sample versions using the data sample name, sorting and filters.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(Pageable pageable,
+                                                               @Parameter(description = "Data collections name encoded with base64.", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String dataCollectionName,
+                                                               @PathVariable(DATA_SAMPLE_PATH_VARIABLE) String name, VersionFilter versionFilter,
+                                                               @RequestParam(value = "search", required = false) String searchParam);
+
+    @PostMapping(DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION')")
+    @Operation(summary = "Rollback version of data collection", description = "Make a new version of a data collection by rollback.",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Data collection rollback successful"),
+            @ApiResponse(responseCode = "404", description = "Data collection or DC version not found"),
+            @ApiResponse(responseCode = "403", description = "No permissions to rollback."),
+    })
+    ResponseEntity<DataCollectionDTO> rollback(Principal principal,
+                                               @Parameter(description = "Encoded with base64 data collection name", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
+                                               @Parameter(description = "Data collection version number", required = true) @PathVariable(VERSION_PATH_VARIABLE) Long version);
 }

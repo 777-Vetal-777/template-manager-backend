@@ -38,5 +38,3 @@ jpa:
     hibernate:
       show_sql: true
       format_sql: true
-
-privacy-information: ${DITO_MANAGER_PRIVACY_INFORMATION_APP_URL:}

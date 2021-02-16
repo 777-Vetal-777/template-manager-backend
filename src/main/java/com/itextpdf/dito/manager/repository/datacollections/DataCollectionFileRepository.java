@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.repository.datacollections;
 
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DataCollectionFileRepository extends JpaRepository<DataCollectionFileEntity, Long> {
@@ -100,4 +102,6 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
 
     @Query(value = SELECT_DEPENDENCIES_CLAUSE + "file.dataCollection.id =:id ")
     List<DependencyModel> searchDependencyOfDataCollection(@Param("id") Long dataCollectionId);
+  
+    Optional<DataCollectionFileEntity> findByVersionAndDataCollection(Long version, DataCollectionEntity dataCollectionEntity);
 }

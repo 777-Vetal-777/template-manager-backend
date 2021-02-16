@@ -14,6 +14,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionHasDependenciesException;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionVersionNotFoundException;
 import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
@@ -354,4 +355,44 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final DataCollectionEntity dataCollectionEntity = get(dataCollectionName);
 		return dataSampleService.create(dataCollectionEntity, name, fileName, sample, comment, email);
 	}
+
+    @Override
+    public DataCollectionEntity rollbackVersion(final String name, final Long version, final String email) {
+
+        final DataCollectionEntity existingDataCollectionEntity = get(name);
+        final DataCollectionFileEntity versionForRollback = dataCollectionFileRepository.findByVersionAndDataCollection(version, existingDataCollectionEntity)
+                .orElseThrow(() -> new DataCollectionVersionNotFoundException(String.valueOf(version)));
+        final String comment = new StringBuilder().append("Rollback to version: ").append(versionForRollback.getVersion()).toString();
+
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        final Long latestVersion = dataCollectionFileRepository.findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
+        final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity, userEntity);
+        final DataCollectionFileEntity newVersion = new DataCollectionFileEntity();
+        newVersion.setDataCollection(existingDataCollectionEntity);
+        newVersion.setVersion(latestVersion + 1);
+        newVersion.setData(versionForRollback.getData());
+        newVersion.setFileName(versionForRollback.getFileName());
+        newVersion.setCreatedOn(new Date());
+        newVersion.setAuthor(userEntity);
+        newVersion.setComment(comment);
+
+        existingDataCollectionEntity.setModifiedOn(new Date());
+        existingDataCollectionEntity.getVersions().add(newVersion);
+        existingDataCollectionEntity.setLatestVersion(newVersion);
+        existingDataCollectionEntity.getDataCollectionLog().add(logEntity);
+
+        final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.save(existingDataCollectionEntity);
+        final List<TemplateFileEntity> templateEntities = templateRepository.findTemplatesFilesByDataCollectionId(existingDataCollectionEntity.getId());
+        if (Objects.nonNull(templateEntities)) {
+            final List<TemplateFileEntity> newFiles = new LinkedList<>();
+            templateEntities.forEach(t -> {
+                final TemplateEntity extendedTemplateEntity = templateService.createNewVersionAsCopy(t, userEntity, "");
+                extendedTemplateEntity.getLatestFile().setDataCollectionFile(dataCollectionEntity.getLatestVersion());
+                newFiles.add(extendedTemplateEntity.getLatestFile());
+            });
+            templateFileRepository.saveAll(newFiles);
+        }
+        return dataCollectionEntity;
+    }
 }
