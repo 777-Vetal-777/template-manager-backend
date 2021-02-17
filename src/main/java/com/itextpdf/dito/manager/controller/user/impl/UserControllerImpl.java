@@ -47,19 +47,19 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> update(final String userName, final UserUpdateRequestDTO userUpdateRequestDTO) {
-        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), userName));
+        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), decodeBase64(userName)));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO) {
-        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(),userName);
+        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(),decodeBase64(userName));
         return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<UserDTO> get(final String userName, final Principal principal) {
-        final UserDTO user = userMapper.map(userService.findByEmail(principal.getName()));
+        final UserDTO user = userMapper.map(userService.findByEmail(decodeBase64(userName)));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
