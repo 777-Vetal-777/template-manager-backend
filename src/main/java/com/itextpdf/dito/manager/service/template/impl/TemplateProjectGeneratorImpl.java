@@ -49,12 +49,12 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
     /**
      * Generate template project with template file and data sample.
      *
-     * @param templateEntity - to be generated in project.
+     * @param templateEntity   - to be generated in project.
      * @param sampleFileEntity - using Data Sample file
      * @return .zip template project file
      */
     private File generateZipByTemplateName(final TemplateEntity templateEntity,
-                                          final DataSampleFileEntity sampleFileEntity) {
+                                           final DataSampleFileEntity sampleFileEntity) {
         return generateZipByTemplate(templateEntity, toDataSampleList(templateEntity, sampleFileEntity));
     }
 
@@ -72,7 +72,11 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
             createFile(TEMPLATES_FOLDER, templateName, templateEntity.getLatestFile().getData(), directories);
             //write all data samples to root of tmp folder
             if (Objects.nonNull(dataSampleFileEntities)) {
-                dataSampleFileEntities.forEach(fileEntity -> createFile(DATA_FOLDER, fileEntity.getFileName(), fileEntity.getData(), directories));
+                dataSampleFileEntities.forEach(fileEntity -> {
+                    if (fileEntity != null) {
+                        createFile(DATA_FOLDER, fileEntity.getFileName(), fileEntity.getData(), directories);
+                    }
+                });
             }
             //write folder to zip
             final Path folders = directories.get(templateName);
@@ -86,7 +90,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
     }
 
     private void createFile(final String templateName, final String fileName, final byte[] file,
-                           final Map<String, Path> folders) {
+                            final Map<String, Path> folders) {
         try {
             final Path newFile = Path
                     .of(new StringBuilder(folders.get(templateName).toAbsolutePath().toString()).append("/")
@@ -126,7 +130,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
     private File generateProjectFolderByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities) {
         final File projectFolder;
         try {
-            projectFolder = Files.createTempDirectory(FilesUtils.TEMP_DIRECTORY.toPath(),"preview_".concat(templateEntity.getName())).toFile();
+            projectFolder = Files.createTempDirectory(FilesUtils.TEMP_DIRECTORY.toPath(), "preview_".concat(templateEntity.getName())).toFile();
         } catch (IOException e) {
             throw new TemplateProjectGenerationException(e.getMessage());
         }
@@ -148,7 +152,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
 
     private List<DataSampleFileEntity> toDataSampleList(final TemplateEntity templateEntity,
                                                         final DataSampleFileEntity sampleFileEntity) {
-        return  Collections.singletonList(Optional.ofNullable(sampleFileEntity).orElseGet(() ->
+        return Collections.singletonList(Optional.ofNullable(sampleFileEntity).orElseGet(() ->
                 dataSampleRepository.findDataSampleByTemplateId(templateEntity.getId()).map(
                         DataSampleEntity::getLatestVersion).orElse(null)));
     }
