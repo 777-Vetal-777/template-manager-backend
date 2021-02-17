@@ -5,8 +5,7 @@
 file name: spring-security-core-5.3.6.RELEASE.jar
 ]]></notes>
         <vulnerabilityName>CVE-2018-1258</vulnerabilityName>
-        <notes>False positive. This suppression will have to been removed once it fixed. Issue:
-            https://github.com/jeremylong/DependencyCheck/issues/1827
-        </notes>
+        <!-- False positive. This suppression will have to been removed once it fixed.
+        Issue: https://github.com/jeremylong/DependencyCheck/issues/1827 -->
     </suppress>
 </suppressions>

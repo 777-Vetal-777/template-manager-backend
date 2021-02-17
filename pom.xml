@@ -115,12 +115,12 @@
             <artifactId>sdk-java</artifactId>
             <version>${itext.sdk-java.version}</version>
         </dependency>
-<!--        <dependency>
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin-stdlib.version}</version>
             <scope>compile</scope>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
