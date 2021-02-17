@@ -5,12 +5,13 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 public interface TemplateProjectGenerator {
-    File generateZipByTemplateName(TemplateEntity templateEntity, DataSampleFileEntity sampleFileEntity);
+    File generateProjectFolderByTemplate(TemplateEntity templateEntity, DataSampleFileEntity dataSampleFileEntity);
 
-    //TODO remove this method in future or make it private
-    void createFile(String templateName, String fileName, byte[] file,
-                    Map<String, Path> folders);
+    File generateZippedProjectByTemplate(TemplateEntity templateEntity, DataSampleFileEntity dataSampleFileEntity);
+
+    File generateZippedProjectByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities);
 }

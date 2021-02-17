@@ -17,7 +17,6 @@ import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
-import com.itextpdf.dito.manager.dto.template.export.TemplateExportDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -30,6 +29,7 @@ import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
+import com.itextpdf.dito.manager.service.template.TemplateExportService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
 import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -62,6 +62,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final FileVersionMapper fileVersionMapper;
     private final TemplateDeploymentService templateDeploymentService;
     private final TemplatePreviewGenerator templatePreviewGenerator;
+    private final TemplateExportService templateExportService;
     private final WorkspaceMapper workspaceMapper;
 
     public TemplateControllerImpl(final TemplateService templateService,
@@ -74,6 +75,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final FileVersionMapper fileVersionMapper,
                                   final TemplateDeploymentService templateDeploymentService,
                                   final TemplatePreviewGenerator templatePreviewGenerator,
+                                  final TemplateExportService templateExportService,
                                   final WorkspaceMapper workspaceMapper) {
         this.templateService = templateService;
         this.templateMapper = templateMapper;
@@ -85,6 +87,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateDependencyService = templateDependencyService;
         this.templateDeploymentService = templateDeploymentService;
         this.templatePreviewGenerator = templatePreviewGenerator;
+        this.templateExportService = templateExportService;
         this.workspaceMapper = workspaceMapper;
     }
 
@@ -162,8 +165,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<byte[]> preview(final String templateName, final String dataSampleName) {
         final String decodedTemplateName = decodeBase64(templateName);
-        final ByteArrayOutputStream pdfStream = (ByteArrayOutputStream) templatePreviewGenerator
-                .generatePreview(decodedTemplateName, dataSampleName);
+        final ByteArrayOutputStream pdfStream = templatePreviewGenerator.generatePreview(decodedTemplateName, dataSampleName);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -247,7 +249,14 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<byte[]> export(final String templateName, final TemplateExportDTO settings) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<byte[]> export(final String templateName) {
+        final String decodedTemplateName = decodeBase64(templateName);
+        final byte[] zippedProject = templateExportService.export(decodedTemplateName);
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final String filename = decodedTemplateName.concat(".dito");
+        headers.setContentDispositionFormData("attachment", filename);
+        return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }
 }

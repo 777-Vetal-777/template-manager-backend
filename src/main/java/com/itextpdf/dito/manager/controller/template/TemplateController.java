@@ -11,7 +11,6 @@ import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
-import com.itextpdf.dito.manager.dto.template.export.TemplateExportDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -302,10 +301,9 @@ public interface TemplateController {
     @Operation(summary = "Export template", description = "Export template as zipped DITO project",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Exported template is in response.", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
+            @ApiResponse(responseCode = "200", description = "Exported template is in response.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)),
             @ApiResponse(responseCode = "404", description = "Template not found"),
-            @ApiResponse(responseCode = "422", description = "Could not proceed template export.")
+            @ApiResponse(responseCode = "422", description = "Could not proceed with template export.")
     })
-    ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
-                  @Parameter(description = "Additional settings", required = false) @ParameterObject TemplateExportDTO settings);
+    ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
 }

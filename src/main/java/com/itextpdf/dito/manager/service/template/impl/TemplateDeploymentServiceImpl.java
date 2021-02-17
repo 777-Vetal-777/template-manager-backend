@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.instance.DefaultInstanceException;
@@ -154,8 +155,9 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final String instanceSocket = instanceEntity.getSocket();
         final String instanceRegisterToken = instanceEntity.getRegisterToken();
         final TemplateDescriptorDTO templateDescriptorDTO = templateMapper.mapToDescriptor(templateFileEntity, isDefaultInstance);
-        final File templateProjectFile = templateProjectGenerator.generateZipByTemplateName(templateEntity, null);
+        final File templateProjectFile = templateProjectGenerator.generateZippedProjectByTemplate(templateEntity, (DataSampleFileEntity) null);
         promoteTemplateToInstance(instanceRegisterToken, instanceSocket, templateDescriptorDTO, templateProjectFile);
+        templateProjectFile.delete();
     }
 
     private TemplateDeploymentDTO promoteTemplateToInstance(final String instanceRegisterToken,
