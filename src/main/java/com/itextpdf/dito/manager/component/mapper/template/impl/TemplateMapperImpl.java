@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
+import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
@@ -19,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -120,6 +122,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         if (entity.getBlockedBy() != null) {
             result.setBlocked(true);
         }
+        result.setDeployedVersions(getDeployedVersions(entity));
         return result;
     }
 
@@ -160,6 +163,37 @@ public class TemplateMapperImpl implements TemplateMapper {
         templateDeployedVersionDTO.setStageName(stageEntity != null ? stageEntity.getName() : null);
         templateDeployedVersionDTO.setVersion(templateFileEntity.getVersion());
         templateDeployedVersionDTO.setDeployed(templateFileEntity.getDeployed());
+        return templateDeployedVersionDTO;
+    }
+
+    private List<TemplateDeployedVersionDTO> getDeployedVersions(final TemplateEntity templateEntity) {
+        final PromotionPathEntity promotionPathEntity = templateEntity.getLatestFile().getStage().getPromotionPath();
+        final List<TemplateFileEntity> files = templateEntity.getFiles();
+        final List<StageEntity> stagesOnPromotionPath = promotionPathEntity.getStages();
+        final List<TemplateDeployedVersionDTO> deployedVersions = new ArrayList<>();
+        for (final StageEntity stageEntity : stagesOnPromotionPath) {
+            if (stageEntity.getSequenceOrder() == 0) {
+                final TemplateFileEntity versionOnDevStage = files.stream()
+                        .filter(version -> version.getStage().equals(stageEntity))
+                        .max(Comparator.comparingLong(TemplateFileEntity::getVersion))
+                        .orElse(null);
+                deployedVersions.add(map(versionOnDevStage, stageEntity));
+            } else {
+                final TemplateFileEntity versionOnStage = files.stream()
+                        .filter(version -> version.getStage().equals(stageEntity))
+                        .findFirst()
+                        .orElse(null);
+                deployedVersions.add(map(versionOnStage, stageEntity));
+            }
+        }
+        return deployedVersions;
+    }
+
+    private TemplateDeployedVersionDTO map(final TemplateFileEntity templateFileEntity, final StageEntity stageEntity) {
+        final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
+        templateDeployedVersionDTO.setStageName(stageEntity.getName());
+        templateDeployedVersionDTO.setVersion(templateFileEntity != null ? templateFileEntity.getVersion() : null);
+        templateDeployedVersionDTO.setDeployed(templateFileEntity != null ? templateFileEntity.getDeployed() : false);
         return templateDeployedVersionDTO;
     }
 }
