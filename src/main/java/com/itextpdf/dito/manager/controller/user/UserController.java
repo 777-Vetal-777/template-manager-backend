@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,11 +42,14 @@ public interface UserController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/users";
     String CURRENT_USER = "/me";
+    String USER_NAME_PATH_VARIABLE = "username";
 
     // Endpoints
+    String USER_NAME_ENDPOINT_WITH_PATH_VARIABLE = "/{" + USER_NAME_PATH_VARIABLE + "}";
     String USERS_UNBLOCK_ENDPOINT = "/unblock";
     String USERS_ACTIVATION_ENDPOINT = "/update-activity";
-    String CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
+    String CURRENT_USER_CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
+    String USER_CHANGE_PASSWORD_ENDPOINT = USER_NAME_ENDPOINT_WITH_PATH_VARIABLE + "/change-password";
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
     String UPDATE_USERS_ROLES_ENDPOINT = "/roles";
     String FORGOT_PASSWORD = "/forgot-password";
@@ -60,6 +65,37 @@ public interface UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input or user already exists", content = @Content),
     })
     ResponseEntity<UserDTO> create(@RequestBody UserCreateRequestDTO userCreateRequestDTO, Principal principal);
+
+    @GetMapping(USER_NAME_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E3_US128_USER_DETAILS_PAGE')")
+    @Operation(summary = "Get info about user by email", description = "Get information about a user using email as a key. Result - First name, last name, user roles. ",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved user data", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "User with such mail was not found", content = @Content)
+    })
+    ResponseEntity<UserDTO> get(@Parameter(name = USER_NAME_PATH_VARIABLE, description = "Encoded with base64 username", required = true) @PathVariable(USER_NAME_PATH_VARIABLE) String userName, Principal principal);
+
+    @PatchMapping(USER_NAME_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("hasAuthority('E3_US128_USER_DETAILS_PAGE')")
+    @Operation(summary = "Update specified user", description = "Update first and last name of the user making request",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Successfully updated user data", content = {
+            @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
+    ResponseEntity<UserDTO> update(@Parameter(name = USER_NAME_PATH_VARIABLE, description = "Encoded with base64 username", required = true) @PathVariable(USER_NAME_PATH_VARIABLE) String userName,
+            @RequestBody UserUpdateRequestDTO userUpdateRequestDTO);
+
+    @PatchMapping(USER_CHANGE_PASSWORD_ENDPOINT)
+    @PreAuthorize("hasAuthority('E3_US128_USER_DETAILS_PAGE')")
+    @Operation(summary = "Change specified user password", description = "Change specified user password",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
+            @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
+    })
+    ResponseEntity<UserDTO> updatePassword(@Parameter(name = USER_NAME_PATH_VARIABLE, description = "Encoded with base64 username", required = true) @PathVariable(USER_NAME_PATH_VARIABLE) String userName,
+            @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E3_US_9_USERS_TABLE', 'E2_US6_SETTINGS_PANEL')")
@@ -102,10 +138,9 @@ public interface UserController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Successfully updated user data", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
-    ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserUpdateRequestDTO userUpdateRequestDTO,
-                                              Principal principal);
+    ResponseEntity<UserDTO> updateCurrentUser(@RequestBody UserUpdateRequestDTO userUpdateRequestDTO, Principal principal);
 
-    @PatchMapping(CHANGE_PASSWORD_ENDPOINT)
+    @PatchMapping(CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
     @PreAuthorize("hasAnyAuthority('E1_US3_FORGOT_PASSWORD', 'E10_US86_CHANGE_PASSWORD', 'E2_US6_SETTINGS_PANEL')")
     @Operation(summary = "Change current user password", description = "Change current user password",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

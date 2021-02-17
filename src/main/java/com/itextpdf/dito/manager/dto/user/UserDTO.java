@@ -12,6 +12,15 @@ public class UserDTO {
     private Boolean blocked;
     private List<RoleDTO> roles;
     private List<String> authorities;
+    private Boolean passwordUpdatedByAdmin;
+
+    public Boolean getPasswordUpdatedByAdmin() {
+        return passwordUpdatedByAdmin;
+    }
+
+    public void setPasswordUpdatedByAdmin(Boolean passwordUpdatedByAdmin) {
+        this.passwordUpdatedByAdmin = passwordUpdatedByAdmin;
+    }
 
     public String getEmail() {
         return email;

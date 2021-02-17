@@ -41,6 +41,8 @@ public class UserEntity implements UserDetails {
     private Date modifiedAt;
     @Column(name = "reset_password_token_date")
     private Date resetPasswordTokenDate;
+    @Column(name = "password_updated_by_admin", insertable = false)
+    private Boolean passwordUpdatedByAdmin;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -90,6 +92,14 @@ public class UserEntity implements UserDetails {
     @Override
     public String getPassword() {
         return password;
+    }
+
+    public Boolean getPasswordUpdatedByAdmin() {
+        return passwordUpdatedByAdmin;
+    }
+
+    public void setPasswordUpdatedByAdmin(Boolean passwordUpdated) {
+        this.passwordUpdatedByAdmin = passwordUpdated;
     }
 
     public Long getId() {

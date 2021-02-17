@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
@@ -45,6 +46,24 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
+    public ResponseEntity<UserDTO> update(final String userName, final UserUpdateRequestDTO userUpdateRequestDTO) {
+        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), userName));
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO) {
+        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(),userName);
+        return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UserDTO> get(final String userName, final Principal principal) {
+        final UserDTO user = userMapper.map(userService.findByEmail(principal.getName()));
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Page<UserDTO>> list(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
         return new ResponseEntity<>(userMapper.map(userService.getAll(pageable, userFilter, searchParam)), HttpStatus.OK);
     }
@@ -64,7 +83,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<UserDTO> updateCurrentUser(final UserUpdateRequestDTO userUpdateRequestDTO,
             Principal principal) {
-        UserDTO user = userMapper
+        final UserDTO user = userMapper
                 .map(userService.updateUser(userMapper.map(userUpdateRequestDTO), principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

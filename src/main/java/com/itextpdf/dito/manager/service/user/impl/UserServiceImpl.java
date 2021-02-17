@@ -69,11 +69,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity updateUser(UserEntity userEntity, String email) {
-        UserEntity persistedUserEntity = findByEmail(email);
+    public UserEntity updateUser(final UserEntity userEntity, final String email) {
+        final UserEntity persistedUserEntity = findByEmail(email);
         persistedUserEntity.setFirstName(userEntity.getFirstName());
         persistedUserEntity.setLastName(userEntity.getLastName());
-
+        persistedUserEntity.setPasswordUpdatedByAdmin(false);
         return userRepository.save(persistedUserEntity);
     }
 
@@ -151,12 +151,27 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (!encoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException();
         }
-        if (encoder.matches(newPassword, user.getPassword())) {
-            throw new NewPasswordTheSameAsOldPasswordException();
-        }
+        checkNewPasswordSameAsOld(newPassword, user.getPassword());
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
         return userRepository.save(user);
+    }
+
+    @Override
+    public UserEntity updatePassword(final String newPassword, final String userEmail) {
+        final UserEntity user = findByEmail(userEmail);
+        checkNewPasswordSameAsOld(newPassword, user.getPassword());
+        user.setPassword(encoder.encode(newPassword));
+        user.setModifiedAt(new Date());
+        //Password has been updated by the admin.
+        user.setPasswordUpdatedByAdmin(true);
+        return userRepository.save(user);
+    }
+
+    private void checkNewPasswordSameAsOld(String newPassword, String oldPasswords) {
+        if (encoder.matches(newPassword, oldPasswords)) {
+            throw new NewPasswordTheSameAsOldPasswordException();
+        }
     }
 
     @Override

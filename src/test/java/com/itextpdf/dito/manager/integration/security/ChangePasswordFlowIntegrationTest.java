@@ -36,7 +36,7 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.save(adminUser);
 
         PasswordChangeRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/users/user-update-password-request.json"), PasswordChangeRequestDTO.class);
-        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
+        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -48,7 +48,7 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
         PasswordChangeRequestDTO request = new PasswordChangeRequestDTO();
         request.setOldPassword("admin@email.com");
         request.setNewPassword("admin@email.com");
-        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
+        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -59,7 +59,7 @@ public class ChangePasswordFlowIntegrationTest extends AbstractIntegrationTest {
     public void failed_InvalidPassword() throws Exception {
         PasswordChangeRequestDTO request = new PasswordChangeRequestDTO();
         request.setOldPassword("adminincorrect@email.com");
-        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CHANGE_PASSWORD_ENDPOINT)
+        mockMvc.perform(patch(UserController.BASE_NAME + UserController.CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

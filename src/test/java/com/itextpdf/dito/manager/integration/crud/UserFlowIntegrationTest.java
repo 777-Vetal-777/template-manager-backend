@@ -162,7 +162,9 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void activateUsers() throws Exception {
         user1.setActive(Boolean.FALSE);
+        user1.setPasswordUpdatedByAdmin(false);
         user2.setActive(Boolean.FALSE);
+        user2.setPasswordUpdatedByAdmin(false);
 
         user1 = userRepository.save(user1);
         user2 = userRepository.save(user2);
@@ -248,7 +250,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         FailedLoginAttemptEntity failedLoginAttemptEntity = new FailedLoginAttemptEntity();
         failedLoginAttemptEntity.setUser(user1);
         failedLoginAttemptEntity.setVersion(new Date());
-
+        user1.setPasswordUpdatedByAdmin(false);
         userRepository.save(user1);
         failedLoginRepository.save(failedLoginAttemptEntity);
 

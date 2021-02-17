@@ -1,0 +1,30 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="001-add-column-password-updated-by-admin-to-user-table" author="Yaroslav_Maievskij">
+        <addColumn tableName="user">
+            <column name="password_updated_by_admin" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" notNullConstraintName="user_password_updated_by_admin_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="002-add-permission-e3-us128-user-details-page-default-permission-to-permission-table" author="Yaroslav_Maievskij">
+        <insert tableName="permission">
+            <column name="id" value="101"/>
+            <column name="name" value="E3_US128_USER_DETAILS_PAGE"/>
+            <column name="optional_for_custom_role" value="false"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" value="101"/>
+        </insert>
+        <insert tableName="role_permission">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" value="101"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
