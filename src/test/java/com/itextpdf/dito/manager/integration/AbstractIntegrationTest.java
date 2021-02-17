@@ -4,9 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
 import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImpl;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
+import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.PromotionPathEntity;
+import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.WorkspaceEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.repository.stage.StageRepository;
+import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
+import com.itextpdf.dito.manager.service.user.UserService;
+import org.aspectj.lang.annotation.After;
 import org.bouncycastle.util.encoders.Base64;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,6 +32,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -45,8 +58,19 @@ public abstract class AbstractIntegrationTest {
     private InstanceService instanceService;
     @Autowired
     private TemplateDeploymentService templateDeploymentService;
+    @Autowired
+    private WorkspaceRepository workspaceRepository;
+    @Autowired
+    private InstanceRepository instanceRepository;
+    @Autowired
+    private StageRepository stageRepository;
+    @Autowired
+    private UserService userService;
 
     protected InstanceClient instanceClientMock;
+    protected WorkspaceEntity defaultWorkspaceEntity;
+    protected  PromotionPathEntity defaultPromotionPathEntity;
+    protected InstanceEntity defaultInstanceEntity;
 
     @BeforeEach
     public void initMocks(){
@@ -57,6 +81,15 @@ public abstract class AbstractIntegrationTest {
         InstanceRegisterResponseDTO sdkRegisterResponse = new InstanceRegisterResponseDTO();
         sdkRegisterResponse.setToken("test-token");
         when(instanceClientMock.register(any(String.class))).thenReturn(sdkRegisterResponse);
+
+        generateDefaultPromotionPath();
+    }
+
+    @AfterEach
+    public void clear(){
+        stageRepository.deleteAll();
+        instanceRepository.deleteAll();
+        workspaceRepository.deleteAll();
     }
 
     protected ResultActions performPostFilesInteraction(URI uri, MockMultipartFile... files) throws Exception {
@@ -65,6 +98,30 @@ public abstract class AbstractIntegrationTest {
             multipartRequestBuilder = multipartRequestBuilder.file(files[i]);
         }
         return this.mockMvc.perform(multipartRequestBuilder);
+    }
+
+    private void generateDefaultPromotionPath(){
+        final StageEntity defaultStageEntity = new StageEntity();
+        defaultStageEntity.setSequenceOrder(0);
+        defaultStageEntity.setName("DEV");
+        defaultPromotionPathEntity = new PromotionPathEntity();
+        defaultStageEntity.setPromotionPath(defaultPromotionPathEntity);
+        defaultStageEntity.setPromotionPath(defaultPromotionPathEntity);
+        defaultWorkspaceEntity = new WorkspaceEntity();
+        defaultPromotionPathEntity.setWorkspace(defaultWorkspaceEntity);
+        defaultWorkspaceEntity.setName("workspace-test");
+        defaultWorkspaceEntity.setTimezone("Europe/Brussels");
+        defaultWorkspaceEntity.setLanguage("ENG");
+        defaultWorkspaceEntity.setPromotionPath(defaultPromotionPathEntity);
+        workspaceRepository.save(defaultWorkspaceEntity);
+        defaultInstanceEntity = new InstanceEntity();
+        defaultInstanceEntity.setName("default-instance");
+        defaultInstanceEntity.setSocket("socket-2");
+        defaultInstanceEntity.setStage(defaultStageEntity);
+        defaultInstanceEntity.setCreatedOn(new Date());
+        defaultInstanceEntity.setCreatedBy(userService.findByEmail("admin@email.com"));
+        instanceRepository.save(defaultInstanceEntity);
+        stageRepository.save(defaultStageEntity);
     }
 
     protected String encodeStringToBase64(String value) {

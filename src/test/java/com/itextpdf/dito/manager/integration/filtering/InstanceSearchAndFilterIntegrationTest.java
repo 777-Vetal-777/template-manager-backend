@@ -25,37 +25,21 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
     
     @Autowired
     private UserRepository userRepository;
-    
-    private InstanceEntity instanceEntity;
-    
-    @BeforeEach
-    public void init(){
-        instanceEntity = new InstanceEntity();
-        instanceEntity.setName("test-instance");
-        instanceEntity.setSocket("socket-name");
-        instanceEntity.setCreatedBy(userRepository.findByEmail("admin@email.com").orElseThrow());
-        instanceRepository.save(instanceEntity);
-    }
-    
-    @AfterEach
-    public void tearDown(){
-        instanceRepository.delete(instanceEntity);
-    }
 
     @Override
     @Test
     public void test_filtering() throws Exception {
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
-                .param("name", "Test"))
+                .param("name", "default"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
+                .andExpect(jsonPath("$.content[0].name", is(defaultInstanceEntity.getName())));
 
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
                 .param("socket", "Socket"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
+                .andExpect(jsonPath("$.content[0].name", is(defaultInstanceEntity.getName())));
 
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
                 .param("createdOn", "01/01/1970")
@@ -69,10 +53,10 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
     public void test_searchAndFiltering() throws Exception {
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
                 .param("name", "instance")
-                .param("search", "test"))
+                .param("search", "default"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(instanceEntity.getName())));
+                .andExpect(jsonPath("$.content[0].name", is(defaultInstanceEntity.getName())));
 
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
                 .param("name", "instance")

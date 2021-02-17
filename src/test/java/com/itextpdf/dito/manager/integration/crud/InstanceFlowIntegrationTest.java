@@ -48,20 +48,8 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private InstanceService instanceService;
 
-    private WorkspaceEntity defaultWorkspace;
-
-    @BeforeEach
-    public void init(){
-        defaultWorkspace = new WorkspaceEntity();
-        defaultWorkspace.setName("default-ws");
-        defaultWorkspace.setLanguage("ENG");
-        defaultWorkspace.setTimezone("America/Sao_Paulo");
-        workspaceRepository.save(defaultWorkspace);
-    }
-
     @AfterEach
     public void tearDown() {
-        workspaceRepository.delete(defaultWorkspace);
         instanceRepository.deleteAll();
     }
 

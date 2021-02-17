@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,9 @@ public class InstanceMapperImpl implements InstanceMapper {
 
     @Override
     public List<InstanceDTO> mapEntities(final List<InstanceEntity> entities) {
-        return entities.stream().map(this::map).collect(Collectors.toList());
+        return !CollectionUtils.isEmpty(entities)
+                ? entities.stream().map(this::map).collect(Collectors.toList())
+                : Collections.emptyList();
     }
 
     @Override

@@ -56,6 +56,8 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testCreateWorkspace() throws Exception {
+        workspaceRepository.deleteAll();
+
         WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
@@ -106,16 +108,6 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        WorkspaceCreateRequestDTO createRequest = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
-                        WorkspaceCreateRequestDTO.class);
-        //createRequest.setMainDevelopmentInstanceSocket(INSTANCE_SOCKET);
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(createRequest))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-
         WorkspaceDTO updateRequest = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceDTO.class);
@@ -133,22 +125,14 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testGetWorkspace() throws Exception {
-        WorkspaceCreateRequestDTO request = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
-                        WorkspaceCreateRequestDTO.class);
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
         final String base64EncodedName = Base64.getEncoder()
                 .encodeToString("workspace-test".getBytes());
         mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("name").value(request.getName()))
-                .andExpect(jsonPath("language").value(request.getLanguage()))
-                .andExpect(jsonPath("timezone").value(request.getTimezone()));
+                .andExpect(jsonPath("name").isNotEmpty())
+                .andExpect(jsonPath("language").isNotEmpty())
+                .andExpect(jsonPath("timezone").isNotEmpty());
     }
 
     @Test

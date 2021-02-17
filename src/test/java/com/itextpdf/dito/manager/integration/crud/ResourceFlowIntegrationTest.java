@@ -304,7 +304,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].name").value(existingTemplate.getName()))
                 .andExpect(jsonPath("$[0].version").value(1))
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
-                .andExpect(jsonPath("$[0].stage").isEmpty())
+                .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
     }
 
@@ -746,7 +746,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].name").value(existingTemplate.getName()))
                 .andExpect(jsonPath("$[0].version").value(2))
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
-                .andExpect(jsonPath("$[0].stage").isEmpty())
+                .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
     }
 
@@ -825,7 +825,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].name").value(existingTemplate.getName()))
                 .andExpect(jsonPath("$[0].version").value(3))
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
-                .andExpect(jsonPath("$[0].stage").isEmpty())
+                .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
     }
 

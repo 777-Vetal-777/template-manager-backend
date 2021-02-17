@@ -72,29 +72,7 @@ public class LicenseFlowIntegrationTest  extends AbstractIntegrationTest {
 
 	@BeforeEach
     void tearUp() throws Exception {
-		
 		Mockito.when(licenseMapper.getDitoHelper(Files.readAllBytes(Paths.get("src/test/resources/test-data/license/volume-andersen.xml")))).thenReturn(ditoHelper);
-        
-		InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/instances-create-request.json"),
-                        InstancesRememberRequestDTO.class);
-        mockMvc.perform(post(InstanceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        WorkspaceCreateRequestDTO request = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
-                        WorkspaceCreateRequestDTO.class);
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value("workspace-test"))
-                .andExpect(jsonPath("language").value("ENG"))
-                .andExpect(jsonPath("timezone").value("America/Sao_Paulo"));
-
     }
  
 	@Test

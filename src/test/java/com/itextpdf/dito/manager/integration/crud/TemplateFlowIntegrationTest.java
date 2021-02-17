@@ -5,9 +5,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
-import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
-import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
@@ -18,7 +16,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +34,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -67,18 +68,17 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private StageRepository stageRepository;
 
-    @BeforeEach
+    @AfterEach
     public void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
         dataCollectionRepository.deleteAll();
-        workspaceRepository.deleteAll();
-        instanceRepository.deleteAll();
-        stageRepository.deleteAll();
     }
 
     @Test
     public void testCreateTemplateWithoutData() throws Exception {
+        addStage();
+
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
@@ -113,8 +113,22 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk());
 
-        //Rollback version
         final Long currentVersion = 2L;
+        //Promote
+        mockMvc.perform(put(TemplateController.BASE_NAME + TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
+                .andExpect(jsonPath("stageName").value("STAGE"))
+                .andExpect(jsonPath("deployed").value("true"));
+
+        //Undeploy
+        mockMvc.perform(put(TemplateController.BASE_NAME + TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
+                .andExpect(jsonPath("stageName").value("DEV"))
+                .andExpect(jsonPath("deployed").value("false"));
+
+        //Rollback version
         mockMvc.perform(post(TemplateController.BASE_NAME + TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("version").value("3"))
@@ -393,38 +407,25 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    private void generateStageEntity(final List<TemplateFileEntity> files) {
-        final StageEntity defaultStageEntity = new StageEntity();
-        defaultStageEntity.setSequenceOrder(0);
-        defaultStageEntity.setName("DEV");
+    private StageEntity addStage(){
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setSequenceOrder(1);
         stageEntity.setName("STAGE");
-        final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
-        defaultStageEntity.setPromotionPath(promotionPathEntity);
-        stageEntity.setPromotionPath(promotionPathEntity);
-        final WorkspaceEntity workspaceEntity = new WorkspaceEntity();
-        promotionPathEntity.setWorkspace(workspaceEntity);
-        workspaceEntity.setName("workspace");
-        workspaceEntity.setTimezone("Europe/Brussels");
-        workspaceEntity.setPromotionPath(promotionPathEntity);
-        workspaceRepository.save(workspaceEntity);
+        stageEntity.setPromotionPath(defaultPromotionPathEntity);
         final InstanceEntity instanceEntity = new InstanceEntity();
         instanceEntity.setName("instance");
         instanceEntity.setSocket("socket");
         instanceEntity.setStage(stageEntity);
-        final InstanceEntity defaultInstanceEntity = new InstanceEntity();
-        defaultInstanceEntity.setName("default-instance");
-        defaultInstanceEntity.setSocket("socket-2");
-        defaultInstanceEntity.setStage(defaultStageEntity);
-        instanceEntity.setTemplateFile(files);
         stageEntity.setInstances(Arrays.asList(instanceEntity));
         instanceRepository.save(instanceEntity);
-        instanceRepository.save(defaultInstanceEntity);
+        return stageEntity;
+    }
+
+    private void generateStageEntity(final List<TemplateFileEntity> files) {
+        final StageEntity nextStage = addStage();
         for (final TemplateFileEntity file : files) {
-            file.setStage(stageEntity);
+            file.setStage(nextStage);
         }
         templateFileRepository.saveAll(files);
-        stageRepository.save(defaultStageEntity);
     }
 }
