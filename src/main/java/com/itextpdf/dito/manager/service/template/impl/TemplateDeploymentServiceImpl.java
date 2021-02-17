@@ -69,7 +69,6 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         for (final InstanceEntity instanceEntity : templateFileEntity.getInstance()) {
             promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
         }
-        templateFileEntity.setStage(getDefaultStage());
     }
 
     /**
