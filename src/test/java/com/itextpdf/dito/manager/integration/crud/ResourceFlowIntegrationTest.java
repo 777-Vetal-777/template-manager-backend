@@ -24,6 +24,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +70,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String IMAGE_NAME = "test-image";
     private static final String IMAGE_TYPE = "IMAGE";
     private static final String IMAGE_FILE_NAME = "any-name.png";
-    private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
+    private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random.png"));
     private static final MockMultipartFile IMAGE_TYPE_PART = new MockMultipartFile("type", "type", "text/plain", IMAGE_TYPE.getBytes());
     private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain", IMAGE_NAME.getBytes());
 
@@ -83,10 +87,10 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String BOLD_ITALIC_FILE_NAME = "bold_italic.ttf";
 
     private static final MockMultipartFile FONT_TYPE_PART = new MockMultipartFile("type", FONT_TYPE, "text/plain", FONT_TYPE.getBytes());
-    private static final MockMultipartFile REGULAR_FONT_FILE_PART = new MockMultipartFile("regular", REGULAR_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
-    private static final MockMultipartFile BOLD_FONT_FILE_PART = new MockMultipartFile("bold", BOLD_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
-    private static final MockMultipartFile ITALIC_FONT_FILE_PART = new MockMultipartFile("italic", ITALIC_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
-    private static final MockMultipartFile BOLD_ITALIC_FILE_PART = new MockMultipartFile("bold_italic", BOLD_ITALIC_FILE_NAME, "text/plain", "{\"file\":\"data\"}".getBytes());
+    private static final MockMultipartFile REGULAR_FONT_FILE_PART = new MockMultipartFile("regular", REGULAR_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+    private static final MockMultipartFile BOLD_FONT_FILE_PART = new MockMultipartFile("bold", BOLD_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+    private static final MockMultipartFile ITALIC_FONT_FILE_PART = new MockMultipartFile("italic", ITALIC_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+    private static final MockMultipartFile BOLD_ITALIC_FILE_PART = new MockMultipartFile("bold_italic", BOLD_ITALIC_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
 
     @Autowired
     private ResourceRepository resourceRepository;
@@ -106,6 +110,18 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private WorkspaceRepository workspaceRepository;
     @Autowired
     private InstanceRepository instanceRepository;
+
+    private static byte[] readFileBytes(final String uri) {
+        byte[] result;
+
+        try {
+            result = Files.readAllBytes(Path.of(uri));
+        } catch (IOException e) {
+            result = new byte[] {};
+        }
+
+        return result;
+    }
 
     @AfterEach
     void tearDown() {
