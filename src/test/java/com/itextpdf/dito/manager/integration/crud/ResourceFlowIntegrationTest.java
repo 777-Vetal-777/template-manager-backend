@@ -24,7 +24,6 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +33,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -110,18 +106,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private WorkspaceRepository workspaceRepository;
     @Autowired
     private InstanceRepository instanceRepository;
-
-    private static byte[] readFileBytes(final String uri) {
-        byte[] result;
-
-        try {
-            result = Files.readAllBytes(Path.of(uri));
-        } catch (IOException e) {
-            result = new byte[] {};
-        }
-
-        return result;
-    }
 
     @AfterEach
     void tearDown() {

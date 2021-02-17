@@ -2,9 +2,11 @@ package com.itextpdf.dito.manager.integration.editor;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,12 +29,14 @@ import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 
+import javax.imageio.ImageIO;
+
 public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	private static final String IMAGE_NAME = "test-image";
 	private static final String IMAGE_TYPE = "IMAGE";
 	private static final String IMAGE_FILE_NAME = "any-name.png";
-	private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME,	"text/plain", "{\"file\":\"data\"}".getBytes());
+	private static final MockMultipartFile IMAGE_FILE_PART = new MockMultipartFile("resource", IMAGE_FILE_NAME,	"text/plain",  readFileBytes("src/test/resources/test-data/resources/random.png"));
 	private static final MockMultipartFile IMAGE_TYPE_PART = new MockMultipartFile("type", "type", "text/plain",IMAGE_TYPE.getBytes());
 	private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain",IMAGE_NAME.getBytes());
 	private static final String BASE64_RESOURCE_ID = "eyJuYW1lIjoidGVzdC1pbWFnZSIsInR5cGUiOiJJTUFHRSIsInN1Yk5hbWUiOm51bGx9";
@@ -60,13 +64,13 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 		final URI uri = UriComponentsBuilder.fromUriString(ResourceManagementController.CREATE_RESOURCE_URL).build()
 				.encode().toUri();
 
-		final MockMultipartFile decriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
+		final MockMultipartFile descriptorFile = new MockMultipartFile("descriptor", "descriptor", "application/json",
 				objectMapper.writeValueAsString(descriptor).getBytes());
 		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json",
-				"{\"file\":\"data\"}".getBytes());
+				readFileBytes("src/test/resources/test-data/resources/random.png"));
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
-				.file(decriptor)
+				.file(descriptorFile)
 				.file(data)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -77,8 +81,8 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.fromUriString(ResourceManagementController.CREATE_RESOURCE_URL + "/" + BASE64_RESOURCE_ID)
 				.build().encode().toUri();
 
-		final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json",
-				"{\"file\":\"NewData\"}".getBytes());
+		final MockMultipartFile newData = new MockMultipartFile("data", "data", MediaType.MULTIPART_FORM_DATA_VALUE,
+				readFileBytes("src/test/resources/test-data/resources/random.png"));
 		final MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(uriUpdate);
 		builder.with(new RequestPostProcessor() {
 			@Override
@@ -89,7 +93,7 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 		});
 		
 		mockMvc.perform(builder
-				.file(decriptor)
+				.file(descriptorFile)
 				.file(newData)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -98,8 +102,7 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 		mockMvc.perform(get(uriUpdate)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("file").value("NewData"));
+				.andExpect(status().isOk());
 	}
 	
 	@Test
@@ -131,8 +134,7 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 		mockMvc.perform(get(integratedResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("file").value("data"));
+				.andExpect(status().isOk());
 
 		// Get Integrated Resource By workspace Id
 		final URI integratedWorkspaceResourceUri = UriComponentsBuilder

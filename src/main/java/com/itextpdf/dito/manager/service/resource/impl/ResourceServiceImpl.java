@@ -27,7 +27,6 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
-
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -94,7 +93,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final UserEntity userEntity = userService.findByEmail(email);
 
         final ContentValidator contentValidator = contentValidators.get(type);
-        if (contentValidators.containsKey(type) && !fonts.values().stream().allMatch(f -> contentValidator.isValid(getFileBytes(f))) ) {
+        if (contentValidators.containsKey(type) && !fonts.values().stream().allMatch(f -> contentValidator.isValid(getFileBytes(f)))) {
             throw new InvalidResourceContentException();
         }
 
@@ -181,9 +180,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final List<TemplateEntity> templateEntities = templateRepository
                 .findTemplatesByResourceId(existingResourceEntity.getId());
         if (Objects.nonNull(templateEntities)) {
+            final String updatedDependenciesComment = new StringBuilder(updatedResourceEntity.getName()).append(" was updated to version ").append(fileEntity.getVersion().toString()).toString();
             templateEntities.forEach(t -> {
                 final TemplateEntity extendedTemplateEntity = templateService
-                        .createNewVersionAsCopy(t.getLatestFile(), userEntity, "");
+                        .createNewVersionAsCopy(t.getLatestFile(), userEntity, updatedDependenciesComment);
                 final Set<ResourceFileEntity> resourceFiles = extendedTemplateEntity.getLatestFile().getResourceFiles();
                 resourceFiles.removeAll(existingResourceEntity.getResourceFiles());
                 resourceFiles.add(fileEntity);
@@ -297,29 +297,29 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Override
     @ReadOnlyProperty
     public List<ResourceEntity> list() {
-		final List<ResourceEntity> resourceList = resourceRepository.findAll();
-		final List<ResourceEntity> resultResourceList = new ArrayList<>();
-		final Iterator<ResourceEntity> it = resourceList.iterator();
-		while (it.hasNext()) {			
-			final ResourceEntity resourceEntity = it.next();
-			if (Objects.equals(resourceEntity.getType(), ResourceTypeEnum.FONT)) {
-				for (final ResourceFileEntity resourceFileEntity : resourceEntity.getLatestFile()) {
-					final ResourceEntity newEntity = new ResourceEntity();
-					final StringBuilder sb = new StringBuilder();
-					sb.append(resourceEntity.getName());
-					sb.append("-");
-					sb.append(resourceFileEntity.getFontName());
-					newEntity.setName(sb.toString());
-					newEntity.setId(resourceEntity.getId());
-					newEntity.setLatestFile(Arrays.asList(new ResourceFileEntity[] { resourceFileEntity }));
-					newEntity.setType(resourceEntity.getType());
-					resultResourceList.add(newEntity);
-				}
-			} else {
-				resultResourceList.add(resourceEntity);
-			}
-		}
-		return resultResourceList;
+        final List<ResourceEntity> resourceList = resourceRepository.findAll();
+        final List<ResourceEntity> resultResourceList = new ArrayList<>();
+        final Iterator<ResourceEntity> it = resourceList.iterator();
+        while (it.hasNext()) {
+            final ResourceEntity resourceEntity = it.next();
+            if (Objects.equals(resourceEntity.getType(), ResourceTypeEnum.FONT)) {
+                for (final ResourceFileEntity resourceFileEntity : resourceEntity.getLatestFile()) {
+                    final ResourceEntity newEntity = new ResourceEntity();
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(resourceEntity.getName());
+                    sb.append("-");
+                    sb.append(resourceFileEntity.getFontName());
+                    newEntity.setName(sb.toString());
+                    newEntity.setId(resourceEntity.getId());
+                    newEntity.setLatestFile(Arrays.asList(new ResourceFileEntity[]{resourceFileEntity}));
+                    newEntity.setType(resourceEntity.getType());
+                    resultResourceList.add(newEntity);
+                }
+            } else {
+                resultResourceList.add(resourceEntity);
+            }
+        }
+        return resultResourceList;
     }
 
     @Override
@@ -364,19 +364,19 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity getResource(final String name, final ResourceTypeEnum type) {
         return resourceRepository.findByNameAndType(name, type).orElseThrow(() -> new ResourceNotFoundException(name));
     }
-     
-	@Override
-	@ReadOnlyProperty
-	public ResourceEntity get(final String name, final ResourceTypeEnum type, final String fontName) {
-		//changing new font name back to db name
-		final StringBuilder sb = new StringBuilder();
-		sb.append("-");
-		sb.append(fontName);
-		sb.append("$");
-		return resourceRepository.getByNameTypeAndFontName(name.replaceFirst(sb.toString(), ""), type, fontName)
-				.orElseThrow(() -> new ResourceNotFoundException(name));
-	}
-    
+
+    @Override
+    @ReadOnlyProperty
+    public ResourceEntity get(final String name, final ResourceTypeEnum type, final String fontName) {
+        //changing new font name back to db name
+        final StringBuilder sb = new StringBuilder();
+        sb.append("-");
+        sb.append(fontName);
+        sb.append("$");
+        return resourceRepository.getByNameTypeAndFontName(name.replaceFirst(sb.toString(), ""), type, fontName)
+                .orElseThrow(() -> new ResourceNotFoundException(name));
+    }
+
     @Override
     public byte[] getFile(final String uuid) {
         final ResourceFileEntity file = resourceFileRepository.findFirstByUuid(uuid)

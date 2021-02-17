@@ -31,7 +31,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -71,6 +74,18 @@ public abstract class AbstractIntegrationTest {
     protected WorkspaceEntity defaultWorkspaceEntity;
     protected  PromotionPathEntity defaultPromotionPathEntity;
     protected InstanceEntity defaultInstanceEntity;
+
+    protected static byte[] readFileBytes(final String uri) {
+        byte[] result;
+
+        try {
+            result = Files.readAllBytes(Path.of(uri));
+        } catch (IOException e) {
+            result = new byte[] {};
+        }
+
+        return result;
+    }
 
     @BeforeEach
     public void initMocks(){
