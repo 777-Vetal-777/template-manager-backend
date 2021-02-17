@@ -16,6 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -35,8 +37,6 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
     private static final String IMAGES = "images";
     private static final String FILE_NAME = "any-permission-name.png";
 
-    private static final MockMultipartFile FILE_PART = new MockMultipartFile("resource", FILE_NAME, "text/plain",
-            "{\"file\":\"data\"}".getBytes());
     private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain",
             NAME.getBytes());
     private static final MockMultipartFile TYPE_PART = new MockMultipartFile("type", "type", "text/plain",
@@ -47,8 +47,9 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
         //Imitate created data collection
         final URI uri = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode().toUri();
         //Create
+        final MockMultipartFile filePart = new MockMultipartFile("resource", FILE_NAME, "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/resources/random.png")));
         mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
-                .file(FILE_PART)
+                .file(filePart)
                 .file(NAME_PART)
                 .file(TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))

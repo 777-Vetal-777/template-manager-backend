@@ -93,6 +93,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         throwExceptionIfResourceExists(resourceName, type);
         final UserEntity userEntity = userService.findByEmail(email);
 
+        final ContentValidator contentValidator = contentValidators.get(type);
+        if (contentValidators.containsKey(type) && !fonts.values().stream().allMatch(f -> contentValidator.isValid(getFileBytes(f))) ) {
+            throw new InvalidResourceContentException();
+        }
+
         final ResourceEntity resourceEntity = new ResourceEntity();
         resourceEntity.setName(resourceName);
         resourceEntity.setType(type);

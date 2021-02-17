@@ -12,6 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,8 +31,8 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     private ResourceService resourceService;
 
     @BeforeEach
-    public void init() {
-        resourceService.create(NAME, ResourceTypeEnum.IMAGE, new byte[]{1, 2, 3}, "random.png", "admin@email.com");
+    public void init() throws IOException {
+        resourceService.create(NAME, ResourceTypeEnum.IMAGE, Files.readAllBytes(Path.of("src/test/resources/test-data/resources/random.png")), "random.png", "admin@email.com");
     }
 
     @AfterEach
