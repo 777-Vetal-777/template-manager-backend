@@ -72,6 +72,10 @@ sentry:
 management:
   endpoints:
     web:
+      cors:
+        allowed-headers: '*'
+        allowed-origins: '*'
+        allowed-methods: '*'
       exposure:
         include: "health, info, env"
   endpoint:
