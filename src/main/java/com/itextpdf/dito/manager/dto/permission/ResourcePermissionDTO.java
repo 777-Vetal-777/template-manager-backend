@@ -1,19 +1,13 @@
 package com.itextpdf.dito.manager.dto.permission;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class ResourcePermissionDTO {
     private String name;
     private String type;
-    @JsonProperty("E8_US66_DELETE_RESOURCE_IMAGE")
-    private Boolean deleteResourceImage;
-    @JsonProperty("E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE")
-    private Boolean createNewVersionResourceImage;
-    @JsonProperty("E8_US55_EDIT_RESOURCE_METADATA_IMAGE")
-    private Boolean editResourceMetadataImage;
-    @JsonProperty("E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE")
-    private Boolean rollBackResourceImage;
+    protected Boolean deleteResource;
+    protected Boolean createNewVersionResource;
+    protected Boolean editResourceMetadata;
+    protected Boolean rollBackResource;
 
 
     public String getName() {
@@ -32,35 +26,35 @@ public class ResourcePermissionDTO {
         this.type = type;
     }
 
-    public Boolean getDeleteResourceImage() {
-        return deleteResourceImage;
+    public Boolean getDeleteResource() {
+        return deleteResource;
     }
 
-    public void setDeleteResourceImage(Boolean deleteResourceImage) {
-        this.deleteResourceImage = deleteResourceImage;
+    public void setDeleteResource(Boolean deleteResource) {
+        this.deleteResource = deleteResource;
     }
 
-    public Boolean getCreateNewVersionResourceImage() {
-        return createNewVersionResourceImage;
+    public Boolean getCreateNewVersionResource() {
+        return createNewVersionResource;
     }
 
-    public void setCreateNewVersionResourceImage(Boolean createNewVersionResourceImage) {
-        this.createNewVersionResourceImage = createNewVersionResourceImage;
+    public void setCreateNewVersionResource(Boolean createNewVersionResource) {
+        this.createNewVersionResource = createNewVersionResource;
     }
 
-    public Boolean getEditResourceMetadataImage() {
-        return editResourceMetadataImage;
+    public Boolean getEditResourceMetadata() {
+        return editResourceMetadata;
     }
 
-    public void setEditResourceMetadataImage(Boolean editResourceMetadataImage) {
-        this.editResourceMetadataImage = editResourceMetadataImage;
+    public void setEditResourceMetadata(Boolean editResourceMetadata) {
+        this.editResourceMetadata = editResourceMetadata;
     }
 
-    public Boolean getRollBackResourceImage() {
-        return rollBackResourceImage;
+    public Boolean getRollBackResource() {
+        return rollBackResource;
     }
 
-    public void setRollBackResourceImage(Boolean rollBackResourceImage) {
-        this.rollBackResourceImage = rollBackResourceImage;
+    public void setRollBackResource(Boolean rollBackResource) {
+        this.rollBackResource = rollBackResource;
     }
 }

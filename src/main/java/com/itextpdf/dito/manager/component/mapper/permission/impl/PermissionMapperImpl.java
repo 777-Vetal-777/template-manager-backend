@@ -4,6 +4,9 @@ import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
+import com.itextpdf.dito.manager.dto.permission.ResourcePermissionFontDTO;
+import com.itextpdf.dito.manager.dto.permission.ResourcePermissionImageDTO;
+import com.itextpdf.dito.manager.dto.permission.ResourcePermissionStylesheetDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
@@ -88,14 +91,28 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     private ResourcePermissionDTO mapResourcePermission(final ResourcePermissionModel entity) {
-        final ResourcePermissionDTO permissionDTO = new ResourcePermissionDTO();
+        ResourcePermissionDTO permissionDTO = null;
+        if (entity.getResourceType().equals("IMAGE")) {
+            permissionDTO = new ResourcePermissionImageDTO();
+            permissionDTO.setDeleteResource(entity.getE8_US66_DELETE_RESOURCE_IMAGE());
+            permissionDTO.setEditResourceMetadata(entity.getE8_US55_EDIT_RESOURCE_METADATA_IMAGE());
+            permissionDTO.setRollBackResource(entity.getE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE());
+            permissionDTO.setCreateNewVersionResource(entity.getE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE());
+        } else if (entity.getResourceType().equals("STYLESHEET")) {
+            permissionDTO = new ResourcePermissionStylesheetDTO();
+            permissionDTO.setCreateNewVersionResource(entity.getE8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET());
+            permissionDTO.setEditResourceMetadata(entity.getE8_US61_EDIT_RESOURCE_METADATA_STYLESHEET());
+            permissionDTO.setDeleteResource(entity.getE8_US66_2_DELETE_RESOURCE_STYLESHEET());
+            permissionDTO.setRollBackResource(entity.getE8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET());
+        } else if (entity.getResourceType().equals("FONT")) {
+            permissionDTO = new ResourcePermissionFontDTO();
+            permissionDTO.setCreateNewVersionResource(entity.getE8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT());
+            permissionDTO.setEditResourceMetadata(entity.getE8_US58_EDIT_RESOURCE_METADATA_FONT());
+            permissionDTO.setDeleteResource(entity.getE8_US66_1_DELETE_RESOURCE_FONT());
+            permissionDTO.setRollBackResource(entity.getE8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT());
+        }
         permissionDTO.setName(entity.getName());
         permissionDTO.setType(entity.getType());
-        permissionDTO.setDeleteResourceImage(entity.getE8_US66_DELETE_RESOURCE_IMAGE());
-        permissionDTO.setEditResourceMetadataImage(entity.getE8_US55_EDIT_RESOURCE_METADATA_IMAGE());
-        permissionDTO.setRollBackResourceImage(entity.getE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE());
-        permissionDTO.setCreateNewVersionResourceImage(entity.getE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE());
-
         return permissionDTO;
     }
 
@@ -111,7 +128,6 @@ public class PermissionMapperImpl implements PermissionMapper {
         permissionDTO.setDeleteDataSample(entity.getE7_US50_DELETE_DATA_SAMPLE());
         permissionDTO.setCreateNewVersionOfDataSample(entity.getE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE());
         permissionDTO.setEditSampleMetadata(entity.getE7_US47_EDIT_SAMPLE_METADATA());
-
         return permissionDTO;
     }
 }

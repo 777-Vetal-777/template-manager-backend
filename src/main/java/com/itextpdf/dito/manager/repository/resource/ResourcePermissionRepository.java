@@ -20,20 +20,36 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE");
 
 
-    String SELECT_FIELDS_CLAUSE = "select name, type," +
+    String SELECT_FIELDS_CLAUSE = "select name, type, resourceType," +
             " E8_US66_DELETE_RESOURCE_IMAGE," +
             " E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE," +
             " E8_US55_EDIT_RESOURCE_METADATA_IMAGE," +
-            " E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE" +
+            " E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE," +
+            " E8_US66_1_DELETE_RESOURCE_FONT," +
+            " E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT," +
+            " E8_US58_EDIT_RESOURCE_METADATA_FONT," +
+            " E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT," +
+            " E8_US66_2_DELETE_RESOURCE_STYLESHEET," +
+            " E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET," +
+            " E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET," +
+            " E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET" +
             " from ";
 
     String SELECT_COUNT_CLAUSE = "select count(*) from ";
 
-    String SUBQUERY_CLAUSE = "(select role.name as name, max(role.type) as type," +
+    String SUBQUERY_CLAUSE = "(select role.name as name, max(role.type) as type, max(resource.type) as resourceType," +
             " max(case when permission.name = 'E8_US66_DELETE_RESOURCE_IMAGE' then 'true' else 'false' end) as E8_US66_DELETE_RESOURCE_IMAGE," +
             " max(case when permission.name = 'E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE' then 'true' else 'false' end) as E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE," +
             " max(case when permission.name = 'E8_US55_EDIT_RESOURCE_METADATA_IMAGE' then 'true' else 'false' end) as E8_US55_EDIT_RESOURCE_METADATA_IMAGE," +
-            " max(case when permission.name = 'E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE' then 'true' else 'false' end) as E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE" +
+            " max(case when permission.name = 'E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE' then 'true' else 'false' end) as E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE," +
+            " max(case when permission.name = 'E8_US66_1_DELETE_RESOURCE_FONT' then 'true' else 'false' end) as E8_US66_1_DELETE_RESOURCE_FONT," +
+            " max(case when permission.name = 'E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT' then 'true' else 'false' end) as E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT," +
+            " max(case when permission.name = 'E8_US58_EDIT_RESOURCE_METADATA_FONT' then 'true' else 'false' end) as E8_US58_EDIT_RESOURCE_METADATA_FONT," +
+            " max(case when permission.name = 'E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT' then 'true' else 'false' end) as E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT," +
+            " max(case when permission.name = 'E8_US66_2_DELETE_RESOURCE_STYLESHEET' then 'true' else 'false' end) as E8_US66_2_DELETE_RESOURCE_STYLESHEET," +
+            " max(case when permission.name = 'E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET' then 'true' else 'false' end) as E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET," +
+            " max(case when permission.name = 'E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET' then 'true' else 'false' end) as E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET," +
+            " max(case when permission.name = 'E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET' then 'true' else 'false' end) as E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET" +
             " from manager.role role" +
             " left join {h-schema}role_permission on role.id = role_permission.role_id " +
             " left join {h-schema}permission on role_permission.permission_id = permission.id" +
