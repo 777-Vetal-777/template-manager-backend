@@ -169,7 +169,7 @@ public interface TemplateController {
                                                      @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), #name, 'E9_US81_PREVIEW_TEMPLATE_STANDARD')")
+    @PreAuthorize("hasAuthority('E9_US81_PREVIEW_TEMPLATE_STANDARD')")
     @Operation(summary = "Get template preview", description = "Get generated template PDF preview",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
