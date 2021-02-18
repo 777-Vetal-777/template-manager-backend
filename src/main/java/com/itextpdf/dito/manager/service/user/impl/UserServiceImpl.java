@@ -62,15 +62,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
         this.tokenService = tokenService;
     }
 
-
-    @Override
-    public UserEntity findByEmail(final String email) {
-        return userRepository.findByEmailAndActiveTrue(email).orElseThrow(() -> new UserNotFoundOrNotActiveException(email));
-    }
-
     @Override
     public UserEntity updateUser(final UserEntity userEntity, final String email) {
-        final UserEntity persistedUserEntity = findByEmail(email);
+        final UserEntity persistedUserEntity = findActiveUserByEmail(email);
         persistedUserEntity.setFirstName(userEntity.getFirstName());
         persistedUserEntity.setLastName(userEntity.getLastName());
         persistedUserEntity.setPasswordUpdatedByAdmin(false);
@@ -147,19 +141,20 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public UserEntity updatePassword(final String oldPassword,
                                      final String newPassword,
                                      final String userEmail) {
-        final UserEntity user = findByEmail(userEmail);
+        final UserEntity user = findActiveUserByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException();
         }
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
+        user.setPasswordUpdatedByAdmin(false);
         return userRepository.save(user);
     }
 
     @Override
     public UserEntity updatePassword(final String newPassword, final String userEmail) {
-        final UserEntity user = findByEmail(userEmail);
+        final UserEntity user = findActiveUserByEmail(userEmail);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
@@ -168,10 +163,14 @@ public class UserServiceImpl extends AbstractService implements UserService {
         return userRepository.save(user);
     }
 
-    private void checkNewPasswordSameAsOld(String newPassword, String oldPasswords) {
-        if (encoder.matches(newPassword, oldPasswords)) {
-            throw new NewPasswordTheSameAsOldPasswordException();
-        }
+    @Override
+    public UserEntity findActiveUserByEmail(final String email) {
+        return userRepository.findByEmailAndActiveTrue(email).orElseThrow(() -> new UserNotFoundOrNotActiveException(email));
+    }
+
+    @Override
+    public UserEntity findUserByEmail(final String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundOrNotActiveException(email));
     }
 
     @Override
@@ -288,6 +287,13 @@ public class UserServiceImpl extends AbstractService implements UserService {
         userEntity.setPassword(encoder.encode(resetPasswordDTO.getPassword()));
         userEntity.setModifiedAt(new Date());
         userEntity.setResetPasswordTokenDate(null);
+        userEntity.setPasswordUpdatedByAdmin(false);
         userRepository.save(userEntity);
+    }
+
+    private void checkNewPasswordSameAsOld(final String newPassword, final String oldPasswords) {
+        if (encoder.matches(newPassword, oldPasswords)) {
+            throw new NewPasswordTheSameAsOldPasswordException();
+        }
     }
 }

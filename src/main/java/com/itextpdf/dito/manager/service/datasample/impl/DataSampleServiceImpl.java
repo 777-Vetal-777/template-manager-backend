@@ -78,7 +78,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 			throw new InvalidDataSampleStructureException();
 		}
 
-		final UserEntity userEntity = userService.findByEmail(email);
+		final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final DataSampleEntity dataSampleEntity = new DataSampleEntity();
         dataSampleEntity.setDataCollection(dataCollectionEntity);
@@ -206,7 +206,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		}
 
 		final DataSampleEntity existingDataSampleEntity = get(name);
-		final UserEntity userEntity = userService.findByEmail(email);
+		final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
 		final DataSampleLogEntity logEntity = createDataSampleLogEntry(existingDataSampleEntity, userEntity);
 		final DataSampleFileEntity fileEntity = new DataSampleFileEntity();
@@ -240,7 +240,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	public DataSampleEntity update(final String name, final DataSampleEntity updatedEntity, final String userEmail) {
 		final DataSampleEntity existingEntity = dataSampleRepository.findByName(name)
 				.orElseThrow(() -> new DataSampleNotFoundException(name));
-		final UserEntity currentUser = userService.findByEmail(userEmail);
+		final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
 		final String newName = updatedEntity.getName();
 		if (!name.equals(newName) && dataSampleRepository.existsByName(newName)) {

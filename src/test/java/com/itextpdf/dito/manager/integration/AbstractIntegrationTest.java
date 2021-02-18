@@ -8,14 +8,13 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
-import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.user.UserService;
-import org.aspectj.lang.annotation.After;
+
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -35,7 +33,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -134,7 +131,7 @@ public abstract class AbstractIntegrationTest {
         defaultInstanceEntity.setSocket("socket-2");
         defaultInstanceEntity.setStage(defaultStageEntity);
         defaultInstanceEntity.setCreatedOn(new Date());
-        defaultInstanceEntity.setCreatedBy(userService.findByEmail("admin@email.com"));
+        defaultInstanceEntity.setCreatedBy(userService.findActiveUserByEmail("admin@email.com"));
         instanceRepository.save(defaultInstanceEntity);
         stageRepository.save(defaultStageEntity);
     }

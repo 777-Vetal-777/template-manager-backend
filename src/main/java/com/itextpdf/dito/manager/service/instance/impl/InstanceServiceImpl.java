@@ -49,7 +49,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
 
     @Override
     public InstanceEntity save(final InstanceEntity instance, final String creatorEmail) {
-        final UserEntity userEntity = userService.findByEmail(creatorEmail);
+        final UserEntity userEntity = userService.findActiveUserByEmail(creatorEmail);
         if (instanceRepository.findByName(instance.getName()).isPresent()) {
             throw new InstanceAlreadyExistsException(instance.getName());
         }

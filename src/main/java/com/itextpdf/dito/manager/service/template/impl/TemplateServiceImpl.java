@@ -117,7 +117,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateEntity.setName(templateName);
         templateEntity.setType(templateTypeEnum);
 
-        final UserEntity author = userService.findByEmail(email);
+        final UserEntity author = userService.findActiveUserByEmail(email);
 
         final TemplateLogEntity logEntity = createLogEntity(templateEntity, author);
 
@@ -237,7 +237,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public TemplateEntity update(final String name, final TemplateEntity updatedTemplateEntity, final String userEmail) {
         final TemplateEntity existingTemplate = findByName(name);
-        final UserEntity userEntity = userService.findByEmail(userEmail);
+        final UserEntity userEntity = userService.findActiveUserByEmail(userEmail);
 
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
             existingTemplate.setName(updatedTemplateEntity.getName());
@@ -260,7 +260,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (newTemplateName != null) {
             existingTemplateEntity.setName(newTemplateName);
         }
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
@@ -472,7 +472,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public TemplateEntity block(final String userEmail, final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
-        final UserEntity currentUser = userService.findByEmail(userEmail);
+        final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
         if (templateEntity.getBlockedAt() != null && currentUser != templateEntity.getBlockedBy()) {
             throw new TemplateBlockedByOtherUserException(templateEntity.getName(), templateEntity.getBlockedBy().getEmail());
         }
@@ -484,7 +484,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     public TemplateEntity unblock(final String userEmail, final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
-        final UserEntity currentUser = userService.findByEmail(userEmail);
+        final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
         if (currentUser != templateEntity.getBlockedBy()) {
             throw new TemplateBlockedByOtherUserException(templateName, templateEntity.getBlockedBy().getEmail());
         }

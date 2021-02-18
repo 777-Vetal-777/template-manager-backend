@@ -1,14 +1,15 @@
 package com.itextpdf.dito.manager.controller.workspace.impl;
 
+import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
-import com.itextpdf.dito.manager.dto.instance.create.InstanceBindToStageRequestDTO;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.exception.license.EmptyLicenseFileException;
@@ -19,12 +20,12 @@ import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 import java.security.Principal;
 import java.util.List;
 
-import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @Validated
 @RestController
@@ -34,27 +35,35 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     private final WorkspaceMapper workspaceMapper;
     private final LicenseService licenseService;
     private final LicenseMapper licenseMapper;
+    private final InstanceMapper instanceMapper;
 
 	public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper,
-			final LicenseService licenseService, final LicenseMapper licenseMapper) {
+            final LicenseService licenseService, final LicenseMapper licenseMapper, final InstanceMapper instanceMapper) {
 		this.workspaceService = workspaceService;
 		this.workspaceMapper = workspaceMapper;
 		this.licenseService = licenseService;
 		this.licenseMapper = licenseMapper;
-	}
-    //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
-    @Override
-    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO) {
-        final WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO));
-        return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.CREATED);
+        this.instanceMapper = instanceMapper;
     }
 
     @Override
-    public ResponseEntity<WorkspaceDTO> setDefaultInstance(@Valid final InstanceBindToStageRequestDTO requestDTO, final Principal principal) {
-        final WorkspaceEntity workspaceEntity = workspaceService
-                .setInstanceAsDefault(requestDTO.getWorkspaceName(), requestDTO.getInstanceName(),
-                        principal.getName());
-        return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.OK);
+    public ResponseEntity<Boolean> checkIsWorkspaceWithNameExist(final String name) {
+        return new ResponseEntity<>(workspaceService.checkIsWorkspaceWithNameExist(name), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Boolean> checkLicenseValidity(final MultipartFile licence, final Principal principal) {
+        final Boolean isLicenseValid = licenseService.verifyLicense(getFileBytes(licence));
+        return new ResponseEntity<>(isLicenseValid, HttpStatus.OK);
+    }
+
+    //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
+    @Override
+    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO, final MultipartFile file, final Principal principal) {
+        final byte[] licenseFile = getBytesFromMultipart(file);
+        final List<InstanceEntity> entities = instanceMapper.map(workspaceCreateRequestDTO.getInstances());
+        final WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO),licenseFile, entities, file.getOriginalFilename(), principal.getName(), workspaceCreateRequestDTO.getMainDevelopInstance());
+        return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.CREATED);
     }
 
     @Override
@@ -83,12 +92,10 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     }
 
     @Override
-    public ResponseEntity<PromotionPathDTO> updatePromotionPath(final String workspaceName,
-            final PromotionPathDTO promotionPathDTO) {
+    public ResponseEntity<PromotionPathDTO> updatePromotionPath(final String workspaceName, final PromotionPathDTO promotionPathDTO) {
         PromotionPathDTO result;
 
-        final PromotionPathEntity promotionPathEntity = workspaceService
-                .updatePromotionPath(decodeBase64(workspaceName), workspaceMapper.map(promotionPathDTO));
+        final PromotionPathEntity promotionPathEntity = workspaceService.updatePromotionPath(decodeBase64(workspaceName), workspaceMapper.map(promotionPathDTO));
         result = workspaceMapper.map(promotionPathEntity);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -98,12 +105,10 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     public ResponseEntity<List<String>> getStageNames(final String workspaceName) {
         final List<String> stageNames = workspaceService.getStageNames(decodeBase64(workspaceName));
         return new ResponseEntity<>(stageNames, HttpStatus.OK);
-
     }
 
 	@Override
-	public ResponseEntity<LicenseDTO> uploadLisence(final String workspaceName, final MultipartFile multipartFile,
-			final Principal principal) {
+	public ResponseEntity<LicenseDTO> uploadLicense(final String workspaceName, final MultipartFile multipartFile, final Principal principal) {
 		final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
 		final byte[] data = getBytesFromMultipart(multipartFile);
 		final String fileName = multipartFile.getOriginalFilename();
@@ -112,19 +117,19 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 	}
 
 	@Override
-	public ResponseEntity<LicenseDTO> getLisence(final String workspaceName, final Principal principal) {
+	public ResponseEntity<LicenseDTO> getLicense(final String workspaceName, final Principal principal) {
 		final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
 		return new ResponseEntity<>(licenseMapper.map(licenseService.getWorkspaceLicense(workspaceEntity)),
 				HttpStatus.OK);
 	}
 	
 	@Override
-	protected RuntimeException throwEmptyFleException() {
+	protected RuntimeException throwEmptyFileException() {
 		throw new EmptyLicenseFileException();
 	}
 
 	@Override
-	protected RuntimeException throwUnreadableFleException(String fileName) {
+	protected RuntimeException throwUnreadableFileException(final String fileName) {
 		throw new UnreadableLicenseException(fileName);
 	}
 }

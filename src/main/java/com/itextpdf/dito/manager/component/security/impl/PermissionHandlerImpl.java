@@ -208,7 +208,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
 
     private boolean checkResourcePermissions(final String email, final ResourceTypeEnum resourceType, final String resourceName, final String checkingPermission) {
         final ResourceEntity resourceEntity = resourceService.getResource(resourceName, resourceType);
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
                 retrieveEntityAppliedRoles(resourceEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
@@ -217,7 +217,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
     @Override
     public boolean checkDataCollectionPermissions(final String email, final String dataCollectionName, final String checkingPermission) {
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(dataCollectionName);
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
                 retrieveEntityAppliedRoles(dataCollectionEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
@@ -232,7 +232,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
     @Override
     public boolean checkTemplatePermissions(final String email, final String templateName, final String checkingPermission) {
         final TemplateEntity templateEntity = templateService.get(templateName);
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         return checkTemplatePermissions(userEntity, templateEntity, checkingPermission);
     }

@@ -30,6 +30,7 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
         result.setLanguage(dto.getLanguage());
         result.setName(dto.getName());
         result.setTimezone(dto.getTimezone());
+        result.setAdjustForDaylight(dto.getAdjustForDaylight());
 
         return result;
     }
@@ -41,6 +42,7 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
         result.setName(dto.getName());
         result.setLanguage(dto.getLanguage());
         result.setTimezone(dto.getTimezone());
+        result.setAdjustForDaylight(dto.getAdjustForDaylight());
 
         return result;
     }
@@ -52,6 +54,7 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
         result.setName(entity.getName());
         result.setLanguage(entity.getLanguage());
         result.setTimezone(entity.getTimezone());
+        result.setAdjustForDaylight(entity.getAdjustForDaylight());
 
         return result;
     }
@@ -96,7 +99,7 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
     }
 
     @Override
-    public List<WorkspaceDTO> map(List<WorkspaceEntity> entities) {
+    public List<WorkspaceDTO> map(final List<WorkspaceEntity> entities) {
         return entities.stream().map(this::map).collect(Collectors.toList());
     }
 }

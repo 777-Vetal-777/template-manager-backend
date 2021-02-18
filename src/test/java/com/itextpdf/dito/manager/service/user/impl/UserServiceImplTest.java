@@ -54,7 +54,7 @@ class UserServiceImplTest {
     void findByEmail_WhenUserExists_ThenReturnSpecifiedUser() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.of(user));
 
-        UserEntity result = userService.findByEmail(user.getEmail());
+        UserEntity result = userService.findActiveUserByEmail(user.getEmail());
         assertEquals(user, result);
     }
 
@@ -63,7 +63,7 @@ class UserServiceImplTest {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundOrNotActiveException.class,
-                () -> userService.findByEmail(user.getEmail()));
+                () -> userService.findActiveUserByEmail(user.getEmail()));
     }
 
     @Test

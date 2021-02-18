@@ -90,7 +90,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity createNewFont(final String email, final String resourceName,
                                         final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
         throwExceptionIfResourceExists(resourceName, type);
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final ContentValidator contentValidator = contentValidators.get(type);
         if (contentValidators.containsKey(type) && !fonts.values().stream().allMatch(f -> contentValidator.isValid(getFileBytes(f)))) {
@@ -125,7 +125,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             throw new InvalidResourceContentException();
         }
 
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final ResourceEntity resourceEntity = new ResourceEntity();
         resourceEntity.setName(name);
@@ -147,7 +147,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data,
                                            final String fileName, final String email, final String comment) {
         final ResourceEntity existingResourceEntity = getResource(name, type);
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         if (contentValidators.containsKey(type) && !contentValidators.get(type).isValid(data)) {
             throw new InvalidResourceContentException();
@@ -201,7 +201,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Override
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
         final ResourceEntity existingResource = getResource(name, entity.getType());
-        final UserEntity userEntity = userService.findByEmail(mail);
+        final UserEntity userEntity = userService.findActiveUserByEmail(mail);
 
         if (!existingResource.getName().equals(entity.getName())) {
             throwExceptionIfResourceExists(entity.getName(), entity.getType());

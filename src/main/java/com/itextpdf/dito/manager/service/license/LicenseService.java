@@ -8,4 +8,5 @@ public interface LicenseService {
 
 	LicenseEntity getWorkspaceLicense(WorkspaceEntity workspaceEntity);
 
+	Boolean verifyLicense(byte[] data);
 }

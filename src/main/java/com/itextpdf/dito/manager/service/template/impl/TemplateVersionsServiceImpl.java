@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
-import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -69,7 +68,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
 
     @Override
     public TemplateEntity rollbackVersion(final String templateName, final Long version, final String userEmail) {
-        final UserEntity currentUser = userService.findByEmail(userEmail);
+        final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final TemplateFileEntity templateFileEntityToBeRevertedTo = templateFileRepository.findByVersionAndTemplate(version, templateEntity)
                 .orElseThrow(() -> new TemplateVersionNotFoundException(String.valueOf(version)));

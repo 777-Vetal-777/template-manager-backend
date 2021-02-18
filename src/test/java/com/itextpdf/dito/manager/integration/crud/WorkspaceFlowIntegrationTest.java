@@ -54,7 +54,9 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
+    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
+    @Disabled
     void testCreateWorkspace() throws Exception {
         workspaceRepository.deleteAll();
 

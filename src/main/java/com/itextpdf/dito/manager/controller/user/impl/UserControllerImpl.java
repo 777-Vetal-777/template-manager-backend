@@ -39,7 +39,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO, Principal principal) {
-        final UserEntity currentUser = userService.findByEmail(principal.getName());
+        final UserEntity currentUser = userService.findActiveUserByEmail(principal.getName());
         final UserEntity user = userService
                 .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles(), currentUser);
         return new ResponseEntity<>(userMapper.map(user), HttpStatus.CREATED);
@@ -59,7 +59,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> get(final String userName, final Principal principal) {
-        final UserDTO user = userMapper.map(userService.findByEmail(decodeBase64(userName)));
+        final UserDTO user = userMapper.map(userService.findUserByEmail(decodeBase64(userName)));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -76,7 +76,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> currentUser(Principal principal) {
-        UserDTO user = userMapper.map(userService.findByEmail(principal.getName()));
+        UserDTO user = userMapper.map(userService.findActiveUserByEmail(principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

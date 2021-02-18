@@ -32,8 +32,7 @@ public class LicenseServiceImpl implements LicenseService {
 
 	@Override
 	@Transactional
-	public LicenseEntity uploadLicense(final WorkspaceEntity workspaceEntity, final byte[] data,
-			final String fileName) {
+	public LicenseEntity uploadLicense(final WorkspaceEntity workspaceEntity, final byte[] data, final String fileName) {
 		try {
 			checkDitoLicense(data);
 		} catch (DitoLicenseException e) {
@@ -67,5 +66,16 @@ public class LicenseServiceImpl implements LicenseService {
 			throw new InvalidLicenseException();
 		}
 		return entity;
+	}
+
+	@Override
+	public Boolean verifyLicense(final byte[] data) {
+		Boolean result = true;
+		try {
+			checkDitoLicense(data);
+		}catch (DitoLicenseException e){
+			result = false;
+		}
+		return result;
 	}
 }

@@ -71,20 +71,24 @@ public class InstanceClientImpl implements InstanceClient {
         final String instanceRegisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_REGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
         instanceRegisterRequestDTO.setSubject(getCurrentWorkspaceName());
-        final Mono<InstanceRegisterResponseDTO> response = WebClient.create()
-                .post()
-                .uri(instanceRegisterUrl)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(instanceRegisterRequestDTO)
-                .exchange()
-                .flatMap(clientResponse -> {
-                    //Error handling
-                    if (clientResponse.statusCode().isError()) {
-                        return clientResponse.createException().flatMap(Mono::error);
-                    }
-                    return clientResponse.bodyToMono(InstanceRegisterResponseDTO.class);
-                });
-        return response.block();
+        try {
+            final Mono<InstanceRegisterResponseDTO> response = WebClient.create()
+                    .post()
+                    .uri(instanceRegisterUrl)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .bodyValue(instanceRegisterRequestDTO)
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        //Error handling
+                        if (clientResponse.statusCode().isError()) {
+                            return clientResponse.createException().flatMap(Mono::error);
+                        }
+                        return clientResponse.bodyToMono(InstanceRegisterResponseDTO.class);
+                    });
+            return response.block();
+        }catch (IllegalArgumentException e){
+            throw new NotReachableInstanceException(instanceSocket);
+        }
     }
 
     @Override

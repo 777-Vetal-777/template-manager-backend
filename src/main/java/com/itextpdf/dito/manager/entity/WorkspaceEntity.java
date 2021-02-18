@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.entity;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,8 @@ public class WorkspaceEntity {
     private String name;
     private String language;
     private String timezone;
+    @Column(name = "adjust_for_daylight", insertable = false)
+    private Boolean adjustForDaylight;
     @OneToOne(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     private PromotionPathEntity promotionPath;
     @OneToOne(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -31,6 +34,14 @@ public class WorkspaceEntity {
         }
         promotionPath.setWorkspace(this);
         this.promotionPath = promotionPath;
+    }
+
+    public Boolean getAdjustForDaylight() {
+        return adjustForDaylight;
+    }
+
+    public void setAdjustForDaylight(Boolean adjustForDaylight) {
+        this.adjustForDaylight = adjustForDaylight;
     }
 
     public Long getId() {

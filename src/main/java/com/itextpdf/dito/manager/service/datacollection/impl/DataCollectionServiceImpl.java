@@ -96,7 +96,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
         checkJsonIsValid(data);
 
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final DataCollectionEntity dataCollectionEntity = new DataCollectionEntity();
         dataCollectionEntity.setName(name);
@@ -127,7 +127,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                                                  final String fileName, final String email, final String comment) {
         checkJsonIsValid(data);
         final DataCollectionEntity existingDataCollectionEntity = findByName(name);
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final Long oldVersion = dataCollectionFileRepository.findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
         final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity, userEntity);
@@ -244,7 +244,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                                        final DataCollectionEntity updatedEntity,
                                        final String userEmail) {
         final DataCollectionEntity existingEntity = findByName(name);
-        final UserEntity currentUser = userService.findByEmail(userEmail);
+        final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
         existingEntity.setType(updatedEntity.getType());
         final String newName = updatedEntity.getName();
@@ -367,7 +367,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                 .orElseThrow(() -> new DataCollectionVersionNotFoundException(String.valueOf(version)));
         final String comment = new StringBuilder().append("Rollback to version: ").append(versionForRollback.getVersion()).toString();
 
-        final UserEntity userEntity = userService.findByEmail(email);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final Long latestVersion = dataCollectionFileRepository.findFirstByDataCollection_IdOrderByVersionDesc(existingDataCollectionEntity.getId()).getVersion();
         final DataCollectionLogEntity logEntity = createDataCollectionLogEntry(existingDataCollectionEntity, userEntity);

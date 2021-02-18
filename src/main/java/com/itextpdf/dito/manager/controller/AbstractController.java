@@ -44,22 +44,22 @@ public abstract class AbstractController {
     
     protected byte[] getBytesFromMultipart(final MultipartFile multipartFile){
         if (multipartFile.isEmpty()) {
-        	throwEmptyFleException();
+        	throwEmptyFileException();
         }
         byte[] data = null;
         try {
             data = multipartFile.getBytes();
         } catch (IOException e) {
-        	throwUnreadableFleException(multipartFile.getOriginalFilename());
+        	throwUnreadableFileException(multipartFile.getOriginalFilename());
         }
         return data;
     }
 
-	protected RuntimeException throwEmptyFleException() {
+	protected RuntimeException throwEmptyFileException() {
 		throw new EmptyDataCollectionFileException();
 	}
 
-	protected RuntimeException throwUnreadableFleException(String fileName) {
+	protected RuntimeException throwUnreadableFileException(String fileName) {
 		throw new UnreadableDataCollectionException(fileName);
 	}
 }

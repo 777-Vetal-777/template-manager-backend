@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsE
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceNotFoundException;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
+import com.itextpdf.dito.manager.service.license.LicenseService;
 import com.itextpdf.dito.manager.service.stage.StageService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -23,13 +24,16 @@ import java.util.Optional;
 public class WorkspaceServiceImpl implements WorkspaceService {
     private final InstanceService instanceService;
     private final StageService stageService;
+    private final LicenseService licenseService;
 
     private final WorkspaceRepository workspaceRepository;
 
     public WorkspaceServiceImpl(final InstanceService instanceService, final StageService stageService,
-                                final WorkspaceRepository workspaceRepository) {
+            final LicenseService licenseService,
+            final WorkspaceRepository workspaceRepository) {
         this.instanceService = instanceService;
         this.stageService = stageService;
+        this.licenseService = licenseService;
         this.workspaceRepository = workspaceRepository;
     }
 
@@ -43,35 +47,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.findAll();
     }
 
+    @Transactional(rollbackOn = Exception.class)
     @Override
-    public WorkspaceEntity create(final WorkspaceEntity workspace) {
+    public WorkspaceEntity create(final WorkspaceEntity workspace, final byte[] data, final List<InstanceEntity> instanceEntities, final String fileName, final String author, final String defaultDevelopInstance) {
         // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
         if (!workspaceRepository.findAll().isEmpty()) {
             throw new OnlyOneWorkspaceAllowedException();
         }
-
         throwExceptionIfNameIsAlreadyInUse(workspace.getName());
-        return workspaceRepository.save(workspace);
-    }
 
-    @Override
-    public WorkspaceEntity setInstanceAsDefault(final String workspaceName, final String instanceName, final String userEmail) {
-        final WorkspaceEntity workspaceEntity = getWorkspace(workspaceName);
-        final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(instanceService.get(instanceName));
-        workspaceEntity.setPromotionPath(promotionPathEntity);
-        return workspaceRepository.save(workspaceEntity);
-    }
-
-    private PromotionPathEntity buildDefaultPromotionPath(final InstanceEntity instanceEntity) {
-        final StageEntity stageEntity = new StageEntity();
-        stageEntity.setName("Development");
-        stageEntity.setSequenceOrder(Integer.valueOf(0));
-        stageEntity.addInstance(instanceEntity);
-
-        final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
-        promotionPathEntity.addStage(stageEntity);
-
-        return promotionPathEntity;
+        final WorkspaceEntity createdWorkspace = workspaceRepository.save(workspace);
+        licenseService.uploadLicense(createdWorkspace, data, fileName);
+        instanceService.save(instanceEntities, author);
+        return setInstanceAsDefault(createdWorkspace, defaultDevelopInstance);
     }
 
     @Override
@@ -124,6 +112,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.getStageNames(workspaceName);
     }
 
+    //TODO When support for multiple workspaces is implemented, it will be necessary to check the user's workspaces, Not all.
+    @Override
+    public Boolean checkIsWorkspaceWithNameExist(final String workspaceName) {
+        return workspaceRepository.existsByName(workspaceName);
+    }
+
     private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities, final PromotionPathEntity promotionPathEntity) {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 
@@ -156,7 +150,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
     }
 
-    private WorkspaceEntity getWorkspace(final String workspace) {
-        return workspaceRepository.findByName(workspace).orElseThrow(() -> new WorkspaceNotFoundException(workspace));
+    private WorkspaceEntity setInstanceAsDefault(final WorkspaceEntity workspace, final String instanceName) {
+        final PromotionPathEntity promotionPathEntity = buildDefaultPromotionPath(instanceService.get(instanceName));
+        workspace.setPromotionPath(promotionPathEntity);
+        return workspaceRepository.save(workspace);
+    }
+
+    private PromotionPathEntity buildDefaultPromotionPath(final InstanceEntity instanceEntity) {
+        final StageEntity stageEntity = new StageEntity();
+        stageEntity.setName("Development");
+        stageEntity.setSequenceOrder(Integer.valueOf(0));
+        stageEntity.addInstance(instanceEntity);
+
+        final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();
+        promotionPathEntity.addStage(stageEntity);
+
+        return promotionPathEntity;
     }
 }

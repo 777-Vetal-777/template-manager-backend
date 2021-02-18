@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 public interface UserService {
     UserEntity create(UserEntity request, List<String> roles, UserEntity currentUser);
 
-    UserEntity findByEmail(String email);
+    UserEntity findActiveUserByEmail(String email);
+
+    UserEntity findUserByEmail(String email);
 
     UserEntity updateUser(UserEntity userEntity, String email);
 

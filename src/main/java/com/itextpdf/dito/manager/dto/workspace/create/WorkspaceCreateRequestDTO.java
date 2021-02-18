@@ -1,7 +1,12 @@
 package com.itextpdf.dito.manager.dto.workspace.create;
 
+import com.itextpdf.dito.manager.dto.instance.create.InstanceRememberRequestDTO;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 public class WorkspaceCreateRequestDTO {
     @NotBlank
@@ -13,6 +18,35 @@ public class WorkspaceCreateRequestDTO {
     @NotBlank
     @Schema(example = "ENG")
     String language;
+    boolean adjustForDaylight;
+    @NotBlank
+    String mainDevelopInstance;
+    @NotEmpty
+    private List<@Valid InstanceRememberRequestDTO> instances;
+
+    public Boolean getAdjustForDaylight() {
+        return adjustForDaylight;
+    }
+
+    public void setAdjustForDaylight(Boolean adjustForDaylight) {
+        this.adjustForDaylight = adjustForDaylight;
+    }
+
+    public String getMainDevelopInstance() {
+        return mainDevelopInstance;
+    }
+
+    public void setMainDevelopInstance(String mainDevelopInstance) {
+        this.mainDevelopInstance = mainDevelopInstance;
+    }
+
+    public List<InstanceRememberRequestDTO> getInstances() {
+        return instances;
+    }
+
+    public void setInstances(List<InstanceRememberRequestDTO> instances) {
+        this.instances = instances;
+    }
 
     public String getName() {
         return name;

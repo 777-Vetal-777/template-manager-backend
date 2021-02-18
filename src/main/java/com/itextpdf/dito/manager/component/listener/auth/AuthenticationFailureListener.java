@@ -33,7 +33,7 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
     @Override
     public void onApplicationEvent(final AuthenticationFailureBadCredentialsEvent event) {
         final String principal = (String) event.getAuthentication().getPrincipal();
-        final UserEntity user = userService.findByEmail(principal);
+        final UserEntity user = userService.findActiveUserByEmail(principal);
 
         if (log.isDebugEnabled()) {
             log(user.getEmail());

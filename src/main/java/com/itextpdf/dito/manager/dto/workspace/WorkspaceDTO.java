@@ -13,6 +13,15 @@ public class WorkspaceDTO {
     @NotBlank
     @Schema(example = "ENG")
     private String language;
+    private Boolean adjustForDaylight;
+
+    public Boolean getAdjustForDaylight() {
+        return adjustForDaylight;
+    }
+
+    public void setAdjustForDaylight(Boolean adjustForDaylight) {
+        this.adjustForDaylight = adjustForDaylight;
+    }
 
     public String getName() {
         return name;
