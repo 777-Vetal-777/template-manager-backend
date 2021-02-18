@@ -36,6 +36,19 @@ public class PermissionHandlerImpl implements PermissionHandler {
             TemplateTypeEnum.FOOTER, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
             TemplateTypeEnum.COMPOSITION, Predicates.or("E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"::equals, "E9_US102_CREATE_NEW_TEMPLATE_WITHOUT_DATA_COMPOSITION"::equals));
 
+    private static final Map<TemplateTypeEnum, String> TEMPLATE_ROLLBACK_METADATA_PERMISSIONS =
+            Map.of(TemplateTypeEnum.STANDARD,"E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE",
+                    TemplateTypeEnum.FOOTER,"E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE",
+                    TemplateTypeEnum.HEADER,"E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE",
+                    TemplateTypeEnum.COMPOSITION,"E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE");
+
+    private static final Map<TemplateTypeEnum, String> TEMPLATE_CREATE_NEW_VERSION_PERMISSIONS =
+            Map.of(TemplateTypeEnum.STANDARD,"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
+                    TemplateTypeEnum.FOOTER,"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
+                    TemplateTypeEnum.HEADER,"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
+                    TemplateTypeEnum.COMPOSITION,"E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
+
+
     private static final Map<ResourceTypeEnum, Predicate<String>> RESOURCE_VIEW_PERMISSIONS = Map.of(
             ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,
             ResourceTypeEnum.FONT, "E8_US57_VIEW_RESOURCE_METADATA_FONT"::equals,
@@ -153,6 +166,30 @@ public class PermissionHandlerImpl implements PermissionHandler {
         final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
 
         return checkResourcePermissions(email, type, resourceName, RESOURCE_ROLLBACK_PERMISSIONS.get(type));
+    }
+
+    @Override
+    public boolean checkTemplateRollbackPermissions(final String email, final String templateName) {
+        final TemplateEntity templateEntity = templateService.get(templateName);
+        final TemplateTypeEnum type = templateEntity.getType();
+        final UserEntity userEntity = userService.findByEmail(email);
+
+        return checkTemplatePermissions(userEntity, templateEntity, TEMPLATE_ROLLBACK_METADATA_PERMISSIONS.get(type));
+    }
+
+    @Override
+    public boolean checkTemplateCreateVersionPermission(final Authentication authentication, final String templateName) {
+        final TemplateEntity templateEntity = templateService.get(templateName);
+        final TemplateTypeEnum type = templateEntity.getType();
+        final UserEntity userEntity = userService.findByEmail(authentication.getName());
+
+        return checkTemplatePermissions(userEntity, templateEntity, TEMPLATE_CREATE_NEW_VERSION_PERMISSIONS.get(type));
+    }
+
+    @Override
+    public boolean checkTemplateCreateVersionPermission(final UserEntity userEntity, final TemplateEntity templateEntity) {
+        final TemplateTypeEnum type = templateEntity.getType();
+        return checkTemplatePermissions(userEntity, templateEntity, TEMPLATE_CREATE_NEW_VERSION_PERMISSIONS.get(type));
     }
 
     private boolean checkResourcePermissions(final String email, final ResourceTypeEnum resourceType, final String resourceName, final String checkingPermission) {

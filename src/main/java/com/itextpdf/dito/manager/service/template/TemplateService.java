@@ -34,13 +34,12 @@ public interface TemplateService {
 
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
 
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#email, #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateCreateVersionPermission(authentication, #name)")
     TemplateEntity createNewVersion(String name, byte[] data, String email, String comment, String templateName, List<TemplatePartDTO> templateParts);
 
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #fileEntityToCopy.getTemplate(), 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateCreateVersionPermission(#userEntity, #fileEntityToCopy.getTemplate())")
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#userEntity, #existingTemplateEntity, 'E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE')")
     TemplateEntity rollbackTemplate(TemplateEntity existingTemplateEntity, TemplateFileEntity templateVersionToBeRevertedTo, UserEntity userEntity);
 
     Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);

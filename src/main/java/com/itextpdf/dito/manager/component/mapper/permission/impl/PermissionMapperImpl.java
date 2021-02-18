@@ -7,7 +7,9 @@ import com.itextpdf.dito.manager.dto.permission.ResourcePermissionDTO;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionFontDTO;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionImageDTO;
 import com.itextpdf.dito.manager.dto.permission.ResourcePermissionStylesheetDTO;
+import com.itextpdf.dito.manager.dto.template.TemplatePermissionCompositionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
+import com.itextpdf.dito.manager.dto.template.TemplatePermissionStandardDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 
 import java.util.Collection;
@@ -66,16 +68,24 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     private TemplatePermissionDTO mapTemplatePermission(final TemplatePermissionsModel entity) {
-        final TemplatePermissionDTO templatePermissionDTO = new TemplatePermissionDTO();
-
+         TemplatePermissionDTO templatePermissionDTO = null;
+        if(entity.getTemplateType().equals("STANDARD")||entity.getTemplateType().equals("HEADER") || entity.getTemplateType().equals("FOOTER")){
+            templatePermissionDTO = new TemplatePermissionStandardDTO();
+            templatePermissionDTO.setExportTemplatePermission(entity.getE9_US24_EXPORT_TEMPLATE_DATA());
+            templatePermissionDTO.setPreviewTemplatePermission(entity.getE9_US81_PREVIEW_TEMPLATE_STANDARD());
+            templatePermissionDTO.setRollbackPermission(entity.getE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE());
+            templatePermissionDTO.setEditMetadataPermission(entity.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD());
+            templatePermissionDTO.setCreateNewVersionPermission(entity.getE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD());
+        }else if(entity.getTemplateType().equals("COMPOSITION")){
+            templatePermissionDTO = new TemplatePermissionCompositionDTO();
+            templatePermissionDTO.setExportTemplatePermission(entity.getE9_US24_EXPORT_TEMPLATE_DATA());
+            templatePermissionDTO.setPreviewTemplatePermission(entity.getE9_US81_PREVIEW_TEMPLATE_STANDARD());
+            templatePermissionDTO.setRollbackPermission(entity.getE9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE());
+            templatePermissionDTO.setEditMetadataPermission(entity.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD());
+            templatePermissionDTO.setCreateNewVersionPermission(entity.getE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED());
+        }
         templatePermissionDTO.setName(entity.getName());
         templatePermissionDTO.setType(entity.getType());
-        templatePermissionDTO.setExportTemplatePermission(entity.getE9_US24_EXPORT_TEMPLATE_DATA());
-        templatePermissionDTO.setPreviewTemplatePermission(entity.getE9_US81_PREVIEW_TEMPLATE_STANDARD());
-        templatePermissionDTO.setRollbackPermission(entity.getE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE());
-        templatePermissionDTO.setEditMetadataPermission(entity.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD());
-        templatePermissionDTO.setCreateNewVersionPermission(entity.getE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD());
-
         return templatePermissionDTO;
     }
 

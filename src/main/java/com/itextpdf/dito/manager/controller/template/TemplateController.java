@@ -169,7 +169,7 @@ public interface TemplateController {
                                                      @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E9_US81_PREVIEW_TEMPLATE_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), #name, 'E9_US81_PREVIEW_TEMPLATE_STANDARD')")
     @Operation(summary = "Get template preview", description = "Get generated template PDF preview",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
@@ -177,7 +177,7 @@ public interface TemplateController {
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name, @Parameter(description = "Optional name of date sample for generating pdf preview. ") @RequestParam(name = "dataSampleName", required = false) String dataSampleName);
 
     @PostMapping(value = TEMPLATE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), #name, 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateCreateVersionPermission(authentication, #name)")
     @Operation(summary = "Create new version of template", description = "Make a new version of a template: upload a new template file and a comment for the new version.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -276,6 +276,7 @@ public interface TemplateController {
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
     @PostMapping(TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateRollbackPermissions(#principal.name, new String(T(java.util.Base64).getUrlDecoder().decode(#templateName)))")
     @Operation(summary = "Rollback template to selected version", description = "Rollback template to selected version",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -298,6 +299,7 @@ public interface TemplateController {
     ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
 
     @GetMapping(TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE)
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US24_EXPORT_TEMPLATE_DATA')")
     @Operation(summary = "Export template", description = "Export template as zipped DITO project",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

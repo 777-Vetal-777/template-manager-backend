@@ -1,29 +1,15 @@
 package com.itextpdf.dito.manager.dto.template;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TemplatePermissionDTO {
 
     private String name;
     private String type;
-    @JsonProperty("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD")
-    private Boolean editMetadataPermission;
-    @JsonProperty("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD")
-    private Boolean createNewVersionPermission;
-    @JsonProperty("E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE")
-    private Boolean rollbackPermission;
-    @JsonProperty("E9_US81_PREVIEW_TEMPLATE_STANDARD")
-    private Boolean previewTemplatePermission;
-    @JsonProperty("E9_US24_EXPORT_TEMPLATE_DATA")
-    private Boolean exportTemplatePermission;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+    protected Boolean editMetadataPermission;
+    protected Boolean createNewVersionPermission;
+    protected Boolean rollbackPermission;
+    protected Boolean previewTemplatePermission;
+    protected Boolean exportTemplatePermission;
 
     public String getName() {
         return name;
@@ -31,6 +17,14 @@ public class TemplatePermissionDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Boolean getEditMetadataPermission() {

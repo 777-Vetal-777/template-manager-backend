@@ -28,7 +28,14 @@ public interface PermissionHandler {
 
     boolean checkTemplatePermissions(String email, String templateName, String checkingPermission);
 
-    //  Data Collections
+     boolean checkTemplateRollbackPermissions(String email, String templateName);
+
+     boolean checkTemplateCreateVersionPermission(Authentication authentication, String templateName);
+
+     boolean checkTemplateCreateVersionPermission(final UserEntity userEntity, final TemplateEntity templateEntity);
+
+
+        //  Data Collections
     boolean checkDataCollectionPermissions(String email, String dataCollectionName, String checkingPermission);
 
 }
