@@ -288,6 +288,7 @@ public interface TemplateController {
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateDeletePermissions(authentication, new String(T(java.util.Base64).getUrlDecoder().decode(#templateName)))")
     @DeleteMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Delete template", description = "Delete template by name - the template cannot be deleted if it has promoted versions or dependencies.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

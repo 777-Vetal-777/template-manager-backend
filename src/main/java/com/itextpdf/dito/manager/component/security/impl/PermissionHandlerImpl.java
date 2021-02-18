@@ -49,6 +49,12 @@ public class PermissionHandlerImpl implements PermissionHandler {
                     TemplateTypeEnum.COMPOSITION,"E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
 
 
+    private static final Map<TemplateTypeEnum, Predicate<String>> TEMPLATE_DELETE_PERMISSIONS = Map.of(
+            TemplateTypeEnum.STANDARD, "E9_US126_DELETE_TEMPLATE_STANDARD"::equals,
+            TemplateTypeEnum.HEADER, "E9_US126_DELETE_TEMPLATE_STANDARD"::equals,
+            TemplateTypeEnum.FOOTER, "E9_US126_DELETE_TEMPLATE_STANDARD"::equals,
+            TemplateTypeEnum.COMPOSITION, "E9_US127_DELETE_TEMPLATE_COMPOSITION"::equals);
+
     private static final Map<ResourceTypeEnum, Predicate<String>> RESOURCE_VIEW_PERMISSIONS = Map.of(
             ResourceTypeEnum.IMAGE, "E8_US54_VIEW_RESOURCE_METADATA_IMAGE"::equals,
             ResourceTypeEnum.FONT, "E8_US57_VIEW_RESOURCE_METADATA_FONT"::equals,
@@ -118,6 +124,14 @@ public class PermissionHandlerImpl implements PermissionHandler {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(templateCommonPermissionsByType.get(type));
+    }
+
+    @Override
+    public boolean checkTemplateDeletePermissions(final Authentication authentication, final String templateName) {
+        final TemplateEntity templateEntity = templateService.get(templateName);
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(TEMPLATE_DELETE_PERMISSIONS.get(templateEntity.getType()));
     }
 
     @Override
