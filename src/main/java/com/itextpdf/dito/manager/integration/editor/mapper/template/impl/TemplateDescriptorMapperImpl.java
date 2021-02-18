@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration.editor.mapper.template.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor.OutputTemplateDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateFragmentType;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
