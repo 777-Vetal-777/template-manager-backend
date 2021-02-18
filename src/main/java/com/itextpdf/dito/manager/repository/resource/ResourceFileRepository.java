@@ -28,27 +28,36 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
 
     Optional<ResourceFileEntity> findFirstByUuid(String uuid);
 
-    String SELECT_CLAUSE = "select file.version as version, max(CONCAT(file.author.firstName, ' ',file.author.lastName)) as modifiedBy, "
-            + " max(file.createdOn) as modifiedOn, max(file.comment) as comment, max(file.stage.name) as stage,  max(file.author.firstName) as firstName"
-            + " from ResourceFileEntity file "
-            + " left join file.stage"
-            + " where file.resource.id = :id and ";
+    String SELECT_CLAUSE = "select file.version as version, max(CONCAT(users.first_name, ' ',users.last_name)) as modifiedBy, "
+            + " max(file.created_on) as modifiedOn, max(file.comment) as comment, max(stage.name) as stage, "
+            + " LOWER(max(CONCAT(users.first_name, ' ',users.last_name))) as lower_modifiedBy, LOWER(max(file.comment)) as lower_comment, LOWER(max(stage.name)) as lower_stage "
+            + " from {h-schema}resource_file file "
+            + " join {h-schema}user users on file.author_id = users.id"
+            + " left join {h-schema}stage stage on stage.id = ( select stage.id from {h-schema}stage stage where stage.sequence_order = (select max(instanceStage.sequence_order) "
+            + " from {h-schema}resource_file_template_file toTemplateFile "
+            + " join {h-schema}template_file templateFile on toTemplateFile.template_file_id = templateFile.id "
+            + " join {h-schema}template_file_instance toInstance on toInstance.template_file_id = templateFile.id "
+            + " join {h-schema}instance instance on instance.id = toInstance.instance_id "
+            + " join {h-schema}stage instanceStage on instanceStage.id = instance.stage_id "
+            + " where toTemplateFile.resource_file_id = file.id) )"
+            + " where file.resource_id = :id and ";
 
-    String FILTER_CONDITION = " (:version is null or file.version is null or file.version=:version) "
-            + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
-            + "and (cast(:startDate as date) is null or file.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
+    String FILTER_CONDITION = " (:version = '' or file.version = CAST(:version as bigint)) "
+            + "and (:modifiedBy='' or LOWER(CONCAT(users.first_name, ' ',users.last_name)) like CONCAT('%',:modifiedBy,'%')) "
+            + "and (cast(:startDate as date) is null or file.modified_on between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))"
-            + "and (:stage='' or LOWER(file.stage.name) like CONCAT('%',:stage,'%')) ";
+            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ";
 
     String GROUP_BY_VERSION = "group by file.version";
 
-    String SEARCH_CONDITION = "and (CAST(file.version as string) like CONCAT('%',:search,'%') "
+    String SEARCH_CONDITION = "and (CAST(file.version as text) like CONCAT('%',:search,'%') "
             + "or LOWER(file.comment) like CONCAT('%',:search,'%') "
-            + "or LOWER(CONCAT(file.author.firstName, ' ', file.author.lastName)) like LOWER(CONCAT('%',:search,'%'))"
-            + "or LOWER(CAST(CAST(file.createdOn as date) as string)) like CONCAT('%',:search,'%') "
-            + "or LOWER(file.stage.name) like CONCAT('%',:search,'%') ) ";
+            + "or LOWER(CONCAT(users.first_name, ' ',users.last_name)) like LOWER(CONCAT('%',:search,'%'))"
+            + "or LOWER(CAST(CAST(file.created_on as date) as text)) like CONCAT('%',:search,'%') "
+            + "or LOWER(stage.name) like CONCAT('%',:search,'%') ) ";
 
     String SELECT_CLAUSE_DEPENDENCY = "select name as name, version as version, stage as stage, 'HARD' as directionType, 'TEMPLATE' as dependencyType " +
+            " , LOWER(name) as lower_name, LOWER(stage) as lower_stage " +
             " from (select template.name as name, max(temFile.version) as version, max(stage.name) as stage" +
             " from {h-schema}resource resource" +
             " join {h-schema}resource_file file on file.resource_id = resource.id" +
@@ -70,20 +79,20 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
             " or 'template' like CONCAT('%', :search, '%')" +
             " or LOWER(stage) like CONCAT('%', :search, '%')))";
 
-    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + GROUP_BY_VERSION)
+    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + GROUP_BY_VERSION, nativeQuery = true)
     Page<FileVersionModel> filter(Pageable pageable,
                                   @Param("id") Long resourceId,
-                                  @Param("version") @Nullable Long version,
+                                  @Param("version") @Nullable String version,
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
                                   @Param("comment") @Nullable String comment,
                                   @Param("stage") @Nullable String stageName);
 
-    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION + GROUP_BY_VERSION)
+    @Query(value = SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION + GROUP_BY_VERSION, nativeQuery = true)
     Page<FileVersionModel> search(Pageable pageable,
                                   @Param("id") Long resourceId,
-                                  @Param("version") @Nullable Long version,
+                                  @Param("version") @Nullable String version,
                                   @Param("modifiedBy") @Nullable String modifiedBy,
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,

@@ -23,7 +23,7 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
     List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
 
     String SELECT_CLAUSE = "select file.version as version, CONCAT(file.author.firstName, ' ',file.author.lastName) as modifiedBy, "
-            + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage "
+            + " file.createdOn as modifiedOn, file.comment, file.stage.name as stage "
             + " from DataCollectionFileEntity file "
             + " left join file.stage "
             + " where file.dataCollection.id = :id and ";

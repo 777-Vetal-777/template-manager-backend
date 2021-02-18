@@ -17,7 +17,7 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
             "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA","E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE",
             "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
 
-    String SELECT_FIELDS_CLAUSE = "select name, type, templateType,"
+    String SELECT_FIELDS_CLAUSE = "select name, type, templateType, lower(name) as lower_name, "
             + " E9_US75_EDIT_TEMPLATE_METADATA_STANDARD, "
             + " E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD, "
             + " E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE, "

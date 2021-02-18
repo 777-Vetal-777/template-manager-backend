@@ -86,7 +86,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     String DEPENDENCY_COUNT_QUERY = "select count(*) from " + DEPENDENCY_SUBQUERY;
 
-    String DEPENDENCY_QUERY = "select version, name, directionType, dependencyType, dependencyTypePluralName, stage from " + DEPENDENCY_SUBQUERY;
+    String DEPENDENCY_QUERY = "select version, name, LOWER(name) as lower_name, directionType, dependencyType, dependencyTypePluralName, stage, LOWER(stage) as lower_stage from " + DEPENDENCY_SUBQUERY;
 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
             " and (:version = 0 or version=:version) " +

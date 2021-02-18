@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class FilterUtils {
 
@@ -69,5 +70,9 @@ public final class FilterUtils {
 
     private FilterUtils() {
         throw new AssertionError("Suppress default constructor for noninstantiability");
+    }
+
+    public static String getStringFromLong(Long filter) {
+        return Optional.ofNullable(filter).map(Object::toString).orElse("");
     }
 }

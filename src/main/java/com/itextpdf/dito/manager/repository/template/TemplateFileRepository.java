@@ -22,7 +22,7 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
     List<String> SUPPORTED_SORT_FIELDS = List.of("version", "stage", "modifiedBy", "modifiedOn", "comment");
 
     String SELECT_CLAUSE = "select file.version as version, CONCAT(file.author.firstName, ' ',file.author.lastName) as modifiedBy, "
-            + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage "
+            + " file.createdOn as modifiedOn, file.comment as comment, file.stage.name as stage, lower(file.comment) as lower_comment "
             + " from TemplateFileEntity file "
             + " left join file.stage "
             + " where file.template.id = :id and ";

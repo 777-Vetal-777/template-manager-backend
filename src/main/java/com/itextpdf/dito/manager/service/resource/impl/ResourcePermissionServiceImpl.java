@@ -70,6 +70,9 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
                             sortParam = new Sort.Order(Sort.Direction.ASC, sortParam.getProperty());
                         }
                     }
+                    if (sortParam.getProperty().equals("name")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "lower_name");
+                    }
                     return sortParam;
                 })
                 .collect(Collectors.toList()));

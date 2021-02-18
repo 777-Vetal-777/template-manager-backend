@@ -515,7 +515,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                     if (sortParam.getProperty().equals("modifiedOn")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.date");
                     }
-                    return sortParam;
+                    return sortParam.getProperty().equals("latestLogRecord.date") ? sortParam : sortParam.ignoreCase();
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);

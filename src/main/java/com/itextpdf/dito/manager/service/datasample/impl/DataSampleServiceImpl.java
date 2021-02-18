@@ -150,13 +150,16 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	private Pageable updateSort(final Pageable pageable) {
 		Sort newSort = Sort.by(pageable.getSort().stream()
 				.map(sortParam -> {
-					if (sortParam.getProperty().equals("modifiedBy")) {
+					if ("modifiedBy".equals(sortParam.getProperty())) {
 						sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.author.firstName");
 					}
-					if (sortParam.getProperty().equals("comment")) {
+					if ("comment".equals(sortParam.getProperty())) {
 						sortParam = new Sort.Order(sortParam.getDirection(), "latestFile.comment");
 					}
-					return sortParam;
+					if ("isDefault".equals(sortParam.getProperty())) {
+						sortParam = new Sort.Order( sortParam.getDirection() == Sort.Direction.ASC ? Sort.Direction.DESC : Sort.Direction.ASC, "isDefault");
+					}
+					return "modifiedOn".equals(sortParam.getProperty()) || "isDefault".equals(sortParam.getProperty()) ? sortParam : sortParam.ignoreCase();
 				})
 				.collect(Collectors.toList()));
 		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);

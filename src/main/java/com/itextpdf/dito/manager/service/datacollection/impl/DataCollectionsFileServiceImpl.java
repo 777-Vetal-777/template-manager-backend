@@ -86,7 +86,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
                         if (sortParam.getProperty().equals("stage")) {
                             sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
                         }
-                        return sortParam;
+                        return sortParam.getProperty().equals("createdOn") ? sortParam : sortParam.ignoreCase();
                     })
                     .collect(Collectors.toList()));
         } else {

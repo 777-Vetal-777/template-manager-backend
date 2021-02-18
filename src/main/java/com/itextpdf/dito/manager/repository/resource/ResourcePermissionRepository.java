@@ -20,7 +20,7 @@ public interface ResourcePermissionRepository extends JpaRepository<TemplateEnti
             "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE");
 
 
-    String SELECT_FIELDS_CLAUSE = "select name, type, resourceType," +
+    String SELECT_FIELDS_CLAUSE = "select name, type, resourceType, lower(name) as lower_name, " +
             " E8_US66_DELETE_RESOURCE_IMAGE," +
             " E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE," +
             " E8_US55_EDIT_RESOURCE_METADATA_IMAGE," +

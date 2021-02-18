@@ -347,7 +347,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                     if (sortParam.getProperty().equals("comment")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "latestFile.comment");
                     }
-                    return sortParam;
+                    return sortParam.getProperty().equals("latestLogRecord.date") ? sortParam : sortParam.ignoreCase();
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);

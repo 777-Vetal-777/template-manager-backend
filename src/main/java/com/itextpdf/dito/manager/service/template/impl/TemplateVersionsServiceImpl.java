@@ -86,7 +86,10 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
                         if (sortParam.getProperty().equals("stage")) {
                             sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
                         }
-                        return sortParam;
+                        if (sortParam.getProperty().equals("comment")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "lower_comment");
+                        }
+                        return sortParam.ignoreCase();
                     })
                     .collect(Collectors.toList()));
         } else {

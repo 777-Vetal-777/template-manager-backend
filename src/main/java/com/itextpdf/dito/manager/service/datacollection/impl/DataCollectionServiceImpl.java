@@ -338,7 +338,10 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                     if (sortParam.getProperty().equals("modifiedBy")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.author.firstName");
                     }
-                    return sortParam;
+                    if (sortParam.getProperty().equals("modifiedOn")) {
+                        sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.date");
+                    }
+                    return sortParam.getProperty().equals("lastLog.date") ? sortParam : sortParam.ignoreCase();
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);

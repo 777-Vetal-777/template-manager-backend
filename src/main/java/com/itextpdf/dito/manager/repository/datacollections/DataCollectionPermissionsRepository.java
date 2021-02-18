@@ -27,7 +27,7 @@ public interface DataCollectionPermissionsRepository extends JpaRepository<DataC
 
     String PERMISSION_COUNT_CLAUSE = "select count(*) from ";
 
-    String PERMISSION_SELECT_CLAUSE = "select name, type,"
+    String PERMISSION_SELECT_CLAUSE = "select name, type, LOWER(name) as lower_name, "
             + " E6_US34_EDIT_DATA_COLLECTION_METADATA, "
             + " E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON, "
             + " E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION, "

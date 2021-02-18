@@ -5,11 +5,6 @@ import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleFileService;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,13 +12,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
-import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromLong;
 
 @Component
-public class DataSampleFileServiceImpl extends AbstractService implements DataSampleFileService{
+public class DataSampleFileServiceImpl extends AbstractService implements DataSampleFileService {
     private DataSampleFileRepository dataSampleFileRepository;
 
     @Autowired
@@ -35,7 +35,7 @@ public class DataSampleFileServiceImpl extends AbstractService implements DataSa
     public Page<FileVersionModel> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final Pageable pageWithSort = updateSort(pageable);
-        final Long version = getLongFromFilter(filter.getVersion());
+        final String version = getStringFromLong(filter.getVersion());
         final String createdBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
         final String stageName = getStringFromFilter(filter.getStage());
@@ -55,13 +55,20 @@ public class DataSampleFileServiceImpl extends AbstractService implements DataSa
                 ? dataSampleFileRepository.filter(pageWithSort, name, version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment)
                 : dataSampleFileRepository.search(pageWithSort, name, version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment, searchParam.toLowerCase());
     }
+
     private Pageable updateSort(final Pageable pageable) {
         Sort newSort;
         if (pageable.getSort().isSorted()) {
             newSort = Sort.by(pageable.getSort().stream()
                     .map(sortParam -> {
                         if (sortParam.getProperty().equals("modifiedBy")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "firstName");
+                            sortParam = new Sort.Order(sortParam.getDirection(), "lower_modifiedBy");
+                        }
+                        if (sortParam.getProperty().equals("stage")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "lower_stage");
+                        }
+                        if (sortParam.getProperty().equals("comment")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "lower_comment");
                         }
                         return sortParam;
                     })

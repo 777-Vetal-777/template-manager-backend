@@ -151,7 +151,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
                     if (sortParam.getProperty().equals("createdBy")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "createdBy.firstName");
                     }
-                    return sortParam;
+                    return sortParam.getProperty().equals("createdOn") ? sortParam : sortParam.ignoreCase();
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
