@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.integration.editor.service.template.TemplateMan
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
+import com.itextpdf.dito.manager.service.template.impl.DefaultTemplateLoader;
 import com.itextpdf.dito.sdk.core.dependency.api.TemplateDependency;
 import com.itextpdf.dito.sdk.core.dependency.retriever.template.DefaultTemplateDependenciesRetriever;
 import com.itextpdf.dito.sdk.core.dependency.retriever.template.TemplateDependenciesRetriever;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -35,20 +37,22 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     private final TemplateRepository templateRepository;
     private final ResourceMapper resourceMapper;
     private final ResourceService resourceService;
+    private final DefaultTemplateLoader defaultTemplateLoader;
 
     public TemplateManagementServiceImpl(final TemplateService templateService,
                                          final TemplateAssetRetriever resourceAssetRetriever,
                                          final TemplateAssetRetriever templateAssetRetriever,
                                          final TemplateRepository templateRepository,
                                          final ResourceMapper resourceMapper,
-                                         final ResourceService resourceService) {
+                                         final ResourceService resourceService,
+                                         final DefaultTemplateLoader defaultTemplateLoader) {
         this.templateService = templateService;
         this.resourceAssetRetriever = resourceAssetRetriever;
         this.templateAssetRetriever = templateAssetRetriever;
         this.resourceMapper = resourceMapper;
         this.resourceService = resourceService;
         this.templateRepository = templateRepository;
-
+        this.defaultTemplateLoader = defaultTemplateLoader;
     }
 
     @Override
@@ -67,6 +71,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
                                            final String newName) {
         final TemplateEntity templateEntity = templateService.createNewVersion(name, data, email, null, newName, null);
         templateEntity.getLatestFile().setResourceFiles(provideConsistency(templateEntity.getLatestFile().getData()));
+        provideFirstVersionTemplateCreation(templateEntity);
         return templateRepository.save(templateEntity);
     }
 
@@ -80,6 +85,17 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
         return templateService.delete(templateName);
     }
 
+	private void provideFirstVersionTemplateCreation(final TemplateEntity templateEntity) {
+		// versions sorted DESC in TemplateEntity
+		if (templateEntity.getFiles().size() == 2
+				&& Arrays.equals(templateEntity.getFiles().get(1).getData(), defaultTemplateLoader.load())) {
+			// removing empty version
+			templateEntity.getFiles().remove(1);
+			// making actual version first
+			templateEntity.getFiles().get(0).setVersion(1L);
+		}
+	}
+	
     private Set<ResourceFileEntity> provideConsistency(final byte[] data) {
         final TemplateDependenciesRetriever retriever = new DefaultTemplateDependenciesRetriever(templateAssetRetriever,
                 resourceAssetRetriever);
