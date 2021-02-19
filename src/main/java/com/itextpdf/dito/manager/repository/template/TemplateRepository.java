@@ -145,14 +145,6 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "group by template.id")
     List<TemplateEntity> findTemplatesByResourceId(@Param("resourceId") Long resourceId);
 
-    @Query(value = "select template from TemplateEntity template "
-            + "left join template.latestFile latestTemplateFile "
-            + "left join latestTemplateFile.dataCollectionFile collectionFile "
-            + "left join collectionFile.dataCollection collection "
-            + "where collection.id = :dataCollectionId "
-            + "group by template.id")
-    List<TemplateEntity> findTemplatesByDataCollectionId(@Param("dataCollectionId") Long dataCollectionId);
-
     @Query(value = "select latestTemplateFile from TemplateEntity template "
             + "left join template.latestFile latestTemplateFile "
             + "left join latestTemplateFile.dataCollectionFile collectionFile "
