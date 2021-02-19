@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.integration.InconsistencyException;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -88,11 +89,19 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
 		// versions sorted DESC in TemplateEntity
 		if (templateEntity.getFiles().size() == 2
 				&& Arrays.equals(templateEntity.getFiles().get(1).getData(), templateLoader.load())) {
-			//removing empty version
-			templateEntity.getFiles().remove(1);
-			//updating editor version to 0L
-			templateEntity.getFiles().get(0).setVersion(0L);
-			templateEntity.getLatestFile().setVersion(0L);
+			// updating empty version to editor version
+			final TemplateFileEntity templateFileEditorVersion = templateEntity.getFiles().get(1);
+			final TemplateFileEntity templateFileEmptyVersion = templateEntity.getFiles().get(0);
+			templateFileEditorVersion.setData(templateFileEmptyVersion.getData());
+			templateFileEditorVersion.setAuthor(templateFileEmptyVersion.getAuthor());
+			templateFileEditorVersion.setComment(templateFileEmptyVersion.getComment());
+			templateFileEditorVersion.setCreatedOn(templateFileEmptyVersion.getCreatedOn());
+			templateFileEditorVersion.setDataCollectionFile(templateFileEmptyVersion.getDataCollectionFile());
+			templateFileEditorVersion.setDeployed(templateFileEmptyVersion.getDeployed());
+			templateFileEditorVersion.setModifiedOn(templateFileEmptyVersion.getModifiedOn());
+			templateFileEditorVersion.setResourceFiles(templateFileEmptyVersion.getResourceFiles());
+			//removing editor version
+			templateEntity.getFiles().remove(0);
 		}
 	}
 	
