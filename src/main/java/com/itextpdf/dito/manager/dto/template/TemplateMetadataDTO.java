@@ -22,6 +22,7 @@ public class TemplateMetadataDTO{
     private String description;
     private Long version;
     private Boolean blocked;
+    private String blockedBy;
     private Set<RoleDTO> appliedRoles;
     private List<TemplateDeployedVersionDTO> deployedVersions;
 
@@ -115,5 +116,13 @@ public class TemplateMetadataDTO{
 
     public void setDeployedVersions(List<TemplateDeployedVersionDTO> deployedVersions) {
         this.deployedVersions = deployedVersions;
+    }
+
+    public String getBlockedBy() {
+        return blockedBy;
+    }
+
+    public void setBlockedBy(String blockedBy) {
+        this.blockedBy = blockedBy;
     }
 }

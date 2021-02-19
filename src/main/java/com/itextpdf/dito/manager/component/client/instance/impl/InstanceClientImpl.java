@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
@@ -86,7 +87,7 @@ public class InstanceClientImpl implements InstanceClient {
                         return clientResponse.bodyToMono(InstanceRegisterResponseDTO.class);
                     });
             return response.block();
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new NotReachableInstanceException(instanceSocket);
         }
     }
@@ -153,6 +154,11 @@ public class InstanceClientImpl implements InstanceClient {
                 .exchange()
                 .flatMap(clientResponse -> {
                     if (clientResponse.statusCode().isError()) {
+                        if (HttpStatus.NOT_FOUND == clientResponse.statusCode()) {
+                            final String message = new StringBuilder().append("Template ").append(templateAlias).append(" was already removed from instance").toString();
+                            log.warn(message);
+                            return clientResponse.bodyToMono(TemplateDeploymentDTO.class);
+                        }
                         return clientResponse.createException().flatMap(Mono::error);
                     }
                     return clientResponse.bodyToMono(TemplateDeploymentDTO.class);

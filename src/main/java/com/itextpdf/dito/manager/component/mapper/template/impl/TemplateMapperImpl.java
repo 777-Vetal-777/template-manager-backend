@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -120,8 +121,10 @@ public class TemplateMapperImpl implements TemplateMapper {
                 ? dataCollectionFileEntity.getDataCollection().getName()
                 : null);
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
-        if (entity.getBlockedBy() != null) {
+        final UserEntity blockedUser = entity.getBlockedBy();
+        if (blockedUser != null) {
             result.setBlocked(true);
+            result.setBlockedBy(new StringBuilder().append(blockedUser.getFirstName()).append(" ").append(blockedUser.getLastName()).toString());
         }
         result.setDeployedVersions(getDeployedVersions(entity));
         return result;
