@@ -155,7 +155,7 @@ public class InstanceClientImpl implements InstanceClient {
                 .flatMap(clientResponse -> {
                     if (clientResponse.statusCode().isError()) {
                         if (HttpStatus.NOT_FOUND == clientResponse.statusCode()) {
-                            final String message = new StringBuilder().append("Template ").append(templateAlias).append(" was already removed from instance").toString();
+                            final String message = new StringBuilder().append("Template ").append(templateAlias).append(" was already removed from instance:").append(instanceSocket).toString();
                             log.warn(message);
                             return clientResponse.bodyToMono(TemplateDeploymentDTO.class);
                         }
