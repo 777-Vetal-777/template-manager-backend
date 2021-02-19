@@ -51,6 +51,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
     @Override
     public ResourceEntity create(final ResourceLeafDescriptor descriptor, final byte[] data, final String fileName,
                                  final String email) {
+    	//Freezed while Editor apply different resources loading. (Bounded to DTM-2006). Uploading Images Only for now
+    	/*
         final ResourceTypeEnum resourceTypeEnum;
         if (descriptor instanceof ImageDescriptor) {
             resourceTypeEnum = ResourceTypeEnum.IMAGE;
@@ -59,6 +61,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
         } else {
             resourceTypeEnum = ResourceTypeEnum.FONT;
         }
+        */
+    	final ResourceTypeEnum resourceTypeEnum = ResourceTypeEnum.IMAGE;
         final String name = descriptor.getDisplayName();
         return resourceService.create(name, resourceTypeEnum, data, name, email);
     }

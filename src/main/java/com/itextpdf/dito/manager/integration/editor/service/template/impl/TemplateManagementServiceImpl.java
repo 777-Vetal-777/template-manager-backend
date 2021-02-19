@@ -8,13 +8,11 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.integration.InconsistencyException;
-import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
-import com.itextpdf.dito.manager.service.template.impl.DefaultTemplateLoader;
 import com.itextpdf.dito.sdk.core.dependency.api.TemplateDependency;
 import com.itextpdf.dito.sdk.core.dependency.retriever.template.DefaultTemplateDependenciesRetriever;
 import com.itextpdf.dito.sdk.core.dependency.retriever.template.TemplateDependenciesRetriever;
@@ -90,7 +88,11 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
 		// versions sorted DESC in TemplateEntity
 		if (templateEntity.getFiles().size() == 2
 				&& Arrays.equals(templateEntity.getFiles().get(1).getData(), templateLoader.load())) {
-			//TO DO Logic
+			//removing empty version
+			templateEntity.getFiles().remove(1);
+			//updating editor version to 0L
+			templateEntity.getFiles().get(0).setVersion(0L);
+			templateEntity.getLatestFile().setVersion(0L);
 		}
 	}
 	
