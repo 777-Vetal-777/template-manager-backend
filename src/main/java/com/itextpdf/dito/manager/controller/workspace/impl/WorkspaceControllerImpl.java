@@ -93,10 +93,8 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<PromotionPathDTO> updatePromotionPath(final String workspaceName, final PromotionPathDTO promotionPathDTO) {
-        PromotionPathDTO result;
-
         final PromotionPathEntity promotionPathEntity = workspaceService.updatePromotionPath(decodeBase64(workspaceName), workspaceMapper.map(promotionPathDTO));
-        result = workspaceMapper.map(promotionPathEntity);
+        final PromotionPathDTO result = workspaceMapper.map(promotionPathEntity);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
