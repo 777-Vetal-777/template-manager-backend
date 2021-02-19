@@ -151,7 +151,7 @@ public interface TemplateController {
             @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @PatchMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
     @Operation(summary = "Update template metadata", description = "Update template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> update(
@@ -169,12 +169,12 @@ public interface TemplateController {
                                                      @Parameter(description = "Universal search string.") @RequestParam(name = "search", required = false) String searchParam);
 
     @GetMapping(TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("hasAuthority('E9_US81_PREVIEW_TEMPLATE_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, new String(T(java.util.Base64).getUrlDecoder().decode(#templateName)), 'E9_US81_PREVIEW_TEMPLATE_STANDARD')")
     @Operation(summary = "Get template preview", description = "Get generated template PDF preview",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Generated template PDF preview")
-    ResponseEntity<byte[]> preview(
-            @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name, @Parameter(description = "Optional name of date sample for generating pdf preview. ") @RequestParam(name = "dataSampleName", required = false) String dataSampleName);
+    ResponseEntity<byte[]> preview(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
+                                   @Parameter(description = "Optional name of date sample for generating pdf preview. ") @RequestParam(name = "dataSampleName", required = false) String dataSampleName);
 
     @PostMapping(value = TEMPLATE_VERSION_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@permissionHandlerImpl.checkTemplateCreateVersionPermission(authentication, #name)")
@@ -300,7 +300,7 @@ public interface TemplateController {
     ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
 
     @GetMapping(value = TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US24_EXPORT_TEMPLATE_DATA')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, new String(T(java.util.Base64).getUrlDecoder().decode(#templateName)), 'E9_US24_EXPORT_TEMPLATE_DATA')")
     @Operation(summary = "Export template", description = "Export template as zipped DITO project",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

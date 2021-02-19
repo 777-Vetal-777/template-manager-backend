@@ -28,7 +28,7 @@ public interface PermissionHandler {
 
     boolean checkTemplatePermissions(UserEntity userEntity, TemplateEntity templateEntity, String permission);
 
-    boolean checkTemplatePermissions(String email, String templateName, String checkingPermission);
+    boolean checkTemplatePermissions(Authentication authentication, String templateName, String checkingPermission);
 
      boolean checkTemplateRollbackPermissions(String email, String templateName);
 

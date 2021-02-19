@@ -230,9 +230,9 @@ public class PermissionHandlerImpl implements PermissionHandler {
     }
 
     @Override
-    public boolean checkTemplatePermissions(final String email, final String templateName, final String checkingPermission) {
+    public boolean checkTemplatePermissions(final Authentication authentication, final String templateName, final String checkingPermission) {
         final TemplateEntity templateEntity = templateService.get(templateName);
-        final UserEntity userEntity = userService.findActiveUserByEmail(email);
+        final UserEntity userEntity = userService.findByEmail(authentication.getName());
 
         return checkTemplatePermissions(userEntity, templateEntity, checkingPermission);
     }
