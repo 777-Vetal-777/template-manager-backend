@@ -232,7 +232,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
     @Override
     public boolean checkTemplatePermissions(final Authentication authentication, final String templateName, final String checkingPermission) {
         final TemplateEntity templateEntity = templateService.get(templateName);
-        final UserEntity userEntity = userService.findByEmail(authentication.getName());
+        final UserEntity userEntity = userService.findActiveUserByEmail(authentication.getName());
 
         return checkTemplatePermissions(userEntity, templateEntity, checkingPermission);
     }
