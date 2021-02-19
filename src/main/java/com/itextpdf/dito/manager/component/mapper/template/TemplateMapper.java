@@ -15,6 +15,8 @@ import java.util.List;
 public interface TemplateMapper {
     TemplateDTO map(TemplateEntity entity);
 
+    TemplateMetadataDTO mapMetadataWithoutRoles(TemplateEntity entity);
+
     TemplateEntity map(TemplateUpdateRequestDTO dto);
 
     TemplateMetadataDTO mapToMetadata(TemplateEntity entity);

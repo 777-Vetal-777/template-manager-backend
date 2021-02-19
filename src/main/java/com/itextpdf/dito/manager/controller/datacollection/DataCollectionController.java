@@ -130,7 +130,7 @@ public interface DataCollectionController {
     @PreAuthorize("hasAnyAuthority('E6_US33_VIEW_DATA_COLLECTION_METADATA', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get data collection", description = "Get data collection",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<DataCollectionDTO> get(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name);
+    ResponseEntity<DataCollectionDTO> get(@Parameter(description = "Data collections name encoded with base64.") @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name, Principal principal);
 
     @PatchMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
     @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E6_US34_EDIT_DATA_COLLECTION_METADATA')")

@@ -4,6 +4,7 @@ import com.google.common.base.Predicates;
 import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -19,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -180,6 +182,22 @@ public class PermissionHandlerImpl implements PermissionHandler {
         final ResourceTypeEnum type = fromPluralNameOrParse(resourceType);
 
         return checkResourcePermissions(email, type, resourceName, RESOURCE_ROLLBACK_PERMISSIONS.get(type));
+    }
+
+    @Override
+    public boolean checkPermissionsByUser(final String email, final String permission) {
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
+        List<RoleEntity> roles = userEntity.getRoles().stream().collect(Collectors.toList());
+        boolean existPermission = false;
+        for(RoleEntity roleEntity:roles){
+            Set<PermissionEntity>permissionEntities= roleEntity.getPermissions();
+            for(PermissionEntity permissionEntity:permissionEntities){
+                if(permissionEntity.getName().equals(permission)){
+                    existPermission= true;
+                }
+            }
+        }
+        return existPermission;
     }
 
     @Override

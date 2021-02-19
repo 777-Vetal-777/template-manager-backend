@@ -149,7 +149,8 @@ public interface TemplateController {
     @Operation(summary = "Get template metadata", description = "Get template metadata",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<TemplateMetadataDTO> get(
-            @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+            @Parameter(description = "Template name encoded with base64.") @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
+            Principal principal);
 
     @PatchMapping(TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")

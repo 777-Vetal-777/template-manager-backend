@@ -19,6 +19,8 @@ public interface PermissionHandler {
 
     boolean checkResourceRollbackPermissions(String email, String resourceType, String resourceName);
 
+    boolean checkPermissionsByUser(String email, String permission);
+
     //  Templates
     boolean checkTemplateCommonPermissionByType(Authentication authentication, String type);
 

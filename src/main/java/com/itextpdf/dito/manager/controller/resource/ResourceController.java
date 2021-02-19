@@ -157,7 +157,7 @@ public interface ResourceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<ResourceDTO> get(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
-            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
+            @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type, Principal principal);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E8_US52_TABLE_OF_RESOURCES', 'E8_US101_RESOURCE_NAVIGATION_MENU')")

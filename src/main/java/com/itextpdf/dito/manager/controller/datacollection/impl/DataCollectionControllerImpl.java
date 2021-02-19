@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
+import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
@@ -61,6 +62,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataSampleService dataSampleService;
     private final DataSampleFileService dataSampleFileService;
     private final FileVersionMapper fileVersionMapper;
+    private final PermissionHandler permissionHandler;
     private final Long sizeJsonLimit;
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
@@ -74,6 +76,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataSampleService dataSampleService,
                                         final DataSampleFileService dataSampleFileService,
                                         final FileVersionMapper fileVersionMapper,
+                                        final PermissionHandler permissionHandler,
                                         @Value("${data-collection.json.size-limit}") final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
@@ -87,6 +90,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.fileVersionMapper = fileVersionMapper;
         this.sizeJsonLimit = sizeJsonLimit;
         this.dataSampleFileService = dataSampleFileService;
+        this.permissionHandler = permissionHandler;
     }
 
     @Override
@@ -129,8 +133,15 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public ResponseEntity<DataCollectionDTO> get(final String name) {
-        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionService.get(decodeBase64(name))), HttpStatus.OK);
+    public ResponseEntity<DataCollectionDTO> get(final String name, final Principal principal) {
+        DataCollectionDTO dataCollectionDTO = null;
+        DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodeBase64(name));
+        if(!permissionHandler.checkPermissionsByUser(principal.getName(), "E6_US39_TABLE_OF_DATA_COLLECTIONS_PERMISSIONS")){
+            dataCollectionDTO = dataCollectionMapper.mapWithFileWithoutRoles(dataCollectionEntity);
+        }else {
+            dataCollectionDTO = dataCollectionMapper.mapWithFile(dataCollectionEntity);
+        }
+        return new ResponseEntity<>(dataCollectionDTO, HttpStatus.OK);
     }
 
     @Override

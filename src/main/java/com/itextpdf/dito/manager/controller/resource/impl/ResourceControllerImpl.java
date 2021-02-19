@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
+import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
@@ -62,6 +63,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final Map<ResourceTypeEnum, List<String>> supportedExtensions = new HashMap<>();
     private final ResourcePermissionService resourcePermissionService;
     private final PermissionMapper permissionMapper;
+    private final PermissionHandler permissionHandler;
     private final FileVersionMapper fileVersionMapper;
     private final Map<ResourceTypeEnum, Long> sizeLimit = new HashMap<>();
 
@@ -77,7 +79,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final ResourcePermissionService resourcePermissionService,
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
-            final FileVersionMapper fileVersionMapper) {
+            final FileVersionMapper fileVersionMapper,
+            final PermissionHandler permissionHandler) {
         this.supportedExtensions.put(IMAGE, supportedPictureExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.FONT, supportedFontExtensions);
@@ -90,6 +93,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourcePermissionService = resourcePermissionService;
         this.permissionMapper = permissionMapper;
         this.fileVersionMapper = fileVersionMapper;
+        this.permissionHandler = permissionHandler;
     }
 
     @Override
@@ -167,9 +171,15 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     @Override
-    public ResponseEntity<ResourceDTO> get(final String name, final String type) {
+    public ResponseEntity<ResourceDTO> get(final String name, final String type, final Principal principal) {
         final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceTypeFromPath(type));
-        return new ResponseEntity<>(resourceMapper.map(entity), HttpStatus.OK);
+        ResourceDTO resourceDTO = null;
+        if(!permissionHandler.checkPermissionsByUser(principal.getName(), "E8_US67_TABLE_OF_RESOURCE_PERMISSIONS_IMAGE")){
+            resourceDTO = resourceMapper.mapWithoutRoles(entity);
+        }else {
+            resourceDTO = resourceMapper.map(entity);
+        }
+        return new ResponseEntity<>(resourceDTO, HttpStatus.OK);
     }
 
     @Override
