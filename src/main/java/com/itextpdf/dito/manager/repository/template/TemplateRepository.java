@@ -51,7 +51,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
                 " left join {h-schema}stage stage on instance.stage_id = stage.id" +
                 " where template.id = :id group by resource.name" +
                 " union all" +
-                " select max(dataFile.version) as version, max(data.name) as name, 'SOFT' as directionType, 'DATA_COLLECTION' as dependencyType, 'data collection' as dependencyTypePluralName, max(stage.name) as stage" +
+                " select max(dataFile.version) as version, max(data.name) as name, 'HARD' as directionType, 'DATA_COLLECTION' as dependencyType, 'data collection' as dependencyTypePluralName, max(stage.name) as stage" +
                 " from {h-schema}template as template" +
                 " join {h-schema}template_file as templateFile ON templateFile.id = (select max(id) from manager.template_file tf where tf.template_id = template.id and tf.version = (select max(version) from manager.template_file tf2 where tf2.template_id = template.id))" +
                 " join {h-schema}data_collection_file as dataFile on templateFile.data_collection_file_id = dataFile.id" +
