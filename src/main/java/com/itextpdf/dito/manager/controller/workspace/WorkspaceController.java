@@ -44,7 +44,7 @@ public interface WorkspaceController {
     String WORKSPACE_PROMOTION_PATH_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/promotion-path";
     String WORKSPACE_STAGES_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/stages";
     String WORKSPACE_LICENSE_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/license";
-    String WORKSPACE_CHECK_LICENSE_ENDPOINT = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/check-license";
+    String WORKSPACE_CHECK_LICENSE_ENDPOINT = "/check-license";
     String WORKSPACE_NAME_AVAILABLE_ENDPOINTS = WORKSPACE_ENDPOINT_WITH_PATH_VARIABLE + "/exist";
 
     @GetMapping(WORKSPACE_NAME_AVAILABLE_ENDPOINTS)
@@ -53,7 +53,7 @@ public interface WorkspaceController {
     @ApiResponse(responseCode = "200", description = "Answer to a request if workspace can be used ", content = @Content)
     ResponseEntity<Boolean> checkIsWorkspaceWithNameExist(@NotBlank @PathVariable(WORKSPACE_PATH_VARIABLE) String name);
 
-    @PostMapping(path = WORKSPACE_CHECK_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_MIXED_VALUE)
+    @PostMapping(path = WORKSPACE_CHECK_LICENSE_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyAuthority('E4_US18_WORKSPACE_DEFAULT_SETTINGS', 'E4_US23_WORKSPACE_SET_UP_WIZARD','E4_US19_UPLOAD_LICENSE')")
     @Operation(summary = "Check the license for validity.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Successfully uploaded")

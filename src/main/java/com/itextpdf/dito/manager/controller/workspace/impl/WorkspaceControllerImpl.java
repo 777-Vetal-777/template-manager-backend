@@ -48,7 +48,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<Boolean> checkIsWorkspaceWithNameExist(final String name) {
-        return new ResponseEntity<>(workspaceService.checkIsWorkspaceWithNameExist(name), HttpStatus.OK);
+        return new ResponseEntity<>(workspaceService.checkIsWorkspaceWithNameExist(decodeBase64(name)), HttpStatus.OK);
     }
 
     @Override
