@@ -222,7 +222,7 @@ public interface TemplateController {
                                                    @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
                                                    @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
-    @GetMapping(TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE)
+    @PatchMapping(TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Block template for editing", description = "Block template for editing by current user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Template blocked for editing successfully."),
@@ -231,7 +231,7 @@ public interface TemplateController {
     })
     ResponseEntity<TemplateMetadataDTO> block(Principal principal, @Parameter(name = "template-name", description = "Encoded with base64 new name of template", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
-    @GetMapping(TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE)
+    @PatchMapping(TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE)
     @Operation(summary = "Unblock template for editing", description = "Unblock template for editing by current user", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Template unblocked for editing successfully."),

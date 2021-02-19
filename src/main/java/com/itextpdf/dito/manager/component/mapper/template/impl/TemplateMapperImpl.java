@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.template.impl;
 
+import com.google.common.collect.Lists;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
@@ -186,7 +187,7 @@ public class TemplateMapperImpl implements TemplateMapper {
                 deployedVersions.add(map(versionOnStage, stageEntity));
             }
         }
-        return deployedVersions;
+        return Lists.reverse(deployedVersions);
     }
 
     private TemplateDeployedVersionDTO map(final TemplateFileEntity templateFileEntity, final StageEntity stageEntity) {
