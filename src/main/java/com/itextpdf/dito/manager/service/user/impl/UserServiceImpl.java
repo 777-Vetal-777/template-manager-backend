@@ -169,7 +169,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity findUserByEmail(final String email) {
+    public UserEntity findByEmail(final String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundOrNotActiveException(email));
     }
 

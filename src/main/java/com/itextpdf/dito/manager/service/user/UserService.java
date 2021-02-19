@@ -15,7 +15,7 @@ public interface UserService {
 
     UserEntity findActiveUserByEmail(String email);
 
-    UserEntity findUserByEmail(String email);
+    UserEntity findByEmail(String email);
 
     UserEntity updateUser(UserEntity userEntity, String email);
 

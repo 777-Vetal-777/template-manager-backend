@@ -59,7 +59,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> get(final String userName, final Principal principal) {
-        final UserDTO user = userMapper.map(userService.findUserByEmail(decodeBase64(userName)));
+        final UserDTO user = userMapper.map(userService.findByEmail(decodeBase64(userName)));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
