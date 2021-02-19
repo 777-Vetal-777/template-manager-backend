@@ -299,12 +299,12 @@ public interface TemplateController {
     })
     ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
 
-    @GetMapping(TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE)
+    @GetMapping(value = TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(#principal.getName(), new String(T(java.util.Base64).getUrlDecoder().decode(#name)), 'E9_US24_EXPORT_TEMPLATE_DATA')")
     @Operation(summary = "Export template", description = "Export template as zipped DITO project",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Exported template is in response.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)),
+            @ApiResponse(responseCode = "200", description = "Exported template is in response."),
             @ApiResponse(responseCode = "404", description = "Template not found"),
             @ApiResponse(responseCode = "422", description = "Could not proceed with template export.")
     })
