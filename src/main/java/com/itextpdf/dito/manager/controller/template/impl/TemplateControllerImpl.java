@@ -255,7 +255,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        final String filename = decodedTemplateName.concat(".dito");
+        final String filename = decodedTemplateName.concat(".zip");
         headers.setContentDispositionFormData("attachment", filename);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }

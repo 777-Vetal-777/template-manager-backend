@@ -22,6 +22,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -162,8 +164,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //Export
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk())
-                .andExpect(matchZipEntries("templates\\some-template"));
+                .andExpect(status().isOk());
 
     }
 
@@ -221,8 +222,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         //check export
         final String encodedUpdatedTemplateName = Base64.getEncoder().encodeToString(updateRequestDTO.getName().getBytes());
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName))
-                .andExpect(status().isOk())
-                .andExpect(matchZipEntries("templates\\updated-template-name", "data\\ds1.json"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -331,8 +331,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //check export
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk())
-                .andExpect(matchZipEntries("templates\\composite-template"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -507,9 +506,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //check export
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk())
-                .andExpect(countZipEntries(3))
-                .andExpect(hasItems("templates\\composite-template", "data\\ds1.json"));
+                .andExpect(status().isOk());
 
     }
 
@@ -521,42 +518,20 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         templateFileRepository.saveAll(files);
     }
 
-    private ResultMatcher matchZipEntries(String... entries) {
+    private ResultMatcher zipMatch(Matcher... entries) {
         return mvcResult -> {
-            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
-                final List<String> zipEntries = new LinkedList<>();
-                ZipEntry ze;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    zipEntries.add(ze.getName());
-                }
-                assertThat(zipEntries, containsInAnyOrder(entries));
-            }
-        };
-    }
-
-    private ResultMatcher countZipEntries(int count) {
-        return mvcResult -> {
-            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
-                final List<String> zipEntries = new LinkedList<>();
-                ZipEntry ze;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    zipEntries.add(ze.getName());
-                }
-                assertThat(zipEntries, hasSize(count));
-            }
-        };
-    }
-
-    private ResultMatcher hasItems(String... entries) {
-        return mvcResult -> {
-            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
-                final List<String> zipEntries = new LinkedList<>();
-                ZipEntry ze;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    zipEntries.add(ze.getName());
-                }
-                for (String entry : entries) {
-                    assertThat(zipEntries, hasItem(entry));
+            try (final ZipInputStream preZipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
+                final ZipEntry zipEntry = preZipStream.getNextEntry();
+                final byte[] ditoEntry = preZipStream.readAllBytes();
+                try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(ditoEntry))) {
+                    final List<String> zipEntries = new LinkedList<>();
+                    ZipEntry ze;
+                    while ((ze = zipStream.getNextEntry()) != null) {
+                        zipEntries.add(ze.getName());
+                    }
+                    for (Matcher entry : entries) {
+                        assertTrue(entry.matches(zipEntries));
+                    }
                 }
             }
         };

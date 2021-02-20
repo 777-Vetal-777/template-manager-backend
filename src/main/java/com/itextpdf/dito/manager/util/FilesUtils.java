@@ -66,6 +66,18 @@ public final class FilesUtils {
         return zipFile;
     }
 
+    public static File zipFile(final Path zipPath, final Path... sourceFolderPaths) throws IOException {
+        final File zipFile = zipPath.toFile();
+        final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
+        for (Path sourceFolderPath : sourceFolderPaths) {
+            zos.putNextEntry(new ZipEntry(sourceFolderPath.getFileName().toString()));
+            Files.copy(sourceFolderPath, zos);
+            zos.closeEntry();
+        }
+        zos.close();
+        return zipFile;
+    }
+
     private FilesUtils() {
         throw new AssertionError("Suppress default constructor for noninstantiability");
     }

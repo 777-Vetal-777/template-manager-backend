@@ -118,7 +118,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         final File zippedProject;
 
         try {
-            zippedProject = zipFolder(projectFolder, Path.of(projectFolder.getParent().toString(), templateEntity.getName().concat(".zip")));
+            zippedProject = zipFolder(projectFolder, Path.of(projectFolder.getParent().toString(), templateEntity.getName().concat(".dito")));
         } catch (IOException e) {
             log.error(e);
             throw new TemplateProjectGenerationException("Error while generating zipped project");

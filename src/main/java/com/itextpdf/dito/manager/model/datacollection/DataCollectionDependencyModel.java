@@ -4,7 +4,7 @@ import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 
-import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.SOFT;
+import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 
 public class DataCollectionDependencyModel implements DependencyModel {
@@ -38,6 +38,6 @@ public class DataCollectionDependencyModel implements DependencyModel {
 
     @Override
     public DependencyDirectionType getDirectionType() {
-        return SOFT;
+        return HARD;
     }
 }
