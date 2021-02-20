@@ -1,52 +1,69 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController.TEMPLATE_URL;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,16 +79,24 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataCollectionService dataCollectionService;
     @Autowired
+    private DataSampleRepository dataSampleRepository;
+    @Autowired
     private WorkspaceRepository workspaceRepository;
     @Autowired
     private InstanceRepository instanceRepository;
     @Autowired
     private StageRepository stageRepository;
+    @Autowired
+    private DataSampleService dataSampleService;
+    @Autowired
+    private ResourceRepository resourceRepository;
 
     @AfterEach
     public void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
+        resourceRepository.deleteAll();
+        dataSampleRepository.deleteAll();
         dataCollectionRepository.deleteAll();
     }
 
@@ -94,7 +119,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isConflict());
 
         //Create new version
-        final MockMultipartFile file = new MockMultipartFile("template", "template.html", "text/plain", "{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile file = new MockMultipartFile("template", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/resources/random.png")));
         final MockMultipartFile description = new MockMultipartFile("description", "description", "text/plain", "test description".getBytes());
         final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", request.getName().getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT).build().encode().toUri();
@@ -134,12 +159,19 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("version").value("3"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("modifiedBy").isNotEmpty());
+
+        //Export
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(matchZipEntries("templates\\some-template"));
+
     }
 
     @Test
-    @Disabled
     public void testCreateTemplateWithData() throws Exception {
-        dataCollectionService.create("data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+        final String userEmail = "admin@email.com";
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.create("data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", userEmail);
+        dataSampleService.create(dataCollectionEntity, "ds1", "ds1.json", "{\"file\":\"file1.json\"}", "comment1", userEmail);
 
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         request.setDataCollectionName("data-collection");
@@ -185,6 +217,12 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("description").isNotEmpty());
+
+        //check export
+        final String encodedUpdatedTemplateName = Base64.getEncoder().encodeToString(updateRequestDTO.getName().getBytes());
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(matchZipEntries("templates\\updated-template-name", "data\\ds1.json"));
     }
 
     @Test
@@ -291,7 +329,10 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[*].dependencyType", containsInAnyOrder("TEMPLATE", "TEMPLATE", "TEMPLATE")))
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("some-template", "some-header-template", "another-footer-template")));
 
-
+        //check export
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(matchZipEntries("templates\\composite-template"));
     }
 
     @Test
@@ -407,7 +448,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    private StageEntity addStage(){
+    private StageEntity addStage() {
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setSequenceOrder(1);
         stageEntity.setName("STAGE");
@@ -421,6 +462,57 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         return stageEntity;
     }
 
+    @Test
+    void shouldCreateAndExportCompositionTemplateWithAllResources() throws Exception {
+        final String userEmail = "admin@email.com";
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", userEmail);
+        dataSampleService.create(dataCollectionEntity, "ds1", "ds1.json", "{\"file\":\"file1.json\"}", "comment1", userEmail);
+
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-with-data-collection2.json");
+
+        //Create resource
+        final String imageName = "b02.jpg";
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
+                .file(new MockMultipartFile("resource", imageName, "text/plain", readFileBytes("src/test/resources/test-data/resources/random.png")))
+                .file(new MockMultipartFile("type", "type", "text/plain", ResourceTypeEnum.IMAGE.toString().getBytes()))
+                .file(new MockMultipartFile("name", "name", "text/plain", imageName.getBytes()))
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated());
+
+        final String encodeTemplatePartString = encodeStringToBase64("some-template");
+
+        //Create new version
+        final MockMultipartFile file = new MockMultipartFile("data", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/templates/template-update-request-data.html")));
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TEMPLATE_URL, encodeTemplatePartString)
+                .file(file)
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
+
+        //Create composite template
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition-for-export.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        final String encodedTemplateName = encodeStringToBase64(request.getName());
+
+        //check export
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(countZipEntries(3))
+                .andExpect(hasItems("templates\\composite-template", "data\\ds1.json"));
+
+    }
+
     private void generateStageEntity(final List<TemplateFileEntity> files) {
         final StageEntity nextStage = addStage();
         for (final TemplateFileEntity file : files) {
@@ -428,4 +520,46 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         }
         templateFileRepository.saveAll(files);
     }
+
+    private ResultMatcher matchZipEntries(String... entries) {
+        return mvcResult -> {
+            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
+                final List<String> zipEntries = new LinkedList<>();
+                ZipEntry ze;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    zipEntries.add(ze.getName());
+                }
+                assertThat(zipEntries, containsInAnyOrder(entries));
+            }
+        };
+    }
+
+    private ResultMatcher countZipEntries(int count) {
+        return mvcResult -> {
+            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
+                final List<String> zipEntries = new LinkedList<>();
+                ZipEntry ze;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    zipEntries.add(ze.getName());
+                }
+                assertThat(zipEntries, hasSize(count));
+            }
+        };
+    }
+
+    private ResultMatcher hasItems(String... entries) {
+        return mvcResult -> {
+            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
+                final List<String> zipEntries = new LinkedList<>();
+                ZipEntry ze;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    zipEntries.add(ze.getName());
+                }
+                for (String entry : entries) {
+                    assertThat(zipEntries, hasItem(entry));
+                }
+            }
+        };
+    }
+
 }
