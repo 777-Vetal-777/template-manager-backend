@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateImportRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
@@ -72,6 +73,7 @@ public interface TemplateController {
     String EXPORT_ENDPOINT = "/export";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
+    String TEMPLATE_IMPORT_ENDPOINT = "/import";
     String TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + EXPORT_ENDPOINT;
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
     String TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_BLOCK_ENDPOINT;
@@ -311,4 +313,17 @@ public interface TemplateController {
             @ApiResponse(responseCode = "422", description = "Could not proceed with template export.")
     })
     ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
+
+    @PostMapping(value = TEMPLATE_IMPORT_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('E9_US25_IMPORT_TEMPLATE_DATA')")
+    @Operation(summary = "Import template data", description = "Import template data. Creates new template or new version of existing template",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)})
+    ResponseEntity<TemplateDTO> importData(Principal principal,
+                                           @Parameter(name = "template", description = "Template dito file", required = true, style = ParameterStyle.FORM) @RequestPart(value = "template") MultipartFile templateFile,
+                                           @RequestBody TemplateImportRequestDTO templateImportRequestDTO);
+
 }

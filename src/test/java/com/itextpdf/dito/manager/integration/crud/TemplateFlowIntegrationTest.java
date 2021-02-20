@@ -40,8 +40,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +56,7 @@ import static com.itextpdf.dito.manager.controller.template.TemplateController.T
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController.TEMPLATE_URL;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -164,7 +164,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //Export
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(zipMatch(hasItem("templates/some-template")));
 
     }
 
@@ -222,7 +223,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         //check export
         final String encodedUpdatedTemplateName = Base64.getEncoder().encodeToString(updateRequestDTO.getName().getBytes());
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(zipMatch(hasItem("templates/updated-template-name"), hasItem("data/ds1.json")));
     }
 
     @Test
@@ -331,7 +333,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //check export
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(zipMatch(hasItem("templates/composite-template")));
     }
 
     @Test
@@ -456,7 +459,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         instanceEntity.setName("instance");
         instanceEntity.setSocket("socket");
         instanceEntity.setStage(stageEntity);
-        stageEntity.setInstances(Arrays.asList(instanceEntity));
+        stageEntity.setInstances(Collections.singletonList(instanceEntity));
         instanceRepository.save(instanceEntity);
         return stageEntity;
     }
@@ -506,7 +509,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //check export
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(zipMatch(hasItem("templates/composite-template"), hasItem("data/ds1.json")));
 
     }
 
@@ -518,20 +522,22 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         templateFileRepository.saveAll(files);
     }
 
-    private ResultMatcher zipMatch(Matcher... entries) {
+    @SafeVarargs
+    private <T> ResultMatcher zipMatch(Matcher<? super T>... entries) {
         return mvcResult -> {
             try (final ZipInputStream preZipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
-                final ZipEntry zipEntry = preZipStream.getNextEntry();
-                final byte[] ditoEntry = preZipStream.readAllBytes();
-                try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(ditoEntry))) {
-                    final List<String> zipEntries = new LinkedList<>();
-                    ZipEntry ze;
-                    while ((ze = zipStream.getNextEntry()) != null) {
-                        zipEntries.add(ze.getName());
+                final List<String> zipEntries = new LinkedList<>();
+                while (preZipStream.getNextEntry() != null) {
+                    final byte[] ditoEntry = preZipStream.readAllBytes();
+                    try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(ditoEntry))) {
+                        ZipEntry ze;
+                        while ((ze = zipStream.getNextEntry()) != null) {
+                            zipEntries.add(ze.getName());
+                        }
                     }
-                    for (Matcher entry : entries) {
-                        assertTrue(entry.matches(zipEntries));
-                    }
+                }
+                for (Matcher<?> entry : entries) {
+                    assertThat(entry.matches(zipEntries));
                 }
             }
         };

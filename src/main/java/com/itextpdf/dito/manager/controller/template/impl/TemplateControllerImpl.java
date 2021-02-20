@@ -15,6 +15,7 @@ import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateImportRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
@@ -272,5 +273,12 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final String filename = decodedTemplateName.concat(".zip");
         headers.setContentDispositionFormData("attachment", filename);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<TemplateDTO> importData(final Principal principal,
+                                                  final MultipartFile templateFile,
+                                                  final TemplateImportRequestDTO templateImportRequestDTO) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }
