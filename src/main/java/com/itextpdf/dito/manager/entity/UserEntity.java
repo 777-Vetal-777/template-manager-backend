@@ -41,7 +41,7 @@ public class UserEntity implements UserDetails {
     private Date modifiedAt;
     @Column(name = "reset_password_token_date")
     private Date resetPasswordTokenDate;
-    @Column(name = "password_updated_by_admin", insertable = false)
+    @Column(name = "password_updated_by_admin")
     private Boolean passwordUpdatedByAdmin;
 
     @ManyToMany(fetch = FetchType.EAGER)
