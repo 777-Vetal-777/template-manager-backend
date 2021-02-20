@@ -79,6 +79,7 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
         user2.setPassword(CUSTOM_USER_PASSWORD);
         user2.setRoles(Set.of(role));
         user2.setActive(Boolean.TRUE);
+        user2.setPasswordUpdatedByAdmin(Boolean.FALSE);
 
         userRepository.save(user2);
     }

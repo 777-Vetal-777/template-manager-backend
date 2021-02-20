@@ -50,6 +50,7 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
         user1.setPassword("password1");
         user1.setRoles(Set.of(role));
         user1.setActive(Boolean.TRUE);
+        user1.setPasswordUpdatedByAdmin(Boolean.FALSE);
 
         user2 = new UserEntity();
         user2.setEmail("user2@email.com");
@@ -58,6 +59,7 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
         user2.setPassword("password2");
         user2.setRoles(Set.of(role2));
         user2.setActive(Boolean.FALSE);
+        user2.setPasswordUpdatedByAdmin(Boolean.FALSE);
 
         user1 = userRepository.save(user1);
         user2 = userRepository.save(user2);
