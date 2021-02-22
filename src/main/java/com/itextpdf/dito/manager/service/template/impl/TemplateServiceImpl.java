@@ -20,6 +20,7 @@ import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
+import com.itextpdf.dito.manager.exception.template.TemplateInvalidNameException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -72,7 +74,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateLogRepository templateLogRepository;
     private final TemplateFilePartService templateFilePartService;
-	private static final String DEFAULT_COMMENT_FOR_NEW_VERSION = "Default comment for the new version %s";
+	private static final String DEFAULT_COMMENT_FOR_NEW_VERSION = "Updated with iText DITO Editor";
+	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{1,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -111,8 +114,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Transactional
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
                                  final String dataCollectionName, final String email, List<TemplatePartDTO> templatePartDTOs) {
-        throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
-
+    	throwExceptionIfTemplateNameIsInvalid(templateName);
+    	throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
+        
         final TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateName);
         templateEntity.setType(templateTypeEnum);
@@ -266,7 +270,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
 		return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts,
-				(comment == null ? String.format(DEFAULT_COMMENT_FOR_NEW_VERSION, oldVersion + 1) : comment),
+				(comment == null ? DEFAULT_COMMENT_FOR_NEW_VERSION : comment),
 				oldVersion + 1);
 	  }
 
@@ -496,6 +500,12 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
             throw new TemplateAlreadyExistsException(templateName);
+        }
+    }
+    
+    private void throwExceptionIfTemplateNameIsInvalid(final String templateName) {
+        if (!Pattern.matches(TEMPLATE_NAME_REGEX, templateName)) {
+            throw new TemplateInvalidNameException(templateName);
         }
     }
 
