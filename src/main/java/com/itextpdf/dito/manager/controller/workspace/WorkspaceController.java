@@ -72,7 +72,7 @@ public interface WorkspaceController {
             @Parameter(description = "Workspace timezone", required = true) @RequestPart(name = "timezone") @NotBlank String timezone,
             @Parameter(description = "Workspace language", required = true) @RequestPart(name = "language") @NotBlank String language,
             @Parameter(description = "Adjust for daylight") @RequestPart(name = "adjustForDaylight", required = false) String adjustForDaylight,
-            @Parameter(description = "Main develop stage instance", required = true) @RequestPart(name = "language") @NotBlank String mainDevelopInstance,
+            @Parameter(description = "Main develop stage instance", required = true) @RequestPart(name = "mainDevelopInstance") @NotBlank String mainDevelopInstance,
             @Parameter(description = "license XML file", required = true, style = ParameterStyle.FORM) @RequestPart("license") MultipartFile multipartFile,
             Principal principal);
 
