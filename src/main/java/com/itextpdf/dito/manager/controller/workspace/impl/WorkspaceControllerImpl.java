@@ -59,7 +59,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     @Override
     public ResponseEntity<WorkspaceDTO> create(final @NotBlank String name, final @NotBlank String timezone, final @NotBlank String language, final String adjustForDaylight, final @NotBlank String mainDevelopInstance, final MultipartFile license, final Principal principal) {
 	    //TODO FIX String as boolean, find solution to improve. Request part support only string
-	    boolean adjustForDayLight = !adjustForDaylight.isBlank();
+	    final boolean adjustForDayLight = !adjustForDaylight.isBlank();
 	    final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);
         final byte[] licenseFile = getBytesFromMultipart(license);
         final WorkspaceEntity result = workspaceService.create(workspaceEntity, licenseFile, license.getOriginalFilename(), principal.getName(), mainDevelopInstance);
