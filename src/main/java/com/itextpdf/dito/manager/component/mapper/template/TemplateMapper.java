@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.mapper.template;
 
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
@@ -21,6 +22,10 @@ public interface TemplateMapper {
     TemplateDescriptorDTO mapToDescriptor(TemplateFileEntity templateFileEntity, boolean versionAliasRequired);
 
     List<TemplateDTO> map(List<TemplateEntity> entities);
+
+    List<TemplateWithSettingsDTO> mapTemplatesWithPart(List<TemplateEntity> entities);
+
+    TemplateWithSettingsDTO mapTemplateWithPart(TemplateEntity entity);
 
     Page<TemplateDTO> map(Page<TemplateEntity> entities);
 

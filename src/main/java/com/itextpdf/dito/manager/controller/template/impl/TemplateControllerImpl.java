@@ -15,6 +15,7 @@ import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
@@ -101,8 +102,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<List<TemplateDTO>> listCompositionTemplates(final String name) {
-        final List<TemplateDTO> templateDTOS = templateMapper.map(templateService.getAllParts(decodeBase64(name)));
+    public ResponseEntity<List<TemplateWithSettingsDTO>> listCompositionTemplates(final String name) {
+        final List<TemplateWithSettingsDTO> templateDTOS = templateMapper.mapTemplatesWithPart(templateService.getAllParts(decodeBase64(name)));
         return new ResponseEntity<>(templateDTOS, HttpStatus.OK);
     }
 
@@ -178,7 +179,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<TemplateDTO> createVersion(final Principal principal,
                                                      final String name,
                                                      final String comment,
-                                                     List<TemplatePartDTO> templateParts,
+                                                     final List<TemplatePartDTO> templateParts,
                                                      final MultipartFile templateFile) {
         final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService

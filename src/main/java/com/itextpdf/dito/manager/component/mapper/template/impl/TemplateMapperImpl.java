@@ -1,9 +1,12 @@
 package com.itextpdf.dito.manager.component.mapper.template.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
@@ -15,7 +18,10 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
+import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -30,14 +36,21 @@ import java.util.stream.Collectors;
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
     private final RoleMapper roleMapper;
+    private final ObjectMapper objectMapper;
+    private static final Logger log = LogManager.getLogger(TemplateMapperImpl.class);
 
-    public TemplateMapperImpl(final RoleMapper roleMapper) {
+    public TemplateMapperImpl(final RoleMapper roleMapper, final ObjectMapper objectMapper) {
         this.roleMapper = roleMapper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public TemplateDTO map(final TemplateEntity entity) {
         final TemplateDTO result = new TemplateDTO();
+        return fillTemplateDTO(entity, result);
+    }
+
+    private TemplateDTO fillTemplateDTO(final TemplateEntity entity, final TemplateDTO result) {
         result.setName(entity.getName());
         result.setType(entity.getType());
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
@@ -139,6 +152,24 @@ public class TemplateMapperImpl implements TemplateMapper {
         }
 
         return result;
+    }
+
+    @Override
+    public List<TemplateWithSettingsDTO> mapTemplatesWithPart(final List<TemplateEntity> entities) {
+        return entities.stream().map(this::mapTemplateWithPart).collect(Collectors.toList());
+    }
+
+    @Override
+    public TemplateWithSettingsDTO mapTemplateWithPart(final TemplateEntity entity) {
+        final TemplateWithSettingsDTO templateWithSettingsDTO = new TemplateWithSettingsDTO();
+        fillTemplateDTO(entity, templateWithSettingsDTO);
+        try {
+            final PartSettings partSettings = objectMapper.readValue(entity.getLatestFile().getCompositions().get(0).getSettings(), PartSettings.class);
+            templateWithSettingsDTO.setStartOnNewPage(partSettings.getStartOnNewPage());
+        } catch (JsonProcessingException e) {
+            log.error("Failed to read PartSettings");
+        }
+        return templateWithSettingsDTO;
     }
 
     @Override

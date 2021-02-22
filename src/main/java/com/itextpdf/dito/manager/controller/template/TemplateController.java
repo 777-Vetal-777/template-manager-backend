@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
@@ -102,7 +103,7 @@ public interface TemplateController {
     @GetMapping(value = TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US74_VIEW_TEMPLATE_METADATA_STANDARD')")
     @Operation(summary = "Get nested templates in template by name.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<List<TemplateDTO>> listCompositionTemplates(@Parameter(description = "The name of the template, which will be used to search for parts. ") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+    ResponseEntity<List<TemplateWithSettingsDTO>> listCompositionTemplates(@Parameter(description = "The name of the template, which will be used to search for parts. ") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
