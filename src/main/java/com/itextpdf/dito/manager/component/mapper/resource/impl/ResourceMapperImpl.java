@@ -15,11 +15,13 @@ import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationExc
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -72,8 +74,8 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     @Override
-    public ResourceDTO mapWithoutRoles(ResourceEntity entity) {
-        ResourceDTO resourceDTO = map(entity);
+    public ResourceDTO mapWithoutRoles(final ResourceEntity entity) {
+        final ResourceDTO resourceDTO = map(entity);
         resourceDTO.setAppliedRoles(null);
         return resourceDTO;
     }

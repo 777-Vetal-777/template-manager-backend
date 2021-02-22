@@ -187,13 +187,13 @@ public class PermissionHandlerImpl implements PermissionHandler {
     @Override
     public boolean checkPermissionsByUser(final String email, final String permission) {
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
-        List<RoleEntity> roles = userEntity.getRoles().stream().collect(Collectors.toList());
+        final List<RoleEntity> roles = userEntity.getRoles().stream().collect(Collectors.toList());
         boolean existPermission = false;
-        for(RoleEntity roleEntity:roles){
-            Set<PermissionEntity>permissionEntities= roleEntity.getPermissions();
-            for(PermissionEntity permissionEntity:permissionEntities){
-                if(permissionEntity.getName().equals(permission)){
-                    existPermission= true;
+        for (final RoleEntity roleEntity : roles) {
+            final Set<PermissionEntity> permissionEntities = roleEntity.getPermissions();
+            for (final PermissionEntity permissionEntity : permissionEntities) {
+                if (permissionEntity.getName().equals(permission)) {
+                    existPermission = true;
                 }
             }
         }
