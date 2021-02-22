@@ -173,7 +173,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type, final Principal principal) {
         final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceTypeFromPath(type));
-        ResourceDTO resourceDTO = null;
+        final ResourceDTO resourceDTO;
         if(!permissionHandler.checkPermissionsByUser(principal.getName(), "E8_US67_TABLE_OF_RESOURCE_PERMISSIONS_IMAGE")){
             resourceDTO = resourceMapper.mapWithoutRoles(entity);
         }else {

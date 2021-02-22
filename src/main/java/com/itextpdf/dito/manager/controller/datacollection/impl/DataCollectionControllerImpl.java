@@ -134,8 +134,8 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> get(final String name, final Principal principal) {
-        DataCollectionDTO dataCollectionDTO = null;
-        DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodeBase64(name));
+        final DataCollectionDTO dataCollectionDTO;
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodeBase64(name));
         if(!permissionHandler.checkPermissionsByUser(principal.getName(), "E6_US39_TABLE_OF_DATA_COLLECTIONS_PERMISSIONS")){
             dataCollectionDTO = dataCollectionMapper.mapWithFileWithoutRoles(dataCollectionEntity);
         }else {
