@@ -1,4 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.itextpdf.dito.manager.component.mail.MailClient;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
@@ -6,6 +8,7 @@ import com.itextpdf.dito.manager.dto.user.EmailDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.itextpdf.kernel.xmp.impl.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +38,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static com.itextpdf.dito.manager.controller.user.UserController.CHANGE_PASSWORD;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.user.UserController.FORGOT_PASSWORD;
@@ -316,7 +321,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
         final UserEntity userEntity = userRepository.findByEmail(user2.getEmail()).get();
         assertNotNull(userEntity.getResetPasswordTokenDate());
-        assertEquals(password2,userEntity.getPassword());
+        assertEquals(password2, userEntity.getPassword());
 
         final ResetPasswordDTO request = new ResetPasswordDTO();
         request.setPassword(newPassword);
@@ -332,5 +337,45 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(userAfterUpdatePassword.isPresent());
         final UserEntity userWhichUpdatedPasswordEntity = userAfterUpdatePassword.get();
         assertFalse(userWhichUpdatedPasswordEntity.getPassword().equals(password2));
+    }
+
+    @Test
+    public void updatePassword() throws Exception {
+        final UpdatePasswordRequestDTO updatePasswordRequestDTO = new UpdatePasswordRequestDTO();
+        updatePasswordRequestDTO.setPassword("NewPassword12345");
+        user1.setPasswordUpdatedByAdmin(false);
+        mockMvc.perform(patch(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com") + CHANGE_PASSWORD)
+                .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("passwordUpdatedByAdmin").value(true));
+    }
+
+    @Test
+    public void updateUser() throws Exception {
+        final UserUpdateRequestDTO updatePasswordRequestDTO = new UserUpdateRequestDTO();
+        updatePasswordRequestDTO.setFirstName("newFirstName");
+        updatePasswordRequestDTO.setLastName("newLastName");
+        user1.setPasswordUpdatedByAdmin(true);
+        mockMvc.perform(patch(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com"))
+                .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("passwordUpdatedByAdmin").value(false))
+                .andExpect(jsonPath("firstName").value("newFirstName"))
+                .andExpect(jsonPath("lastName").value("newLastName"));
+    }
+
+    @Test
+    public void getUser() throws Exception {
+        mockMvc.perform(get(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("passwordUpdatedByAdmin").value(false))
+                .andExpect(jsonPath("firstName").value("Harry"))
+                .andExpect(jsonPath("lastName").value("Kane"));
     }
 }

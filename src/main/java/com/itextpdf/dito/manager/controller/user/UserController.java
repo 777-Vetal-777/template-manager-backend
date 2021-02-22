@@ -43,13 +43,14 @@ public interface UserController {
     String BASE_NAME = MAJOR_VERSION + "/users";
     String CURRENT_USER = "/me";
     String USER_NAME_PATH_VARIABLE = "username";
+    String CHANGE_PASSWORD = "/change-password";
 
     // Endpoints
     String USER_NAME_ENDPOINT_WITH_PATH_VARIABLE = "/{" + USER_NAME_PATH_VARIABLE + "}";
     String USERS_UNBLOCK_ENDPOINT = "/unblock";
     String USERS_ACTIVATION_ENDPOINT = "/update-activity";
-    String CURRENT_USER_CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + "/change-password";
-    String USER_CHANGE_PASSWORD_ENDPOINT = USER_NAME_ENDPOINT_WITH_PATH_VARIABLE + "/change-password";
+    String CURRENT_USER_CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + CHANGE_PASSWORD;
+    String USER_CHANGE_PASSWORD_ENDPOINT = USER_NAME_ENDPOINT_WITH_PATH_VARIABLE + CHANGE_PASSWORD;
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
     String UPDATE_USERS_ROLES_ENDPOINT = "/roles";
     String FORGOT_PASSWORD = "/forgot-password";
