@@ -49,7 +49,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Transactional(rollbackOn = Exception.class)
     @Override
-    public WorkspaceEntity create(final WorkspaceEntity workspace, final byte[] data, final List<InstanceEntity> instanceEntities, final String fileName, final String author, final String defaultDevelopInstance) {
+    public WorkspaceEntity create(final WorkspaceEntity workspace, final byte[] data, final String fileName, final String author, final String defaultDevelopInstance) {
         // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
         if (!workspaceRepository.findAll().isEmpty()) {
             throw new OnlyOneWorkspaceAllowedException();
@@ -58,7 +58,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
         final WorkspaceEntity createdWorkspace = workspaceRepository.save(workspace);
         licenseService.uploadLicense(createdWorkspace, data, fileName);
-        instanceService.save(instanceEntities, author);
         return setInstanceAsDefault(createdWorkspace, defaultDevelopInstance);
     }
 

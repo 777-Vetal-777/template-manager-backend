@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.controller.workspace.impl;
 
-import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -8,8 +7,6 @@ import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
-import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
-import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.exception.license.EmptyLicenseFileException;
@@ -25,6 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.constraints.NotBlank;
+
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @Validated
@@ -35,15 +35,13 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     private final WorkspaceMapper workspaceMapper;
     private final LicenseService licenseService;
     private final LicenseMapper licenseMapper;
-    private final InstanceMapper instanceMapper;
 
 	public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper,
-            final LicenseService licenseService, final LicenseMapper licenseMapper, final InstanceMapper instanceMapper) {
+            final LicenseService licenseService, final LicenseMapper licenseMapper) {
 		this.workspaceService = workspaceService;
 		this.workspaceMapper = workspaceMapper;
 		this.licenseService = licenseService;
 		this.licenseMapper = licenseMapper;
-        this.instanceMapper = instanceMapper;
     }
 
     @Override
@@ -59,11 +57,13 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
     @Override
-    public ResponseEntity<WorkspaceDTO> create(final WorkspaceCreateRequestDTO workspaceCreateRequestDTO, final MultipartFile file, final Principal principal) {
-        final byte[] licenseFile = getBytesFromMultipart(file);
-        final List<InstanceEntity> entities = instanceMapper.map(workspaceCreateRequestDTO.getInstances());
-        final WorkspaceEntity workspaceEntity = workspaceService.create(workspaceMapper.map(workspaceCreateRequestDTO),licenseFile, entities, file.getOriginalFilename(), principal.getName(), workspaceCreateRequestDTO.getMainDevelopInstance());
-        return new ResponseEntity<>(workspaceMapper.map(workspaceEntity), HttpStatus.CREATED);
+    public ResponseEntity<WorkspaceDTO> create(final @NotBlank String name, final @NotBlank String timezone, final @NotBlank String language, final String adjustForDaylight, final @NotBlank String mainDevelopInstance, final MultipartFile license, final Principal principal) {
+	    //TODO FIX String as boolean, find solution to improve. Request part support only string
+	    boolean adjustForDayLight = !adjustForDaylight.isBlank();
+	    final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);
+        final byte[] licenseFile = getBytesFromMultipart(license);
+        final WorkspaceEntity result = workspaceService.create(workspaceEntity, licenseFile, license.getOriginalFilename(), principal.getName(), mainDevelopInstance);
+        return new ResponseEntity<>(workspaceMapper.map(result), HttpStatus.CREATED);
     }
 
     @Override

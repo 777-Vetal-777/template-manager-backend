@@ -12,7 +12,7 @@ public interface WorkspaceService {
 
     List<WorkspaceEntity> getAll();
 
-    WorkspaceEntity create(WorkspaceEntity workspace, byte[] data, List<InstanceEntity> instanceEntities, String fileName, String author, String defaultDevelopInstance);
+    WorkspaceEntity create(WorkspaceEntity workspace, byte[] data, String fileName, String author, String defaultDevelopInstance);
 
     WorkspaceEntity update(String name, WorkspaceEntity workspace);
 

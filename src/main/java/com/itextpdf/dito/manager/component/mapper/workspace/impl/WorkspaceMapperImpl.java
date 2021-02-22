@@ -102,4 +102,14 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
     public List<WorkspaceDTO> map(final List<WorkspaceEntity> entities) {
         return entities.stream().map(this::map).collect(Collectors.toList());
     }
+
+    @Override
+    public WorkspaceEntity map(final String name, final String language, final String timezone, final boolean adjustForDaylight) {
+        final WorkspaceEntity result = new WorkspaceEntity();
+        result.setName(name);
+        result.setLanguage(language);
+        result.setTimezone(timezone);
+        result.setAdjustForDaylight(adjustForDaylight);
+        return result;
+    }
 }

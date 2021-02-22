@@ -26,4 +26,6 @@ public interface WorkspaceMapper {
     StageEntity map(StageDTO dto);
 
     List<WorkspaceDTO> map(List<WorkspaceEntity> entities);
+
+    WorkspaceEntity map(String name, String language, String timezone, boolean adjustForDaylight);
 }
