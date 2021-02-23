@@ -8,9 +8,11 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -24,16 +26,16 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
     @Override
     public byte[] get(final String name, final ResourceTypeEnum type, final String subName) {
-    	//subName - it's a name of font for that realization
-    	ResourceEntity resourceEntity = null;
+		// subName - it's a name of font for that realization
+		final ResourceEntity resourceEntity = resourceService.get(name, type);
+		final Optional<ResourceFileEntity> resourceFileEntity;
 		if (subName != null) {
-			resourceEntity = resourceService.get(name, type, subName);
+			resourceFileEntity = resourceEntity.getResourceFiles().stream()
+					.filter(r -> Objects.equals(r.getFontName(), subName)).findFirst();
 		} else {
-			resourceEntity = resourceService.get(name, type);
+			resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
 		}
-        final Optional<ResourceFileEntity> resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
-
-        return resourceFileEntity.get().getFile();
+		return resourceFileEntity.get().getFile();
     }
 
     @Override

@@ -295,31 +295,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    @ReadOnlyProperty
     public List<ResourceEntity> list() {
-        final List<ResourceEntity> resourceList = resourceRepository.findAll();
-        final List<ResourceEntity> resultResourceList = new ArrayList<>();
-        final Iterator<ResourceEntity> it = resourceList.iterator();
-        while (it.hasNext()) {
-            final ResourceEntity resourceEntity = it.next();
-            if (Objects.equals(resourceEntity.getType(), ResourceTypeEnum.FONT)) {
-                for (final ResourceFileEntity resourceFileEntity : resourceEntity.getLatestFile()) {
-                    final ResourceEntity newEntity = new ResourceEntity();
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append(resourceEntity.getName());
-                    sb.append("-");
-                    sb.append(resourceFileEntity.getFontName());
-                    newEntity.setName(sb.toString());
-                    newEntity.setId(resourceEntity.getId());
-                    newEntity.setLatestFile(Arrays.asList(new ResourceFileEntity[]{resourceFileEntity}));
-                    newEntity.setType(resourceEntity.getType());
-                    resultResourceList.add(newEntity);
-                }
-            } else {
-                resultResourceList.add(resourceEntity);
-            }
-        }
-        return resultResourceList;
+        return resourceRepository.findAll();
     }
 
     @Override
