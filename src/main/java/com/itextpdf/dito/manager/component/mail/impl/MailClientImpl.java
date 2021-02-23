@@ -38,7 +38,6 @@ public class MailClientImpl implements MailClient {
 
     private JavaMailSender client;
 
-    private static final String MAIL_FROM = "vadzim.sarokin.tech.acc@gmail.com";
     private static final String MAIL_SUBJECT = "DITO registration";
     private static final String MAIL_RESET_PASSWORD_SUBJECT = "DITO reset password";
     private final String FRONT_URL;
@@ -73,7 +72,7 @@ public class MailClientImpl implements MailClient {
     public void sendRegistrationMessage(final UserEntity savedUser, final String password, final UserEntity currentUser) {
         final String mailBody = generateRegistrationHtml(savedUser, password, currentUser);
         try {
-            send(MAIL_FROM, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
+            send(host, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
         } catch (Exception ex) {
             throw new MailingException(ex.getMessage());
         }
@@ -83,7 +82,7 @@ public class MailClientImpl implements MailClient {
     public void sendResetMessage(final UserEntity userEntity, final String token) {
         final String mailBody = generateResetPasswordHtml(userEntity, token);
         try {
-            send(MAIL_FROM, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
+            send(host, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
         } catch (Exception e) {
             throw new MailingException(e.getMessage());
         }
