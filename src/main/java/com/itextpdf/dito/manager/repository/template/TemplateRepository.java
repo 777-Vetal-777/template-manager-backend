@@ -201,7 +201,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "join composition.template compositionTemplate "
             + "left join fetch file.dataCollectionFile dataCollectionFile "
             + "left join fetch dataCollectionFile.dataCollection dataCollection "
-            + "where compositionTemplate.latestFile.version = composition.version and compositionTemplate.id = :id")
+            + "where compositionTemplate.latestFile.version = composition.version and compositionTemplate.id = :id order by template.id")
     List<TemplateEntity> getTemplatesPartsByTemplateId(@Param("id") Long templateId);
 
     @Query(value = SELECT_CLAUSE_TEMPLATE_HARD_DEPENDENCIES, nativeQuery = true)
