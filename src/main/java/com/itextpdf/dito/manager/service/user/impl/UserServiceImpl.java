@@ -9,11 +9,7 @@ import com.itextpdf.dito.manager.exception.role.AttemptToAttachGlobalAdministrat
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.token.InvalidResetPasswordTokenException;
-import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
-import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
-import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.user.UserNotFoundException;
-import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
+import com.itextpdf.dito.manager.exception.user.*;
 import com.itextpdf.dito.manager.filter.user.UserFilter;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
@@ -165,6 +161,17 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
+    public UserEntity updatePasswordSpecifiedByAdmin(final String newPassword, final String email) {
+        final UserEntity user = findActiveUserByEmail(email);
+        checkNewPasswordSameAsOld(newPassword, user.getPassword());
+        checkUserPasswordIsSpecifiedByAdmin(user);
+        user.setPassword(encoder.encode(newPassword));
+        user.setModifiedAt(new Date());
+        user.setPasswordUpdatedByAdmin(false);
+        return userRepository.save(user);
+    }
+
+    @Override
     public UserEntity findActiveUserByEmail(final String email) {
         return userRepository.findByEmailAndActiveTrue(email).orElseThrow(() -> new UserNotFoundOrNotActiveException(email));
     }
@@ -295,6 +302,12 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private void checkNewPasswordSameAsOld(final String newPassword, final String oldPasswords) {
         if (encoder.matches(newPassword, oldPasswords)) {
             throw new NewPasswordTheSameAsOldPasswordException();
+        }
+    }
+
+    private void checkUserPasswordIsSpecifiedByAdmin(final UserEntity userEntity){
+        if(!userEntity.getPasswordUpdatedByAdmin()){
+            throw new PasswordNotSpecifiedByAdminException();
         }
     }
 }

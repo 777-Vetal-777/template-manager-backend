@@ -31,6 +31,8 @@ public interface UserService {
 
     UserEntity updatePassword(String newPassword, String userEmail);
 
+    UserEntity updatePasswordSpecifiedByAdmin(String newPassword, String email);
+
     List<UserEntity> updateUsersRoles(List<String> emails, List<String> roles,
                                       UpdateUsersRolesActionEnum actionEnum);
 

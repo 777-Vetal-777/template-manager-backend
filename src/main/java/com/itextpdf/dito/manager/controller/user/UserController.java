@@ -44,6 +44,7 @@ public interface UserController {
     String CURRENT_USER = "/me";
     String USER_NAME_PATH_VARIABLE = "username";
     String CHANGE_PASSWORD = "/change-password";
+    String UPDATE_PASSWORD = "/update-password";
 
     // Endpoints
     String USER_NAME_ENDPOINT_WITH_PATH_VARIABLE = "/{" + USER_NAME_PATH_VARIABLE + "}";
@@ -51,6 +52,7 @@ public interface UserController {
     String USERS_ACTIVATION_ENDPOINT = "/update-activity";
     String CURRENT_USER_CHANGE_PASSWORD_ENDPOINT = CURRENT_USER + CHANGE_PASSWORD;
     String USER_CHANGE_PASSWORD_ENDPOINT = USER_NAME_ENDPOINT_WITH_PATH_VARIABLE + CHANGE_PASSWORD;
+    String USER_UPDATE_PASSWORD_ENDPOINT = CURRENT_USER + UPDATE_PASSWORD;
     String CURRENT_USER_INFO_ENDPOINT = CURRENT_USER + "/info";
     String UPDATE_USERS_ROLES_ENDPOINT = "/roles";
     String FORGOT_PASSWORD = "/forgot-password";
@@ -149,8 +151,17 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
-    ResponseEntity<UserDTO> updatePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO,
-                                           Principal principal);
+    ResponseEntity<UserDTO> updatePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO, Principal principal);
+
+    @PatchMapping(USER_UPDATE_PASSWORD_ENDPOINT)
+    @PreAuthorize("hasAnyAuthority('E1_US3_FORGOT_PASSWORD', 'E10_US86_CHANGE_PASSWORD', 'E2_US6_SETTINGS_PANEL')")
+    @Operation(summary = "Change the admin password to the custom", description = "Update the password specified by the administrator for the password that the user wants ",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
+            @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
+    })
+    ResponseEntity<UserDTO> updateAdminPasswordToUser(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
 
     @PatchMapping(UPDATE_USERS_ROLES_ENDPOINT)
     @PreAuthorize("hasAuthority('E3_US11_CHANGE_ROLE_TO_THE_USER')")

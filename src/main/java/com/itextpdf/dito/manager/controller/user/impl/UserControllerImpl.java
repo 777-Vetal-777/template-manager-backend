@@ -107,6 +107,12 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
+    public ResponseEntity<UserDTO> updateAdminPasswordToUser(final UpdatePasswordRequestDTO updatePasswordRequestDTO, final Principal principal) {
+        final UserEntity userEntity = userService.updatePasswordSpecifiedByAdmin(updatePasswordRequestDTO.getPassword(), principal.getName());
+        return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<List<UserDTO>> updateUsersRoles(
             @Valid final UserRolesUpdateRequestDTO userRolesUpdateRequestDTO) {
         final List<UserEntity> userEntities = userService
