@@ -3,7 +3,6 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
-
 import com.itextpdf.dito.manager.exception.user.PasswordNotSpecifiedByAdminException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import org.springframework.http.HttpStatus;

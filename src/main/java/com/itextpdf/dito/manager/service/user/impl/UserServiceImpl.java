@@ -305,8 +305,8 @@ public class UserServiceImpl extends AbstractService implements UserService {
         }
     }
 
-    private void checkUserPasswordIsSpecifiedByAdmin(final UserEntity userEntity){
-        if(!userEntity.getPasswordUpdatedByAdmin()){
+    private void checkUserPasswordIsSpecifiedByAdmin(final UserEntity userEntity) {
+        if (!userEntity.getPasswordUpdatedByAdmin()) {
             throw new PasswordNotSpecifiedByAdminException();
         }
     }
