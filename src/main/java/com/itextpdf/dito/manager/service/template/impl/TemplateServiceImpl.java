@@ -47,6 +47,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -280,7 +282,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), Collections.emptyList(), comment, oldVersion + 1);
+        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), getTemplatePartDTOList(fileEntityToCopy), comment, oldVersion + 1);
     }
 
     @Override
@@ -528,4 +530,16 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
+    
+	private List<TemplatePartDTO> getTemplatePartDTOList(final TemplateFileEntity fileEntityToCopy) {
+		final List<TemplateFilePartEntity> partEntityList = fileEntityToCopy.getParts();
+		final List<TemplatePartDTO> templateParts = new ArrayList<>();
+		for (final TemplateFilePartEntity partEntity : partEntityList) {
+			final TemplatePartDTO dto = new TemplatePartDTO();
+			dto.setCondition(partEntity.getCondition());
+			dto.setName(partEntity.getPart().getTemplate().getName());
+			templateParts.add(dto);
+		}
+		return templateParts;
+	}
 }
