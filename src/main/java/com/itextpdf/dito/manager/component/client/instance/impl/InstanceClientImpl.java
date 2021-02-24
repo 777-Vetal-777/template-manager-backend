@@ -39,6 +39,8 @@ public class InstanceClientImpl implements InstanceClient {
     private static final String INSTANCE_UNREGISTER_ENDPOINT = "/api/admin/unregister";
     private static final String INSTANCE_DEPLOYMENT_ENDPOINT = "/api/deployments";
 
+    private static final String WORKSPACE_ALIAS = "Template Manager";
+
     private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 1L;
 
     private final WebClient webClient;
@@ -71,7 +73,7 @@ public class InstanceClientImpl implements InstanceClient {
     public InstanceRegisterResponseDTO register(final String instanceSocket) {
         final String instanceRegisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_REGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
-        instanceRegisterRequestDTO.setSubject(getCurrentWorkspaceName());
+        instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
         try {
             final Mono<InstanceRegisterResponseDTO> response = WebClient.create()
                     .post()
@@ -96,7 +98,7 @@ public class InstanceClientImpl implements InstanceClient {
     public void unregister(final String instanceSocket, final String instanceToken) {
         final String instanceUnregisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_UNREGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
-        instanceRegisterRequestDTO.setSubject(getCurrentWorkspaceName());
+        instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
         final Mono<Void> response = WebClient.create()
                 .post()
                 .uri(instanceUnregisterUrl)
@@ -174,6 +176,7 @@ public class InstanceClientImpl implements InstanceClient {
         return builder.build();
     }
 
+    //TODO use this method to be set as subject in register and unregister endpoints when multiple workspace support is implemented
     private String getCurrentWorkspaceName() {
         final List<WorkspaceEntity> workspaceEntityList = workspaceRepository.findAll();
         if (CollectionUtils.isEmpty(workspaceEntityList)) {
