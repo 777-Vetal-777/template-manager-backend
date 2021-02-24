@@ -10,6 +10,6 @@ public class TemplateCannotBeBlockedException extends RuntimeException {
     }
 
     private static String buildMessage(final String reason) {
-        return new StringBuilder().append(MESSAGE).append(reason).toString();
+        return new StringBuilder(MESSAGE).append(reason).toString();
     }
 }
