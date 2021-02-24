@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.instance.DefaultInstanceException;
+import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
@@ -19,6 +20,12 @@ public class InstanceExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> notReachableInstanceExceptionHandler(
             final NotReachableInstanceException ex) {
         return buildErrorResponse(ex, "Not reachable instance.", HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(InstanceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> instanceAlreadyExistsExceptionHandler(
+            final InstanceAlreadyExistsException ex) {
+        return buildErrorResponse(ex, ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(InstanceUsedInPromotionPathException.class)

@@ -53,6 +53,9 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         if (instanceRepository.findByName(instance.getName()).isPresent()) {
             throw new InstanceAlreadyExistsException(instance.getName());
         }
+        if (instanceRepository.findBySocket(instance.getSocket()).isPresent()) {
+            throw new InstanceAlreadyExistsException(instance.getSocket());
+        }
         final String instanceToken = instanceClient.register(instance.getSocket()).getToken();
         instance.setCreatedBy(userEntity);
         instance.setRegisterToken(instanceToken);

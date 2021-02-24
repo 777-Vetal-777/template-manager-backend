@@ -34,6 +34,8 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
             + " or LOWER(CAST(i.createdOn as string)) like CONCAT('%',:search,'%'))";
     Optional<InstanceEntity> findByName(String name);
 
+    Optional<InstanceEntity> findBySocket(String socket);
+
     Page<InstanceEntity> findAll(Pageable pageable);
 
     @Query(PAGEABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION)
