@@ -48,19 +48,14 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     public static final String CUSTOM_USER_PASSWORD = "password2";
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private TemplateRepository templateRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     private TemplateFileRepository templateFileRepository;
-
     @Autowired
     private PermissionRepository permissionRepository;
-
     @Autowired
     private DataCollectionService dataCollectionService;
 
@@ -123,7 +118,8 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     void destroy() throws Exception {
         templateFileRepository.deleteAll();
         templateRepository.deleteAll();
-
+        userRepository.findByEmail(CUSTOM_USER_EMAIL).ifPresent(userRepository::delete);
+        roleRepository.findByNameAndMasterTrue(roleName).ifPresent(roleRepository::delete);
     }
 
     @Test

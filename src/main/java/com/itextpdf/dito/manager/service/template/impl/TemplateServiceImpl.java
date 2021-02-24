@@ -74,7 +74,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateLogRepository templateLogRepository;
     private final TemplateFilePartService templateFilePartService;
-	private static final String DEFAULT_COMMENT_FOR_NEW_VERSION = "Updated with iText DITO Editor";
 	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{1,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
@@ -269,8 +268,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-		return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts,
-				(comment == null ? DEFAULT_COMMENT_FOR_NEW_VERSION : comment),
+		return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts, comment,
 				oldVersion + 1);
 	  }
 
