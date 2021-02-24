@@ -479,7 +479,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (TemplateTypeEnum.COMPOSITION == templateEntity.getType()) {
             throw new TemplateCannotBeBlockedException("Composition templates cannot be blocked");
         }
-        if (templateEntity.getBlockedAt() != null && currentUser != templateEntity.getBlockedBy()) {
+        if (Objects.nonNull(templateEntity.getBlockedAt()) && !Objects.equals(currentUser, templateEntity.getBlockedBy())) {
             throw new TemplateBlockedByOtherUserException(templateEntity.getName(), templateEntity.getBlockedBy().getEmail());
         }
         templateEntity.setBlockedAt(new Date());
@@ -491,7 +491,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     public TemplateEntity unblock(final String userEmail, final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
-        if (templateEntity.getBlockedBy() != null && currentUser != templateEntity.getBlockedBy()) {
+        if (Objects.nonNull(templateEntity.getBlockedAt()) && !Objects.equals(currentUser, templateEntity.getBlockedBy())) {
             throw new TemplateBlockedByOtherUserException(templateName, templateEntity.getBlockedBy().getEmail());
         }
         templateEntity.setBlockedBy(null);
