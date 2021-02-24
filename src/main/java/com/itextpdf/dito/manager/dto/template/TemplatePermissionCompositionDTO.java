@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.dto.template;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TemplatePermissionCompositionDTO extends TemplatePermissionDTO{
+public class TemplatePermissionCompositionDTO extends TemplatePermissionDTO {
 
     @Override
     @JsonProperty("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD")

@@ -50,14 +50,26 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
         final String createNewVersionResourceImage = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionResourceImage());
         final String rollBackResourceImage = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollBackResourceImage());
         final String deleteResourceImage = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteResourceImage());
+        final String editResourceMetadataFont = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditResourceMetadataFont());
+        final String createNewVersionResourceFont = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionResourceFont());
+        final String rollBackResourceFont = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollBackResourceFont());
+        final String deleteResourceFont = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteResourceFont());
+        final String editResourceMetadataStylesheet = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditResourceMetadataStylesheet());
+        final String createNewVersionResourceStylesheet = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionResourceStylesheet());
+        final String rollBackResourceStylesheet = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollBackResourceStylesheet());
+        final String deleteResourceStylesheet = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteResourceStylesheet());
+
 
         final Pageable pageWithSort = updateSort(pageable);
 
         return StringUtils.isEmpty(search)
                 ? resourcePermissionRepository.filter(pageWithSort, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
-                createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage)
+                createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, editResourceMetadataFont, createNewVersionResourceFont,
+                rollBackResourceFont, deleteResourceFont, editResourceMetadataStylesheet, createNewVersionResourceStylesheet, rollBackResourceStylesheet, deleteResourceStylesheet)
                 : resourcePermissionRepository.search(pageWithSort, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
-                createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, search.toLowerCase());
+                createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, editResourceMetadataFont, createNewVersionResourceFont,
+                rollBackResourceFont, deleteResourceFont, editResourceMetadataStylesheet, createNewVersionResourceStylesheet, rollBackResourceStylesheet, deleteResourceStylesheet,
+                search.toLowerCase());
     }
 
     private Pageable updateSort(final Pageable pageable) {

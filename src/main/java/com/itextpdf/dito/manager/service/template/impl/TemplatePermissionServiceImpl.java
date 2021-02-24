@@ -38,16 +38,20 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
 
         final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getName());
         final String editTemplateMetadataFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditTemplateMetadata());
-        final String createNewTemplateVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersion());
-        final String rollbackVersionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersion());
+        final String createNewTemplateVersionStandardFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersionStandard());
+        final String rollbackVersionStandardFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersionStandard());
         final String previewTemplateFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getPreviewTemplate());
         final String exportTemplateFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getExportTemplate());
+        final String createNewTemplateVersionCompositionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersionComposition());
+        final String rollbackVersionCompositionFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersionComposition());
 
         final Pageable pageWithSort = updateSort(pageable);
-        
+
         return StringUtils.isEmpty(search)
-                ? templatePermissionRepository.filter(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionFilter, rollbackVersionFilter, previewTemplateFilter, exportTemplateFilter)
-                : templatePermissionRepository.search(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionFilter, rollbackVersionFilter, previewTemplateFilter, exportTemplateFilter, search.toLowerCase());
+                ? templatePermissionRepository.filter(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionStandardFilter, rollbackVersionStandardFilter, previewTemplateFilter, exportTemplateFilter,
+                createNewTemplateVersionCompositionFilter, rollbackVersionCompositionFilter)
+                : templatePermissionRepository.search(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionStandardFilter, rollbackVersionStandardFilter, previewTemplateFilter, exportTemplateFilter,
+                createNewTemplateVersionCompositionFilter, rollbackVersionCompositionFilter, search.toLowerCase());
     }
 
     private Pageable updateSort(final Pageable pageable) {

@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface TemplatePermissionRepository extends JpaRepository<TemplateEntity, Long> {
     List<String> SUPPORTED_SORT_FIELDS = List.of("name", "E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
-            "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA","E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE",
+            "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA", "E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE",
             "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
 
     String SELECT_FIELDS_CLAUSE = "select name, type, templateType, lower(name) as lower_name, "
@@ -48,10 +48,12 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
 
     String FILTER_CONDITION = "(COALESCE(:role_name) is null or CAST(name as text) in (:role_name))"
             + "  and (:edit_template='' or :edit_template=E9_US75_EDIT_TEMPLATE_METADATA_STANDARD) "
-            + "  and (:new_version_template='' or :new_version_template=E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD) "
-            + "  and (:rollback_template='' or :rollback_template=E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE) "
+            + "  and (:new_version_template_standard='' or :new_version_template_standard=E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD) "
+            + "  and (:rollback_template_standard='' or :rollback_template_standard=E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE) "
             + "  and (:preview_template='' or :preview_template=E9_US81_PREVIEW_TEMPLATE_STANDARD) "
-            + "  and (:export_template='' or :export_template=E9_US24_EXPORT_TEMPLATE_DATA)";
+            + "  and (:export_template='' or :export_template=E9_US24_EXPORT_TEMPLATE_DATA)"
+            + "  and (:new_version_template_composition='' or :new_version_template_composition=E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED)"
+            + "  and (:rollback_template_composition='' or :rollback_template_composition=E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE)";
 
     String SEARCH_CONDITION = " and LOWER(name) like CONCAT('%',:search,'%')";
 
@@ -62,10 +64,12 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
                                           @Param("name") String templateName,
                                           @Param("role_name") List<String> roleName,
                                           @Param("edit_template") String editTemplate,
-                                          @Param("new_version_template") String newVersionTemplate,
-                                          @Param("rollback_template") String rollBack,
+                                          @Param("new_version_template_standard") String newVersionTemplateStandard,
+                                          @Param("rollback_template_standard") String rollBackStandard,
                                           @Param("preview_template") String preview,
-                                          @Param("export_template") String export);
+                                          @Param("export_template") String export,
+                                          @Param("new_version_template_composition") String newVersionTemplateComposition,
+                                          @Param("rollback_template_composition") String rollBackComposition);
 
     @Query(value = SELECT_FIELDS_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION,
             countQuery = SELECT_COUNT_CLAUSE + SUBQUERY_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION,
@@ -74,10 +78,12 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
                                           @Param("name") String templateName,
                                           @Param("role_name") List<String> roleName,
                                           @Param("edit_template") String editTemplate,
-                                          @Param("new_version_template") String newVersionTemplate,
-                                          @Param("rollback_template") String rollBack,
+                                          @Param("new_version_template_standard") String newVersionTemplateStandard,
+                                          @Param("rollback_template_standard") String rollBackStandard,
                                           @Param("preview_template") String preview,
                                           @Param("export_template") String export,
+                                          @Param("new_version_template_composition") String newVersionTemplateComposition,
+                                          @Param("rollback_template_composition") String rollBackComposition,
                                           @Param("search") String searchParam);
 
 
