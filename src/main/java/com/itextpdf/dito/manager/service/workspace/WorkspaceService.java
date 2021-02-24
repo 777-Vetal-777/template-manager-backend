@@ -1,6 +1,4 @@
 package com.itextpdf.dito.manager.service.workspace;
-
-import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 

@@ -296,7 +296,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     public void resetPassword(final ResetPasswordDTO resetPasswordDTO) {
         final UserEntity userEntity = tokenService.checkResetPasswordToken(resetPasswordDTO.getToken())
-                .orElseThrow(() -> new InvalidResetPasswordTokenException());
+                .orElseThrow(InvalidResetPasswordTokenException::new);
         userEntity.setPassword(encoder.encode(resetPasswordDTO.getPassword()));
         userEntity.setModifiedAt(new Date());
         userEntity.setResetPasswordTokenDate(null);

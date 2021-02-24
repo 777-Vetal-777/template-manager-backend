@@ -10,7 +10,6 @@ import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateProjectGenerator;
 import com.itextpdf.dito.sdk.core.data.IExplicitTemplateData;
 import com.itextpdf.dito.sdk.core.data.JsonData;
-import com.itextpdf.dito.sdk.core.preprocess.asset.TemplateAssetRetriever;
 import com.itextpdf.dito.sdk.output.PdfProducer;
 import com.itextpdf.dito.sdk.output.PdfProducerProperties;
 import org.apache.logging.log4j.LogManager;

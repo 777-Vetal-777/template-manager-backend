@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.integration.crud;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.itextpdf.dito.manager.component.mail.MailClient;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
@@ -8,6 +7,7 @@ import com.itextpdf.dito.manager.dto.user.EmailDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.unblock.UsersUnblockRequestDTO;
+import com.itextpdf.dito.manager.dto.user.update.PasswordChangeRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdatePasswordRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.dto.user.update.UserRolesUpdateRequestDTO;
@@ -40,15 +40,18 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static com.itextpdf.dito.manager.controller.user.UserController.CHANGE_PASSWORD;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
+import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_CHANGE_PASSWORD_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.user.UserController.FORGOT_PASSWORD;
 import static com.itextpdf.dito.manager.controller.user.UserController.RESET_PASSWORD;
 import static com.itextpdf.dito.manager.controller.user.UserController.UPDATE_USERS_ROLES_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACTIVATION_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.USER_UPDATE_PASSWORD_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -377,5 +380,65 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("passwordUpdatedByAdmin").value(false))
                 .andExpect(jsonPath("firstName").value("Harry"))
                 .andExpect(jsonPath("lastName").value("Kane"));
+    }
+
+    @Test
+    public void shouldDropInvalidPasswordExceptionWhenUpdatePasswordWithWrongOldPassword() throws Exception {
+        final PasswordChangeRequestDTO passwordChangeRequestDTO = new PasswordChangeRequestDTO();
+        passwordChangeRequestDTO.setOldPassword("WRONG_OLD_PASSWORD");
+        passwordChangeRequestDTO.setNewPassword("NEW_PASSWORD");
+        mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
+                .content(objectMapper.writeValueAsString(passwordChangeRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldThrowNoSuchUserException() throws Exception {
+        mockMvc.perform(get(UserController.BASE_NAME + "/" + Base64.encode("bad_user@email.com"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldThrowPasswordIsNotSpecifiedByAdmin() throws Exception {
+        final UpdatePasswordRequestDTO updatePasswordRequestDTO = new UpdatePasswordRequestDTO();
+        updatePasswordRequestDTO.setPassword("test");
+        mockMvc.perform(patch(UserController.BASE_NAME + USER_UPDATE_PASSWORD_ENDPOINT)
+                .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void shouldThrowInvalidResetPasswordTokenException() throws Exception {
+        final String newPassword = "SpecialNewPassword123!";
+
+        final EmailDTO emailDTO = new EmailDTO();
+        emailDTO.setEmail(user2.getEmail());
+
+        doNothing().when(mailClient).sendResetMessage(any(), any());
+        mockMvc.perform(patch(UserController.BASE_NAME + FORGOT_PASSWORD)
+                .content(objectMapper.writeValueAsString(emailDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        final UserEntity userEntity = userRepository.findByEmail(user2.getEmail()).get();
+        assertNotNull(userEntity.getResetPasswordTokenDate());
+        assertEquals(password2, userEntity.getPassword());
+
+        final ResetPasswordDTO request = new ResetPasswordDTO();
+        request.setPassword(newPassword);
+        request.setToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcm8xMDB2ZXRhbDA3MDMwNDAxQGdtYWlsLmNvbSIsInR5cGUiOiJyZXNldFBhc3N3b3JkIiwiZXhwIjoxNjE0MjUxMDU4LCJpYXQiOjE2MTQxNjQ2NTh9.-EUUeyz3i9oSQSBT2RKOXFkFKJVTb1s458RxoAXl4CpVILB7ehXsxiD6bMrguGMZSCxZ0L-W-nk_PNE_sZFFvg");
+
+        mockMvc.perform(patch(UserController.BASE_NAME + RESET_PASSWORD)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }

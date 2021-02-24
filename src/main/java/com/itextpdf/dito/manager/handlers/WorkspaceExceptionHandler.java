@@ -3,8 +3,8 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.stage.NoNextStageOnPromotionPathException;
 import com.itextpdf.dito.manager.exception.workspace.OnlyOneWorkspaceAllowedException;
-import com.itextpdf.dito.manager.exception.workspace.WorkspaceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasNoDevelopmentStageException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceNameAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,9 +30,8 @@ public class WorkspaceExceptionHandler extends AbstractExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(WorkspaceAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDTO> WorkspaceAlreadyExistsExceptionHandler(final WorkspaceAlreadyExistsException ex) {
+    @ExceptionHandler(WorkspaceNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> WorkspaceNameAlreadyExistsExceptionHandler(final WorkspaceNameAlreadyExistsException ex) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT);
     }
-
 }

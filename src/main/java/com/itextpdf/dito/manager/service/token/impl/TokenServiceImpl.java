@@ -130,10 +130,9 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private Claims getTokenBody(final String token) {
-        final Claims body = Jwts.parser()
+        return Jwts.parser()
                 .setSigningKey(privateKey)
                 .parseClaimsJws(token.replace(JwtResetPasswordTokenBuilder.BEAN_ID, ""))
                 .getBody();
-        return body;
     }
 }

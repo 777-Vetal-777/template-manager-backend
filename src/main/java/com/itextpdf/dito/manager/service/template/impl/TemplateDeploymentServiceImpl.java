@@ -35,8 +35,6 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TemplateDeploymentServiceImpl implements TemplateDeploymentService {
 
-    private static final Logger log = LogManager.getLogger(TemplateDeploymentServiceImpl.class);
-
     private final TemplateMapper templateMapper;
     private final TemplateFileRepository templateFileRepository;
     private final TemplateProjectGenerator templateProjectGenerator;

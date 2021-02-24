@@ -73,7 +73,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final PermissionService permissionService;
     private final TemplateDeploymentService templateDeploymentService;
     private final CompositeTemplateBuilder compositeTemplateConstructor;
-    private final TemplateLogRepository templateLogRepository;
     private final TemplateFilePartService templateFilePartService;
 	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{1,199}";
 
@@ -87,7 +86,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final InstanceRepository instanceRepository,
                                final TemplateDeploymentService templateDeploymentService,
                                final CompositeTemplateBuilder compositeTemplateConstructor,
-                               final TemplateLogRepository templateLogRepository,
                                final TemplateFilePartService templateFilePartService) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
@@ -99,7 +97,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.instanceRepository = instanceRepository;
         this.templateDeploymentService = templateDeploymentService;
         this.compositeTemplateConstructor = compositeTemplateConstructor;
-        this.templateLogRepository = templateLogRepository;
         this.templateFilePartService = templateFilePartService;
     }
 
@@ -332,7 +329,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity templateEntityLatestFile = templateEntity.getLatestFile();
         final String updatedDependenciesComment = new StringBuilder(templateEntity.getName()).append(" was updated to version ").append(templateEntityLatestFile.getVersion().toString()).toString();
         final List<TemplateEntity> compositions = templateFileRepository.getTemplateCompositionsByTemplateFileId(previousVersionFileEntity.getId());
-        final List<TemplateFileEntity> updatedVersions = compositions.stream().map(composition -> {
+        return compositions.stream().map(composition -> {
             final TemplateFileEntity latestFile = composition.getLatestFile();
             final TemplateEntity updatedComposition = createVersionForTemplateEntity(composition, latestFile, userEntity, null, latestFile.getParts(), updatedDependenciesComment, latestFile.getVersion() + 1);
             final TemplateFileEntity updatedLatestFile = updatedComposition.getLatestFile();
@@ -342,7 +339,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             updatedLatestFileParts.addAll(updatedParts);
             return updatedLatestFile;
         }).collect(Collectors.toList());
-        return updatedVersions;
     }
 
     private TemplateEntity createNewVersion(final TemplateEntity existingTemplateEntity,
