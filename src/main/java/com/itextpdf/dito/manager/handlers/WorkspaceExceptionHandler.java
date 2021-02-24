@@ -31,7 +31,7 @@ public class WorkspaceExceptionHandler extends AbstractExceptionHandler {
     }
 
     @ExceptionHandler(WorkspaceNameAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDTO> WorkspaceNameAlreadyExistsExceptionHandler(final WorkspaceNameAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponseDTO> workspaceNameAlreadyExistsExceptionHandler(final WorkspaceNameAlreadyExistsException ex) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT);
     }
 }
