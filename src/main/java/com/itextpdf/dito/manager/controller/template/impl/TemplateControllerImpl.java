@@ -151,7 +151,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     public ResponseEntity<TemplateMetadataDTO> get(final String name, final Principal principal) {
         final TemplateMetadataDTO metaData;
         final TemplateEntity templateEntity = templateService.get(decodeBase64(name));
-        if (!permissionHandler.checkPermissionsByUser(principal.getName(), "E9_US82_TABLE_OF_TEMPLATE_PERMISSIONS_STANDARD")) {
+        if (!permissionHandler.checkPermissionsByUser(principal.getName(), "E3_US13_SECURITY_ROLES_TABLE")) {
             metaData = templateMapper.mapMetadataWithoutRoles(templateEntity);
         } else {
             metaData = templateMapper.mapToMetadata(templateEntity);

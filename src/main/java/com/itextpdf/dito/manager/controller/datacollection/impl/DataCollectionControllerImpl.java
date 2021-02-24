@@ -136,7 +136,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataCollectionDTO> get(final String name, final Principal principal) {
         final DataCollectionDTO dataCollectionDTO;
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodeBase64(name));
-        if (!permissionHandler.checkPermissionsByUser(principal.getName(), "E6_US39_TABLE_OF_DATA_COLLECTIONS_PERMISSIONS")) {
+        if (!permissionHandler.checkPermissionsByUser(principal.getName(), "E3_US13_SECURITY_ROLES_TABLE")) {
             dataCollectionDTO = dataCollectionMapper.mapWithFileWithoutRoles(dataCollectionEntity);
         } else {
             dataCollectionDTO = dataCollectionMapper.mapWithFile(dataCollectionEntity);
