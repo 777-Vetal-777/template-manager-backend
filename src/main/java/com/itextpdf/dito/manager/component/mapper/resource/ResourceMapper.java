@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 
 public interface ResourceMapper {
     ResourceDTO map(ResourceEntity entity);
-    ResourceDTO mapWithoutRoles(ResourceEntity entity);
 
     ResourceEntity map(ResourceUpdateRequestDTO dto);
 

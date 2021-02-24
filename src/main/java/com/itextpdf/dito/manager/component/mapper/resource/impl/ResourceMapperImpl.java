@@ -74,13 +74,6 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     @Override
-    public ResourceDTO mapWithoutRoles(final ResourceEntity entity) {
-        final ResourceDTO resourceDTO = map(entity);
-        resourceDTO.setAppliedRoles(null);
-        return resourceDTO;
-    }
-
-    @Override
     public ResourceEntity map(final ResourceUpdateRequestDTO dto) {
         final ResourceEntity entity = new ResourceEntity();
         entity.setName(dto.getName());

@@ -13,8 +13,6 @@ public interface DataCollectionMapper {
 
     DataCollectionDTO map(DataCollectionEntity entity);
 
-    DataCollectionDTO mapWithFileWithoutRoles(DataCollectionEntity entity);
-
     DataCollectionDTO mapWithFile(final DataCollectionEntity entity);
 
     Page<DataCollectionDTO> map(Page<DataCollectionEntity> entities);

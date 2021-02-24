@@ -49,13 +49,6 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
     }
 
     @Override
-    public DataCollectionDTO mapWithFileWithoutRoles(final DataCollectionEntity entity) {
-        final DataCollectionDTO dto = map(entity);
-        dto.setAppliedRoles(null);
-        return dto;
-    }
-
-    @Override
     public DataCollectionDTO mapWithFile(final DataCollectionEntity entity) {
         final DataCollectionDTO dto = map(entity);
         final DataCollectionFileEntity latestVersion = entity.getLatestVersion();

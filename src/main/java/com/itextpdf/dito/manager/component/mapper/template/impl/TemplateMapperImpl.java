@@ -87,13 +87,6 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     @Override
-    public TemplateMetadataDTO mapMetadataWithoutRoles(final TemplateEntity entity) {
-        final TemplateMetadataDTO dto = mapToMetadata(entity);
-        dto.setAppliedRoles(null);
-        return dto;
-    }
-
-    @Override
     public TemplateEntity map(final TemplateUpdateRequestDTO dto) {
         final TemplateEntity entity = new TemplateEntity();
         entity.setName(dto.getName());
