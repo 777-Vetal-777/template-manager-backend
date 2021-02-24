@@ -9,7 +9,12 @@ import com.itextpdf.dito.manager.exception.role.AttemptToAttachGlobalAdministrat
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.token.InvalidResetPasswordTokenException;
-import com.itextpdf.dito.manager.exception.user.*;
+import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
+import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
+import com.itextpdf.dito.manager.exception.user.PasswordNotSpecifiedByAdminException;
+import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.user.UserNotFoundException;
+import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.filter.user.UserFilter;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
