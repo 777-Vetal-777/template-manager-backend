@@ -205,7 +205,12 @@ public class UserServiceImpl extends AbstractService implements UserService {
             case REMOVE:
                 for (final UserEntity userEntity : userEntities) {
                     final Set<RoleEntity> userRoles = userEntity.getRoles();
-                    if (userRoles.size() <= roleEntities.size()) {
+					final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
+							.collect(Collectors.toList());
+					final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
+							.collect(Collectors.toList());
+					userRolesId.removeAll(roleEntitiesId);
+                    if (userRolesId.isEmpty()) {
                         throw new UnableToDeleteSingularRoleException();
                     }
                     userEntity.getRoles().removeAll(roleEntities);
