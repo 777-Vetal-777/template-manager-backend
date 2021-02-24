@@ -16,6 +16,7 @@ import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +60,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     @Override
     public ResponseEntity<WorkspaceDTO> create(final @NotBlank String name, final @NotBlank String timezone, final @NotBlank String language, final String adjustForDaylight, final @NotBlank String mainDevelopInstance, final MultipartFile license, final Principal principal) {
 	    //TODO FIX String as boolean, find solution to improve. Request part support only string
-	    final boolean adjustForDayLight = !adjustForDaylight.isBlank();
+        final boolean adjustForDayLight = !Objects.isNull(adjustForDaylight);
 	    final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);
         final byte[] licenseFile = getBytesFromMultipart(license);
         final WorkspaceEntity result = workspaceService.create(workspaceEntity, licenseFile, license.getOriginalFilename(), principal.getName(), mainDevelopInstance);

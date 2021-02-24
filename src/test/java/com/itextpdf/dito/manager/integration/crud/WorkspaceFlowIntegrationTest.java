@@ -8,33 +8,63 @@ import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
 import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.LicenseEntity;
+import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.repository.license.LicenseRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.Optional;
 
+import static com.itextpdf.dito.manager.controller.workspace.WorkspaceController.WORKSPACE_CHECK_LICENSE_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
+    private static final String WORKSPACE_NAME = "workspace-test";
+    private static final String WORKSPACE_TIMEZONE = "America/Sao_Paulo";
+    private static final String WORKSPACE_LANGUAGE = "ENG";
+    private static final String WORKSPACE_ADJUST_FOR_DAYLIGHT = "Test";
+    private static final String MAIN_DEVELOP_INSTANCE_NAME = "MY-DEV-INSTANCE";
+
+    private final MockMultipartFile licensePart = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", Files.readAllBytes(Paths.get("src/test/resources/test-data/license/volume-andersen.xml")));
+    private final MockMultipartFile workspaceNamePart = new MockMultipartFile("name", WORKSPACE_NAME, "text/xml", WORKSPACE_NAME.getBytes(StandardCharsets.UTF_8));
+    private final MockMultipartFile workspaceTimeZonePart = new MockMultipartFile("timezone", WORKSPACE_TIMEZONE, "text/xml", WORKSPACE_TIMEZONE.getBytes(StandardCharsets.UTF_8));
+    private final MockMultipartFile workspaceLanguagePart = new MockMultipartFile("language", WORKSPACE_LANGUAGE, "text/xml", WORKSPACE_LANGUAGE.getBytes(StandardCharsets.UTF_8));
+    private final MockMultipartFile workspaceAdjustForDayLightPart = new MockMultipartFile("adjustForDaylight", WORKSPACE_ADJUST_FOR_DAYLIGHT, "text/xml", WORKSPACE_ADJUST_FOR_DAYLIGHT.getBytes(StandardCharsets.UTF_8));
+    private final MockMultipartFile mainDevelopInstancePart = new MockMultipartFile("mainDevelopInstance", MAIN_DEVELOP_INSTANCE_NAME, "text/xml", MAIN_DEVELOP_INSTANCE_NAME.getBytes(StandardCharsets.UTF_8));
+
+    private final static URI workspaceBaseUri = UriComponentsBuilder.fromUriString(WorkspaceController.BASE_NAME).build().encode().toUri();
+    private static final String WORKSPACE_BASE64_ENCODED_NAME = com.itextpdf.kernel.xmp.impl.Base64.encode(WORKSPACE_NAME);
 
     @Autowired
+    private WorkspaceRepository workspaceRepository;
+    @Autowired
     private InstanceRepository instanceRepository;
+    @Autowired
+    private LicenseRepository licenseRepository;
+
+    WorkspaceFlowIntegrationTest() throws IOException { }
 
     @AfterEach
     public void teardown() {
@@ -44,9 +74,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void tearUp() throws Exception {
-        InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/instances-create-request.json"),
-                        InstancesRememberRequestDTO.class);
+        final InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/workspaces/instances-create-request.json"), InstancesRememberRequestDTO.class);
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -54,43 +82,66 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
-    @Disabled
-    void testCreateWorkspace() throws Exception {
-        workspaceRepository.deleteAll();
-
-        WorkspaceCreateRequestDTO request = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
-                        WorkspaceCreateRequestDTO.class);
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("name").value("workspace-test"))
-                .andExpect(jsonPath("language").value("ENG"))
-                .andExpect(jsonPath("timezone").value("America/Sao_Paulo"));
-
-        assertEquals(1, workspaceRepository.findAll().size());
+    void testLicenceShouldCheckValidLicenseSuccessfully() throws Exception {
+        final URI uri = UriComponentsBuilder
+                .fromUriString(WorkspaceController.BASE_NAME + WORKSPACE_CHECK_LICENSE_ENDPOINT).build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri).file(licensePart).contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
     }
 
-    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
-    @Disabled
-    void testCreateWorkspaceWithExistingName() throws Exception {
-        WorkspaceCreateRequestDTO request = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
-                        WorkspaceCreateRequestDTO.class);
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+    void testCreateWorkspace() throws Exception {
+        createWorkspace(workspaceNamePart);
+        final Optional<WorkspaceEntity> optionalCreatedWorkspace = workspaceRepository.findByName(WORKSPACE_NAME);
+        assertTrue(optionalCreatedWorkspace.isPresent());
+        final WorkspaceEntity workspaceEntity = optionalCreatedWorkspace.get();
+        Optional<LicenseEntity> optionalLicense = licenseRepository.findByWorkspace(workspaceEntity);
+        assertTrue(optionalLicense.isPresent());
+    }
 
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
+    @Test
+    void testCreateWorkspaceWithExistingName() throws Exception {
+        createWorkspace(workspaceNamePart);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+                .file(workspaceNamePart)
+                .file(workspaceTimeZonePart)
+                .file(workspaceLanguagePart)
+                .file(mainDevelopInstancePart)
+                .file(licensePart)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCreateWorkspaceWithWrongLicense() throws Exception {
+        final MockMultipartFile badLicense = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", "Wrong staff".getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+                .file(workspaceNamePart)
+                .file(workspaceTimeZonePart)
+                .file(workspaceLanguagePart)
+                .file(mainDevelopInstancePart)
+                .file(badLicense)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldNotCreateWorkspaceWithoutInstance() throws Exception{
+        final MockMultipartFile notExistingInstance = new MockMultipartFile("unknownInstance", MAIN_DEVELOP_INSTANCE_NAME, "text/xml", MAIN_DEVELOP_INSTANCE_NAME.getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+                .file(workspaceNamePart)
+                .file(workspaceTimeZonePart)
+                .file(workspaceLanguagePart)
+                .file(workspaceAdjustForDayLightPart)
+                .file(notExistingInstance)
+                .file(licensePart)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -103,19 +154,17 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName(INSTANCE_NAME);
         instanceDTO.setSocket(INSTANCE_SOCKET);
-        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        instancesRememberRequestDTO.setInstances(Collections.singletonList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        WorkspaceDTO updateRequest = objectMapper
+        final WorkspaceDTO updateRequest = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceDTO.class);
-        final String base64EncodedName = Base64.getEncoder()
-                .encodeToString("workspace-test".getBytes());
-        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
+        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WORKSPACE_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(updateRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -155,43 +204,33 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     }
 
-    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
-    @Disabled
     void testGetPromotionPath() throws Exception {
-        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
-
-        final String base64EncodedName = Base64.getEncoder().encodeToString(workspaceCreateRequestDTO.getName().getBytes());
-
-        mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+        createWorkspace(workspaceNamePart);
+        mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
                 .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
                 .andExpect(jsonPath("stages[0].name").value("Development"));
     }
 
-    //TEMPORARY DISABLED, SHOULD BE REALIZED AFTER THE DTM-1867
     @Test
-    @Disabled
     void testUpdatePromotionPath() throws Exception {
-        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
+        createWorkspace(workspaceNamePart);
 
-        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
-        InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
+        final InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
+        final InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName("test-name");
         instanceDTO.setSocket("localhost:9999");
-        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        instancesRememberRequestDTO.setInstances(Collections.singletonList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        PromotionPathDTO request = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/promotion-path-update-request.json"),
-                        PromotionPathDTO.class);
+        final PromotionPathDTO request = objectMapper
+                .readValue(new File("src/test/resources/test-data/workspaces/promotion-path-update-request.json"), PromotionPathDTO.class);
 
-        final String base64EncodedName = Base64.getEncoder().encodeToString(workspaceCreateRequestDTO.getName().getBytes());
-
-        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
@@ -201,14 +240,14 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testUpdatePromotionPathBadRequest() throws Exception {
-        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
+        final WorkspaceCreateRequestDTO workspaceCreateRequestDTO = createTestWorkspace();
 
-        InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
+        final InstancesRememberRequestDTO instancesRememberRequestDTO = new InstancesRememberRequestDTO();
         InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName("test-name");
         instanceDTO.setSocket("localhost:9999");
 
-        instancesRememberRequestDTO.setInstances(Arrays.asList(instanceDTO));
+        instancesRememberRequestDTO.setInstances(Collections.singletonList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -219,7 +258,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         myInstanceDTO.setName("MY-DEV-INSTANCE");
         myInstanceDTO.setSocket("localhost:8080");
 
-        PromotionPathDTO request = objectMapper
+        final PromotionPathDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/promotion-path-update-request.json"),
                         PromotionPathDTO.class);
 
@@ -234,7 +273,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     private WorkspaceCreateRequestDTO createTestWorkspace() throws Exception {
-        WorkspaceCreateRequestDTO request = objectMapper
+        final WorkspaceCreateRequestDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
                         WorkspaceCreateRequestDTO.class);
 
@@ -246,4 +285,21 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         return request;
     }
 
+    private void createWorkspace(final MockMultipartFile workspaceNamePart) throws Exception {
+        workspaceRepository.deleteAll();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+                .file(workspaceNamePart)
+                .file(workspaceTimeZonePart)
+                .file(workspaceLanguagePart)
+                .file(workspaceAdjustForDayLightPart)
+                .file(mainDevelopInstancePart)
+                .file(licensePart)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("name").value(WORKSPACE_NAME))
+                .andExpect(jsonPath("language").value("ENG"))
+                .andExpect(jsonPath("timezone").value("America/Sao_Paulo"))
+                .andExpect(jsonPath("adjustForDaylight").value(true));
+    }
 }
