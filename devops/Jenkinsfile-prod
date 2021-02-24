@@ -72,8 +72,10 @@ pipeline {
         }
         stage("Remove unused docker image"){
             steps{
-                sh '''docker rmi -f $(docker images --filter=reference=${projectName}-${WORKING_ENV} -q) >/dev/null 2>&1''' 
-                sh '''docker rmi -f $(docker images --filter=reference=${dbName}-${WORKING_ENV} -q) >/dev/null 2>&1'''
+                sh """
+                docker rmi -f ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1
+                docker rmi -f ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1
+                """
             }
         }
         stage("Deploy docker image to host"){
