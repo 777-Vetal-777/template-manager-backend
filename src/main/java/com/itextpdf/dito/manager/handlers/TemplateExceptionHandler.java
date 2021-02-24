@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.instance.deployment.InstanceDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
+import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
@@ -22,6 +23,11 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(TemplateBlockedByOtherUserException.class)
     public ResponseEntity<ErrorResponseDTO> templateBlockedByOtherUserException(final TemplateBlockedByOtherUserException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(TemplateCannotBeBlockedException.class)
+    public ResponseEntity<ErrorResponseDTO> templateCannotBeBlockedExceptionHandler(final TemplateCannotBeBlockedException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InstanceDeploymentException.class)
@@ -58,7 +64,7 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> templateProjectGenerationExceptionHandler(final TemplateProjectGenerationException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
-    
+
     @ExceptionHandler(TemplateInvalidNameException.class)
     public ResponseEntity<ErrorResponseDTO> templateInvalidNameExceptionHandler(final TemplateInvalidNameException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);

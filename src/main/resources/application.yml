@@ -58,7 +58,7 @@ resources:
 
 template:
   unblock-scheduler:
-    execution-delay-in-millis: 3600000
+    execution-delay-in-millis: 900000
     initial-delay-in-millis: 1000
 
 data-collection:

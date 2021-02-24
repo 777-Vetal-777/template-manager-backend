@@ -19,6 +19,7 @@ import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
+import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateInvalidNameException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
@@ -115,7 +116,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                  final String dataCollectionName, final String email, List<TemplatePartDTO> templatePartDTOs) {
     	throwExceptionIfTemplateNameIsInvalid(templateName);
     	throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
-        
+
         final TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateName);
         templateEntity.setType(templateTypeEnum);
@@ -475,6 +476,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     public TemplateEntity block(final String userEmail, final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
+        if (TemplateTypeEnum.COMPOSITION == templateEntity.getType()) {
+            throw new TemplateCannotBeBlockedException("Composition templates cannot be blocked");
+        }
         if (templateEntity.getBlockedAt() != null && currentUser != templateEntity.getBlockedBy()) {
             throw new TemplateBlockedByOtherUserException(templateEntity.getName(), templateEntity.getBlockedBy().getEmail());
         }
@@ -487,7 +491,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     public TemplateEntity unblock(final String userEmail, final String templateName) {
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
-        if (currentUser != templateEntity.getBlockedBy()) {
+        if (templateEntity.getBlockedBy() != null && currentUser != templateEntity.getBlockedBy()) {
             throw new TemplateBlockedByOtherUserException(templateName, templateEntity.getBlockedBy().getEmail());
         }
         templateEntity.setBlockedBy(null);
@@ -500,7 +504,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             throw new TemplateAlreadyExistsException(templateName);
         }
     }
-    
+
     private void throwExceptionIfTemplateNameIsInvalid(final String templateName) {
         if (!Pattern.matches(TEMPLATE_NAME_REGEX, templateName)) {
             throw new TemplateInvalidNameException(templateName);
