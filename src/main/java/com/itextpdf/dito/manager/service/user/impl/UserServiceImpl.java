@@ -162,7 +162,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setModifiedAt(new Date());
         //Password has been updated by the admin.
         user.setPasswordUpdatedByAdmin(true);
-        return userRepository.save(user);
+        final UserEntity savedUser = userRepository.save(user);
+        if (mailClient != null) {
+            mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword);
+        }
+        return savedUser;
     }
 
     @Override

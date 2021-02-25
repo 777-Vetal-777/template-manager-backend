@@ -5,5 +5,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 public interface MailClient {
     void sendRegistrationMessage(UserEntity savedUser, String password, UserEntity currentUser);
 
+    void sendPasswordsWasUpdatedByAdminMessage(UserEntity savedUser, String password);
+
     void sendResetMessage(UserEntity userEntity, String token);
 }
