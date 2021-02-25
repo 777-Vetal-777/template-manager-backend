@@ -41,8 +41,11 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         dto.setModifiedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
         dto.setModifiedOn(entity.getModifiedOn());
         dto.setCreatedOn(entity.getCreatedOn());
-        dto.setAuthorFirstName(entity.getAuthor().getFirstName());
-        dto.setAuthorLastName(entity.getAuthor().getLastName());
+        dto.setCreatedBy(new StringBuilder()
+                .append(entity.getAuthor().getFirstName())
+                .append(" ")
+                .append(entity.getAuthor().getLastName())
+                .toString());
         dto.setDescription(entity.getDescription());
         dto.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         return dto;

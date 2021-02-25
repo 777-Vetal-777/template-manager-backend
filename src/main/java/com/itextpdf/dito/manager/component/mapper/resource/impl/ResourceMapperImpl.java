@@ -43,8 +43,11 @@ public class ResourceMapperImpl implements ResourceMapper {
         result.setCreatedOn(entity.getCreatedOn());
         final UserEntity author = entity.getCreatedBy();
         if (Objects.nonNull(author)) {
-            result.setAuthorFirstName(author.getFirstName());
-            result.setAuthorLastName(author.getLastName());
+            result.setCreatedBy(new StringBuilder()
+                    .append(author.getFirstName())
+                    .append(" ")
+                    .append(author.getLastName())
+                    .toString());
         }
 
         final Collection<ResourceFileEntity> files = entity.getLatestFile();

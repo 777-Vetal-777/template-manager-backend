@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.dto.resource;
 
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -12,10 +11,7 @@ public class ResourceDTO {
     private String comment;
     private String description;
     private ResourceTypeEnum type;
-    @JsonProperty("author.firstName")
-    private String authorFirstName;
-    @JsonProperty("author.lastName")
-    private String authorLastName;
+    private String createdBy;
     private Date createdOn;
     private String modifiedBy;
     private Date modifiedOn;
@@ -88,20 +84,12 @@ public class ResourceDTO {
         this.name = name;
     }
 
-    public String getAuthorFirstName() {
-        return authorFirstName;
+    public String getCreatedBy() {
+        return createdBy;
     }
 
-    public void setAuthorFirstName(String authorFirstName) {
-        this.authorFirstName = authorFirstName;
-    }
-
-    public String getAuthorLastName() {
-        return authorLastName;
-    }
-
-    public void setAuthorLastName(String authorLastName) {
-        this.authorLastName = authorLastName;
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public Date getModifiedOn() {
