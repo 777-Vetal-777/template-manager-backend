@@ -3,21 +3,16 @@ package com.itextpdf.dito.manager.component.validator.resource.impl;
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
+import com.itextpdf.io.font.FontProgramFactory;
 import org.springframework.stereotype.Component;
-
-import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 @Component
 public class ResourceFontContentValidator implements ContentValidator {
     @Override
     public boolean isValid(final byte[] content) {
-        try (final InputStream byteStream = new ByteArrayInputStream(content)) {
-            Font.createFont(Font.TRUETYPE_FONT, byteStream);
-            return true;
-        } catch (IOException | FontFormatException e) {
+        try {
+            return FontProgramFactory.createFont(content, false) instanceof com.itextpdf.io.font.TrueTypeFont;
+        } catch (java.io.IOException | com.itextpdf.io.IOException e) {
             throw new InvalidResourceContentException(e);
         }
     }
