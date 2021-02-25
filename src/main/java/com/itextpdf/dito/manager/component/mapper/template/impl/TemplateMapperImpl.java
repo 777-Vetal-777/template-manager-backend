@@ -87,6 +87,7 @@ public class TemplateMapperImpl implements TemplateMapper {
             final DataCollectionFileEntity dataCollectionFileEntity = latestFile.getDataCollectionFile();
             result.setDataCollection(Objects.nonNull(dataCollectionFileEntity) ? dataCollectionFileEntity.getDataCollection().getName() : null);
         }
+        result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         return result;
     }
 

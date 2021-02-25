@@ -1,9 +1,11 @@
 package com.itextpdf.dito.manager.dto.template;
 
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.Set;
 
 public class TemplateDTO {
     private String name;
@@ -18,6 +20,7 @@ public class TemplateDTO {
     private Date createdOn;
     private String createdBy;
     private String comment;
+    private Set<RoleDTO> appliedRoles;
 
     public Long getVersion() {
         return version;
@@ -89,5 +92,13 @@ public class TemplateDTO {
 
     public void setDataCollection(String dataCollection) {
         this.dataCollection = dataCollection;
+    }
+
+    public Set<RoleDTO> getAppliedRoles() {
+        return appliedRoles;
+    }
+
+    public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
+        this.appliedRoles = appliedRoles;
     }
 }
