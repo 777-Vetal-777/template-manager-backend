@@ -418,27 +418,26 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         final String newPassword = "SpecialNewPassword123!";
 
         final EmailDTO emailDTO = new EmailDTO();
-        emailDTO.setEmail(user2.getEmail());
-
-        doNothing().when(mailClient).sendResetMessage(any(), any());
+        emailDTO.setEmail(user1.getEmail());
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<UserEntity> captor2 = ArgumentCaptor.forClass(UserEntity.class);
+        doNothing().when(mailClient).sendResetMessage(captor2.capture(), captor.capture());
         mockMvc.perform(patch(UserController.BASE_NAME + FORGOT_PASSWORD)
                 .content(objectMapper.writeValueAsString(emailDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
-        final UserEntity userEntity = userRepository.findByEmail(user2.getEmail()).get();
-        assertNotNull(userEntity.getResetPasswordTokenDate());
-        assertEquals(password2, userEntity.getPassword());
+        verify(mailClient, times(1)).sendResetMessage(captor2.capture(), captor.capture());
+        assertNotNull(captor2.getValue());
 
         final ResetPasswordDTO request = new ResetPasswordDTO();
         request.setPassword(newPassword);
-        request.setToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcm8xMDB2ZXRhbDA3MDMwNDAxQGdtYWlsLmNvbSIsInR5cGUiOiJyZXNldFBhc3N3b3JkIiwiZXhwIjoxNjE0MjUxMDU4LCJpYXQiOjE2MTQxNjQ2NTh9.-EUUeyz3i9oSQSBT2RKOXFkFKJVTb1s458RxoAXl4CpVILB7ehXsxiD6bMrguGMZSCxZ0L-W-nk_PNE_sZFFvg");
+        request.setToken(captor.getValue());
 
         mockMvc.perform(patch(UserController.BASE_NAME + RESET_PASSWORD)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNoContent());
     }
 }

@@ -2,12 +2,15 @@ package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
+import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
+import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -16,10 +19,9 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionReposi
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
-import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
-import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
+import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.hamcrest.Matcher;
@@ -35,7 +37,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,14 +45,17 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
@@ -60,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -83,15 +88,13 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataSampleRepository dataSampleRepository;
     @Autowired
-    private WorkspaceRepository workspaceRepository;
-    @Autowired
     private InstanceRepository instanceRepository;
-    @Autowired
-    private StageRepository stageRepository;
     @Autowired
     private DataSampleService dataSampleService;
     @Autowired
     private ResourceRepository resourceRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @AfterEach
     public void clearDb() {
@@ -257,13 +260,14 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    private void performCreateTemplateRequest(final String pathname) throws Exception {
+    private TemplateCreateRequestDTO performCreateTemplateRequest(final String pathname) throws Exception {
         final TemplateCreateRequestDTO request = objectMapper.readValue(new File(pathname), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+        return request;
     }
 
     @Test
@@ -511,7 +515,91 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/composite-template"), hasItem("data/ds1.json")));
+    }
 
+    @Test
+    void shouldSuccessfullyBlockAndUnblockTemplate() throws Exception {
+        final TemplateCreateRequestDTO templateCreateRequestDTO = performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
+        final String encTemplateName = Base64.getEncoder().encodeToString(templateCreateRequestDTO.getName().getBytes());
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.blocked").value(true))
+                .andExpect(jsonPath("$.blockedBy").isNotEmpty())
+                .andExpect(jsonPath("$.version").value(1l));
+        final Optional<TemplateEntity> optionalTemplate = templateRepository.findByName(templateCreateRequestDTO.getName());
+        assertTrue(optionalTemplate.isPresent());
+        final TemplateEntity templateEntity = optionalTemplate.get();
+        assertTrue(Objects.nonNull(templateEntity.getBlockedBy()));
+        assertTrue(Objects.nonNull(templateEntity.getBlockedAt()));
+
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName)).andExpect(status().isOk());
+        final Optional<TemplateEntity> optionalUpdatedTemplate = templateRepository.findByName(templateCreateRequestDTO.getName());
+        assertTrue(optionalTemplate.isPresent());
+        final TemplateEntity updatedTemplateEntity = optionalUpdatedTemplate.get();
+        assertTrue(Objects.isNull(updatedTemplateEntity.getBlockedBy()));
+        assertTrue(Objects.isNull(updatedTemplateEntity.getBlockedAt()));
+    }
+
+    @Test
+    void shouldThrowTemplateBlockedByAnotherUser() throws Exception {
+        final UserCreateRequestDTO anotherUser = createAnotherUser("src/test/resources/test-data/users/user-create-request.json");
+        final TemplateCreateRequestDTO templateCreateRequestDTO = performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
+        final String encTemplateName = Base64.getEncoder().encodeToString(templateCreateRequestDTO.getName().getBytes());
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName)).andExpect(status().isOk());
+
+        final Optional<TemplateEntity> optionalTemplate = templateRepository.findByName(templateCreateRequestDTO.getName());
+        assertTrue(optionalTemplate.isPresent());
+        final TemplateEntity templateEntity = optionalTemplate.get();
+
+        final Optional<UserEntity> optionalAnotherUser = userRepository.findByEmail(anotherUser.getEmail());
+        assertTrue(optionalAnotherUser.isPresent());
+        final UserEntity anotherUserEntity = optionalAnotherUser.get();
+        templateEntity.setBlockedBy(optionalAnotherUser.get());
+        templateRepository.save(templateEntity);
+
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isForbidden());
+
+        final UserEntity creator = userRepository.findByEmail("admin@email.com").get();
+        final TemplateEntity updatedTemplateEntity = templateRepository.findByName(templateCreateRequestDTO.getName()).get();
+        updatedTemplateEntity.setBlockedBy(creator);
+        templateRepository.save(updatedTemplateEntity);
+
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isOk());
+        userRepository.deleteById(anotherUserEntity.getId());
+        assertFalse(userRepository.findByEmail(anotherUserEntity.getEmail()).isPresent());
+    }
+
+    @Test
+    void shouldThrowTemplateCannotBeBlockedException() throws Exception {
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer2.json");
+
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition.json"), TemplateCreateRequestDTO.class);
+        request.getTemplateParts().removeIf(part -> "some-footer-template".equals(part.getName()));
+        request.getTemplateParts().removeIf(part -> "some-template-with-data-collection".equals(part.getName()));
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        final String encTemplateName = Base64.getEncoder().encodeToString(request.getName().getBytes());
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldThrowTemplateInvalidNameException() throws Exception{
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        request.setName("BAD_NAME!@#$%^&()*//`");
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     private void generateStageEntity(final List<TemplateFileEntity> files) {
@@ -520,6 +608,16 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
             file.setStage(nextStage);
         }
         templateFileRepository.saveAll(files);
+    }
+
+    private UserCreateRequestDTO createAnotherUser(final String filePath) throws Exception {
+        final UserCreateRequestDTO request = objectMapper.readValue(new File(filePath), UserCreateRequestDTO.class);
+        mockMvc.perform(post(UserController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        return request;
     }
 
     @SafeVarargs
