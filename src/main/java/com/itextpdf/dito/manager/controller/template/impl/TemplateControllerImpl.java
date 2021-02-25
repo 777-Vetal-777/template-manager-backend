@@ -102,7 +102,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                               final Principal principal) {
         final TemplateEntity templateEntity = templateService
                 .create(templateCreateRequestDTO.getName(), templateCreateRequestDTO.getType(),
-                        templateCreateRequestDTO.getDataCollectionName(), principal.getName(), templateCreateRequestDTO.getTemplateParts());
+                        templateCreateRequestDTO.getDataCollectionName(), principal.getName(), templateMapper.mapPartDto(templateCreateRequestDTO.getTemplateParts()));
         return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.CREATED);
     }
 
@@ -189,7 +189,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final byte[] data = templateFile != null ? getFileBytes(templateFile) : null;
         final TemplateEntity templateEntity = templateService
                 .createNewVersion(name, data, principal.getName(),
-                        comment, null, templateParts);
+                        comment, null, templateMapper.mapPartDto(templateParts));
         return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.OK);
     }
 

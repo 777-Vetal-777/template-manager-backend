@@ -1,17 +1,19 @@
 package com.itextpdf.dito.manager.service.template;
 
-import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
+import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 
 import java.util.List;
 
 public interface TemplateFilePartService {
 
-    List<TemplateFilePartEntity> createTemplatePartEntities(String dataCollectionName, List<TemplatePartDTO> templatePartDTOs);
+    List<TemplateFilePartEntity> createTemplatePartEntities(String dataCollectionName, List<TemplatePartModel> templateParts);
 
     TemplateFilePartEntity updateComposition(TemplateFilePartEntity templateFilePartEntity, TemplateFileEntity composition);
 
     TemplateFilePartEntity updatePart(TemplateFilePartEntity templateFilePartEntity, TemplateFileEntity part);
+
+    TemplatePartModel mapFromEntity(TemplateFilePartEntity entity);
 
 }

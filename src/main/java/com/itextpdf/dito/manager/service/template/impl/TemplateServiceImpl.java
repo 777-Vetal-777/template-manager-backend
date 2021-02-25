@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.manager.component.template.CompositeTemplateBuilder;
-import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -26,6 +25,7 @@ import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
+import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -48,7 +48,6 @@ import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -112,7 +111,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Override
     @Transactional
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
-                                 final String dataCollectionName, final String email, List<TemplatePartDTO> templatePartDTOs) {
+                                 final String dataCollectionName, final String email, List<TemplatePartModel> templateParts) {
     	throwExceptionIfTemplateNameIsInvalid(templateName);
     	throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
@@ -140,8 +139,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
 
         if (TemplateTypeEnum.COMPOSITION.equals(templateTypeEnum)) {
-            if (Objects.nonNull(templatePartDTOs)) {
-                fillTemplatePartsForTemplateFileEntity(dataCollectionName, templatePartDTOs, templateFileEntity);
+            if (Objects.nonNull(templateParts)) {
+                fillTemplatePartsForTemplateFileEntity(dataCollectionName, templateParts, templateFileEntity);
             }
             templateFileEntity.setData(compositeTemplateConstructor.build(templateFileEntity));
         }
@@ -158,9 +157,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     private void fillTemplatePartsForTemplateFileEntity(final String dataCollectionName,
-                                                        final List<TemplatePartDTO> templatePartDTOs,
+                                                        final List<TemplatePartModel> templateParts,
                                                         final TemplateFileEntity templateFileEntity) {
-        final List<TemplateFilePartEntity> parts = templateFilePartService.createTemplatePartEntities(dataCollectionName, templatePartDTOs);
+        final List<TemplateFilePartEntity> parts = templateFilePartService.createTemplatePartEntities(dataCollectionName, templateParts);
         final List<TemplateFilePartEntity> templateFileParts = templateFileEntity.getParts();
         for (final TemplateFilePartEntity templatePart : parts) {
             templatePart.setComposition(templateFileEntity);
@@ -258,7 +257,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     @Transactional
-    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName, List<TemplatePartDTO> templateParts) {
+    public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName, List<TemplatePartModel> templateParts) {
         final TemplateEntity existingTemplateEntity = findByName(name);
         if (newTemplateName != null) {
             existingTemplateEntity.setName(newTemplateName);
@@ -282,7 +281,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), getTemplatePartDTOList(fileEntityToCopy), comment, oldVersion + 1);
+        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), getTemplatePartsList(fileEntityToCopy), comment, oldVersion + 1);
     }
 
     @Override
@@ -347,7 +346,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                             final TemplateFileEntity fileEntityToCopyDependencies,
                                             final UserEntity userEntity,
                                             final byte[] data,
-                                            final List<TemplatePartDTO> templateParts,
+                                            final List<TemplatePartModel> templateParts,
                                             final String comment,
                                             final Long newVersion) {
         final List<TemplateFilePartEntity> templatePartsForTemplateFileEntity;
@@ -531,15 +530,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
     
-	private List<TemplatePartDTO> getTemplatePartDTOList(final TemplateFileEntity fileEntityToCopy) {
-		final List<TemplateFilePartEntity> partEntityList = fileEntityToCopy.getParts();
-		final List<TemplatePartDTO> templateParts = new ArrayList<>();
-		for (final TemplateFilePartEntity partEntity : partEntityList) {
-			final TemplatePartDTO dto = new TemplatePartDTO();
-			dto.setCondition(partEntity.getCondition());
-			dto.setName(partEntity.getPart().getTemplate().getName());
-			templateParts.add(dto);
-		}
-		return templateParts;
+	private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
+		return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
 	}
 }

@@ -2,7 +2,7 @@ package com.itextpdf.dito.manager.service.template.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
+import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateFilePartService;
 import org.apache.logging.log4j.LogManager;
@@ -34,41 +35,44 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
 
     private final TemplateRepository templateRepository;
 
+    private final TemplateMapper templateMapper;
+
     public TemplateFilePartServiceImpl(final TemplateRepository templateRepository,
-                                       final ObjectMapper objectMapper) {
+                                       final ObjectMapper objectMapper,
+                                       final TemplateMapper templateMapper) {
         this.templateRepository = templateRepository;
         this.objectMapper = objectMapper;
+        this.templateMapper = templateMapper;
     }
 
     @Override
     public List<TemplateFilePartEntity> createTemplatePartEntities(final String dataCollectionName,
-                                                                   final List<TemplatePartDTO> templatePartDTOs) {
-        final List<TemplateEntity> templatePartList = templateRepository.getTemplatesWithLatestFileByName(templatePartDTOs.stream().map(TemplatePartDTO::getName).collect(Collectors.toList()));
+                                                                   final List<TemplatePartModel> templateParts) {
+        final List<TemplateEntity> templatePartList = templateRepository.getTemplatesWithLatestFileByName(templateParts.stream().map(TemplatePartModel::getTemplateName).collect(Collectors.toList()));
         final Map<String, TemplateFileEntity> templateFilePartMap = templatePartList.stream().collect(Collectors.toMap(TemplateEntity::getName, TemplateEntity::getLatestFile, (templateFileEntity1, templateFileEntity2) -> templateFileEntity1));
 
         //checks that all templates exists
-        throwExceptionIfSomeTemplatesAreNotFound(templatePartDTOs, templateFilePartMap);
+        throwExceptionIfSomeTemplatesAreNotFound(templateParts, templateFilePartMap);
 
         //checks that all templates has the same (or absent dataCollection)
         throwExceptionIfTemplatesHaveAnotherDataCollections(templatePartList, dataCollectionName);
 
         //checks that exists at most one HEADER and FOOTER
-        throwExceptionIfPartsSizeAreIncorrect(templatePartDTOs, templateFilePartMap);
+        throwExceptionIfPartsSizeAreIncorrect(templateParts, templateFilePartMap);
 
-        return templatePartDTOs.stream().map(templatePart -> {
-            final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getName());
+        return templateParts.stream().map(templatePart -> {
+            final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getTemplateName());
             return createTemplateFilePartEntity(partTemplateFileEntity, templatePart);
         }).collect(Collectors.toList());
     }
 
     private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity partTemplateFileEntity,
-                                                                final TemplatePartDTO templatePart) {
+                                                                final TemplatePartModel templatePart) {
         return createTemplateFilePartEntity(null, partTemplateFileEntity, templatePart.getCondition(), getSettingsString(templatePart));
     }
 
-    private String getSettingsString(final TemplatePartDTO templatePart) {
-        final PartSettings partSettings = new PartSettings();
-        Optional.ofNullable(templatePart.getStartOnNewPage()).ifPresent(partSettings::setStartOnNewPage);
+    private String getSettingsString(final TemplatePartModel templatePart) {
+        final PartSettings partSettings = templatePart.getPartSettings();
         try {
             return objectMapper.writeValueAsString(partSettings);
         } catch (JsonProcessingException e) {
@@ -101,8 +105,8 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         return templateFilePartEntity;
     }
 
-    private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplatePartDTO> templatePartDTOs, final Map<String, TemplateFileEntity> templatePartMap) {
-        final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templatePartDTOs.stream().flatMap(part -> Stream.of(templatePartMap.get(part.getName()).getTemplate())).collect(
+    private void throwExceptionIfPartsSizeAreIncorrect(final List<TemplatePartModel> templateParts, final Map<String, TemplateFileEntity> templatePartMap) {
+        final Map<TemplateTypeEnum, Integer> mapOfPartsCount = templateParts.stream().flatMap(part -> Stream.of(templatePartMap.get(part.getTemplateName()).getTemplate())).collect(
                 Collectors.groupingBy(TemplateEntity::getType,
                         Collectors.collectingAndThen(Collectors.toList(), List::size)));
         throwExceptionIfHaveCompositeParts(mapOfPartsCount);
@@ -138,11 +142,19 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         }
     }
 
-    private void throwExceptionIfSomeTemplatesAreNotFound(final List<TemplatePartDTO> templatePartDTOs, final Map<String, TemplateFileEntity> templateFilePartMap) {
-        final List<String> missedTemplateNames = templatePartDTOs.stream().map(TemplatePartDTO::getName).filter(partName -> !templateFilePartMap.containsKey(partName)).collect(Collectors.toList());
+    private void throwExceptionIfSomeTemplatesAreNotFound(final List<TemplatePartModel> templateParts, final Map<String, TemplateFileEntity> templateFilePartMap) {
+        final List<String> missedTemplateNames = templateParts.stream().map(TemplatePartModel::getTemplateName).filter(partName -> !templateFilePartMap.containsKey(partName)).collect(Collectors.toList());
         if (!missedTemplateNames.isEmpty()) {
             throw new TemplateNotFoundException(missedTemplateNames.get(0));
         }
     }
 
+    @Override
+    public TemplatePartModel mapFromEntity(final TemplateFilePartEntity partEntity) {
+        final TemplatePartModel model = new TemplatePartModel();
+        model.setCondition(partEntity.getCondition());
+        model.setTemplateName(partEntity.getPart().getTemplate().getName());
+        model.setPartSettings(templateMapper.mapPartSettings(partEntity));
+        return model;
+    }
 }

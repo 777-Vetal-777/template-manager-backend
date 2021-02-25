@@ -6,9 +6,10 @@ import com.google.common.collect.Lists;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
-import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
-import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
+import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
+import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
@@ -17,8 +18,10 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
+import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +34,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -163,13 +167,21 @@ public class TemplateMapperImpl implements TemplateMapper {
     public TemplateWithSettingsDTO mapTemplateWithPart(final TemplateEntity entity) {
         final TemplateWithSettingsDTO templateWithSettingsDTO = new TemplateWithSettingsDTO();
         fillTemplateDTO(entity, templateWithSettingsDTO);
-        try {
-            final PartSettings partSettings = objectMapper.readValue(entity.getLatestFile().getCompositions().get(0).getSettings(), PartSettings.class);
-            templateWithSettingsDTO.setStartOnNewPage(partSettings.getStartOnNewPage());
-        } catch (JsonProcessingException e) {
-            log.error("Failed to read PartSettings");
-        }
+        final PartSettings partSettings = mapPartSettings(entity.getLatestFile().getCompositions().get(0));
+        templateWithSettingsDTO.setStartOnNewPage(partSettings.getStartOnNewPage());
         return templateWithSettingsDTO;
+    }
+
+    @Override
+    public PartSettings mapPartSettings(TemplateFilePartEntity entity) {
+        PartSettings partSettings;
+        try {
+            partSettings = objectMapper.readValue(entity.getSettings(), PartSettings.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to read PartSettings", e);
+            partSettings = new PartSettings();
+        }
+        return partSettings;
     }
 
     @Override
@@ -231,4 +243,27 @@ public class TemplateMapperImpl implements TemplateMapper {
         templateDeployedVersionDTO.setDeployed(templateFileEntity != null ? templateFileEntity.getDeployed() : false);
         return templateDeployedVersionDTO;
     }
+
+    @Override
+    public TemplatePartModel mapPartDto(final TemplatePartDTO dto) {
+        final TemplatePartModel model = new TemplatePartModel();
+        model.setTemplateName(dto.getName());
+        model.setCondition(dto.getCondition());
+        final PartSettings partSettings = new PartSettings();
+        Optional.ofNullable(dto.getStartOnNewPage()).ifPresent(partSettings::setStartOnNewPage);
+        model.setPartSettings(partSettings);
+        return model;
+    }
+
+    @Override
+    public List<TemplatePartModel> mapPartDto(final List<TemplatePartDTO> dto) {
+        final List<TemplatePartModel> result;
+        if (dto != null) {
+            result = dto.stream().map(this::mapPartDto).collect(Collectors.toList());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
 }
