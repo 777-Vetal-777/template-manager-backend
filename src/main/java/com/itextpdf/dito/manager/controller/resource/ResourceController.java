@@ -223,7 +223,7 @@ public interface ResourceController {
             @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
 
     @DeleteMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
-    @PreAuthorize("@permissionHandlerImpl.checkResourceDeletePermissions(#principal.getName(), #type, new String(T(java.util.Base64).getUrlDecoder().decode(#name)))")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceDeletePermissions(#principal.getName(), #type, @permissionHandlerImpl.decodeBase64(#name))")
     @Operation(summary = "Delete resource", description = "Delete resource by name and type - the resource cannot be deleted if the resource version is used in the template.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {
@@ -236,7 +236,7 @@ public interface ResourceController {
                                 @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type);
 
     @PostMapping(RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE)
-    @PreAuthorize("@permissionHandlerImpl.checkResourceRollbackPermissions(#principal.name, #type, new String(T(java.util.Base64).getUrlDecoder().decode(#name)))")
+    @PreAuthorize("@permissionHandlerImpl.checkResourceRollbackPermissions(#principal.name, #type, @permissionHandlerImpl.decodeBase64(#name))")
     @Operation(summary = "Rollback resource to selected version", description = "Rollback resource to selected version",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponses(value = {

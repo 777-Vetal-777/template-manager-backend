@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import org.springframework.security.core.Authentication;
 
 public interface PermissionHandler {
+    String decodeBase64(String name);
+
     //  Resources
     boolean checkResourceCommonPermissionByType(Authentication authentication, String type);
 

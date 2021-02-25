@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
@@ -20,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,6 +102,15 @@ public class PermissionHandlerImpl implements PermissionHandler {
         this.templateService = templateService;
         this.dataCollectionService = dataCollectionService;
         this.resourceService = resourceService;
+    }
+
+    @Override
+    public String decodeBase64(final String name) {
+        try {
+            return new String(Base64.getUrlDecoder().decode(name));
+        } catch (IllegalArgumentException ex) {
+            throw new Base64DecodeException(name);
+        }
     }
 
     //  Resources

@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.mail.MailingException;
@@ -70,6 +71,11 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(InvalidDateRangeException.class)
     public ResponseEntity<ErrorResponseDTO> invalidDateExceptionHandler(final InvalidDateRangeException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Base64DecodeException.class)
+    public ResponseEntity<ErrorResponseDTO> base64DecodeExceptionHandler(final Base64DecodeException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }

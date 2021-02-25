@@ -9,6 +9,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Base64.Decoder;
+
+import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +25,11 @@ public abstract class AbstractController {
     private final Decoder decoder = Base64.getUrlDecoder();
 
     protected String decodeBase64(final String data) {
-        return new String(decoder.decode(data));
+        try {
+            return new String(decoder.decode(data));
+        } catch (IllegalArgumentException ex) {
+            throw new Base64DecodeException(data);
+        }
     }
 
     protected String inputStreamToString(final InputStream inputStream) {
@@ -41,7 +47,7 @@ public abstract class AbstractController {
 
         return result.toString();
     }
-    
+
     protected byte[] getBytesFromMultipart(final MultipartFile multipartFile){
         if (multipartFile.isEmpty()) {
         	throwEmptyFileException();
