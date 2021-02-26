@@ -61,7 +61,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
     @Override
     public ResponseEntity<WorkspaceDTO> create(final String name, final String timezone, final String language, final String adjustForDaylight, final String mainDevelopInstance, final MultipartFile license, final Principal principal) {
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put("name", name);
         params.put("timezone", timezone);
         params.put("language", language);
