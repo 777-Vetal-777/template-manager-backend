@@ -1,11 +1,13 @@
 package com.itextpdf.dito.manager.component.client.instance.impl;
 
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
+import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDeploymentDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
+import com.itextpdf.dito.manager.exception.instance.InstanceConnectionException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -80,14 +83,15 @@ public class InstanceClientImpl implements InstanceClient {
                     .uri(instanceRegisterUrl)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(instanceRegisterRequestDTO)
-                    .exchange()
-                    .flatMap(clientResponse -> {
-                        //Error handling
-                        if (clientResponse.statusCode().isError()) {
-                            return clientResponse.createException().flatMap(Mono::error);
-                        }
-                        return clientResponse.bodyToMono(InstanceRegisterResponseDTO.class);
-                    });
+                    .retrieve()
+                    .onStatus(HttpStatus::isError, clientResponse -> {
+                        final Mono<InstanceRegisterErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceRegisterErrorResponseDTO.class);
+                        return errorMessage.flatMap(message->{
+                            log.warn(message.getMessage());
+                            throw new InstanceConnectionException();
+                        });
+                    })
+                    .bodyToMono(InstanceRegisterResponseDTO.class);
             return response.block();
         } catch (IllegalArgumentException e) {
             throw new NotReachableInstanceException(instanceSocket);
