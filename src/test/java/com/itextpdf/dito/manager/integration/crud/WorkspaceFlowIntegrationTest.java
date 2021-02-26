@@ -41,11 +41,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
-    public static final String WORKSPACE_NAME = "workspace-test";
-    public static final String WORKSPACE_TIMEZONE = "America/Sao_Paulo";
-    public static final String WORKSPACE_LANGUAGE = "ENG";
-    public static final String WORKSPACE_ADJUST_FOR_DAYLIGHT = "Test";
-    public static final String MAIN_DEVELOP_INSTANCE_NAME = "MY-DEV-INSTANCE";
+    private static final String WORKSPACE_NAME = "workspace-test";
+    private static final String WORKSPACE_TIMEZONE = "America/Sao_Paulo";
+    private static final String WORKSPACE_LANGUAGE = "ENG";
+    private static final String WORKSPACE_ADJUST_FOR_DAYLIGHT = "Test";
+    private static final String MAIN_DEVELOP_INSTANCE_NAME = "MY-DEV-INSTANCE";
 
     private final MockMultipartFile licensePart = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", Files.readAllBytes(Paths.get("src/test/resources/test-data/license/volume-andersen.xml")));
     private final MockMultipartFile workspaceNamePart = new MockMultipartFile("name", WORKSPACE_NAME, "text/xml", WORKSPACE_NAME.getBytes(StandardCharsets.UTF_8));

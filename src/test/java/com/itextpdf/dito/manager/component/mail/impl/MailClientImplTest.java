@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.mail.impl;
 
 import com.itextpdf.dito.manager.entity.UserEntity;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,7 +30,7 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        mailClient.sendRegistrationMessage(userEntity, "12345", userEntity);
+        Assertions.assertDoesNotThrow(()-> mailClient.sendRegistrationMessage(userEntity, "12345", userEntity));
     }
 
     @Test
@@ -37,7 +38,7 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345");
+        Assertions.assertDoesNotThrow(()-> mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345"));
     }
 
     @Test
@@ -45,6 +46,6 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        mailClient.sendResetMessage(userEntity, "12345");
+        Assertions.assertDoesNotThrow(()-> mailClient.sendResetMessage(userEntity, "12345"));
     }
 }
