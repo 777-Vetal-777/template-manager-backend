@@ -20,6 +20,12 @@ import java.util.Optional;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
+	
+	String UNION_ALL = " union all";
+	String LEFT_JOIN_STAGE_ON_STAGE_ID = " left join {h-schema}stage stage on instance.stage_id = stage.id";
+	String LEFT_JOIN_INSTANCE_ON_INSTANCE_ID = " left join {h-schema}instance as instance on tfi.instance_id = instance.id";
+	String LEFT_JOIN_TEMPLATE_FILE_INSTANCE_ON_TEMPLATE_FILE_ID = " left join {h-schema}template_file_instance as tfi on tfi.template_file_id = templateFile.id";
+	
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "modifiedOn");
 
     String TEMPLATE_TABLE_SELECT_CLAUSE = "select template from TemplateEntity template "
@@ -47,9 +53,9 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + " join {h-schema}template_file_part ON template_file_part.template_file_part_id = templateFile.id"
             + " join {h-schema}template_file template_file2 ON template_file2.id = template_file_part.template_file_id"
             + " join {h-schema}template template2 on template2.id = template_file2.template_id"
-            + " left join {h-schema}template_file_instance as tfi on tfi.template_file_id = templateFile.id"
-            + " left join {h-schema}instance as instance on tfi.instance_id = instance.id"
-            + " left join {h-schema}stage stage on instance.stage_id = stage.id"
+            + LEFT_JOIN_TEMPLATE_FILE_INSTANCE_ON_TEMPLATE_FILE_ID
+            + LEFT_JOIN_INSTANCE_ON_INSTANCE_ID
+            + LEFT_JOIN_STAGE_ON_STAGE_ID
             + " where template.id = :id group by template2.name";
 
     String DEPENDENCY_SUBQUERY =
@@ -61,30 +67,30 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + " join {h-schema}resource resource on resource.id = resourceFile.resource_id"
             + " left join {h-schema}template_file_instance tfi on tfi.template_file_id = templateFile.id"
             + " left join {h-schema}instance instance on tfi.instance_id = instance.id"
-            + " left join {h-schema}stage stage on instance.stage_id = stage.id"
+            + LEFT_JOIN_STAGE_ON_STAGE_ID
             + " where template.id = :id group by resource.name"
-            + " union all"
+            + UNION_ALL
             + " select max(dataFile.version) as version, max(data.name) as name, 'SOFT' as directionType, 'DATA_COLLECTION' as dependencyType, 'data collection' as dependencyTypePluralName, max(stage.name) as stage"
             + " from {h-schema}template as template"
             + " join {h-schema}template_file as templateFile ON templateFile.id = (select max(id) from manager.template_file tf where tf.template_id = template.id and tf.version = (select max(version) from manager.template_file tf2 where tf2.template_id = template.id))"
             + " join {h-schema}data_collection_file as dataFile on templateFile.data_collection_file_id = dataFile.id"
             + " join {h-schema}data_collection as data on dataFile.data_collection_id = data.id"
-            + " left join {h-schema}template_file_instance as tfi on tfi.template_file_id = templateFile.id"
-            + " left join {h-schema}instance as instance on tfi.instance_id = instance.id"
-            + " left join {h-schema}stage stage on instance.stage_id = stage.id"
+            + LEFT_JOIN_TEMPLATE_FILE_INSTANCE_ON_TEMPLATE_FILE_ID
+            + LEFT_JOIN_INSTANCE_ON_INSTANCE_ID
+            + LEFT_JOIN_STAGE_ON_STAGE_ID
             + " where template.id = :id group by data.name"
-            + " union all"
+            + UNION_ALL
             + " select max(template_file2.version) as version, template2.name as name, 'SOFT' as directionType, 'TEMPLATE' as dependencyType, 'TEMPLATE' as dependencyTypePluralName, max(stage.name) as stage"
             + " from {h-schema}template"
             + " join {h-schema}template_file templateFile ON templateFile.id = (select max(id) from {h-schema}template_file tf where tf.template_id = template.id and tf.version = (select max(version) from {h-schema}template_file tf2 where tf2.template_id = template.id))"
             + " join {h-schema}template_file_part ON template_file_part.template_file_id = templateFile.id"
             + " join {h-schema}template_file template_file2 ON template_file2.id = template_file_part.template_file_part_id"
             + " join {h-schema}template template2 on template2.id = template_file2.template_id"
-            + " left join {h-schema}template_file_instance as tfi on tfi.template_file_id = templateFile.id"
-            + " left join {h-schema}instance as instance on tfi.instance_id = instance.id"
-            + " left join {h-schema}stage stage on instance.stage_id = stage.id"
+            + LEFT_JOIN_TEMPLATE_FILE_INSTANCE_ON_TEMPLATE_FILE_ID
+            + LEFT_JOIN_INSTANCE_ON_INSTANCE_ID
+            + LEFT_JOIN_STAGE_ON_STAGE_ID
             + " where template.id = :id group by template2.name"
-            + " union all" + SELECT_CLAUSE_TEMPLATE_HARD_DEPENDENCIES + ") as dependency";
+            + UNION_ALL + SELECT_CLAUSE_TEMPLATE_HARD_DEPENDENCIES + ") as dependency";
 
     String DEPENDENCY_COUNT_QUERY = "select count(*) from " + DEPENDENCY_SUBQUERY;
 

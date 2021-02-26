@@ -96,6 +96,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("fileName").value("fileName2"))
                 .andExpect(jsonPath("isDefault").value("true"));
+        assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
 
     }
 
@@ -130,6 +131,8 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("isDefault").value("false"));
+        
+        assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
     }
 
     @Test
@@ -151,6 +154,8 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("description").value("description2"));
+        
+        assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
 
     }
     

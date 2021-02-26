@@ -44,6 +44,9 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class UserServiceImpl extends AbstractService implements UserService {
+	
+	private static final String ACTIVE = "active";
+	
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final FailedLoginRepository failedLoginRepository;
@@ -270,14 +273,14 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private Pageable updateSort(Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
-                    if ("active".equals(sortParam.getProperty())) {
+                    if (ACTIVE.equals(sortParam.getProperty())) {
                         //W/A for sorting: on FE false shows as NOT ACTIVE, TRUE as ACTIVE.
-                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC, "active");
+                        sortParam = new Sort.Order(sortParam.isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC, ACTIVE);
                     }
                     if ("roles".equals(sortParam.getProperty())) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "roles.size");
                     }
-                    return ("roles.size".equals(sortParam.getProperty()) || "active".equals(sortParam.getProperty()) ? sortParam : sortParam.ignoreCase());
+                    return ("roles.size".equals(sortParam.getProperty()) || ACTIVE.equals(sortParam.getProperty()) ? sortParam : sortParam.ignoreCase());
                 })
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);

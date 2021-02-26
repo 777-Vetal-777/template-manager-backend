@@ -84,8 +84,10 @@ public class PermissionMapperImpl implements PermissionMapper {
             templatePermissionDTO.setEditMetadataPermission(entity.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD());
             templatePermissionDTO.setCreateNewVersionPermission(entity.getE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED());
         }
-        templatePermissionDTO.setName(entity.getName());
-        templatePermissionDTO.setType(entity.getType());
+		if (templatePermissionDTO != null) {
+			templatePermissionDTO.setName(entity.getName());
+			templatePermissionDTO.setType(entity.getType());
+		}
         return templatePermissionDTO;
     }
 
@@ -121,8 +123,10 @@ public class PermissionMapperImpl implements PermissionMapper {
             permissionDTO.setDeleteResource(entity.getE8_US66_1_DELETE_RESOURCE_FONT());
             permissionDTO.setRollBackResource(entity.getE8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT());
         }
-        permissionDTO.setName(entity.getName());
-        permissionDTO.setType(entity.getType());
+        if(permissionDTO != null) {
+        	permissionDTO.setName(entity.getName());
+        	permissionDTO.setType(entity.getType());
+        }
         return permissionDTO;
     }
 

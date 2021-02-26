@@ -1,35 +1,24 @@
 package com.itextpdf.dito.manager.integration.crud;
 
-import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
-import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImpl;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
-import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
-import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
-import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
-import com.itextpdf.dito.manager.service.instance.InstanceService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.util.Base64;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -43,10 +32,6 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     private InstanceRepository instanceRepository;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
-    @Autowired
-    private InstanceService instanceService;
 
     @AfterEach
     public void tearDown() {
@@ -58,6 +43,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
         final String encodedSocketName = new String(Base64.getEncoder().encode("localhost:9999".getBytes()));
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.INSTANCE_STATUS_ENDPOINT, encodedSocketName))
                 .andExpect(status().isBadGateway());
+        assertTrue(instanceRepository.findByName(encodedSocketName).isEmpty());
     }
 
     @Test
@@ -70,7 +56,6 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-//                .andExpect(jsonPath("$.[0].name", is(request.getInstances().get(0).getName())))
                 .andExpect(jsonPath("$.[0].socket", is(request.getInstances().get(0).getSocket())));
 
         mockMvc.perform(post(InstanceController.BASE_NAME)
@@ -78,6 +63,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
+        assertTrue(instanceRepository.findByName(request.getInstances().get(0).getSocket()).isEmpty());
     }
 
     @Test
@@ -93,6 +79,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     public void test_list() throws Exception {
         mockMvc.perform(get(InstanceController.BASE_NAME))
                 .andExpect(status().isOk());
+        assertTrue(!instanceRepository.findAll().isEmpty());
     }
 
     @Test

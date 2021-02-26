@@ -14,8 +14,8 @@ public class Base64DecodeException extends RuntimeException {
     }
 
     private String buildMessage(final String argument) {
-        final StringBuilder message = new StringBuilder("Param was not URL-safe encoded: ");
-        message.append(argument);
-        return message.toString();
+        final StringBuilder messageBuilder = new StringBuilder("Param was not URL-safe encoded: ");
+        messageBuilder.append(argument);
+        return messageBuilder.toString();
     }
 }

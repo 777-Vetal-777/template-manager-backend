@@ -54,6 +54,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+        assertTrue(roleRepository.findByNameAndMasterTrue(request.getName()).isEmpty());
     }
 
     @Test
@@ -64,7 +65,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
-
+        assertTrue(roleRepository.findByNameAndMasterTrue(request.getName()).isEmpty());
     }
 
     @Test
@@ -73,6 +74,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        assertTrue(!roleRepository.findAll().isEmpty());
     }
 
     @Test
@@ -96,6 +98,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
 
         testRole.setPermissions(Collections.emptySet());
         roleRepository.save(testRole);
+        assertTrue(roleRepository.findByNameAndMasterTrue(roleToBeUpdatedName).isPresent());
     }
 
     @Test
@@ -109,6 +112,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isOk());
+        assertTrue(roleRepository.findByNameAndMasterTrue(roleToBeDeletedName).isEmpty());
     }
 
     @Test
@@ -116,12 +120,14 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         final String roleToBeDeletedName = "GLOBAL_ADMINISTRATOR";
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isBadRequest());
+        assertTrue(roleRepository.findByNameAndMasterTrue(roleToBeDeletedName).isPresent());
     }
 
     @Test
     public void delete_failure_roleNotFound() throws Exception {
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString("unknown-role-name".getBytes())))
                 .andExpect(status().isNotFound());
+        assertTrue(roleRepository.findByNameAndMasterTrue("unknown-role-name").isEmpty());
     }
 
     @Test
@@ -130,6 +136,7 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(roleToBeDeletedName.getBytes())))
                 .andExpect(status().isBadRequest());
+        assertTrue(roleRepository.findByNameAndMasterTrue(roleToBeDeletedName).isPresent());
     }
 
 }

@@ -53,28 +53,29 @@ public final class FilesUtils {
 
     public static File zipFolder(final Path sourceFolderPath, final Path zipPath) throws IOException {
         final File zipFile = zipPath.toFile();
-        final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
-        Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<>() {
-            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-                zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(file).toString()));
-                Files.copy(file, zos);
-                zos.closeEntry();
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        zos.close();
+		try (final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
+			Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<>() {
+				@Override
+				public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+					zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(file).toString()));
+					Files.copy(file, zos);
+					zos.closeEntry();
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		}
         return zipFile;
     }
 
     public static File zipFile(final Path zipPath, final Path... sourceFolderPaths) throws IOException {
         final File zipFile = zipPath.toFile();
-        final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
-        for (Path sourceFolderPath : sourceFolderPaths) {
-            zos.putNextEntry(new ZipEntry(sourceFolderPath.getFileName().toString()));
-            Files.copy(sourceFolderPath, zos);
-            zos.closeEntry();
-        }
-        zos.close();
+		try (final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
+			for (Path sourceFolderPath : sourceFolderPaths) {
+				zos.putNextEntry(new ZipEntry(sourceFolderPath.getFileName().toString()));
+				Files.copy(sourceFolderPath, zos);
+				zos.closeEntry();
+			}
+		}
         return zipFile;
     }
 

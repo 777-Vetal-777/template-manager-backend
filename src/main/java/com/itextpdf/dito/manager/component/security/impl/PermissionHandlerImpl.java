@@ -33,30 +33,36 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class PermissionHandlerImpl implements PermissionHandler {
+	
+	private static final String E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD = "E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD";
+	private static final String E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE = "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE";
+	private static final String E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA = "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA";
+	private static final String E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD = "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD";
+	private static final String E9_US126_DELETE_TEMPLATE_STANDARD = "E9_US126_DELETE_TEMPLATE_STANDARD";
 
     private final Map<TemplateTypeEnum, Predicate<String>> templateCommonPermissionsByType = Map.of(
-            TemplateTypeEnum.STANDARD, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
-            TemplateTypeEnum.HEADER, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
-            TemplateTypeEnum.FOOTER, Predicates.or("E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD"::equals, "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA"::equals),
+            TemplateTypeEnum.STANDARD, Predicates.or(E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD::equals, E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA::equals),
+            TemplateTypeEnum.HEADER, Predicates.or(E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD::equals, E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA::equals),
+            TemplateTypeEnum.FOOTER, Predicates.or(E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD::equals, E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA::equals),
             TemplateTypeEnum.COMPOSITION, Predicates.or("E9_US99_NEW_TEMPLATE_WITH_DATA_COMPOSITION"::equals, "E9_US102_CREATE_NEW_TEMPLATE_WITHOUT_DATA_COMPOSITION"::equals));
 
     private static final Map<TemplateTypeEnum, String> TEMPLATE_ROLLBACK_METADATA_PERMISSIONS =
-            Map.of(TemplateTypeEnum.STANDARD,"E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE",
-                    TemplateTypeEnum.FOOTER,"E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE",
-                    TemplateTypeEnum.HEADER,"E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE",
+            Map.of(TemplateTypeEnum.STANDARD, E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE,
+                    TemplateTypeEnum.FOOTER, E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE,
+                    TemplateTypeEnum.HEADER, E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE,
                     TemplateTypeEnum.COMPOSITION,"E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE");
 
     private static final Map<TemplateTypeEnum, String> TEMPLATE_CREATE_NEW_VERSION_PERMISSIONS =
-            Map.of(TemplateTypeEnum.STANDARD,"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
-                    TemplateTypeEnum.FOOTER,"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
-                    TemplateTypeEnum.HEADER,"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD",
+            Map.of(TemplateTypeEnum.STANDARD, E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD,
+                    TemplateTypeEnum.FOOTER, E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD,
+                    TemplateTypeEnum.HEADER, E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD,
                     TemplateTypeEnum.COMPOSITION,"E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
 
 
     private static final Map<TemplateTypeEnum, Predicate<String>> TEMPLATE_DELETE_PERMISSIONS = Map.of(
-            TemplateTypeEnum.STANDARD, "E9_US126_DELETE_TEMPLATE_STANDARD"::equals,
-            TemplateTypeEnum.HEADER, "E9_US126_DELETE_TEMPLATE_STANDARD"::equals,
-            TemplateTypeEnum.FOOTER, "E9_US126_DELETE_TEMPLATE_STANDARD"::equals,
+            TemplateTypeEnum.STANDARD, E9_US126_DELETE_TEMPLATE_STANDARD::equals,
+            TemplateTypeEnum.HEADER, E9_US126_DELETE_TEMPLATE_STANDARD::equals,
+            TemplateTypeEnum.FOOTER, E9_US126_DELETE_TEMPLATE_STANDARD::equals,
             TemplateTypeEnum.COMPOSITION, "E9_US127_DELETE_TEMPLATE_COMPOSITION"::equals);
 
     private static final Map<ResourceTypeEnum, Predicate<String>> RESOURCE_VIEW_PERMISSIONS = Map.of(

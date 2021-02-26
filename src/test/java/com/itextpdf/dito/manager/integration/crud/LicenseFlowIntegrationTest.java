@@ -22,6 +22,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -142,6 +144,7 @@ public class LicenseFlowIntegrationTest  extends AbstractIntegrationTest {
 				.andExpect(jsonPath("fileName").value("volume-andersen.xml"))
 				.andExpect(jsonPath("volumeLimit").value(50))
 				.andExpect(jsonPath("isUnlimited").value(false));
+		assertTrue(!licenseRepository.findAll().isEmpty());
 
 	}
 

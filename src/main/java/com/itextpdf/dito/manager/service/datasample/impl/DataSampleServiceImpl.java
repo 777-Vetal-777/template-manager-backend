@@ -42,6 +42,8 @@ import static java.util.Collections.singleton;
 @Service
 public class DataSampleServiceImpl extends AbstractService implements DataSampleService {
 
+	private static final String IS_DEFAULT = "isDefault";
+	
     private final DataSampleRepository dataSampleRepository;
     private final UserService userService;
     private final JsonValidator jsonValidator;
@@ -156,10 +158,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 					if ("comment".equals(sortParam.getProperty())) {
 						sortParam = new Sort.Order(sortParam.getDirection(), "latestFile.comment");
 					}
-					if ("isDefault".equals(sortParam.getProperty())) {
-						sortParam = new Sort.Order( sortParam.getDirection() == Sort.Direction.ASC ? Sort.Direction.DESC : Sort.Direction.ASC, "isDefault");
+					if (IS_DEFAULT.equals(sortParam.getProperty())) {
+						sortParam = new Sort.Order( sortParam.getDirection() == Sort.Direction.ASC ? Sort.Direction.DESC : Sort.Direction.ASC, IS_DEFAULT);
 					}
-					return "modifiedOn".equals(sortParam.getProperty()) || "isDefault".equals(sortParam.getProperty()) ? sortParam : sortParam.ignoreCase();
+					return "modifiedOn".equals(sortParam.getProperty()) || IS_DEFAULT.equals(sortParam.getProperty()) ? sortParam : sortParam.ignoreCase();
 				})
 				.collect(Collectors.toList()));
 		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);

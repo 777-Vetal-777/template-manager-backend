@@ -225,6 +225,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(type)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest());
+        assertTrue(!dataCollectionRepository.existsByName(NAME));
     }
 
     @Test
@@ -249,6 +250,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(
                         jsonPath("message").value(String.format("Data collection with id %s already exists.", NAME)));
+        assertTrue(dataCollectionRepository.existsByName(NAME));
     }
 
     @Test
@@ -257,6 +259,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        assertTrue(dataCollectionRepository.findAll().isEmpty());
     }
 
     @Test
@@ -267,5 +270,6 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+        assertTrue(!dataCollectionRepository.existsByName(notExistingCollectionName));
     }
 }
