@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -21,7 +20,6 @@ public interface OptionController {
     String BASE_NAME = MAJOR_VERSION + "/options";
 
     @GetMapping
-    @PreAuthorize("hasAuthority('E4_US26_SMTP_SERVER_CONFIGURATION_BACK_END')")
     @Operation(summary = "Get options list", description = "Get application's options.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Options list", content = {

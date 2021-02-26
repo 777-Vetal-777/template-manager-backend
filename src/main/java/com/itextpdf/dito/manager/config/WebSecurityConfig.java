@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.config;
 
 import com.itextpdf.dito.manager.component.auth.TokenAuthorizationFilter;
+import com.itextpdf.dito.manager.controller.feature.OptionController;
 import com.itextpdf.dito.manager.controller.login.AuthenticationController;
 import com.itextpdf.dito.manager.controller.token.TokenController;
 
@@ -61,7 +62,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
             AuthenticationController.BASE_NAME,
             UserController.BASE_NAME + UserController.FORGOT_PASSWORD,
             UserController.BASE_NAME + UserController.RESET_PASSWORD,
-            TokenController.BASE_NAME + TokenController.REFRESH_ENDPOINT
+            TokenController.BASE_NAME + TokenController.REFRESH_ENDPOINT,
+            OptionController.BASE_NAME
     };
 
     @Override

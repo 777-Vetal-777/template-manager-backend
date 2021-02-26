@@ -11,11 +11,14 @@ import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.exception.license.EmptyLicenseFileException;
 import com.itextpdf.dito.manager.exception.license.UnreadableLicenseException;
+import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasBlankParameterException;
 import com.itextpdf.dito.manager.service.license.LicenseService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
@@ -24,7 +27,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotBlank;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
@@ -58,7 +60,17 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
     @Override
-    public ResponseEntity<WorkspaceDTO> create(final @NotBlank String name, final @NotBlank String timezone, final @NotBlank String language, final String adjustForDaylight, final @NotBlank String mainDevelopInstance, final MultipartFile license, final Principal principal) {
+    public ResponseEntity<WorkspaceDTO> create(final String name, final String timezone, final String language, final String adjustForDaylight, final String mainDevelopInstance, final MultipartFile license, final Principal principal) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", name);
+        params.put("timezone", timezone);
+        params.put("language", language);
+        params.put("mainDevelopInstance", mainDevelopInstance);
+        params.forEach((keyName, keyValue) -> {
+            if (Objects.isNull(keyValue) || keyValue.isBlank()) {
+                throw new WorkspaceHasBlankParameterException(keyName);
+            }
+        });
 	    //TODO FIX String as boolean, find solution to improve. Request part support only string
         final boolean adjustForDayLight = !Objects.isNull(adjustForDaylight);
 	    final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);

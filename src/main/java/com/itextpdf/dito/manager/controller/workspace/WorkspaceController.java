@@ -68,11 +68,11 @@ public interface WorkspaceController {
             @ApiResponse(responseCode = "409", description = "Workspace already exist.", content = @Content),
     })
     ResponseEntity<WorkspaceDTO> create(
-            @Parameter(description = "Workspace name", required = true) @RequestPart(name = "name") @NotBlank String name,
-            @Parameter(description = "Workspace timezone", required = true) @RequestPart(name = "timezone") @NotBlank String timezone,
-            @Parameter(description = "Workspace language", required = true) @RequestPart(name = "language") @NotBlank String language,
+            @Parameter(description = "Workspace name", required = true) @RequestPart(name = "name", required = false) String name,
+            @Parameter(description = "Workspace timezone", required = true) @RequestPart(name = "timezone", required = false) String timezone,
+            @Parameter(description = "Workspace language", required = true) @RequestPart(name = "language", required = false)  String language,
             @Parameter(description = "Adjust for daylight") @RequestPart(name = "adjustForDaylight", required = false) String adjustForDaylight,
-            @Parameter(description = "Main develop stage instance", required = true) @RequestPart(name = "mainDevelopInstance") @NotBlank String mainDevelopInstance,
+            @Parameter(description = "Main develop stage instance", required = true) @RequestPart(name = "mainDevelopInstance", required = false) String mainDevelopInstance,
             @Parameter(description = "license XML file", required = true, style = ParameterStyle.FORM) @RequestPart("license") MultipartFile multipartFile,
             Principal principal);
 
