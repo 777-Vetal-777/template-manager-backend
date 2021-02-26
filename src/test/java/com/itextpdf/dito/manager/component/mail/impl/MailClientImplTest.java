@@ -31,4 +31,20 @@ class MailClientImplTest {
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
         mailClient.sendRegistrationMessage(userEntity, "12345", userEntity);
     }
+
+    @Test
+    void sendAdminUpdatedPasswordsMessage() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        ReflectionTestUtils.setField(mailClient, "client", mailSender);
+        when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
+        mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345");
+    }
+
+    @Test
+    void sendResetTokenMessage() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        ReflectionTestUtils.setField(mailClient, "client", mailSender);
+        when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
+        mailClient.sendResetMessage(userEntity, "12345");
+    }
 }

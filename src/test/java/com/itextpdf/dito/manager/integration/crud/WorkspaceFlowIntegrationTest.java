@@ -41,11 +41,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
-    private static final String WORKSPACE_NAME = "workspace-test";
-    private static final String WORKSPACE_TIMEZONE = "America/Sao_Paulo";
-    private static final String WORKSPACE_LANGUAGE = "ENG";
-    private static final String WORKSPACE_ADJUST_FOR_DAYLIGHT = "Test";
-    private static final String MAIN_DEVELOP_INSTANCE_NAME = "MY-DEV-INSTANCE";
+    public static final String WORKSPACE_NAME = "workspace-test";
+    public static final String WORKSPACE_TIMEZONE = "America/Sao_Paulo";
+    public static final String WORKSPACE_LANGUAGE = "ENG";
+    public static final String WORKSPACE_ADJUST_FOR_DAYLIGHT = "Test";
+    public static final String MAIN_DEVELOP_INSTANCE_NAME = "MY-DEV-INSTANCE";
 
     private final MockMultipartFile licensePart = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", Files.readAllBytes(Paths.get("src/test/resources/test-data/license/volume-andersen.xml")));
     private final MockMultipartFile workspaceNamePart = new MockMultipartFile("name", WORKSPACE_NAME, "text/xml", WORKSPACE_NAME.getBytes(StandardCharsets.UTF_8));
@@ -80,6 +80,35 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void testShouldGetAllWorkspaces() throws Exception{
+        mockMvc.perform(get(WorkspaceController.BASE_NAME)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].name").value(WORKSPACE_NAME))
+                .andExpect(jsonPath("$.[0].timezone").isNotEmpty())
+                .andExpect(jsonPath("$.[0].language").value(WORKSPACE_LANGUAGE))
+                .andExpect(jsonPath("$.[0].adjustForDaylight").isNotEmpty());
+    }
+
+    @Test
+    void testShouldCheckWorkspaceIsExistByName() throws Exception{
+        final String base64EncodedName = Base64.getEncoder().encodeToString("workspace-test".getBytes());
+        final URI uriWithValidName = UriComponentsBuilder.fromUriString(WorkspaceController.BASE_NAME + "/" + base64EncodedName + "/exist").build().encode().toUri();
+        mockMvc.perform(get(uriWithValidName)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(true));
+
+        final String base64BadWorkspaceEncodedName = Base64.getEncoder().encodeToString("!@#!@#BadWorkspace".getBytes());
+        final URI uriWithBadName = UriComponentsBuilder.fromUriString(WorkspaceController.BASE_NAME + "/" + base64BadWorkspaceEncodedName + "/exist").build().encode().toUri();
+        mockMvc.perform(get(uriWithBadName)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(false));
+
     }
 
     @Test
@@ -161,9 +190,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        final WorkspaceDTO updateRequest = objectMapper
-                .readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"),
-                        WorkspaceDTO.class);
+        final WorkspaceDTO updateRequest = objectMapper.readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"), WorkspaceDTO.class);
         mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WORKSPACE_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(updateRequest))
                 .contentType(MediaType.APPLICATION_JSON)

@@ -520,25 +520,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void shouldCreateStylesheetVersionsAndReturnThem() throws Exception {
         //create test INSTANCE
         InstanceEntity instanceEntity = new InstanceEntity();
         instanceEntity.setName("resource_test_instance");
         instanceEntity.setSocket("localhost:8080");
         instanceRepository.save(instanceEntity);
-
-        //create test WORKSPACE
-        WorkspaceCreateRequestDTO workspaceCreateRequestDTO = objectMapper
-                .readValue(new File("src/test/resources/test-data/resources/workspace-create-request.json"),
-                        WorkspaceCreateRequestDTO.class);
-
-        mockMvc.perform(post(WorkspaceController.BASE_NAME)
-                .content(objectMapper.writeValueAsString(workspaceCreateRequestDTO))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-
         //create TEMPLATE
         TemplateCreateRequestDTO templateCreateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/template-create-request.json"), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
@@ -581,8 +568,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
-                .andExpect(jsonPath("$.content[0].stage").value("Development"))
-                .andExpect(jsonPath("$.content[4].stage").value("Development"));
+                .andExpect(jsonPath("$.content[0].stage").value("DEV"))
+                .andExpect(jsonPath("$.content[4].stage").value("DEV"));
     }
 
     @Test

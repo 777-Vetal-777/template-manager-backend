@@ -342,7 +342,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void testCreateCompositionTemplateWithDataCollection() throws Exception {
         dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
