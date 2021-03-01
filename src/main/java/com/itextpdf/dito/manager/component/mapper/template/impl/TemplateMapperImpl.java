@@ -238,7 +238,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         for (final StageEntity stageEntity : stagesOnPromotionPath) {
             if (stageEntity.getSequenceOrder() == 0) {
                 final TemplateFileEntity versionOnDevStage = files.stream()
-                        .filter(version -> version.getStage().equals(stageEntity))
+                        .filter(version -> Objects.equals(version.getStage(), stageEntity))
                         .max(Comparator.comparingLong(TemplateFileEntity::getVersion))
                         .orElse(null);
                 deployedVersions.add(map(versionOnDevStage, stageEntity));

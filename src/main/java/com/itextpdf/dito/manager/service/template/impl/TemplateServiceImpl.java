@@ -77,7 +77,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final TemplateDeploymentService templateDeploymentService;
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateFilePartService templateFilePartService;
-    private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{1,199}";
+	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{0,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
