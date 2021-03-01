@@ -49,7 +49,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
 
     private static final String ACTIVE = "active";
-	
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final FailedLoginRepository failedLoginRepository;
@@ -234,11 +234,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
             case REMOVE:
                 for (final UserEntity userEntity : userEntities) {
                     final Set<RoleEntity> userRoles = userEntity.getRoles();
-                    final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
-                            .collect(Collectors.toList());
-                    final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
-                            .collect(Collectors.toList());
-                    userRolesId.removeAll(roleEntitiesId);
+					final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
+							.collect(Collectors.toList());
+					final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
+							.collect(Collectors.toList());
+					userRolesId.removeAll(roleEntitiesId);
                     if (userRolesId.isEmpty()) {
                         throw new UnableToDeleteSingularRoleException();
                     }
