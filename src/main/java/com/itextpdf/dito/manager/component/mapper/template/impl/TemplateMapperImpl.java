@@ -31,6 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -215,9 +216,11 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     private List<TemplateDeployedVersionDTO> getDeployedVersions(final TemplateEntity templateEntity) {
-        final PromotionPathEntity promotionPathEntity = templateEntity.getLatestFile().getStage().getPromotionPath();
+        final List<StageEntity> stagesOnPromotionPath = Optional.ofNullable(templateEntity.getLatestFile().getStage())
+                .map(StageEntity::getPromotionPath)
+                .map(PromotionPathEntity::getStages)
+                .orElse(Collections.emptyList());
         final List<TemplateFileEntity> files = templateEntity.getFiles();
-        final List<StageEntity> stagesOnPromotionPath = promotionPathEntity.getStages();
         final List<TemplateDeployedVersionDTO> deployedVersions = new ArrayList<>();
         for (final StageEntity stageEntity : stagesOnPromotionPath) {
             if (stageEntity.getSequenceOrder() == 0) {
