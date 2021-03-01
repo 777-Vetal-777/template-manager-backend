@@ -14,6 +14,8 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
+import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
@@ -24,10 +26,14 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
+
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -94,6 +100,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private ResourceRepository resourceRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TemplateService templateService;
 
     @AfterEach
     public void clearDb() {
@@ -142,6 +150,31 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk());
 
+        //get sortable versions
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
+        		.param("search", "name")
+        		.param("sort", "stage")
+        		.param("sort", "modifiedBy")
+        		.param("modifiedOn", "10/02/2021")
+        		.param("modifiedOn", "10/02/2021")
+        		.param("sort", "comment"))
+                .andExpect(status().isOk());
+        
+        //get roles
+        final TemplatePermissionFilter filter = new TemplatePermissionFilter();
+        final List<String> list = new ArrayList<>();
+        list.add("name");
+        filter.setName(list); 
+        final Pageable pageable = PageRequest.of(0, 8);
+        templateService.getRoles(pageable, request.getName(), filter);
+        
+        assertTrue(!templateService.getAll().isEmpty());
+        
+        final TemplateListFilter templateListFilter = new TemplateListFilter();
+        assertTrue(!templateService.getAll(templateListFilter).isEmpty());
+        
+        assertTrue(templateService.getAllParts(request.getName()).isEmpty());
+        
         final Long currentVersion = 2L;
         //Promote
         mockMvc.perform(put(TemplateController.BASE_NAME + TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
@@ -200,8 +233,10 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("description").isEmpty());
 
         //get dependencies
-        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
-                .andExpect(status().isOk());
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
+        	.param("sort", "name")
+        	.param("stage", "STAGE"))          
+        	.andExpect(status().isOk());
 
         //get preview
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
@@ -567,7 +602,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.deleteById(anotherUserEntity.getId());
         assertFalse(userRepository.findByEmail(anotherUserEntity.getEmail()).isPresent());
     }
-
+    
     @Test
     void shouldThrowTemplateCannotBeBlockedException() throws Exception {
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");

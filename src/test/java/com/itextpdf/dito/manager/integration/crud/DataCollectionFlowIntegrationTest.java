@@ -7,13 +7,20 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
+import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
+import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,11 +29,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.VERSIONS_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -46,6 +56,8 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     private DataCollectionLogRepository dataCollectionLogRepository;
     @Autowired
     private TemplateRepository templateRepository;
+    @Autowired
+    private DataCollectionService dataCollectionService;
 
     @AfterEach
     public void clearDb() {
@@ -181,6 +193,23 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
+        //Get List
+        mockMvc.perform(
+                get(DataCollectionController.BASE_NAME +"/search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+            	.param("modifiedOn", "10/02/2021")
+        		.param("modifiedOn", "10/02/2021"))
+                .andExpect(status().isOk());
+        
+        //get roles
+        final DataCollectionPermissionFilter filter = new  DataCollectionPermissionFilter();
+        final List<String> list = new ArrayList<>();
+        list.add("name");
+        filter.setName(list); 
+        final Pageable pageable = PageRequest.of(0, 8);
+        assertTrue(dataCollectionService.getRoles(pageable, NAME, filter).isEmpty());
+        
         //UPDATE by name
         final String newCollectionName = "new collectionName";
 
@@ -271,5 +300,10 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
         assertTrue(!dataCollectionRepository.existsByName(notExistingCollectionName));
+    }
+    
+    @Test
+    void testNoTemplateByDataCollectionException() {
+    	assertThrows(TemplateNotFoundException.class,()->dataCollectionService.getByTemplateName("not-existing-template"));
     }
 }

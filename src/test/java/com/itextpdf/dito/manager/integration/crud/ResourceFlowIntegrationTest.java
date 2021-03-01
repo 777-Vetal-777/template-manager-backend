@@ -3,16 +3,15 @@ package com.itextpdf.dito.manager.integration.crud;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
-import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
-import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -23,10 +22,13 @@ import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
+import com.itextpdf.dito.manager.service.resource.ResourceService;
+
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -106,6 +108,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private WorkspaceRepository workspaceRepository;
     @Autowired
     private InstanceRepository instanceRepository;
+    @Autowired
+    ResourceService resourceService;
 
     @AfterEach
     void tearDown() {
@@ -290,6 +294,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
                 .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
+        
+        //ResponseEntity<Page<DependencyDTO>> list
+        mockMvc.perform(
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + "/pageable", FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()))
+                .param("sort", "name")
+                .param("stage", "STAGE"))       
+        		.andExpect(status().isOk());
+        
+        //Roles test
+        final RoleFilter filter = new  RoleFilter();
+        filter.setName(AUTHOR_NAME);
+        final Pageable pageable = PageRequest.of(0, 8);
+        assertTrue(resourceService.getRoles(pageable, IMAGE_NAME,  ResourceTypeEnum.FONT, filter).isEmpty());
+        
     }
 
     @Test
@@ -469,7 +487,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 encodedResourceType))
                 .andExpect(status().isNotFound());
     }
-
+    
     @Test
     void shouldAllowCreateEmptyStylesheet() throws Exception {
         final MockMultipartFile EMPTY_FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", "".getBytes());
@@ -570,6 +588,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
                 .andExpect(jsonPath("$.content[0].stage").value("DEV"))
                 .andExpect(jsonPath("$.content[4].stage").value("DEV"));
+      
     }
 
     @Test
@@ -798,6 +817,13 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
                 .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
+        
+        //GET RESOURCES List
+        mockMvc.perform(get(ResourceController.BASE_NAME)
+        		.param("modifiedOn", "10/02/2021")
+        		.param("modifiedOn", "10/02/2021"))        
+        		.andExpect(status().isOk());     
+       
     }
 
 }
