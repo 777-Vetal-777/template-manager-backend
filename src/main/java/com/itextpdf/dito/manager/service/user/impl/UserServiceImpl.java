@@ -49,7 +49,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
 
     private static final String ACTIVE = "active";
-	
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final FailedLoginRepository failedLoginRepository;
@@ -234,11 +234,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
             case REMOVE:
                 for (final UserEntity userEntity : userEntities) {
                     final Set<RoleEntity> userRoles = userEntity.getRoles();
-					final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
-							.collect(Collectors.toList());
-					final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
-							.collect(Collectors.toList());
-					userRolesId.removeAll(roleEntitiesId);
+                    final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
+                            .collect(Collectors.toList());
+                    final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
+                            .collect(Collectors.toList());
+                    userRolesId.removeAll(roleEntitiesId);
                     if (userRolesId.isEmpty()) {
                         throw new UnableToDeleteSingularRoleException();
                     }
@@ -323,7 +323,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public void forgotPassword(final String email) {
         log.info("Forgot password for email: {} was started", email);
         final Optional<UserEntity> userEntity = userRepository.findByEmail(email);
-        if (userEntity.isPresent()) {
+        if (userEntity.isPresent() && mailClient != null) {
             final String token = tokenService.generateResetPasswordToken(userEntity.get());
             mailClient.sendResetMessage(userEntity.get(), token);
         }
@@ -331,15 +331,15 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public void resetPassword(final ResetPasswordDTO resetPasswordDTO) {
-        log.info("Reset password with token: {} was started", resetPasswordDTO.getToken());
-        final UserEntity userEntity = tokenService.checkResetPasswordToken(resetPasswordDTO.getToken())
+    public void resetPassword(final String token, final String password) {
+        log.info("Reset password with token: {} was started", token);
+        final UserEntity userEntity = tokenService.checkResetPasswordToken(token)
                 .orElseThrow(InvalidResetPasswordTokenException::new);
-        userEntity.setPassword(encoder.encode(resetPasswordDTO.getPassword()));
+        userEntity.setPassword(encoder.encode(password));
         userEntity.setModifiedAt(new Date());
         userEntity.setResetPasswordTokenDate(null);
         userEntity.setPasswordUpdatedByAdmin(false);
-        log.info("Reset password with token: {} was finished successfully", resetPasswordDTO.getToken());
+        log.info("Reset password with token: {} was finished successfully", token);
         userRepository.save(userEntity);
     }
 

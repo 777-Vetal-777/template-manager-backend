@@ -40,5 +40,5 @@ public interface UserService {
 
     void forgotPassword(String email);
 
-    void resetPassword(ResetPasswordDTO resetPasswordDTO);
+    void resetPassword(String token, String password);
 }

@@ -153,7 +153,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<Void> resetPassword(final @Valid ResetPasswordDTO resetPasswordDTO) {
         log.info("Reset password by token: {} was started", resetPasswordDTO.getToken());
-        userService.resetPassword(resetPasswordDTO);
+        userService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getPassword());
         log.info("Reset password by token: {} was finished successfully", resetPasswordDTO.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
