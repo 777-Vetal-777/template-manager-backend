@@ -56,4 +56,12 @@ public class FailedLoginAttemptEntity {
     public void setUser(UserEntity user) {
         this.user = user;
     }
+
+    @Override
+    public String toString() {
+        return "FailedLoginAttemptEntity{" +
+                "id=" + id +
+                ", version=" + version +
+                '}';
+    }
 }

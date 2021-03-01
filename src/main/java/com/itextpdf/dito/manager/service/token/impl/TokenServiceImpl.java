@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.exception.token.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.token.InvalidResetPasswordTokenException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
+import com.itextpdf.dito.manager.service.template.impl.TemplateVersionsServiceImpl;
 import com.itextpdf.dito.manager.service.token.TokenService;
 
 import java.time.Instant;
@@ -21,12 +22,15 @@ import java.util.Optional;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TokenServiceImpl implements TokenService {
+    private static final Logger log = LogManager.getLogger(TokenServiceImpl.class);
     private final TokenHelper refreshTokenHelper;
     private final TokenBuilder accessTokenBuilder;
     private final TokenBuilder refreshTokenBuilder;
@@ -63,6 +67,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String refreshToken(String refreshToken) throws InvalidRefreshTokenException {
+
         String result;
 
         if (!refreshTokenHelper.isValid(refreshToken)) {
@@ -95,15 +100,18 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String generateResetPasswordToken(final UserEntity userEntity) {
+        log.info("Generate reset password token for user: {} was started", userEntity);
         final String token = resetPasswordTokenBuilder.build(userEntity.getEmail());
         final Claims claims = getTokenBody(token);
         userEntity.setResetPasswordTokenDate(claims.getIssuedAt());
         userRepository.save(userEntity);
+        log.info("Generate reset password token for user: {} was finished successfully", userEntity);
         return token;
     }
 
     @Override
     public Optional<UserEntity> checkResetPasswordToken(final String token) {
+        log.info("Check reset password toke {} was started", token);
         final Claims body = getTokenBody(token);
         final Date expirationDate = body.getExpiration();
         final Date createdDateToken = body.getIssuedAt();
@@ -123,7 +131,7 @@ public class TokenServiceImpl implements TokenService {
                 activeToken = true;
             }
         }
-
+        log.info("Check reset password toke {} was finished successfully", token);
         return activeToken
                 ? userEntity
                 : Optional.empty();

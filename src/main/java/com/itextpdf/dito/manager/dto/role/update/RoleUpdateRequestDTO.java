@@ -25,4 +25,12 @@ public class RoleUpdateRequestDTO {
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
     }
+
+    @Override
+    public String toString() {
+        return "RoleUpdateRequestDTO{" +
+                "name='" + name + '\'' +
+                ", permissions=" + permissions +
+                '}';
+    }
 }

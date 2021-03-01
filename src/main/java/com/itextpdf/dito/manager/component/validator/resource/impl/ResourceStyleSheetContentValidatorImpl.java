@@ -5,6 +5,8 @@ import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
 import com.steadystate.css.parser.CSSOMParser;
 import com.steadystate.css.parser.SACParserCSS3;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.w3c.css.sac.CSSException;
 import org.w3c.css.sac.CSSParseException;
@@ -17,6 +19,7 @@ import java.io.InputStreamReader;
 
 @Component
 public class ResourceStyleSheetContentValidatorImpl implements ContentValidator {
+    private static final Logger log = LogManager.getLogger(ResourceStyleSheetContentValidatorImpl.class);
 
     private final CSSOMParser parser = new CSSOMParser(new SACParserCSS3());
 
@@ -31,6 +34,7 @@ public class ResourceStyleSheetContentValidatorImpl implements ContentValidator 
             parser.parseStyleSheet(source, null, null);
             return true;
         } catch (IOException | CSSException e) {
+            log.info(e.getMessage());
             throw new InvalidResourceContentException(e);
         }
     }

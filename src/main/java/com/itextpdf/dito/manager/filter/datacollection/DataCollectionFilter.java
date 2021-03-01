@@ -37,4 +37,14 @@ public class DataCollectionFilter {
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
+
+    @Override
+    public String toString() {
+        return "DataCollectionFilter{" +
+                "name='" + name + '\'' +
+                ", modifiedOn=" + modifiedOn +
+                ", type=" + type +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                '}';
+    }
 }

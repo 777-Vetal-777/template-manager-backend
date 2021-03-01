@@ -16,4 +16,11 @@ public class InstancesRememberRequestDTO {
     public void setInstances(List<InstanceRememberRequestDTO> instances) {
         this.instances = instances;
     }
+
+    @Override
+    public String toString() {
+        return "InstancesRememberRequestDTO{" +
+                "instances=" + instances +
+                '}';
+    }
 }

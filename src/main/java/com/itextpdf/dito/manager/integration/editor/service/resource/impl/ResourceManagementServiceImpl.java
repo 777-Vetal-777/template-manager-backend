@@ -9,6 +9,8 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.Optional;
 
 @Service
 public class ResourceManagementServiceImpl implements ResourceManagementService {
+    private static final Logger log = LogManager.getLogger(ResourceManagementServiceImpl.class);
     private final ResourceService resourceService;
 
     public ResourceManagementServiceImpl(final ResourceService resourceService) {
@@ -26,7 +29,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
     @Override
     public byte[] get(final String name, final ResourceTypeEnum type, final String subName) {
-		// subName - it's a name of font for that realization
+        log.info("Get file by resource name: {} and type: {} and subName: {} was started", name, type, subName);
+        // subName - it's a name of font for that realization
 		final ResourceEntity resourceEntity = resourceService.get(name, type);
 		final Optional<ResourceFileEntity> resourceFileEntity;
 		if (subName != null) {
@@ -35,7 +39,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 		} else {
 			resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
 		}
-		return resourceFileEntity.get().getFile();
+        log.info("Get file by resource name: {} and type: {} and subName: {} was finished successfully", name, type, subName);
+        return resourceFileEntity.get().getFile();
     }
 
     @Override

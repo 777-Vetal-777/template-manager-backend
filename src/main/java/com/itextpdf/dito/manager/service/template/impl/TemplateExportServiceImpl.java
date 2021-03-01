@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.zipFile;
-import static com.itextpdf.dito.manager.util.FilesUtils.zipFolder;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 @Service
@@ -42,6 +41,7 @@ public class TemplateExportServiceImpl implements TemplateExportService {
 
     @Override
     public byte[] export(final String templateName) {
+        log.info("Export template by templateName: {} was started", templateName);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final File zippedProject = exportToDito(templateEntity);
         final File result;
@@ -62,8 +62,8 @@ public class TemplateExportServiceImpl implements TemplateExportService {
             throw new TemplateProjectGenerationException("Error while reading zipped project");
         } finally {
             deleteQuietly(result);
+            log.info("Export template by templateName: {} was finished successfully", templateName);
         }
-
     }
 
     private File exportToDito(final TemplateEntity templateEntity) {

@@ -8,6 +8,8 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRe
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionDependencyService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class DataCollectionDependencyServiceImpl extends AbstractService implements DataCollectionDependencyService {
+    private static final Logger log = LogManager.getLogger(DataCollectionDependencyServiceImpl.class);
     private final DataCollectionService dataCollectionService;
     private final DataCollectionFileRepository dataCollectionFileRepository;
 
@@ -40,6 +43,7 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
                                       final String name,
                                       final DependencyFilter filter,
                                       final String searchParam) {
+        log.info("Get list dataCollection dependencies with pageable by name {} and filter: {} and searchParam: {} was started", name, filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         Page<DependencyModel> searchResult = Page.empty();
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(name);
@@ -47,13 +51,14 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
         final Long version = getLongFromFilter(filter.getVersion());
         final String depend = getStringFromFilter(filter.getName());
         final List<String> stages = filter.getStage();
-        final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d ->  d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
+        final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d -> d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
         final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
         if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType().contains(DependencyType.TEMPLATE)) {
             searchResult = isSearchEmpty
                     ? dataCollectionFileRepository.filter(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stages)
                     : dataCollectionFileRepository.search(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stages, searchParam.toLowerCase());
         }
+        log.info("Get list dataCollection dependencies with pageable by name {} and filter: {} and searchParam: {} was finished successfully", name, filter, searchParam);
         return searchResult;
 
     }
@@ -87,8 +92,11 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
 
     @Override
     public List<DependencyModel> list(final String name) {
+        log.info("Get list dataCollection dependencies with pageable by name {} was started", name);
         final DataCollectionEntity existingDataCollection = dataCollectionService.get(name);
-        return dataCollectionFileRepository.searchDependencyOfDataCollection(existingDataCollection.getId());
+        final List<DependencyModel> dependencyModelList = dataCollectionFileRepository.searchDependencyOfDataCollection(existingDataCollection.getId());
+        log.info("Get list dataCollection dependencies with pageable by name {} was finished successfully", name);
+        return dependencyModelList;
     }
 
 }

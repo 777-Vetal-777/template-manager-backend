@@ -62,4 +62,17 @@ public class InstanceDTO {
     public void setTemplates(List<TemplateInstanceVersionDTO> templates) {
         this.templates = templates;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceDTO{" +
+                "name='" + name + '\'' +
+                ", socket='" + socket + '\'' +
+                ", createdBy='" + createdBy + '\'' +
+                ", createdOn=" + createdOn +
+                ", stage='" + stage + '\'' +
+                ", templates=" + templates +
+                '}';
+    }
+
 }

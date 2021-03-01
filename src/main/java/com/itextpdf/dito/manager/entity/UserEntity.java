@@ -181,5 +181,21 @@ public class UserEntity implements UserDetails {
     public void setResetPasswordTokenDate(Date resetPasswordTokenDate) {
         this.resetPasswordTokenDate = resetPasswordTokenDate;
     }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", active=" + active +
+                ", locked=" + locked +
+                ", modifiedAt=" + modifiedAt +
+                ", resetPasswordTokenDate=" + resetPasswordTokenDate +
+                ", passwordUpdatedByAdmin=" + passwordUpdatedByAdmin +
+                '}';
+    }
 }
 

@@ -27,12 +27,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -41,7 +45,7 @@ import static java.util.Collections.singleton;
 
 @Service
 public class DataSampleServiceImpl extends AbstractService implements DataSampleService {
-
+    private static final Logger log = LogManager.getLogger(DataSampleServiceImpl.class);
 	private static final String IS_DEFAULT = "isDefault";
 	
     private final DataSampleRepository dataSampleRepository;
@@ -62,13 +66,14 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		this.dataSampleLogRepository = dataSampleLogRepository;
 	}
 
-	@Override
-	public DataSampleEntity create(final DataCollectionEntity dataCollectionEntity, final String name, final String fileName,
-			final String sample, final String comment, final String email) {
-
-		if (dataSampleRepository.existsByName(name)) {
-	        throw new DataSampleAlreadyExistsException(name);
-	    }
+    @Override
+    public DataSampleEntity create(final DataCollectionEntity dataCollectionEntity, final String name, final String fileName,
+                                   final String sample, final String comment, final String email) {
+        log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was started",
+                dataCollectionEntity, fileName, sample, comment, email);
+        if (dataSampleRepository.existsByName(name)) {
+            throw new DataSampleAlreadyExistsException(name);
+        }
 
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
@@ -103,7 +108,9 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
         final DataSampleLogEntity logEntity = createDataSampleLogEntry(dataSampleEntity, userEntity);
         dataSampleEntity.setDataSampleLog(Arrays.asList(logEntity));
 
-        return dataSampleRepository.save(dataSampleEntity);
+		log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was finished successfully",
+				dataCollectionEntity, fileName, sample, comment, email);
+		return dataSampleRepository.save(dataSampleEntity);
     }
 
 	@Override
@@ -111,9 +118,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		return DataSampleRepository.SUPPORTED_SORT_FIELDS;
 	}
 
-	@Override
-	public Page<DataSampleEntity> list(final Pageable pageable, final Long dataCollectionId, final DataSampleFilter filter, final String searchParam) {
-		throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
+    @Override
+    public Page<DataSampleEntity> list(final Pageable pageable, final Long dataCollectionId, final DataSampleFilter filter, final String searchParam) {
+        log.info("Get list dataSamples by dataCollectionId: {} and filter: {} and searchParam: {} was started", dataCollectionId, filter, searchParam);
+        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
 		final Pageable pageWithSort = updateSort(pageable);
 		final String name = getStringFromFilter(filter.getName());
@@ -132,11 +140,13 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 			editedOnEndDate = getEndDateFromRange(editedOnDateRange);
 		}
 
-		return StringUtils.isEmpty(searchParam)
+		final Page<DataSampleEntity> dataSampleEntities = StringUtils.isEmpty(searchParam)
 				? dataSampleRepository
 				.filter(pageWithSort, dataCollectionId, name, modifiedBy, editedOnStartDate, editedOnEndDate, isDefault, comment)
 				: dataSampleRepository
 				.search(pageWithSort, dataCollectionId, name, modifiedBy, editedOnStartDate, editedOnEndDate, comment, isDefault, searchParam.toLowerCase());
+		log.info("Get list dataSamples by dataCollectionId: {} and filter: {} and searchParam: {} was finished successfully", dataCollectionId, filter, searchParam);
+		return dataSampleEntities;
 	}
 
 	@Override
@@ -169,6 +179,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 
 	@Override
 	public DataSampleEntity setAsDefault(final String dataSampleName) {
+		log.info("Set as default dataSample with name: {} was started", dataSampleName);
 		final DataSampleEntity dataSampleEntity = get(dataSampleName);
 		final DataCollectionEntity dataCollectionEntity = dataSampleEntity.getDataCollection();
 		final List<DataSampleEntity> list = dataSampleRepository.findByDataCollection(dataCollectionEntity)
@@ -179,26 +190,33 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		});
 		dataSampleEntity.setIsDefault(true);
 		dataSampleRepository.saveAll(list);
+		log.info("Set as default dataSample with name: {} was finished successfully", dataSampleName);
 		return dataSampleEntity;
 	}
 
 	@Override
 	public List<DataSampleEntity> delete(final List<String> dataSamplesList) {
+		log.info("Delete list dataSample: {} was started", dataSamplesList);
 		final List<DataSampleEntity> dataSampleListToDelete = dataSamplesList.stream().map(e->get(e)).collect(Collectors.toList());
 		dataSampleRepository.deleteAll(dataSampleListToDelete);
+		log.info("Delete list dataSample: {} was finished successfully", dataSamplesList);
 		return dataSampleListToDelete;
 	}
 
 	@Override
 	public void delete(final DataCollectionEntity dataCollectionEntity) {
+		log.info("Delete dataSamples by dataCollection: {} was started", dataCollectionEntity);
 		final List<DataSampleEntity> dataSampleListToDelete = dataSampleRepository
 				.findByDataCollection(dataCollectionEntity)
 				.orElseThrow(() -> new DataCollectionNotFoundException(dataCollectionEntity.getName()));
 		dataSampleRepository.deleteAll(dataSampleListToDelete);
+		log.info("Delete dataSamples by dataCollection: {} was finished successfully", dataCollectionEntity);
 	}
 
 	@Override
 	public DataSampleEntity createNewVersion(final String name, final String sample, final String fileName, final String email, final String comment) {
+		log.info("Create new version with name: {}, sample: {} and fileName: {}, email: {}, comment: {} was started",
+				name, sample, email, comment);
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
 		}
@@ -228,7 +246,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		existingDataSampleEntity.setLatestVersion(fileEntity);
 		existingDataSampleEntity.getDataSampleLog().add(logEntity);
 
-		return dataSampleRepository.save(existingDataSampleEntity);
+		final DataSampleEntity savedDataSampleEntity = dataSampleRepository.save(existingDataSampleEntity);
+		log.info("Create new version with name: {}, sample: {} and fileName: {}, email: {}, comment: {} was finished successfully",
+				name, sample, email, comment);
+		return savedDataSampleEntity;
 	}
 
 	private DataSampleLogEntity createDataSampleLogEntry(final DataSampleEntity dataSampleEntity, final UserEntity userEntity) {

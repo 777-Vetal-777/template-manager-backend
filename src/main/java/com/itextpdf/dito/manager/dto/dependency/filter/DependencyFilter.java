@@ -53,4 +53,14 @@ public class DependencyFilter {
         this.directionType = directionType;
     }
 
+    @Override
+    public String toString() {
+        return "DependencyFilter{" +
+                "name='" + name + '\'' +
+                ", version=" + version +
+                ", dependencyType=" + dependencyType +
+                ", stage=" + stage +
+                ", directionType=" + directionType +
+                '}';
+    }
 }

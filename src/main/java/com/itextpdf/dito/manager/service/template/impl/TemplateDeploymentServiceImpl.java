@@ -29,12 +29,14 @@ import java.util.List;
 import java.util.Optional;
 
 import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
 public class TemplateDeploymentServiceImpl implements TemplateDeploymentService {
-
+    private static final Logger log = LogManager.getLogger(TemplateDeploymentServiceImpl.class);
     private final TemplateMapper templateMapper;
     private final TemplateFileRepository templateFileRepository;
     private final TemplateProjectGenerator templateProjectGenerator;
@@ -64,10 +66,12 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      */
     @Override
     public void promoteOnDefaultStage(final TemplateFileEntity templateFileEntity) {
+        log.info("Promote on default stage template: {} was started ", templateFileEntity);
         final boolean isDefaultStage = true;
         for (final InstanceEntity instanceEntity : templateFileEntity.getInstance()) {
             promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
         }
+        log.info("Promote on default stage template: {} was finished successfully ", templateFileEntity);
     }
 
     /**
@@ -79,6 +83,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      */
     @Override
     public TemplateFileEntity promote(final String templateName, final Long version) {
+        log.info("Promote template version to next stage by name: {} and version: {} was started", templateName, version);
         final boolean isDefaultStage = false;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
@@ -98,7 +103,9 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         }
         templateFileEntity.setDeployed(true);
         templateFileEntity.setStage(nextStage);
-        return templateFileRepository.save(templateFileEntity);
+        final TemplateFileEntity savedTemplateFileEntity = templateFileRepository.save(templateFileEntity);
+        log.info("Promote template version to next stage by name: {} and version: {} was finished successfully", templateName, version);
+        return savedTemplateFileEntity;
     }
 
     /**
@@ -109,6 +116,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      */
     @Override
     public TemplateFileEntity undeploy(final String templateName, final Long version) {
+        log.info("Undeploy template version by name: {} and version: {} was started", templateName, version);
         final boolean isDefaultStage = true;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
@@ -127,7 +135,9 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         }
         templateFileEntity.setDeployed(false);
         templateFileEntity.setStage(defaultStageEntity);
-        return templateFileRepository.save(templateFileEntity);
+        final TemplateFileEntity savedTemplateFileEntity = templateFileRepository.save(templateFileEntity);
+        log.info("Undeploy template version by name: {} and version: {} was finished successfully", templateName, version);
+        return savedTemplateFileEntity;
     }
 
     /**
@@ -137,15 +147,20 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
      */
     @Override
     public void removeAllVersionsFromDefaultStage(final List<TemplateFileEntity> templateVersions) {
+        log.info("Remove all versions from default stage: {} was started", templateVersions);
         final InstanceEntity defaultInstance = getDefaultInstance();
         templateVersions.forEach(templateVersion -> removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersion));
+        log.info("Remove all versions from default stage: {} was finished successfully", templateVersions);
     }
 
     @Override
     public StageEntity getNextStage(final String templateName, final Long version) {
+        log.info("Get next stage by templateName: {} and version: {} was started", templateName, version);
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
-        return getNextStage(templateFileEntity);
+        final StageEntity stageEntity = getNextStage(templateFileEntity);
+        log.info("Get next stage by templateName: {} and version: {} was finished successfully", templateName, version);
+        return stageEntity;
     }
 
     private void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {

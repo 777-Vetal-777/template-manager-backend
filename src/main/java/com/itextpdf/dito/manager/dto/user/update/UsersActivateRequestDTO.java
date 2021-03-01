@@ -25,4 +25,12 @@ public class UsersActivateRequestDTO {
     public void setActivate(boolean activate) {
         this.activate = activate;
     }
+
+    @Override
+    public String toString() {
+        return "UsersActivateRequestDTO{" +
+                "activate=" + activate +
+                ", emails=" + emails +
+                '}';
+    }
 }

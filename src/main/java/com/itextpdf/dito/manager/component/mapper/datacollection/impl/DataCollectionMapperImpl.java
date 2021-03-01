@@ -7,6 +7,9 @@ import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateR
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.service.template.impl.TemplateServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
-
+    private static final Logger log = LogManager.getLogger(DataCollectionMapperImpl.class);
     private final RoleMapper roleMapper;
 
     public DataCollectionMapperImpl(final RoleMapper roleMapper) {
@@ -25,15 +28,18 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
 
     @Override
     public DataCollectionEntity map(DataCollectionUpdateRequestDTO dto) {
+        log.info("Convert {} to entity was  started", dto);
         final DataCollectionEntity entity = new DataCollectionEntity();
         entity.setName(dto.getName());
         entity.setType(dto.getType());
         entity.setDescription(dto.getDescription());
+        log.info("Convert {} to entity was  finished successfully", dto);
         return entity;
     }
 
     @Override
     public DataCollectionDTO map(final DataCollectionEntity entity) {
+        log.info("Convert dataCollection: {} to dto was started", entity.getId());
         final DataCollectionDTO dto = new DataCollectionDTO();
         final UserEntity modifiedBy = entity.getModifiedBy();
         dto.setName(entity.getName());
@@ -47,17 +53,20 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
                 .toString());
         dto.setDescription(entity.getDescription());
         dto.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        log.info("Convert dataCollection: {}  to dto was finished successfully", entity.getId());
         return dto;
     }
 
     @Override
     public DataCollectionDTO mapWithFile(final DataCollectionEntity entity) {
+        log.info("Convert dataCollection: {} to dto wit file was started", entity.getId());
         final DataCollectionDTO dto = map(entity);
         final DataCollectionFileEntity latestVersion = entity.getLatestVersion();
         dto.setAttachment(new String(latestVersion.getData()));
         dto.setVersion(latestVersion.getVersion());
         dto.setComment(latestVersion.getComment());
         dto.setFileName(latestVersion.getFileName());
+        log.info("Convert dataCollection: {} to dto wit file was finished successfully", entity.getId());
         return dto;
     }
 

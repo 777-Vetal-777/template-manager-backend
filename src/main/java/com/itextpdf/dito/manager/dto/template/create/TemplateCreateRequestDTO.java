@@ -50,4 +50,14 @@ public class TemplateCreateRequestDTO {
     public void setTemplateParts(List<TemplatePartDTO> templateParts) {
         this.templateParts = templateParts;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateCreateRequestDTO{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", dataCollectionName='" + dataCollectionName + '\'' +
+                ", templateParts=" + templateParts +
+                '}';
+    }
 }

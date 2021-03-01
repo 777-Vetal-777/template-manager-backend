@@ -11,6 +11,8 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateVersionsService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class TemplateVersionsServiceImpl extends AbstractService implements TemplateVersionsService {
+    private static final Logger log = LogManager.getLogger(TemplateVersionsServiceImpl.class);
     private final TemplateService templateService;
     private final TemplateFileRepository templateFileRepository;
     private final UserService userService;
@@ -42,6 +45,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
 
     @Override
     public Page<FileVersionModel> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
+        log.info("Get template versions by name: {} and filter: {} and searchParam: {} was started", name, filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final TemplateEntity template = templateService.get(name);
 
@@ -61,18 +65,24 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
-        return StringUtils.isEmpty(searchParam)
+        final Page<FileVersionModel> versionModels = StringUtils.isEmpty(searchParam)
                 ? templateFileRepository.filter(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName)
                 : templateFileRepository.search(pageWithSort, template.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam.toLowerCase());
+        log.info("Get template versions by name: {} and filter: {} and searchParam: {} was finished successfully", name, filter, searchParam);
+
+        return versionModels;
     }
 
     @Override
     public TemplateEntity rollbackVersion(final String templateName, final Long version, final String userEmail) {
+        log.info("Rollback vesion by templateName: {} and version: {} and userEmail: {} was started", templateName, version, userEmail);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final TemplateFileEntity templateFileEntityToBeRevertedTo = templateFileRepository.findByVersionAndTemplate(version, templateEntity)
                 .orElseThrow(() -> new TemplateVersionNotFoundException(String.valueOf(version)));
-        return templateService.rollbackTemplate(templateEntity,templateFileEntityToBeRevertedTo,currentUser);
+        final TemplateEntity updatedTemplateEntity = templateService.rollbackTemplate(templateEntity, templateFileEntityToBeRevertedTo, currentUser);
+        log.info("Rollback vesion by templateName: {} and version: {} and userEmail: {} was finished successfully", templateName, version, userEmail);
+        return updatedTemplateEntity;
     }
 
     private Pageable updateSort(final Pageable pageable) {

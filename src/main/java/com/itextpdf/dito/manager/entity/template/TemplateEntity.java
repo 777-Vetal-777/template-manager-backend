@@ -173,4 +173,15 @@ public class TemplateEntity {
     public void setBlockedBy(UserEntity blockedBy) {
         this.blockedBy = blockedBy;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                ", blockedAt=" + blockedAt +
+                '}';
+    }
 }

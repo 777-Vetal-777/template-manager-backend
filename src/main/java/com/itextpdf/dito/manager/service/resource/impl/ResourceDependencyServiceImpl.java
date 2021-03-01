@@ -10,6 +10,8 @@ import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class ResourceDependencyServiceImpl extends AbstractService implements ResourceDependencyService {
+    private static final Logger log = LogManager.getLogger(ResourceDependencyServiceImpl.class);
     private static final String HARD_DEPENDENCY = HARD.toString().toLowerCase();
     private static final String TEMPLATE_DEPENDENCY_TYPE = TEMPLATE.toString().toLowerCase();
     private final ResourceService resourceService;
@@ -43,6 +46,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
 
     @Override
     public Page<DependencyModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final DependencyFilter filter, final String searchParam) {
+        log.info("Get list resource dependencies by name: {}, type: {}, filter: {} and searchParam: {} was started", name, type, filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         Page<DependencyModel> searchResult = Page.empty();
         final List<DependencyType> dependenciesType = filter.getDependencyType();
@@ -65,13 +69,17 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
                         : resourceFileRepository.search(pageWithSort, resourceEntity.getId(), depend, version, stages, searchParam.toLowerCase());
             }
         }
+        log.info("Get list resource dependencies by name: {}, type: {}, filter: {} and searchParam: {} was finished successfully", name, type, filter, searchParam);
         return searchResult;
     }
 
     @Override
     public List<DependencyModel> list(final String name, final ResourceTypeEnum type) {
+        log.info("Get list resource dependencies by name: {}, type: {} was started", name, type);
         final ResourceEntity resourceEntity = resourceService.getResource(name, type);
-        return resourceFileRepository.searchDependencies(resourceEntity.getId());
+        final List<DependencyModel> dependencyModels = resourceFileRepository.searchDependencies(resourceEntity.getId());
+        log.info("Get list resource dependencies by name: {}, type: {} was finished successfully", name, type);
+        return dependencyModels;
     }
 
     @Override

@@ -35,4 +35,13 @@ public class DataCollectionUpdateRequestDTO {
     public void setType(DataCollectionType type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "DataCollectionUpdateRequestDTO{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

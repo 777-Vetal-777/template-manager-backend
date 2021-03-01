@@ -5,10 +5,11 @@ import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundExceptio
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 @Service
 public class PermissionServiceImpl implements PermissionService {
+    private static final Logger log = LogManager.getLogger(PermissionServiceImpl.class);
     private final PermissionRepository permissionRepository;
 
     public PermissionServiceImpl(final PermissionRepository permissionRepository) {
@@ -29,9 +31,12 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Page<PermissionEntity> list(final Pageable pageable, final String searchParam) {
-        return StringUtils.isEmpty(searchParam)
+        log.info("Get list permissions by searchParam: {} was started", searchParam);
+        final Page<PermissionEntity> permissionEntities = StringUtils.isEmpty(searchParam)
                 ? permissionRepository.findAll(pageable)
                 : permissionRepository.search(pageable, searchParam);
+        log.info("Get list permissions by searchParam: {} was finished successfully", searchParam);
+        return permissionEntities;
     }
 
     @Override
@@ -41,10 +46,12 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public List<PermissionEntity> defaultPermissions() {
+        log.info("Get default permissions was started");
         final List<PermissionEntity> permissionEntities = permissionRepository.findByNameIn(defaultPermissionNames);
         if (permissionEntities.size() != defaultPermissionNames.size()) {
             throw new IllegalStateException("De-synchronization of default permission names between jvm and database.");
         }
+        log.info("Get default permissions was finished successfully");
         return permissionEntities;
     }
 

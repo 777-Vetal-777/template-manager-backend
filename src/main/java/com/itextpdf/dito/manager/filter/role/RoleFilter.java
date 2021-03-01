@@ -23,4 +23,12 @@ public class RoleFilter {
     public void setType(List<RoleTypeEnum> type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "RoleFilter{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

@@ -31,6 +31,8 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
 import liquibase.util.file.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +57,7 @@ import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @RestController
 public class ResourceControllerImpl extends AbstractController implements ResourceController {
+    private static final Logger log = LogManager.getLogger(ResourceControllerImpl.class);
     private final ResourceService resourceService;
     private final ResourceVersionsService resourceVersionsService;
     private final ResourceDependencyService resourceDependencyService;
@@ -98,12 +101,16 @@ public class ResourceControllerImpl extends AbstractController implements Resour
 
     @Override
     public ResponseEntity<byte[]> getFile(final String uuid) {
-        return new ResponseEntity<>(resourceService.getFile(uuid), HttpStatus.OK);
+        log.info("Get the file using uuid: {} was started ", uuid);
+        byte[] file = resourceService.getFile(uuid);
+        log.info("Get the file using uuid: {} was finished successfully", uuid);
+        return new ResponseEntity<>(file, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> createFont(final Principal principal, final String name, final String type,
                                                   final MultipartFile regular, final MultipartFile bold, final MultipartFile italic, final MultipartFile boldItalic) {
+        log.info("Create resource(font) with name: {} and type: {} was started", name, type);
         final ResourceTypeEnum typeEnum = parseResourceType(type);
         if (typeEnum != FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -117,6 +124,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         fileMap.entrySet().forEach(entry -> checkFileExtensionIsSupported(typeEnum, entry.getValue()));
         final ResourceEntity resourceEntity = resourceService
                 .createNewFont(principal.getName(), name, typeEnum, fileMap);
+        log.info("Create  resource(font) with name: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
@@ -124,14 +132,17 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<Page<FileVersionDTO>> getVersions(final Principal principal, final Pageable pageable,
                                                             final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
         final String decodedName = decodeBase64(encodedName);
+        log.info("Get resource versions by resourceName: {} and resourceType: {} and filter: {} was started", decodedName, type, filter);
         final Page<FileVersionDTO> versionsDTOs = fileVersionMapper.map(resourceVersionsService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
+        log.info("Get resource versions by resourceName: {} and resourceType: {} and filter: {} was finished successfully", decodedName, type, filter);
         return new ResponseEntity<>(versionsDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> createVersion(final Principal principal, final String name, final String comment,
                                                      final String type, final MultipartFile file) {
+        log.info("Create new version of resource by resourceName: {} and type: {} and comment: {} was started", name, type, comment);
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -142,43 +153,53 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         final String originalFilename = file.getOriginalFilename();
         final ResourceEntity resourceEntity = resourceService
                 .createNewVersion(name, resourceType, data, originalFilename, principal.getName(), comment);
+        log.info("Create new version of resource by resourceName: {} and type: {} and comment: {} was finished successfully", name, type, comment);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
                                                     final String searchParam, final DependencyFilter filter) {
+        log.info("Get list dependencies by resourceName: {} and type: {} and searchParam: {} and filter: {} was started", resource, type, searchParam, filter);
         final String decodedName = decodeBase64(resource);
         final Page<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
+        log.info("Get list dependencies by resourceName: {} and type: {} and searchParam: {} and filter: {} was finished successfully", resource, type, searchParam, filter);
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DependencyDTO>> list(final String name, final String type) {
+        log.info("Get list dependencies by resourceName: {} and type: {} was started", name, type);
         final String decodedName = decodeBase64(name);
         final ResourceTypeEnum typeEnum = parseResourceTypeFromPath(type);
         final List<DependencyDTO> dependencyDTOs = dependencyMapper
                 .map(resourceDependencyService.list(decodedName, typeEnum));
+        log.info("Get list dependencies by resourceName: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<ResourceDTO>> list(final Pageable pageable,
                                                   final ResourceFilter filter, final String searchParam) {
+        log.info("Get list resources by filter: {} and searchParam: {} was started", filter, searchParam);
         final Page<ResourceDTO> dtos = resourceMapper.map(resourceService.list(pageable, filter, searchParam));
+        log.info("Get list resources by filter: {} and searchParam: {} was finished successfully", filter, searchParam);
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type, final Principal principal) {
+        log.info("Get resource by name: {} and type: {} was started", name, type);
         final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceTypeFromPath(type));
+        log.info("Get resource by name: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(resourceMapper.map(entity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> create(final Principal principal, final String name, final String type,
                                               final MultipartFile multipartFile) {
+        log.info("Create newResource by name: {} and type: {} was started", name, type);
         final ResourceTypeEnum resourceType = parseResourceType(type);
         if (resourceType == FONT) {
             throw new IncorrectResourceTypeException(type);
@@ -189,53 +210,66 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         final String originalFilename = multipartFile.getOriginalFilename();
 
         final ResourceEntity resourceEntity = resourceService.create(name, resourceType, data, originalFilename, principal.getName());
+        log.info("Create newResource by name: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> update(final String name, @Valid final ResourceUpdateRequestDTO updateRequestDTO,
                                               final Principal principal) {
+        log.info("Update resource by name: {} and updateRequestDTO: {} was started", name, updateRequestDTO);
         final ResourceEntity entity = resourceService
                 .update(decodeBase64(name), resourceMapper.map(updateRequestDTO), principal.getName());
         final ResourceDTO dto = resourceMapper.map(entity);
+        log.info("Update resource by name: {} and updateRequestDTO: {} was finished successfully", name, updateRequestDTO);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> applyRole(final String name, final String type,
                                                  @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+        log.info("Apply role by resourceName: {} and type: {} and applyRoleRequestDTO: {} was started", name, type, applyRoleRequestDTO);
         final ResourceEntity resourceEntity = resourceService
                 .applyRole(decodeBase64(name), parseResourceTypeFromPath(type),
                         applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
+        log.info("Apply role by resourceName: {} and type: {} and applyRoleRequestDTO: {} was finished successfully", name, type, applyRoleRequestDTO);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<ResourcePermissionDTO>> getRoles(final Pageable pageable, final String name,
                                                                 final String type, final ResourcePermissionFilter filter, final String search) {
+        log.info("Get roles by resourceName: {} and type: {} and filter: {} and searchParam: {} was started", name, type, filter, search);
         final Page<ResourcePermissionModel> resourcePermissions = resourcePermissionService
                 .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter, search);
+        log.info("Get roles by resourceName: {} and type: {} and filter: {} and searchParam: {} was finished successfully", name, type, filter, search);
         return new ResponseEntity<>(permissionMapper.mapResourcePermissions(resourcePermissions), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> deleteRole(final String name, final String type,
                                                   final String roleName) {
+        log.info("Delete role by resourceName: {} and type: {} and roleName: {} was started", name, type, roleName);
         final ResourceEntity resourceEntity = resourceService
                 .detachRole(decodeBase64(name), parseResourceTypeFromPath(type), decodeBase64(roleName));
+        log.info("Delete role by resourceName: {} and type: {} and roleName: {} was finished", name, type, roleName);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> delete(final Principal principal, final String name, final String type) {
+        log.info("Delete resource by resourceName: {} and type: {} was started", name, type);
         resourceService.delete(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName());
+        log.info("Delete resource by resourceName: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> rollbackVersion(final Principal principal, final String name, final String type, final Long version) {
+        log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was started", decodeBase64(name), type, version);
         final ResourceEntity rollBackEntity = resourceVersionsService.rollbackVersion(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName(), version);
+        log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was finished successfully");
         return new ResponseEntity<>(resourceMapper.map(rollBackEntity), HttpStatus.OK);
     }
 

@@ -64,4 +64,12 @@ public class DataSampleLogEntity {
     public void setDataSample(DataSampleEntity dataSample) {
         this.dataSample = dataSample;
     }
+
+    @Override
+    public String toString() {
+        return "DataSampleLogEntity{" +
+                "id=" + id +
+                ", date=" + date +
+                '}';
+    }
 }

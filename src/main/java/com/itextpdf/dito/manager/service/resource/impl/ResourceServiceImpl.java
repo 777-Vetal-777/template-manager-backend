@@ -27,6 +27,8 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,6 +59,7 @@ import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @Service
 public class ResourceServiceImpl extends AbstractService implements ResourceService {
+    private static final Logger log = LogManager.getLogger(ResourceServiceImpl.class);
     private final ResourceRepository resourceRepository;
     private final ResourceFileRepository resourceFileRepository;
     private final TemplateRepository templateRepository;
@@ -89,6 +92,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Transactional(rollbackOn = Exception.class)
     public ResourceEntity createNewFont(final String email, final String resourceName,
                                         final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
+        log.info("Create resource(Font) by email: {} and resourceName: {} and type: {} and fonts: {} was started", email, resourceName, type, fonts);
         throwExceptionIfResourceExists(resourceName, type);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
@@ -110,12 +114,15 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         resourceEntity.setResourceFiles(files);
         resourceEntity.setLatestFile(files);
         resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
-        return resourceRepository.save(resourceEntity);
+        final ResourceEntity savedResource = resourceRepository.save(resourceEntity);
+        log.info("Create resource(Font) by email: {} and resourceName: {} and type: {} and fonts: {} was finished successfully", email, resourceName, type, fonts);
+        return savedResource;
     }
 
     @Override
     public ResourceEntity create(final String name, final ResourceTypeEnum type, final byte[] data,
                                  final String fileName, final String email) {
+        log.info("Create resource with name: {}, type: {}, data: {}, fileName: {} and email: {} was started", name, type, data, fileName, email);
         final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(name, type);
         if (resourceExists) {
             throw new ResourceAlreadyExistsException(name);
@@ -139,13 +146,16 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         resourceEntity.setLatestFile(Collections.singletonList(fileEntity));
         resourceEntity.setResourceFiles(Collections.singletonList(fileEntity));
         resourceEntity.setResourceLogs(Collections.singletonList(logEntity));
-        return resourceRepository.save(resourceEntity);
+        final ResourceEntity savedResource = resourceRepository.save(resourceEntity);
+        log.info("Create resource with name: {}, type: {}, data: {}, fileName: {} and email: {} was finished successfully", name, type, data, fileName, email);
+        return savedResource;
     }
 
     @Override
     @Transactional(rollbackOn = Exception.class)
     public ResourceEntity createNewVersion(final String name, final ResourceTypeEnum type, final byte[] data,
                                            final String fileName, final String email, final String comment) {
+        log.info("Create resource version with resourceName: {} and type: {} and fileName: {}, email: {}, comment: {} was started", name, type, fileName, email, comment);
         final ResourceEntity existingResourceEntity = getResource(name, type);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
@@ -190,6 +200,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             });
             templateRepository.saveAll(templateEntities);
         }
+        log.info("Create resource version with resourceName: {} and type: {} and fileName: {}, email: {}, comment: {} was finished successfully", name, type, fileName, email, comment);
         return updatedResourceEntity;
     }
 
@@ -200,6 +211,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
+        log.info("Update resource by name: {} and new resource: {} and email: {} was started", name, entity, mail);
         final ResourceEntity existingResource = getResource(name, entity.getType());
         final UserEntity userEntity = userService.findActiveUserByEmail(mail);
 
@@ -209,9 +221,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
 
-        final ResourceLogEntity log = createResourceLogEntry(existingResource, userEntity);
-        existingResource.getResourceLogs().add(log);
-
+        final ResourceLogEntity logEntity = createResourceLogEntry(existingResource, userEntity);
+        existingResource.getResourceLogs().add(logEntity);
+        log.info("Update resource by name: {} and new resource: {} and email: {} was finished successfully", name, entity, mail);
         return resourceRepository.save(existingResource);
     }
 
@@ -219,6 +231,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity applyRole(final String resourceName, final ResourceTypeEnum resourceType,
                                     final String roleName,
                                     final List<String> permissions) {
+        log.info("Apply resource roles by name: {} and type: {} and roleName: {} and permissions: {} was started", resourceName, resourceType, roleName, permissions);
         final ResourceEntity resourceEntity = getResource(resourceName, resourceType);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, resourceEntity);
@@ -243,11 +256,14 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         slaveRoleEntity.getResources().add(resourceEntity);
 
         resourceEntity.getAppliedRoles().add(slaveRoleEntity);
-        return resourceRepository.save(resourceEntity);
+        final ResourceEntity savedResource = resourceRepository.save(resourceEntity);
+        log.info("Apply resource roles by name: {} and type: {} and roleName: {} and permissions: {} was finished successfully", resourceName, resourceType, roleName, permissions);
+        return savedResource;
     }
 
     @Override
     public ResourceEntity detachRole(final String name, final ResourceTypeEnum type, final String roleName) {
+        log.info("Detach role by resourceName: {} and type: {} and roleName: {} was started", name, type, roleName);
         final ResourceEntity resourceEntity = getResource(name, type);
         final RoleEntity roleEntity = roleService.getSlaveRole(roleName, resourceEntity);
 
@@ -257,18 +273,24 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         resourceEntity.getAppliedRoles().remove(roleEntity);
         roleService.delete(roleEntity);
-        return resourceRepository.save(resourceEntity);
+        final ResourceEntity savedResourceEntity = resourceRepository.save(resourceEntity);
+        log.info("Detach role by resourceName: {} and type: {} and roleName: {} was finished successfully", name, type, roleName);
+        return savedResourceEntity;
     }
 
     @Override
     public Page<RoleEntity> getRoles(final Pageable pageable, final String resourceName, final ResourceTypeEnum type,
                                      final RoleFilter roleFilter) {
+        log.info("Ger resource roles by resourceName: {} and type: {} and filter: {} was started", resourceName, type, roleFilter);
         final ResourceEntity resourceEntity = getResource(resourceName, type);
-        return roleService.getSlaveRolesByResource(pageable, roleFilter, resourceEntity);
+        final Page<RoleEntity> roleEntities = roleService.getSlaveRolesByResource(pageable, roleFilter, resourceEntity);
+        log.info("Ger resource roles by resourceName: {} and type: {} and filter: {} was finished successfully", resourceName, type, roleFilter);
+        return roleEntities;
     }
 
     @Override
     public Page<ResourceEntity> list(final Pageable pageable, final ResourceFilter filter, final String searchParam) {
+        log.info("Get list resources by filter: {} and searchParam: {} was started", filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -287,11 +309,13 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
-        return StringUtils.isEmpty(searchParam)
+        final Page<ResourceEntity> resourceEntities = StringUtils.isEmpty(searchParam)
                 ? resourceRepository
                 .filter(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
                 : resourceRepository.search(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate,
                 modifiedOnEndDate, searchParam.toLowerCase());
+        log.info("Get list resources by filter: {} and searchParam: {} was finished successfully", filter, searchParam);
+        return resourceEntities;
     }
 
     @Override
@@ -301,6 +325,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
+        log.info("Delete resource by name: {} and type: {} and email: {} was started", name, type, mail);
         final ResourceEntity deletingResourceEntity = getResource(name, type);
 
         if (hasOutboundDependencies(deletingResourceEntity.getId())) {
@@ -308,7 +333,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         }
 
         resourceRepository.delete(deletingResourceEntity);
-
+        log.info("Delete resource by name: {} and type: {} and email: {} was finished successfully", name, type, mail);
         return deletingResourceEntity;
     }
 

@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 
+import java.util.Arrays;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.PrePersist;
@@ -176,5 +177,20 @@ public class ResourceFileEntity {
 
     public void setStage(StageEntity stage) {
         this.stage = stage;
+    }
+
+    @Override
+    public String toString() {
+        return "ResourceFileEntity{" +
+                "id=" + id +
+                ", version=" + version +
+                ", fileName='" + fileName + '\'' +
+                ", comment='" + comment + '\'' +
+                ", deployed=" + deployed +
+                ", createdOn=" + createdOn +
+                ", modifiedOn=" + modifiedOn +
+                ", uuid='" + uuid + '\'' +
+                ", fontName='" + fontName + '\'' +
+                '}';
     }
 }

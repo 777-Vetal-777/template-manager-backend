@@ -49,6 +49,7 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
 
     @Override
     public ByteArrayOutputStream generatePreview(final String templateName, final String dataSampleName) {
+        log.info("Generate template preview by template name: {} and data sample name: {} was started", templateName, dataSampleName);
         final TemplateEntity templateEntity = getTemplateByName(templateName);
 
         //get data sample file by template id to transfer it to SDK
@@ -72,6 +73,7 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
                 return pdfOutputStream;
             } finally {
                 deleteDirectory(temporaryPreviewFolder);
+                log.info("Generate template preview by template name: {} and data sample name: {} was finished successfully", templateName, dataSampleName);
             }
         } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             log.error(ex);

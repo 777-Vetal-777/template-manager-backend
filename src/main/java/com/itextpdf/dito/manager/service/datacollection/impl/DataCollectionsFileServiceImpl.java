@@ -9,6 +9,8 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class DataCollectionsFileServiceImpl extends AbstractService implements DataCollectionFileService {
+    private static final Logger log = LogManager.getLogger(DataCollectionsFileServiceImpl.class);
 
     private final DataCollectionService dataCollectionService;
     private final DataCollectionFileRepository dataCollectionFileRepository;
@@ -42,6 +45,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
 
     @Override
     public Page<FileVersionModel> list(final Pageable pageable, final String name, final VersionFilter filter, final String searchParam) {
+        log.info("Get dataCollection versions by name: {} and filter: {} and searchParam: {} was started", name, filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final DataCollectionEntity dataCollection = dataCollectionService.get(name);
 
@@ -61,9 +65,11 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
             createdOnStartDate = getStartDateFromRange(createdOnDateRange);
             createdOnEndDate = getEndDateFromRange(createdOnDateRange);
         }
-        return StringUtils.isEmpty(searchParam)
+        final Page<FileVersionModel> versions = StringUtils.isEmpty(searchParam)
                 ? dataCollectionFileRepository.filter(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment)
                 : dataCollectionFileRepository.search(pageWithSort, dataCollection.getId(), version, createdBy, createdOnStartDate, createdOnEndDate, stageName, comment, searchParam.toLowerCase());
+        log.info("Get dataCollection versions by name: {} and filter: {} and searchParam: {} was finished successfully", name, filter, searchParam);
+        return versions;
     }
 
     private Pageable updateSort(final Pageable pageable) {

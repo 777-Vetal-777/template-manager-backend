@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.repository.template.TemplatePermissionRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +22,7 @@ import static com.itextpdf.dito.manager.repository.template.TemplatePermissionRe
 
 @Service
 public class TemplatePermissionServiceImpl extends AbstractService implements TemplatePermissionService {
-
+    private static final Logger log = LogManager.getLogger(TemplatePermissionServiceImpl.class);
     private final TemplatePermissionRepository templatePermissionRepository;
 
     public TemplatePermissionServiceImpl(final TemplatePermissionRepository templatePermissionRepository) {
@@ -34,6 +36,7 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
 
     @Override
     public Page<TemplatePermissionsModel> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter, final String search) {
+        log.info("Get roles by templateName: {} and filter: {} and search was started", name, filter, search);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getName());
@@ -47,11 +50,13 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
 
         final Pageable pageWithSort = updateSort(pageable);
 
-        return StringUtils.isEmpty(search)
+        final Page<TemplatePermissionsModel> permissionsModels = StringUtils.isEmpty(search)
                 ? templatePermissionRepository.filter(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionStandardFilter, rollbackVersionStandardFilter, previewTemplateFilter, exportTemplateFilter,
                 createNewTemplateVersionCompositionFilter, rollbackVersionCompositionFilter)
                 : templatePermissionRepository.search(pageWithSort, name, roleNameFilter, editTemplateMetadataFilter, createNewTemplateVersionStandardFilter, rollbackVersionStandardFilter, previewTemplateFilter, exportTemplateFilter,
                 createNewTemplateVersionCompositionFilter, rollbackVersionCompositionFilter, search.toLowerCase());
+        log.info("Get roles by templateName: {} and filter: {} and search was finished successfully", name, filter, search);
+        return permissionsModels;
     }
 
     private Pageable updateSort(final Pageable pageable) {

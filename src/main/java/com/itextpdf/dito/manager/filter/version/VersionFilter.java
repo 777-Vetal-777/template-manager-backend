@@ -48,4 +48,15 @@ public class VersionFilter {
     public void setStage(String stage) {
         this.stage = stage;
     }
+
+    @Override
+    public String toString() {
+        return "VersionFilter{" +
+                "version=" + version +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", modifiedOn=" + modifiedOn +
+                ", comment='" + comment + '\'' +
+                ", stage='" + stage + '\'' +
+                '}';
+    }
 }

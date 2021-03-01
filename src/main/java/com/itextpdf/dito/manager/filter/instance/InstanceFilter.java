@@ -50,4 +50,15 @@ public class InstanceFilter {
     public void setStage(List<String> stage) {
         this.stage = stage;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceFilter{" +
+                "name='" + name + '\'' +
+                ", socket='" + socket + '\'' +
+                ", createdBy='" + createdBy + '\'' +
+                ", stage=" + stage +
+                ", createdOn=" + createdOn +
+                '}';
+    }
 }

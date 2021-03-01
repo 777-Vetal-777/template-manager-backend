@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -200,4 +201,15 @@ public class TemplateFileEntity {
         return compositions;
     }
 
+    @Override
+    public String toString() {
+        return "TemplateFileEntity{" +
+                "id=" + id +
+                ", comment='" + comment + '\'' +
+                ", version=" + version +
+                ", createdOn=" + createdOn +
+                ", modifiedOn=" + modifiedOn +
+                ", deployed=" + deployed +
+                '}';
+    }
 }

@@ -10,6 +10,8 @@ import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.resource.ResourceVersionsService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromLong;
 
 @Service
 public class ResourceVersionsServiceImpl extends AbstractService implements ResourceVersionsService {
+    private static final Logger log = LogManager.getLogger(ResourceVersionsServiceImpl.class);
     private final ResourceFileRepository resourceFileRepository;
     private final ResourceService resourceService;
 
@@ -40,6 +43,7 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
 
     @Override
     public Page<FileVersionModel> list(final Pageable pageable, final String name, final ResourceTypeEnum type, final VersionFilter filter, final String searchParam) {
+        log.info("Get list resource versions by resourceName: {} and type: {} and filter: {} and searchParam: {} was started", name, type, filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final ResourceEntity resource = resourceService.getResource(name, type);
 
@@ -59,18 +63,24 @@ public class ResourceVersionsServiceImpl extends AbstractService implements Reso
             modifiedOnStartDate = getStartDateFromRange(modifiedOnDateRange);
             modifiedOnEndDate = getEndDateFromRange(modifiedOnDateRange);
         }
-        return StringUtils.isEmpty(searchParam)
+        final Page<FileVersionModel> fileVersionModels = StringUtils.isEmpty(searchParam)
                 ? resourceFileRepository.filter(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName)
                 : resourceFileRepository.search(pageWithSort, resource.getId(), version, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, comment, stageName, searchParam.toLowerCase());
+
+        log.info("Get list resource versions by resourceName: {} and type: {} and filter: {} and searchParam: {} was finished successfully", name, type, filter, searchParam);
+        return fileVersionModels;
     }
 
     @Override
     public ResourceEntity rollbackVersion(final String resourceName, final ResourceTypeEnum resourceType, final String userEmail, final Long version) {
+        log.info("Rollback resource version by resourceName: {} and type: {} and email: {} and version: {} was started", resourceName, resourceType, userEmail, version);
         final ResourceEntity resourceEntity = resourceService.getResource(resourceName, resourceType);
         final ResourceFileEntity resourceFileEntityToBeRevertedTo = resourceFileRepository.findByVersionAndResource(version, resourceEntity)
                 .orElseThrow(() -> new ResourceVersionNotFoundException(String.valueOf(version)));
         final String comment = new StringBuilder().append("Rollback to version: ").append(resourceFileEntityToBeRevertedTo.getVersion()).toString();
-        return resourceService.createNewVersion(resourceName, resourceType, resourceFileEntityToBeRevertedTo.getFile(), resourceFileEntityToBeRevertedTo.getFileName(), userEmail, comment);
+        final ResourceEntity savedResourceEntity = resourceService.createNewVersion(resourceName, resourceType, resourceFileEntityToBeRevertedTo.getFile(), resourceFileEntityToBeRevertedTo.getFileName(), userEmail, comment);
+        log.info("Rollback resource version by resourceName: {} and type: {} and email: {} and version: {} was finished successfully", resourceName, resourceType, userEmail, version);
+        return savedResourceEntity;
     }
 
     private Pageable updateSort(final Pageable pageable) {

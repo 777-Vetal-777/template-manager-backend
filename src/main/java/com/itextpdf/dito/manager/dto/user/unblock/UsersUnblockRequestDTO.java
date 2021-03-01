@@ -14,4 +14,11 @@ public class UsersUnblockRequestDTO {
     public void setUserEmails(List<String> userEmails) {
         this.userEmails = userEmails;
     }
+
+    @Override
+    public String toString() {
+        return "UsersUnblockRequestDTO{" +
+                "userEmails=" + userEmails +
+                '}';
+    }
 }

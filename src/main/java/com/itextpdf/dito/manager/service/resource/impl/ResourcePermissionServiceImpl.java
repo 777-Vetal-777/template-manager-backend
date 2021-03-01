@@ -9,6 +9,8 @@ import com.itextpdf.dito.manager.repository.resource.ResourcePermissionRepositor
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,7 @@ import static com.itextpdf.dito.manager.repository.resource.ResourcePermissionRe
 
 @Service
 public class ResourcePermissionServiceImpl extends AbstractService implements ResourcePermissionService {
+    private static final Logger log = LogManager.getLogger(ResourcePermissionServiceImpl.class);
 
     private ResourcePermissionRepository resourcePermissionRepository;
 
@@ -43,6 +46,7 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
     @Override
     public Page<ResourcePermissionModel> getRoles(final Pageable pageable, final String name, final ResourceTypeEnum type,
                                                   final ResourcePermissionFilter filter, final String search) {
+        log.info("Get roles by name: {} and type: {} and filter: {} and searchParam: {} was started", name, type, filter, search);
         final ResourceEntity resourceEntity = resourceService.getResource(name, type);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getName());
@@ -61,8 +65,7 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
 
 
         final Pageable pageWithSort = updateSort(pageable);
-
-        return StringUtils.isEmpty(search)
+        final Page<ResourcePermissionModel> resourcePermissionModels = StringUtils.isEmpty(search)
                 ? resourcePermissionRepository.filter(pageWithSort, resourceEntity.getId(), roleNameFilter, editResourceMetadataImage,
                 createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, editResourceMetadataFont, createNewVersionResourceFont,
                 rollBackResourceFont, deleteResourceFont, editResourceMetadataStylesheet, createNewVersionResourceStylesheet, rollBackResourceStylesheet, deleteResourceStylesheet)
@@ -70,6 +73,9 @@ public class ResourcePermissionServiceImpl extends AbstractService implements Re
                 createNewVersionResourceImage, rollBackResourceImage, deleteResourceImage, editResourceMetadataFont, createNewVersionResourceFont,
                 rollBackResourceFont, deleteResourceFont, editResourceMetadataStylesheet, createNewVersionResourceStylesheet, rollBackResourceStylesheet, deleteResourceStylesheet,
                 search.toLowerCase());
+        log.info("Get roles by name: {} and type: {} and filter: {} and searchParam: {} was finished successfully", name, type, filter, search);
+
+        return resourcePermissionModels;
     }
 
     private Pageable updateSort(final Pageable pageable) {

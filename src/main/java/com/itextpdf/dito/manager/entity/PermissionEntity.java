@@ -55,4 +55,13 @@ public class PermissionEntity {
     public void setOptionalForCustomRole(Boolean optionalForCustomRole) {
         this.optionalForCustomRole = optionalForCustomRole;
     }
+
+    @Override
+    public String toString() {
+        return "PermissionEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", optionalForCustomRole=" + optionalForCustomRole +
+                '}';
+    }
 }

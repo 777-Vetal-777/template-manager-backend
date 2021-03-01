@@ -23,4 +23,12 @@ public class InstanceRememberRequestDTO {
     public void setSocket(String socket) {
         this.socket = socket;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceRememberRequestDTO{" +
+                "name='" + name + '\'' +
+                ", socket='" + socket + '\'' +
+                '}';
+    }
 }

@@ -25,4 +25,12 @@ public class RoleCreateRequestDTO {
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
     }
+
+    @Override
+    public String toString() {
+        return "RoleCreateRequestDTO{" +
+                "name='" + name + '\'' +
+                ", permissions=" + permissions +
+                '}';
+    }
 }

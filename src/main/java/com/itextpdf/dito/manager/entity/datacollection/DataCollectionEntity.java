@@ -205,4 +205,16 @@ public class DataCollectionEntity {
             Collection<DataSampleEntity> dataSamples) {
         this.dataSamples = dataSamples;
     }
+
+    @Override
+    public String toString() {
+        return "DataCollectionEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", type=" + type +
+                ", modifiedOn=" + modifiedOn +
+                ", createdOn=" + createdOn +
+                '}';
+    }
 }

@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Arrays;
 import java.util.Date;
 
 @Entity
@@ -94,5 +95,16 @@ public class DataSampleFileEntity {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    @Override
+    public String toString() {
+        return "DataSampleFileEntity{" +
+                "id=" + id +
+                ", comment='" + comment + '\'' +
+                ", version=" + version +
+                ", createdOn=" + createdOn +
+                ", fileName='" + fileName + '\'' +
+                '}';
     }
 }

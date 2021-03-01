@@ -20,27 +20,35 @@ import java.util.stream.Collectors;
 import com.itextpdf.dito.manager.model.resource.ResourcePermissionModel;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PermissionMapperImpl implements PermissionMapper {
+    private static final Logger log = LogManager.getLogger(PermissionMapperImpl.class);
+
     @Override
     public PermissionDTO map(final PermissionEntity entity) {
+        log.info("Convert permissionEntity: {} to dto was started", entity.getId());
         final PermissionDTO result = new PermissionDTO();
 
         result.setName(entity.getName());
         result.setOptionalForCustomRole(entity.getOptionalForCustomRole());
+        log.info("Convert permissionEntity: {} to dto was finished successfully", entity.getId());
 
         return result;
     }
 
     @Override
     public PermissionEntity map(final PermissionDTO dto) {
+        log.info("Convert {} to entity was started", dto);
         final PermissionEntity result = new PermissionEntity();
 
         result.setName(dto.getName());
         result.setOptionalForCustomRole(dto.getOptionalForCustomRole());
+        log.info("Convert {} to entity was finished successfully", dto);
 
         return result;
     }
@@ -68,6 +76,7 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     private TemplatePermissionDTO mapTemplatePermission(final TemplatePermissionsModel entity) {
+        log.info("Convert {} to templatePermission dto was started", entity);
          TemplatePermissionDTO templatePermissionDTO = null;
         if(entity.getTemplateType().equals("STANDARD")||entity.getTemplateType().equals("HEADER") || entity.getTemplateType().equals("FOOTER")){
             templatePermissionDTO = new TemplatePermissionStandardDTO();
@@ -88,6 +97,7 @@ public class PermissionMapperImpl implements PermissionMapper {
 			templatePermissionDTO.setName(entity.getName());
 			templatePermissionDTO.setType(entity.getType());
 		}
+        log.info("Convert {} to templatePermission dto was finished successfully", entity);
         return templatePermissionDTO;
     }
 
@@ -103,6 +113,7 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     private ResourcePermissionDTO mapResourcePermission(final ResourcePermissionModel entity) {
+        log.info("Convert {} to resourcePermission dto was started", entity);
         ResourcePermissionDTO permissionDTO = null;
         if (entity.getResourceType().equals("IMAGE")) {
             permissionDTO = new ResourcePermissionImageDTO();
@@ -127,10 +138,12 @@ public class PermissionMapperImpl implements PermissionMapper {
         	permissionDTO.setName(entity.getName());
         	permissionDTO.setType(entity.getType());
         }
+        log.info("Convert {} to resourcePermission dto was finished successfully", entity);
         return permissionDTO;
     }
 
     private DataCollectionPermissionDTO mapDataCollectionPermission(final DataCollectionPermissionsModel entity) {
+        log.info("Convert {} to dataCollectionPermission dto was started", entity);
         final DataCollectionPermissionDTO permissionDTO = new DataCollectionPermissionDTO();
         permissionDTO.setName(entity.getName());
         permissionDTO.setType(entity.getType());
@@ -142,6 +155,7 @@ public class PermissionMapperImpl implements PermissionMapper {
         permissionDTO.setDeleteDataSample(entity.getE7_US50_DELETE_DATA_SAMPLE());
         permissionDTO.setCreateNewVersionOfDataSample(entity.getE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE());
         permissionDTO.setEditSampleMetadata(entity.getE7_US47_EDIT_SAMPLE_METADATA());
+        log.info("Convert {} to dataCollectionPermission dto was finished successfully", entity);
         return permissionDTO;
     }
 }

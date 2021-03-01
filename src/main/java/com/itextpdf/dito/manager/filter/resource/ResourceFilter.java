@@ -50,4 +50,15 @@ public class ResourceFilter {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    @Override
+    public String toString() {
+        return "ResourceFilter{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", modifiedOn=" + modifiedOn +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
 }

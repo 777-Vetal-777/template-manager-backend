@@ -28,4 +28,12 @@ public class StageDTO {
     public void setInstances(List<InstanceDTO> instances) {
         this.instances = instances;
     }
+
+    @Override
+    public String toString() {
+        return "StageDTO{" +
+                "name='" + name + '\'' +
+                ", instances=" + instances +
+                '}';
+    }
 }

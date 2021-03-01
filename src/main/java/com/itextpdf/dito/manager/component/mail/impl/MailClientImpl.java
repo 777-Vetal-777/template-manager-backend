@@ -72,9 +72,11 @@ public class MailClientImpl implements MailClient {
 
     @Override
     public void sendRegistrationMessage(final UserEntity savedUser, final String password, final UserEntity currentUser) {
+        log.info("Send registration message for user: {} was started", savedUser);
         final String mailBody = generateRegistrationHtml(savedUser, password, currentUser);
         try {
             send(username, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
+            log.info("Send registration message for user: {} was finished successfully", savedUser);
         } catch (Exception ex) {
             throw new MailingException(ex.getMessage());
         }
@@ -86,21 +88,26 @@ public class MailClientImpl implements MailClient {
         try {
             send(username, savedUser.getEmail(), MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT, mailBody);
         } catch (Exception ex) {
+            log.info(ex.getMessage());
             throw new MailingException(ex.getMessage());
         }
     }
 
     @Override
     public void sendResetMessage(final UserEntity userEntity, final String token) {
+        log.info("Sen reset password for user: {} was started", userEntity);
         final String mailBody = generateResetPasswordHtml(userEntity, token);
         try {
             send(username, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
+            log.info("Sen reset password for user: {} was finished successfully", userEntity);
         } catch (Exception e) {
+            log.info(e.getMessage());
             throw new MailingException(e.getMessage());
         }
     }
 
     private String generateResetPasswordHtml(final UserEntity userEntity, final String token) {
+        log.info("Generate reset password html for user: {} was started", userEntity);
         final List<String> list = readFile("templates/resetPasswordEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
         list.set(35, String.format(list.get(35), FRONT_URL.concat("/forgot_password?token=").concat(token)));
@@ -125,10 +132,12 @@ public class MailClientImpl implements MailClient {
         for (final String str2 : list) {
             stringBuilder.append(str2);
         }
+        log.info("Generate reset password for user: {} was finished successfully", userEntity);
         return stringBuilder.toString();
     }
 
     private String generateRegistrationHtml(final UserEntity userEntity, final String password, final UserEntity currentUser) {
+        log.info("Generate registration html for user: {} was started", userEntity);
         final List<String> list = readFile("templates/registrationEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
         list.set(29, String.format(list.get(29), currentUser.getFirstName() + " " + currentUser.getLastName()));
@@ -141,10 +150,12 @@ public class MailClientImpl implements MailClient {
         for (final String str2 : list) {
             stringBuilder.append(str2);
         }
+        log.info("Generate registration html for user: {} was finished successfully", userEntity);
         return stringBuilder.toString();
     }
 
     private List<String> readFile(final String file) {
+        log.info("Read file: {} was started", file);
         final InputStreamReader inputStreamReader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(file));
         final List<String> list = new ArrayList<>();
         String line;
@@ -155,11 +166,13 @@ public class MailClientImpl implements MailClient {
         } catch (IOException e) {
             log.error("Failed to read html {}", file);
         }
+        log.info("Read file: {} was finished successfully", file);
         return list;
     }
 
     private void send(final String from, final String to, final String subject, final String text)
             throws MessagingException {
+        log.info("Send message from: {} to {} was started", from, to);
         final MimeMessage mail = client.createMimeMessage();
         mail.setSubject(subject);
         final MimeMessageHelper helper = new MimeMessageHelper(mail);
@@ -167,6 +180,7 @@ public class MailClientImpl implements MailClient {
         helper.setTo(to);
         helper.setText(text, true);
         client.send(mail);
+        log.info("Send message from: {} to {} was finished successfully", from, to);
     }
 
     private JavaMailSenderImpl buildMailClient() {

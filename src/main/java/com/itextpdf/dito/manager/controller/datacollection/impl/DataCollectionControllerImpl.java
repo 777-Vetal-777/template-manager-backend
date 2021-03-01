@@ -37,6 +37,8 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleFileService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +66,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final FileVersionMapper fileVersionMapper;
     private final PermissionHandler permissionHandler;
     private final Long sizeJsonLimit;
+    private static final Logger log = LogManager.getLogger(DataCollectionControllerImpl.class);
 
     public DataCollectionControllerImpl(final DataCollectionService dataCollectionService,
                                         final DataCollectionMapper dataCollectionMapper,
@@ -95,46 +98,57 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> create(final String name, final String dataCollectionType, final MultipartFile multipartFile, final Principal principal) {
+        log.info("Started creating new dataCollection by name: {} and type: {}", name, dataCollectionType);
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
+        log.info("Creating new dataCollection by name: {} and type: {} is finished successfully", name, dataCollectionType);
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<List<DependencyDTO>> listDependencies(final String name) {
+        log.info("Started getting list of Dependencies by name: {}", name);
         final String decodedName = decodeBase64(name);
         final List<DependencyDTO> dependencyDTOs = dependencyMapper.map(dataCollectionDependencyService.list(decodedName));
+        log.info(String.format("get listOfDependencies by name: {} is finished successfully", name));
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataCollectionDTO> create(final Principal principal, final String name, final String dataCollectionType, final MultipartFile multipartFile, final String comment) {
+        log.info("Started creating new version of dataCollection with name: {}, and type: {}", name, dataCollectionType);
         final DataCollectionType collectionType = getDataCollectionTypeFromPath(dataCollectionType);
         final byte[] data = getBytesFromMultipart(multipartFile);
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.createNewVersion(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName(), comment);
+        log.info("Create new version of dataCollection with name: {} is finished successfully");
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Page<DataCollectionDTO>> list(final Pageable pageable, final DataCollectionFilter filter,
                                                         final String searchParam) {
-
+        log.info("Get list of dataCollections with params: {} and searchParam: {} was started", filter, searchParam);
         final Page<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(pageable, filter, searchParam);
+        log.info("Get list of dataCollections with params: {} and searchParam: {} was finished successfully", filter, searchParam);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DataCollectionDTO>> list(DataCollectionFilter filter, String searchParam) {
+        log.info("Started getting list of dataCollections with params: {} and searchParam: {}", filter, searchParam);
         final List<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(filter, searchParam);
+        log.info("Getting list of dataCollections with params: {} and searchParam: {} is finished successfully", filter, searchParam);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataCollectionDTO> get(final String name, final Principal principal) {
+        log.info("Get dataCollection by name: {} was started", name);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodeBase64(name));
+        log.info("Get dataCollection by name: {} was finished successfully", name);
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.OK);
     }
 
@@ -142,15 +156,18 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataCollectionDTO> update(final String name,
                                                     final @Valid DataCollectionUpdateRequestDTO dataCollectionUpdateRequestDTO,
                                                     final Principal principal) {
+        log.info("Update dataCollection by name: {} and params: {} was started", name, dataCollectionUpdateRequestDTO);
         final DataCollectionEntity entity = dataCollectionService.update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),
                 principal.getName());
-
+        log.info("Update dataCollection by name: {} and params: {} was finished successfully", name, dataCollectionUpdateRequestDTO);
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(entity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> delete(final String name, final Principal principal) {
+        log.info("Delete by name: {} was started", name);
         dataCollectionService.delete(decodeBase64(name), principal.getName());
+        log.info("Delete by name: {} was finished successfully", name);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -159,8 +176,10 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                                             final String name,
                                                             final VersionFilter versionFilter,
                                                             final String searchParam) {
+        log.info("Get dataCollection versions by name: {} and params: {} was started", name, versionFilter);
         final String dataCollectionName = decodeBase64(name);
         final Page<FileVersionModel> dataCollectionVersionEntities = dataCollectionFileService.list(pageable, dataCollectionName, versionFilter, searchParam);
+        log.info("Get dataCollection versions by name: {} and params: {} was finished successfully", name, versionFilter);
         return new ResponseEntity<>(fileVersionMapper.map(dataCollectionVersionEntities), HttpStatus.OK);
     }
 
@@ -176,31 +195,39 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                                                 final String name,
                                                                 final DependencyFilter filter,
                                                                 final String searchParam) {
+        log.info("Get list dependencies by name: {} and params: {} was started", name, filter);
         final String dataCollectionName = decodeBase64(name);
         final Page<DependencyModel> result = dataCollectionDependencyService.list(pageable, dataCollectionName, filter, searchParam);
+        log.info("Get list dependencies by name: {} and params: {} was finished successfully", name, filter);
         return new ResponseEntity<>(dependencyMapper.map(result), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Page<DataCollectionPermissionDTO>> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter, final String searchParam) {
+        log.info("Get list dataCollection's roles by dataCollectionName: {} and params: {} was started", name, filter);
         final Page<DataCollectionPermissionsModel> roleEntities = dataCollectionPermissionService
                 .getRoles(pageable, decodeBase64(name), filter, searchParam);
+        log.info("Get list dataCollection's roles by dataCollectionName: {} and params: {} was finished successfully", name, filter);
         return new ResponseEntity<>(permissionMapper.mapDataCollectionPermissions(roleEntities), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataCollectionDTO> applyRole(final String name,
                                                        @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+        log.info("ApplyRole by dataCollectionName: {} and newRoleParams: {} was started", name, applyRoleRequestDTO);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
                 .applyRole(decodeBase64(name), applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
+        log.info("ApplyRole by dataCollectionName: {} and newRoleParams: {} was finished successfully", name, applyRoleRequestDTO);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataCollectionDTO> deleteRole(final String name, final String roleName) {
+        log.info("Delete role by dataCollectionName: {} and roleName: {} was started", name, roleName);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
                 .detachRole(decodeBase64(name), decodeBase64(roleName));
+        log.info("Delete role by dataCollectionName: {} and roleName: {} was finished successfully", name, roleName);
         return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
 
     }
@@ -213,25 +240,31 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataSampleDTO> create(final String dataCollectionName, final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+        log.info("Create dataSample by dataCollectionName {} and dataSampleParams: {} was started", dataCollectionName, dataSampleCreateRequestDTO);
         final String dataSampleName = dataSampleCreateRequestDTO.getName();
         final String fileName = dataSampleCreateRequestDTO.getFileName();
         final String data = dataSampleCreateRequestDTO.getSample();
         final String comment = dataSampleCreateRequestDTO.getComment();
         final DataSampleEntity dataSampleEntity = dataCollectionService.create(decodeBase64(dataCollectionName), dataSampleName, fileName, data, comment, principal.getName());
+        log.info("Create dataSample by dataCollectionName {} and dataSampleParams: {} was finished successfully", dataCollectionName, dataSampleCreateRequestDTO);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Page<DataSampleDTO>> listDataSamples(final String dataCollectionName, final Pageable pageable,
                                                                final DataSampleFilter filter, final String searchParam) {
+        log.info("Get list dataSamples by dataCollectionName: {} and filter: {} and searchParam: {} was started", dataCollectionName, filter, searchParam);
         final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
+        log.info("Get list dataSamples by dataCollectionName: {} and filter: {} and searchParam: {} was finished successfully", dataCollectionName, filter, searchParam);
         return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(pageable, dataCollection.getId(), filter, searchParam)),
                 HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DataSampleDTO>> listDataSamples(final String dataCollectionName) {
+        log.info("Get list dataSamples by dataCollectionName: {} was started", dataCollectionName);
         final DataCollectionEntity dataCollection = dataCollectionService.get(decodeBase64(dataCollectionName));
+        log.info("Get list dataSamples by dataCollectionName: {} was finished successfully", dataCollectionName);
         return new ResponseEntity<>(dataSampleMapper.map(dataSampleService.list(dataCollection.getId())),
                 HttpStatus.OK);
 
@@ -239,53 +272,68 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<List<DataSampleDTO>> listDataSamplesByTemplateName(final String templateName) {
+        log.info("Get list dataSamples by templateName: {} was started", templateName);
         final List<DataSampleEntity> listByTemplateName = dataSampleService.getListByTemplateName(decodeBase64(templateName));
+        log.info("Get list dataSamples by templateName: {} was finished successfully", templateName);
         return new ResponseEntity<>(dataSampleMapper.map(listByTemplateName), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {
-        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.get(decodeBase64(dataSampleName))),
+        log.info("Get dataSample by dataCollectionName: {} and dataSampleName: {} was started", dataCollectionName, dataSampleName);
+        final DataSampleEntity dataSampleEntity = dataSampleService.get(decodeBase64(dataSampleName));
+        log.info("Get dataSample by dataCollectionName: {} and dataSampleName: {} was finished successfully", dataCollectionName, dataSampleName);
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity),
                 HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName,
                                                      final List<String> dataSampleNames, final Principal principal) {
+        log.info("Delete list dataSamples by dataSamplesNames: {} was started", dataSampleNames);
         dataSampleService.delete(dataSampleNames);
+        log.info("Delete list dataSamples by dataSamplesNames: {} was finished successfully", dataSampleNames);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> deleteAllDataSamples(final String dataCollectionName, final Principal principal) {
+        log.info("Delete all dataSamples by dataCollectionName: {} was started", dataCollectionName);
         dataSampleService.delete(dataCollectionService.get(decodeBase64(dataCollectionName)));
+        log.info("Delete all dataSamples by dataCollectionName: {} was finished successfully", dataCollectionName);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataSampleDTO> setDataSampleAsDefault(final String dataCollectionName, final String dataSampleName,
                                                                 final Principal principal) {
-        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleService.setAsDefault(decodeBase64(dataSampleName))), HttpStatus.OK);
+        log.info("Set dataSample as default by dataCollectionName: {} and dataSampleName: {} was started", dataCollectionName, dataSampleName);
+        final DataSampleEntity dataSampleEntity = dataSampleService.setAsDefault(decodeBase64(dataSampleName));
+        log.info("Set dataSample as default by dataCollectionName: {} and dataSampleName: {} was finished successfully", dataCollectionName, dataSampleName);
+        return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataSampleDTO> updateDataSample(final String dataCollectionName, final String dataSampleName,
                                                           @Valid final DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, final Principal principal) {
+        log.info("Update dataSample by dataSampleName: {} and dataSampleUpdateRequestDTO: {} was started", dataSampleName, dataSampleUpdateRequestDTO);
         final DataSampleEntity entity = dataSampleService.update(decodeBase64(dataSampleName), dataSampleMapper.map(dataSampleUpdateRequestDTO),
                 principal.getName());
-
+        log.info("Update dataSample by dataSampleName: {} and dataSampleUpdateRequestDTO: {} was finished successfully", dataSampleName, dataSampleUpdateRequestDTO);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataSampleDTO> createDataSampleNewVersion(final String dataCollectionName,
                                                                     final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+        log.info("Create new version of dataSample: {} was started", dataSampleCreateRequestDTO);
         final String dataSampleName = dataSampleCreateRequestDTO.getName();
         final String fileName = dataSampleCreateRequestDTO.getFileName();
         final String data = dataSampleCreateRequestDTO.getSample();
         final String comment = dataSampleCreateRequestDTO.getComment();
         final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(dataSampleName, data, fileName,
                 principal.getName(), comment);
+        log.info("Create new version of dataSample: {} was finished successfully", dataSampleCreateRequestDTO);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
     }
 
@@ -293,16 +341,19 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<Page<FileVersionDTO>> getDataSampleVersions(final Pageable pageable,
                                                                       final String dataCollectionName, final String name, final VersionFilter versionFilter,
                                                                       final String searchParam) {
+        log.info("Get dataSampleVersions by dataSampleName: {} and filter: {}", name, versionFilter);
         final String dataSampleName = decodeBase64(name);
         final Page<FileVersionModel> dataSampleVersionEntities = dataSampleFileService.list(pageable, dataSampleName,
                 versionFilter, searchParam);
-
+        log.info("Get dataSampleVersions by dataSampleName: {} and filter: {}", name, versionFilter);
         return new ResponseEntity<>(fileVersionMapper.map(dataSampleVersionEntities), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DataCollectionDTO> rollback(final Principal principal, final String name, final Long version) {
+        log.info("Rollback by dataCollectionName: {} and version: {} was started ", name, version);
         final DataCollectionEntity result = dataCollectionService.rollbackVersion(decodeBase64(name), version, principal.getName());
+        log.info("Rollback by dataCollectionName: {} and version: {} was finished successfully", name, version);
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(result), HttpStatus.OK);
     }
 }

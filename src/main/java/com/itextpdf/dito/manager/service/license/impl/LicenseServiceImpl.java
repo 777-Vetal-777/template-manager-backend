@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.service.license.impl;
 
 import java.io.ByteArrayInputStream;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -55,7 +54,7 @@ public class LicenseServiceImpl implements LicenseService {
 	public void checkDitoLicense(final byte[] data) throws DitoLicenseException{
 		DitoLicense.parseLicense(new ByteArrayInputStream(data));
 	}
-	
+
 	@Override
 	public LicenseEntity getWorkspaceLicense(WorkspaceEntity workspaceEntity) {
 		final LicenseEntity entity = licenseRepository.findByWorkspace(workspaceEntity)

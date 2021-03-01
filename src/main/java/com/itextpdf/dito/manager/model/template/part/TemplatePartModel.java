@@ -28,4 +28,13 @@ public class TemplatePartModel {
     public void setPartSettings(PartSettings partSettings) {
         this.partSettings = partSettings;
     }
+
+    @Override
+    public String toString() {
+        return "TemplatePartModel{" +
+                "templateName='" + templateName + '\'' +
+                ", condition='" + condition + '\'' +
+                ", partSettings=" + partSettings +
+                '}';
+    }
 }

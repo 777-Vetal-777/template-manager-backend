@@ -101,4 +101,19 @@ public class TemplateDTO {
     public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
         this.appliedRoles = appliedRoles;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateDTO{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", dataCollection='" + dataCollection + '\'' +
+                ", author='" + author + '\'' +
+                ", lastUpdate=" + lastUpdate +
+                ", version=" + version +
+                ", createdOn=" + createdOn +
+                ", createdBy='" + createdBy + '\'' +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
 }

@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsM
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionPermissionsRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermissionService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class DataCollectionPermissionServiceImpl extends AbstractService implements DataCollectionPermissionService {
-
+    private static final Logger log = LogManager.getLogger(DataCollectionPermissionServiceImpl.class);
     private final DataCollectionPermissionsRepository dataCollectionPermissionsRepository;
 
     public DataCollectionPermissionServiceImpl(final DataCollectionPermissionsRepository dataCollectionPermissionsRepository) {
@@ -32,6 +34,7 @@ public class DataCollectionPermissionServiceImpl extends AbstractService impleme
 
     @Override
     public Page<DataCollectionPermissionsModel> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter, final String search) {
+        log.info("Get roles by dataCollectionName: {} and filter: {} and searchParam: {} was started", name, filter, search);
         final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getName());
         final String editDataCollectionMetadata = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditDataCollectionMetadata());
         final String createNewVersionOfDataCollection = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewVersionOfDataCollection());
@@ -43,7 +46,7 @@ public class DataCollectionPermissionServiceImpl extends AbstractService impleme
         final String deleteDataSample = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getDeleteDataSample());
 
         final Pageable pageWithSort = updateSort(pageable);
-
+        log.info("Get roles by dataCollectionName: {} and filter: {} and searchParam: {} was finished successfully", name, filter, search);
         return StringUtils.isEmpty(search)
                 ? dataCollectionPermissionsRepository.filterPermissions(pageWithSort, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample)
                 : dataCollectionPermissionsRepository.searchPermissions(pageWithSort, name, roleNameFilter, editDataCollectionMetadata, createNewVersionOfDataCollection, rollbackOfTheDataCollection, deleteDataCollection, createNewDataSample, editSampleMetadata, createNewVersionOfDataSample, deleteDataSample, search.toLowerCase());

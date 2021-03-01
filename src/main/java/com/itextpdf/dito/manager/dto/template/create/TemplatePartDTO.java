@@ -38,4 +38,13 @@ public class TemplatePartDTO {
     public void setStartOnNewPage(Boolean startOnNewPage) {
         this.startOnNewPage = startOnNewPage;
     }
+
+    @Override
+    public String toString() {
+        return "TemplatePartDTO{" +
+                "name='" + name + '\'' +
+                ", condition='" + condition + '\'' +
+                ", startOnNewPage=" + startOnNewPage +
+                '}';
+    }
 }

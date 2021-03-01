@@ -41,4 +41,13 @@ public class DataSampleCreateRequestDTO {
 		this.comment = comment;
 	}
 
+	@Override
+	public String toString() {
+		return "DataSampleCreateRequestDTO{" +
+				"name='" + name + '\'' +
+				", fileName='" + fileName + '\'' +
+				", sample='" + sample + '\'' +
+				", comment='" + comment + '\'' +
+				'}';
+	}
 }

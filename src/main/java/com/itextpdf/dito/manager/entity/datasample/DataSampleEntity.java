@@ -185,4 +185,16 @@ public class DataSampleEntity {
     public UserEntity getModifiedBy() {
         return getLastDataSampleLog().getAuthor();
     }
+
+    @Override
+    public String toString() {
+        return "DataSampleEntity{" +
+                "Id=" + Id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", modifiedOn=" + modifiedOn +
+                ", createdOn=" + createdOn +
+                ", isDefault=" + isDefault +
+                '}';
+    }
 }

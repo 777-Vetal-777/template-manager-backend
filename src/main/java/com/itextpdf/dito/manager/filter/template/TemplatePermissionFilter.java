@@ -79,4 +79,18 @@ public class TemplatePermissionFilter {
     public List<Boolean> getRollbackVersionComposition() {
         return rollbackVersionComposition;
     }
+
+    @Override
+    public String toString() {
+        return "TemplatePermissionFilter{" +
+                "name=" + name +
+                ", editTemplateMetadata=" + editTemplateMetadata +
+                ", createNewTemplateVersionStandard=" + createNewTemplateVersionStandard +
+                ", rollbackVersionStandard=" + rollbackVersionStandard +
+                ", previewTemplate=" + previewTemplate +
+                ", exportTemplate=" + exportTemplate +
+                ", createNewTemplateVersionComposition=" + createNewTemplateVersionComposition +
+                ", rollbackVersionComposition=" + rollbackVersionComposition +
+                '}';
+    }
 }

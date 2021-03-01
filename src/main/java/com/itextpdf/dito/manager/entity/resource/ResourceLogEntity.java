@@ -61,4 +61,12 @@ public class ResourceLogEntity {
     public void setResource(ResourceEntity resource) {
         this.resource = resource;
     }
+
+    @Override
+    public String toString() {
+        return "ResourceLogEntity{" +
+                "id=" + id +
+                ", date=" + date +
+                '}';
+    }
 }

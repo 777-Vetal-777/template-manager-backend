@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
+import com.itextpdf.dito.manager.component.mapper.permission.impl.PermissionMapperImpl;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
@@ -22,11 +23,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceMapperImpl implements ResourceMapper {
+    private static final Logger log = LogManager.getLogger(ResourceMapperImpl.class);
     private final RoleMapper roleMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,6 +40,7 @@ public class ResourceMapperImpl implements ResourceMapper {
 
     @Override
     public ResourceDTO map(final ResourceEntity entity) {
+        log.info("Convert resource:{} to resource dto was started", entity.getId());
         final ResourceDTO result = new ResourceDTO();
         result.setName(entity.getName());
         result.setType(entity.getType());
@@ -72,15 +77,18 @@ public class ResourceMapperImpl implements ResourceMapper {
         }
 
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        log.info("Convert resource:{} to resource dto was finished successfully", entity.getId());
         return result;
     }
 
     @Override
     public ResourceEntity map(final ResourceUpdateRequestDTO dto) {
+        log.info("Convert {} to entity was started", dto);
         final ResourceEntity entity = new ResourceEntity();
         entity.setName(dto.getName());
         entity.setType(dto.getType());
         entity.setDescription(dto.getDescription());
+        log.info("Convert {} to entity was finished successfully", dto);
         return entity;
     }
 
@@ -90,15 +98,18 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     private static FileMetaInfoDTO map(final ResourceFileEntity file) {
+        log.info("Convert resourceFile: {} to fileMetaInfoDto was started", file.getId());
         final FileMetaInfoDTO fileMetaInfoDTO = new FileMetaInfoDTO();
         fileMetaInfoDTO.setUuid(file.getUuid());
         fileMetaInfoDTO.setFileName(file.getFileName());
         fileMetaInfoDTO.setFontType(file.getFontName());
+        log.info("Convert resourceFile: {} to fileMetaInfoDto was finished successfully", file.getId());
         return fileMetaInfoDTO;
     }
     //TODO In the future, replace this code with an integration code.
     @Override
     public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
+        log.info("Encode resource with name: {} and type: {} and subName: {} was started", name, resourceTypeEnum, subName);
         String result;
 
         final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
@@ -108,6 +119,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         final String json = serialize(resourceIdDTO);
         result = encode(json);
 
+        log.info("Encode resource with name: {} and type: {} and subName: {} was finished successfully", name, resourceTypeEnum, subName);
         return result;
     }
 
@@ -118,6 +130,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         try {
             result = objectMapper.readValue(data, ResourceIdDTO.class);
         } catch (JsonProcessingException e) {
+            log.info(e.getMessage());
             throw new TemplatePreviewGenerationException( new StringBuilder("Exception when writing resources from the template. Exception: ").append(e.getMessage()).toString());
         }
         return result;
@@ -130,6 +143,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         try {
             result = objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
+            log.info(e.getMessage());
             throw new TemplatePreviewGenerationException( new StringBuilder("Exception when reading resources from the template. Exception: ").append(e.getMessage()).toString());
         }
 

@@ -82,4 +82,13 @@ public class StageEntity {
     public void setInstances(List<InstanceEntity> instances) {
         this.instances = instances;
     }
+
+    @Override
+    public String toString() {
+        return "StageEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sequenceOrder=" + sequenceOrder +
+                '}';
+    }
 }

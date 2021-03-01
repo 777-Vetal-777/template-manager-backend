@@ -85,4 +85,19 @@ public class DataCollectionPermissionFilter {
     public void setE7_US50_DELETE_DATA_SAMPLE(List<Boolean> deleteDataSample) {
         this.deleteDataSample = deleteDataSample;
     }
+
+    @Override
+    public String toString() {
+        return "DataCollectionPermissionFilter{" +
+                "name=" + name +
+                ", editDataCollectionMetadata=" + editDataCollectionMetadata +
+                ", createNewVersionOfDataCollection=" + createNewVersionOfDataCollection +
+                ", rollbackOfTheDataCollection=" + rollbackOfTheDataCollection +
+                ", deleteDataCollection=" + deleteDataCollection +
+                ", createNewDataSample=" + createNewDataSample +
+                ", editSampleMetadata=" + editSampleMetadata +
+                ", createNewVersionOfDataSample=" + createNewVersionOfDataSample +
+                ", deleteDataSample=" + deleteDataSample +
+                '}';
+    }
 }

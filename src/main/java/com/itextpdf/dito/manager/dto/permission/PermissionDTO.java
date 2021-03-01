@@ -19,4 +19,12 @@ public class PermissionDTO {
     public void setOptionalForCustomRole(Boolean optionalForCustomRole) {
         this.optionalForCustomRole = optionalForCustomRole;
     }
+
+    @Override
+    public String toString() {
+        return "PermissionDTO{" +
+                "name='" + name + '\'' +
+                ", optionalForCustomRole=" + optionalForCustomRole +
+                '}';
+    }
 }

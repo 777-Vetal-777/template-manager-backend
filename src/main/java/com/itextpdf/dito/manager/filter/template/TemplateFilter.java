@@ -51,4 +51,15 @@ public class TemplateFilter {
     public void setType(List<TemplateTypeEnum> type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateFilter{" +
+                "name='" + name + '\'' +
+                ", dataCollection='" + dataCollection + '\'' +
+                ", modifiedOn=" + modifiedOn +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

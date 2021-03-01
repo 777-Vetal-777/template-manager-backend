@@ -21,6 +21,8 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Component
 public class RoleServiceImpl extends AbstractService implements RoleService {
+    private static final Logger log = LogManager.getLogger(RoleServiceImpl.class);
     // Repositories
     private final RoleRepository roleRepository;
     // Services
@@ -66,26 +69,32 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public Page<RoleEntity> getSlaveRolesByResource(final Pageable pageable, final RoleFilter roleFilter, final ResourceEntity resource) {
+        log.info("Get slave roles by resource: {} and filter: {} was started", resource, roleFilter);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final String name = getStringFromFilter(roleFilter.getName());
         final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
 
         final Pageable pageWithSort = updateSort(pageable);
-        return roleRepository.findAllByResourcesAndMasterFalse(pageWithSort, resource, name, roleTypeEnums);
+        final Page<RoleEntity> roleEntities = roleRepository.findAllByResourcesAndMasterFalse(pageWithSort, resource, name, roleTypeEnums);
+        log.info("Get slave roles by resource: {} and filter: {} was finished successfully", resource, roleFilter);
+        return roleEntities;
     }
 
     @Override
     public Page<RoleEntity> getSlaveRolesByDataCollection(final Pageable pageable, final DataCollectionPermissionFilter filter, final DataCollectionEntity dataCollection) {
+        log.info("Get slave roles by dataCollection: {} and filter: {} was started", dataCollection, filter);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final String name = filter.getName() != null ? filter.getName().get(0) : null;
         final Pageable pageWithSort = updateSort(pageable);
-
-        return roleRepository.findAllByDataCollectionsAndMasterFalse(pageWithSort, dataCollection, name);
+        final Page<RoleEntity> roleEntities = roleRepository.findAllByDataCollectionsAndMasterFalse(pageWithSort, dataCollection, name);
+        log.info("Get slave roles by dataCollection: {} and filter: {} was finished successfully", dataCollection, filter);
+        return roleEntities;
     }
 
     @Override
     public RoleEntity create(final String name, final List<String> permissions, final Boolean master) {
+        log.info("Create role with name: {} and permissions: {} and master: {} was started", name, permissions, master);
         checkSystemRole(name);
         if (roleRepository.countByNameAndMasterTrue(name) > 0) {
             throw new RoleAlreadyExistsException(name);
@@ -96,24 +105,30 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         setDefaultPermissions(roleEntity);
         roleEntity.setType(RoleTypeEnum.CUSTOM);
         roleEntity.setMaster(master);
-        return roleRepository.save(roleEntity);
+        final RoleEntity savedRole = roleRepository.save(roleEntity);
+        log.info("Create role with name: {} and permissions: {} and master: {} was finished successfully", name, permissions, master);
+        return savedRole;
     }
 
     @Override
     public Page<RoleEntity> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
+        log.info("Get list roles by roleFilter: {} and searchParam: {} was started", roleFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(roleFilter.getName());
         final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
 
-        return StringUtils.isEmpty(searchParam)
+        final Page<RoleEntity> roleEntities = StringUtils.isEmpty(searchParam)
                 ? roleRepository.filter(pageWithSort, name, roleTypeEnums)
                 : roleRepository.search(pageWithSort, name, roleTypeEnums, searchParam.toLowerCase());
+        log.info("Get list roles by roleFilter: {} and searchParam: {} was finished successfully", roleFilter, searchParam);
+        return roleEntities;
     }
 
     @Override
     public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {
+        log.info("Update role by name: {} and new role: {} and new permissions: {} was started", name, updatedRole, permissions);
         RoleEntity existingRole = roleRepository.findByNameAndMasterTrue(name).orElseThrow(() -> new RoleNotFoundException(name));
 
         if (existingRole.getType() == RoleTypeEnum.SYSTEM) {
@@ -126,11 +141,14 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         existingRole.setName(updatedRole.getName());
         setPermissions(existingRole, permissions);
         setDefaultPermissions(existingRole);
-        return roleRepository.save(existingRole);
+        final RoleEntity savedRoleEntity = roleRepository.save(existingRole);
+        log.info("Update role by name: {} and new role: {} and new permissions: {} was finished successfully", name, updatedRole, permissions);
+        return savedRoleEntity;
     }
 
     @Override
     public void deleteMasterRole(final String name) {
+        log.info("Delete master role with name: {} was started", name);
         final RoleEntity masterRole = roleRepository.findByNameAndMasterTrue(name).orElseThrow(() -> new RoleNotFoundException(name));
 
         if (masterRole.getType() == RoleTypeEnum.SYSTEM) {
@@ -144,6 +162,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         slaveRoles.add(masterRole);
 
         roleRepository.deleteAll(slaveRoles);
+        log.info("Delete master role with name: {} was finished successfully", name);
     }
 
     @Override
@@ -153,12 +172,14 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
     @Override
     public Page<RoleEntity> getSlaveRolesByTemplate(final Pageable pageable, final TemplatePermissionFilter filter, final TemplateEntity templateEntity) {
+        log.info("Get slave roles by template with filter: {} and template: {} was started", filter, templateEntity);
         //TODO: method is not used in project. Should be it removed later?
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
         final String name = getStringFromFilter(filter.getName().get(0));
         final Pageable pageWithSort = updateSort(pageable);
-
-        return roleRepository.findAllByTemplatesAndMasterFalse(pageWithSort, templateEntity, name);
+        final Page<RoleEntity> roleEntities = roleRepository.findAllByTemplatesAndMasterFalse(pageWithSort, templateEntity, name);
+        log.info("Get slave roles by template with filter: {} and template: {} was finished successfully", filter, templateEntity);
+        return roleEntities;
     }
 
     @Override

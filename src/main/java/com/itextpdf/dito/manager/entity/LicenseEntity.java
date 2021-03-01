@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "license")
@@ -49,5 +50,12 @@ public class LicenseEntity {
 		public void setData(byte[] data) {
 			this.data = data;
 		}
-	      
+
+	@Override
+	public String toString() {
+		return "LicenseEntity{" +
+				"id=" + id +
+				", fileName='" + fileName + '\'' +
+				'}';
+	}
 }

@@ -15,6 +15,8 @@ import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class InstanceServiceImpl extends AbstractService implements InstanceService {
+    private static final Logger log = LogManager.getLogger(InstanceServiceImpl.class);
     private final UserService userService;
     private final InstanceRepository instanceRepository;
     private final InstanceClient instanceClient;
@@ -49,6 +52,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
 
     @Override
     public InstanceEntity save(final InstanceEntity instance, final String creatorEmail) {
+        log.info("Save instance: {} by email: {} was started", instance, creatorEmail);
         final UserEntity userEntity = userService.findActiveUserByEmail(creatorEmail);
         if (instanceRepository.findByName(instance.getName()).isPresent()) {
             throw new InstanceAlreadyExistsException(instance.getName());
@@ -59,14 +63,19 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final String instanceToken = instanceClient.register(instance.getSocket()).getToken();
         instance.setCreatedBy(userEntity);
         instance.setRegisterToken(instanceToken);
-        return instanceRepository.save(instance);
+        final InstanceEntity instanceEntity = instanceRepository.save(instance);
+        log.info("Save instance: {} by email: {} was finished successfully", instance, creatorEmail);
+        return instanceEntity;
     }
 
     @Override
     public List<InstanceEntity> save(final List<InstanceEntity> instances, final String creatorEmail) {
-        return instances.stream()
-                .map(instance->save(instance, creatorEmail))
+        log.info("Save list instances: {} was started", instances);
+        final List<InstanceEntity> instanceEntityList = instances.stream()
+                .map(instance -> save(instance, creatorEmail))
                 .collect(Collectors.toList());
+        log.info("Save list instances: {} was finished successfully", instances);
+        return instanceEntityList;
     }
 
     @Override
@@ -82,6 +91,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
     @Override
     public Page<InstanceEntity> getAll(final InstanceFilter instanceFilter, final Pageable pageable,
                                        final String searchParam) {
+        log.info("Get all instanceEntities by filter: {} and searchParam: {} was started", instanceFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -102,15 +112,17 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
             createdOnStartDate = getStartDateFromRange(createdOnDateRange);
             createdOnEndDate = getEndDateFromRange(createdOnDateRange);
         }
-
-        return StringUtils.isEmpty(searchParam)
+        final Page<InstanceEntity> instanceEntities = StringUtils.isEmpty(searchParam)
                 ? instanceRepository.filter(pageWithSort, name, socket, createdBy, createdOnStartDate, createdOnEndDate, stages)
                 : instanceRepository.search(pageWithSort, name, socket, createdBy, createdOnStartDate, createdOnEndDate, stages, searchParam.toLowerCase());
+        log.info("Get all instanceEntities by filter: {} and searchParam: {} was finished successfully", instanceFilter, searchParam);
+        return instanceEntities;
     }
 
     @Override
     @Transactional
     public void forget(final String name) {
+        log.info("Delete instance by name: {} was started", name);
         final InstanceEntity instanceEntity = get(name);
 
         final StageEntity stageEntity = instanceEntity.getStage();
@@ -124,10 +136,12 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         }
         instanceClient.unregister(instanceEntity.getSocket(), instanceEntity.getRegisterToken());
         instanceRepository.deleteByName(name);
+        log.info("Delete instance by name: {} was finished", name);
     }
 
     @Override
     public InstanceEntity update(final String name, final InstanceEntity instanceEntity) {
+        log.info("Update instance by name: {} and params: {} was started", name, instanceEntity);
         final InstanceEntity oldInstanceEntity = get(name);
 
         if (instanceRepository.findByName(instanceEntity.getName()).isPresent()) {
@@ -136,8 +150,9 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
 
         oldInstanceEntity.setName(instanceEntity.getName());
         oldInstanceEntity.setSocket(instanceEntity.getSocket());
-
-        return instanceRepository.save(oldInstanceEntity);
+        final InstanceEntity savedInstance = instanceRepository.save(oldInstanceEntity);
+        log.info("Update instance by name: {} and params: {} was finished successfully", name, instanceEntity);
+        return savedInstance;
     }
 
     @Override

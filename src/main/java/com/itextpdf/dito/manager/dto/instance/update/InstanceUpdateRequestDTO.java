@@ -23,4 +23,12 @@ public class InstanceUpdateRequestDTO {
     public void setSocket(String socket) {
         this.socket = socket;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceUpdateRequestDTO{" +
+                "name='" + name + '\'' +
+                ", socket='" + socket + '\'' +
+                '}';
+    }
 }

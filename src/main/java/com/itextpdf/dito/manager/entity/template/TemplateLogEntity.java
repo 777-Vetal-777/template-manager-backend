@@ -71,4 +71,13 @@ public class TemplateLogEntity {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateLogEntity{" +
+                "id=" + id +
+                ", date=" + date +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
 }

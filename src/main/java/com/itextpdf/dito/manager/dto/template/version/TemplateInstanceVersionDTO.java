@@ -19,4 +19,12 @@ public class TemplateInstanceVersionDTO {
     public void setVersion(Long version) {
         this.version = version;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateInstanceVersionDTO{" +
+                "name='" + name + '\'' +
+                ", version=" + version +
+                '}';
+    }
 }

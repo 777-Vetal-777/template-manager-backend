@@ -25,6 +25,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 
     @Override
     public DataSampleDTO map(final DataSampleEntity entity) {
+        log.info("Convert dataSample: {} to dto was started", entity.getId());
         final DataSampleDTO dto = new DataSampleDTO();
         final UserEntity modifiedBy = entity.getModifiedBy();
         dto.setName(entity.getName());
@@ -40,17 +41,20 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setVersion(entity.getLatestVersion().getVersion());
         dto.setIsActual(checkJsonsEquality(new String(entity.getDataCollection().getLatestVersion().getData()),
                 new String(entity.getLatestVersion().getData())));
+        log.info("Convert dataSample: {} to dto was finished successfully", entity.getId());
         return dto;
     }
 
     @Override
     public DataSampleDTO mapWithFile(final DataSampleEntity entity) {
+        log.info("Convert dataSample: {} to dto was started", entity.getId());
         final DataSampleDTO dto = map(entity);
         final DataSampleFileEntity latestVersion = entity.getLatestVersion();
         dto.setFile(new String(latestVersion.getData()));
         dto.setVersion(latestVersion.getVersion());
         dto.setComment(latestVersion.getComment());
         dto.setFileName(latestVersion.getFileName());
+        log.info("Convert dataSample: {} to dto was finished successfully", entity.getId());
         return dto;
     }
 
@@ -61,9 +65,11 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 
     @Override
     public DataSampleEntity map(final DataSampleUpdateRequestDTO dto) {
+        log.info("Convert {} to dataSample was started", dto);
         final DataSampleEntity entity = new DataSampleEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
+        log.info("Convert {} to dataSample was finished successfully", dto);
         return entity;
     }
 

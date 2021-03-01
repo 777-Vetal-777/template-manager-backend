@@ -71,4 +71,16 @@ public class WorkspaceCreateRequestDTO {
     public void setLanguage(String language) {
         this.language = language;
     }
+
+    @Override
+    public String toString() {
+        return "WorkspaceCreateRequestDTO{" +
+                "name='" + name + '\'' +
+                ", timezone='" + timezone + '\'' +
+                ", language='" + language + '\'' +
+                ", adjustForDaylight=" + adjustForDaylight +
+                ", mainDevelopInstance='" + mainDevelopInstance + '\'' +
+                ", instances=" + instances +
+                '}';
+    }
 }

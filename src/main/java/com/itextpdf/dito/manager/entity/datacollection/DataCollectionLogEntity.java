@@ -65,4 +65,12 @@ public class DataCollectionLogEntity {
     public void setDataCollection(DataCollectionEntity dataCollectionId) {
         this.dataCollection = dataCollectionId;
     }
+
+    @Override
+    public String toString() {
+        return "DataCollectionLogEntity{" +
+                "id=" + id +
+                ", date=" + date +
+                '}';
+    }
 }

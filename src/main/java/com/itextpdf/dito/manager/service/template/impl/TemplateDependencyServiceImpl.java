@@ -10,6 +10,8 @@ import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +29,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class TemplateDependencyServiceImpl extends AbstractController implements TemplateDependencyService {
-
+    private static final Logger log = LogManager.getLogger(TemplateDependencyServiceImpl.class);
     private final TemplateService templateService;
     private final TemplateRepository templateRepository;
 
@@ -38,6 +40,7 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
 
     @Override
     public Page<DependencyModel> list(final Pageable pageable, final String name, final DependencyFilter filter, final String search) {
+        log.info("Get list template dependencies by name: {} and filter: {} and search: {} was started", name, filter, search);
         final String templateName = decodeBase64(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
@@ -47,16 +50,21 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
         final Long version = getLongFromFilter(filter.getVersion());
         final Pageable pageWithSort = updateSort(pageable);
 
-        return StringUtils.isEmpty(search)
+        final Page<DependencyModel> dependencyModels = StringUtils.isEmpty(search)
                 ? templateRepository.filter(pageWithSort, templateEntity.getId(), depend, version, directionType, dependencyTypes, stages)
                 : templateRepository.search(pageWithSort, templateEntity.getId(), depend, version, directionType, dependencyTypes, stages, search.toLowerCase());
+        log.info("Get list template dependencies by name: {} and filter: {} and search: {} was finished successfully", name, filter, search);
+        return dependencyModels;
     }
 
     @Override
     public List<DependencyModel> list(final String name) {
+        log.info("Get list template dependencies by name: {} was started", name);
         final String templateName = decodeBase64(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
-        return templateRepository.getTemplateHardRelations(templateEntity.getId());
+        final List<DependencyModel> dependencyModels = templateRepository.getTemplateHardRelations(templateEntity.getId());
+        log.info("Get list template dependencies by name: {} was finished successfully", name);
+        return dependencyModels;
     }
 
     private List<String> getDependencyAsString(final List<DependencyType> list) {

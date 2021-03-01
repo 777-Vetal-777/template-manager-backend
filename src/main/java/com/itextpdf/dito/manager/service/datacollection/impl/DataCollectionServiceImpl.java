@@ -32,6 +32,8 @@ import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +55,7 @@ import static java.util.Collections.singleton;
 
 @Service
 public class DataCollectionServiceImpl extends AbstractService implements DataCollectionService {
+    private static final Logger log = LogManager.getLogger(DataCollectionServiceImpl.class);
     private final DataCollectionRepository dataCollectionRepository;
     private final DataCollectionLogRepository dataCollectionLogRepository;
     private final DataCollectionFileRepository dataCollectionFileRepository;
@@ -91,6 +94,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public DataCollectionEntity create(final String name, final DataCollectionType type, final byte[] data, final String fileName, final String email) {
+        log.info("Create dataCollection with name: {} and type: {} and fileName: {} and email: {} was started", name, type, fileName, email);
         if (dataCollectionRepository.existsByName(name)) {
             throw new DataCollectionAlreadyExistsException(name);
         }
@@ -117,7 +121,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
         DataCollectionEntity savedCollection = dataCollectionRepository.save(dataCollectionEntity);
         logDataCollectionUpdate(savedCollection, userEntity);
-
+        log.info("Create dataCollection with name: {} and type: {} and fileName: {} and email: {} was finished successfully", name, type, fileName, email);
         return savedCollection;
     }
 
@@ -125,6 +129,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     @Transactional(rollbackOn = Exception.class)
     public DataCollectionEntity createNewVersion(final String name, final DataCollectionType type, final byte[] data,
                                                  final String fileName, final String email, final String comment) {
+        log.info("Create new version of dataCollection with name: {} and type: {} and fileName: {} and email: {} was started", name, type, fileName, email);
         checkJsonIsValid(data);
         final DataCollectionEntity existingDataCollectionEntity = findByName(name);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
@@ -158,6 +163,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
             });
             templateFileRepository.saveAll(newFiles);
         }
+        log.info("Create new version of dataCollection with name: {} and type: {} and fileName: {} and email: {} was finished successfully", name, type, fileName, email);
         return dataCollectionEntity;
     }
 
@@ -169,6 +175,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public Page<DataCollectionEntity> list(final Pageable pageable, final DataCollectionFilter dataCollectionFilter, final String searchParam) {
+        log.info("Get list dataCollections with pageable by filter: {} and searchParam: {} was started", dataCollectionFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -187,7 +194,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
 
         final List<DataCollectionType> types = dataCollectionFilter.getType();
-
+        log.info("Get list dataCollections with pageable by filter: {} and searchParam: {} was finished successfully", dataCollectionFilter, searchParam);
         return StringUtils.isEmpty(searchParam)
                 ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types)
                 : dataCollectionRepository.search(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types, searchParam.toLowerCase());
@@ -195,6 +202,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public List<DataCollectionEntity> list(final DataCollectionFilter dataCollectionFilter, final String searchParam) {
+        log.info("Get list dataCollections by filter: {} and searchParam: {} was started", dataCollectionFilter, searchParam);
         final String name = getStringFromFilter(dataCollectionFilter.getName());
         final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
 
@@ -210,7 +218,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
 
         final List<DataCollectionType> types = dataCollectionFilter.getType();
-
+        log.info("Get list dataCollections by filter: {} and searchParam: {} was finished successfully", dataCollectionFilter, searchParam);
         return StringUtils.isEmpty(searchParam)
                 ? dataCollectionRepository.filter(name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types)
                 : dataCollectionRepository.search(name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types, searchParam.toLowerCase());
@@ -229,6 +237,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public void delete(final String name, final String userEmail) {
+        log.info("Delete dataCollection by userEmail: {} was started", userEmail);
         final DataCollectionEntity deletingDataCollection = findByName(name);
 
         if (hasOutboundDependencies(deletingDataCollection.getId())) {
@@ -236,6 +245,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
 
         dataCollectionRepository.delete(findByName(name));
+        log.info("Delete dataCollection by userEmail: {} was finished successfully", userEmail);
     }
 
     @Override
@@ -243,6 +253,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     public DataCollectionEntity update(final String name,
                                        final DataCollectionEntity updatedEntity,
                                        final String userEmail) {
+        log.info("Update dataCollection by dataCollectionName: {} and params: {} was started", name, updatedEntity);
         final DataCollectionEntity existingEntity = findByName(name);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
@@ -256,17 +267,22 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         existingEntity.setDescription(updatedEntity.getDescription());
         final DataCollectionEntity savedCollection = dataCollectionRepository.save(existingEntity);
         logDataCollectionUpdate(savedCollection, currentUser);
+        log.info("Update dataCollection by dataCollectionName: {} and params: {} was finished successfully", name, updatedEntity);
         return savedCollection;
     }
 
     @Override
     public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter) {
+        log.info("Get dataCollection roles by name: {} and filter: {} was started", name, filter);
         final DataCollectionEntity dataCollectionEntity = findByName(name);
-        return roleService.getSlaveRolesByDataCollection(pageable, filter, dataCollectionEntity);
+        final Page<RoleEntity> roleEntities = roleService.getSlaveRolesByDataCollection(pageable, filter, dataCollectionEntity);
+        log.info("Get dataCollection roles by name: {} and filter: {} was finished successfully", name, filter);
+        return roleEntities;
     }
 
     @Override
     public DataCollectionEntity applyRole(final String dataCollectionName, final String roleName, final List<String> permissions) {
+        log.info("Apply dataCollection role by dataCollectionName: {} and roleName: {} and permissions: {} was started", dataCollectionName, roleName, permissions);
         final DataCollectionEntity dataCollectionEntity = findByName(dataCollectionName);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, dataCollectionEntity);
@@ -291,12 +307,14 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         slaveRoleEntity.getDataCollections().add(dataCollectionEntity);
 
         dataCollectionEntity.getAppliedRoles().add(slaveRoleEntity);
+        log.info("Apply dataCollection role by dataCollectionName: {} and roleName: {} and permissions: {} was finished successfully", dataCollectionName, roleName, permissions);
         return dataCollectionRepository.save(dataCollectionEntity);
 
     }
 
     @Override
     public DataCollectionEntity detachRole(final String name, final String roleName) {
+        log.info("Detach dataCollection role by dataCollectionName: {} and roleName: {} was started", name, roleName);
         final DataCollectionEntity dataCollectionEntity = findByName(name);
         final RoleEntity roleEntity = roleService.getSlaveRole(roleName, dataCollectionEntity);
 
@@ -306,6 +324,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
         dataCollectionEntity.getAppliedRoles().remove(roleEntity);
         roleService.delete(roleEntity);
+        log.info("Detach dataCollection role by dataCollectionName: {} and roleName: {} was finished successfully", name, roleName);
         return dataCollectionRepository.save(dataCollectionEntity);
 
     }
@@ -358,13 +377,18 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     @Override
     public DataSampleEntity create(final String dataCollectionName, final String name, final String fileName, final String sample, final String comment, final String email) {
+        log.info("Create dataSample with dataCollectionName: {}, dataSampleName: {}, fileName: {}, jsonObject: {}, comment: {}, email: {} was started",
+                dataCollectionName, name, fileName, sample, comment, email);
         final DataCollectionEntity dataCollectionEntity = get(dataCollectionName);
-        return dataSampleService.create(dataCollectionEntity, name, fileName, sample, comment, email);
+        final DataSampleEntity dataSampleEntity = dataSampleService.create(dataCollectionEntity, name, fileName, sample, comment, email);
+        log.info("Create dataSample with dataCollectionName: {}, dataSampleName: {}, fileName: {}, jsonObject: {}, comment: {}, email: {} was finished successfully",
+                dataCollectionName, name, fileName, sample, comment, email);
+        return dataSampleEntity;
     }
 
     @Override
     public DataCollectionEntity rollbackVersion(final String name, final Long version, final String email) {
-
+        log.info("Rollback dataCollection version by name: {} and version: {} was started", name, version);
         final DataCollectionEntity existingDataCollectionEntity = get(name);
         final DataCollectionFileEntity versionForRollback = dataCollectionFileRepository.findByVersionAndDataCollection(version, existingDataCollectionEntity)
                 .orElseThrow(() -> new DataCollectionVersionNotFoundException(String.valueOf(version)));
@@ -399,6 +423,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
             });
             templateFileRepository.saveAll(newFiles);
         }
+        log.info("Rollback dataCollection version by name: {} and version: {} was finished", name, version);
         return dataCollectionEntity;
     }
 }

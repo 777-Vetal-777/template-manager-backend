@@ -23,4 +23,12 @@ public class TemplateListFilter {
     public void setType(List<TemplateTypeEnum> type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateListFilter{" +
+                "dataCollection='" + dataCollection + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

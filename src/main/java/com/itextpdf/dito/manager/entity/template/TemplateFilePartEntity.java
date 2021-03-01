@@ -67,4 +67,12 @@ public class TemplateFilePartEntity {
     public void setPart(TemplateFileEntity part) {
         this.part = part;
     }
+
+    @Override
+    public String toString() {
+        return "TemplateFilePartEntity{" +
+                "id=" + id +
+                ", condition='" + condition + '\'' +
+                '}';
+    }
 }

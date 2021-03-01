@@ -17,4 +17,11 @@ public class PromotionPathDTO {
     public void setStages(List<StageDTO> stages) {
         this.stages = stages;
     }
+
+    @Override
+    public String toString() {
+        return "PromotionPathDTO{" +
+                "stages=" + stages +
+                '}';
+    }
 }

@@ -48,6 +48,7 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
     @Override
     public List<TemplateFilePartEntity> createTemplatePartEntities(final String dataCollectionName,
                                                                    final List<TemplatePartModel> templateParts) {
+        LOG.info("Create template parts by dataCollectionName: {} and templateParts: {} was started", dataCollectionName, templateParts);
         final List<TemplateEntity> templatePartList = templateRepository.getTemplatesWithLatestFileByName(templateParts.stream().map(TemplatePartModel::getTemplateName).collect(Collectors.toList()));
         final Map<String, TemplateFileEntity> templateFilePartMap = templatePartList.stream().collect(Collectors.toMap(TemplateEntity::getName, TemplateEntity::getLatestFile, (templateFileEntity1, templateFileEntity2) -> templateFileEntity1));
 
@@ -60,15 +61,20 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         //checks that exists at most one HEADER and FOOTER
         throwExceptionIfPartsSizeAreIncorrect(templateParts, templateFilePartMap);
 
-        return templateParts.stream().map(templatePart -> {
+        List<TemplateFilePartEntity> templateFilePartEntities = templateParts.stream().map(templatePart -> {
             final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getTemplateName());
             return createTemplateFilePartEntity(partTemplateFileEntity, templatePart);
         }).collect(Collectors.toList());
+        LOG.info("Create template parts by dataCollectionName: {} and templateParts: {} was finished successfully", dataCollectionName, templateParts);
+        return templateFilePartEntities;
     }
 
     private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity partTemplateFileEntity,
                                                                 final TemplatePartModel templatePart) {
-        return createTemplateFilePartEntity(null, partTemplateFileEntity, templatePart.getCondition(), getSettingsString(templatePart));
+        LOG.info("Create template part by templateFileEntity: {} and templatePartModel: {} was started", partTemplateFileEntity, templatePart);
+        final TemplateFilePartEntity filePartEntity = createTemplateFilePartEntity(null, partTemplateFileEntity, templatePart.getCondition(), getSettingsString(templatePart));
+        LOG.info("Create template part by templateFileEntity: {} and templatePartModel: {} was finished successfully", partTemplateFileEntity, templatePart);
+        return filePartEntity;
     }
 
     private String getSettingsString(final TemplatePartModel templatePart) {
@@ -84,13 +90,19 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
     @Override
     public TemplateFilePartEntity updateComposition(final TemplateFilePartEntity example,
                                                     final TemplateFileEntity composition) {
-        return createTemplateFilePartEntity(composition, example.getPart(), example.getCondition(), example.getSettings());
+        LOG.info("Update composition with templateFilePartEntity: {} and composition: {} was started", example, composition);
+        final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(composition, example.getPart(), example.getCondition(), example.getSettings());
+        LOG.info("Update composition with templateFilePartEntity: {} and composition: {} was finished successfully", example, composition);
+        return templateFilePartEntity;
     }
 
     @Override
     public TemplateFilePartEntity updatePart(final TemplateFilePartEntity example,
                                              final TemplateFileEntity part) {
-        return createTemplateFilePartEntity(example.getComposition(), part, example.getCondition(), example.getSettings());
+        LOG.info("Update template part with templateFilePartEntity: {} and part: {} was started", example, part);
+        final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(example.getComposition(), part, example.getCondition(), example.getSettings());
+        LOG.info("Update template part with templateFilePartEntity: {} and part: {} was finished successfully", example, part);
+        return templateFilePartEntity;
     }
 
     private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity compositionTemplateFileEntity,

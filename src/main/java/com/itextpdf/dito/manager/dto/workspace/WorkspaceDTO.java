@@ -46,4 +46,14 @@ public class WorkspaceDTO {
     public void setLanguage(String language) {
         this.language = language;
     }
+
+    @Override
+    public String toString() {
+        return "WorkspaceDTO{" +
+                "name='" + name + '\'' +
+                ", timezone='" + timezone + '\'' +
+                ", language='" + language + '\'' +
+                ", adjustForDaylight=" + adjustForDaylight +
+                '}';
+    }
 }

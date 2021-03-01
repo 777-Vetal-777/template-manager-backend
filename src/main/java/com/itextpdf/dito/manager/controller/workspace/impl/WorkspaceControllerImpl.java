@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.controller.workspace.impl;
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
+import com.itextpdf.dito.manager.controller.user.impl.UserControllerImpl;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +36,7 @@ import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 @Validated
 @RestController
 public class WorkspaceControllerImpl extends AbstractController implements WorkspaceController {
+    private static final Logger log = LogManager.getLogger(WorkspaceControllerImpl.class);
 
     private final WorkspaceService workspaceService;
     private final WorkspaceMapper workspaceMapper;

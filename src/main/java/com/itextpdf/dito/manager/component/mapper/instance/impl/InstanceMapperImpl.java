@@ -8,6 +8,8 @@ import com.itextpdf.dito.manager.dto.template.version.TemplateInstanceVersionDTO
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -18,16 +20,21 @@ import java.util.stream.Collectors;
 
 @Component
 public class InstanceMapperImpl implements InstanceMapper {
+    private static final Logger log = LogManager.getLogger(InstanceMapperImpl.class);
+
     @Override
     public InstanceEntity map(final InstanceDTO dto) {
+        log.info("Convert dto: {} to entity was started", dto);
         final InstanceEntity instanceEntity = new InstanceEntity();
         instanceEntity.setName(dto.getName());
         instanceEntity.setSocket(dto.getSocket());
+        log.info("Convert dto: {} to entity was finished successfully", dto);
         return instanceEntity;
     }
 
     @Override
     public InstanceDTO map(final InstanceEntity entity) {
+        log.info("Convert instance:{} to dto was started", entity.getId());
         final InstanceDTO instanceDTO = new InstanceDTO();
         instanceDTO.setName(entity.getName());
         instanceDTO.setSocket(entity.getSocket());
@@ -49,14 +56,17 @@ public class InstanceMapperImpl implements InstanceMapper {
         if (stageEntity != null) {
             instanceDTO.setStage(stageEntity.getName());
         }
+        log.info("Convert instance: {} to dto was finished successfully", entity.getId());
         return instanceDTO;
     }
 
     @Override
     public InstanceEntity map(final InstanceRememberRequestDTO dto) {
+        log.info("Convert {} to entity was started", dto);
         final InstanceEntity entity = new InstanceEntity();
         entity.setName(dto.getName());
         entity.setSocket(dto.getSocket());
+        log.info("Convert {} to entity was finished successfully", dto);
         return entity;
     }
 
@@ -84,9 +94,11 @@ public class InstanceMapperImpl implements InstanceMapper {
 
     @Override
     public InstanceEntity map(final InstanceUpdateRequestDTO dto) {
+        log.info("Convert {} to entity was started", dto);
         final InstanceEntity entity = new InstanceEntity();
         entity.setName(dto.getName());
         entity.setSocket(dto.getSocket());
+        log.info("Convert {} to entity was finished successfully", dto);
         return entity;
     }
 }

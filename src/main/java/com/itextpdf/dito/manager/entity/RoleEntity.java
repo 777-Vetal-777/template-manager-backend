@@ -124,4 +124,14 @@ public class RoleEntity {
     public void setTemplates(Set<TemplateEntity> templates) {
         this.templates = templates;
     }
+
+    @Override
+    public String toString() {
+        return "RoleEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", master=" + master +
+                '}';
+    }
 }

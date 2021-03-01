@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.component.mapper.user.impl;
 
 
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
+import com.itextpdf.dito.manager.component.mapper.template.impl.TemplateMapperImpl;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
@@ -13,12 +14,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapperImpl implements UserMapper {
+    private static final Logger log = LogManager.getLogger(UserMapperImpl.class);
     private final RoleMapper roleMapper;
 
     public UserMapperImpl(final RoleMapper roleMapper) {
@@ -49,6 +53,7 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public UserDTO map(final UserEntity entity) {
+        log.info("Convert user: {} to dto was started", entity.getId());
         final UserDTO result = new UserDTO();
 
         result.setEmail(entity.getEmail());
@@ -60,7 +65,7 @@ public class UserMapperImpl implements UserMapper {
         result.setRoles(entity.getRoles().stream().map(roleMapper::mapWithoutUsers).collect(Collectors.toList()));
         result.setAuthorities(entity.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
-
+        log.info("Convert user: {} to dto was finished successfully", entity.getId());
         return result;
     }
 

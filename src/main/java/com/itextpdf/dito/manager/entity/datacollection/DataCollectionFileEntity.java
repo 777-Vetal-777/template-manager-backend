@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -126,5 +127,16 @@ public class DataCollectionFileEntity {
 
     public void setStage(StageEntity stage) {
         this.stage = stage;
+    }
+
+    @Override
+    public String toString() {
+        return "DataCollectionFileEntity{" +
+                "Id=" + Id +
+                ", version=" + version +
+                ", comment='" + comment + '\'' +
+                ", createdOn=" + createdOn +
+                ", fileName='" + fileName + '\'' +
+                '}';
     }
 }

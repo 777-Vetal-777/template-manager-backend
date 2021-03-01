@@ -29,7 +29,6 @@ import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
-import com.itextpdf.dito.manager.repository.template.TemplateLogRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
@@ -39,6 +38,8 @@ import com.itextpdf.dito.manager.service.template.TemplateFilePartService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +65,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class TemplateServiceImpl extends AbstractService implements TemplateService {
+    private static final Logger log = LogManager.getLogger(TemplateServiceImpl.class);
     private final TemplateFileRepository templateFileRepository;
     private final TemplateRepository templateRepository;
     private final InstanceRepository instanceRepository;
@@ -75,7 +77,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final TemplateDeploymentService templateDeploymentService;
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateFilePartService templateFilePartService;
-	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{1,199}";
+    private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{1,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -105,15 +107,21 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     @Transactional
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
                                  final String dataCollectionName, final String email) {
-        return create(templateName, templateTypeEnum, dataCollectionName, email, null);
+        log.info("Create template with templateName: {} and type: {} and dataCollectionName: {} and email: {} was started", templateName, templateTypeEnum, dataCollectionName, email);
+        final TemplateEntity templateEntity = create(templateName, templateTypeEnum, dataCollectionName, email, null);
+        log.info("Create template with templateName: {} and type: {} and dataCollectionName: {} and email: {} was finished successfully", templateName, templateTypeEnum, dataCollectionName, email);
+
+        return templateEntity;
     }
 
     @Override
     @Transactional
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
-                                 final String dataCollectionName, final String email, List<TemplatePartModel> templateParts) {
-    	throwExceptionIfTemplateNameIsInvalid(templateName);
-    	throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
+                                 final String dataCollectionName, final String email, final List<TemplatePartModel> templateParts) {
+        log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was started",
+                templateName, templateTypeEnum, dataCollectionName, email, templateParts);
+        throwExceptionIfTemplateNameIsInvalid(templateName);
+        throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         final TemplateEntity templateEntity = new TemplateEntity();
         templateEntity.setName(templateName);
@@ -153,7 +161,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateFileEntity.getInstance().addAll(developerStageInstances);
 
         templateDeploymentService.promoteOnDefaultStage(templateFileEntity);
-        return templateRepository.save(templateEntity);
+        final TemplateEntity savedTemplateEntity = templateRepository.save(templateEntity);
+        log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was finished successfully",
+                templateName, templateTypeEnum, dataCollectionName, email, templateParts);
+        return savedTemplateEntity;
     }
 
     private void fillTemplatePartsForTemplateFileEntity(final String dataCollectionName,
@@ -178,6 +189,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     public Page<TemplateEntity> getAll(final Pageable pageable, final TemplateFilter templateFilter, final String searchParam) {
+        log.info("Get all templates by filter: {} and search: {} was started", templateFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -197,12 +209,14 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             editedOnEndDate = getEndDateFromRange(editedOnDateRange);
         }
 
-        return StringUtils.isEmpty(searchParam)
+        final Page<TemplateEntity> templateEntities = StringUtils.isEmpty(searchParam)
                 ? templateRepository
                 .filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
                 : templateRepository
                 .search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate,
                         editedOnEndDate, searchParam.toLowerCase());
+        log.info("Get all templates by filter: {} and search: {} was finished successfully", templateFilter, searchParam);
+        return templateEntities;
     }
 
     @Override
@@ -217,8 +231,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     public List<TemplateEntity> getAllParts(final String templateName) {
+        log.info("Get all parts by templateName: {} was started", templateName);
         final TemplateEntity templateEntity = findByName(templateName);
-        return templateRepository.getTemplatesPartsByTemplateId(templateEntity.getId());
+        final List<TemplateEntity> templateEntities = templateRepository.getTemplatesPartsByTemplateId(templateEntity.getId());
+        log.info("Get all parts by templateName: {} was finished successfully", templateName);
+        return templateEntities;
     }
 
     @Override
@@ -238,6 +255,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     public TemplateEntity update(final String name, final TemplateEntity updatedTemplateEntity, final String userEmail) {
+        log.info("Update template by name: {} and template: {} and email: {} was started", name, updatedTemplateEntity, userEmail);
         final TemplateEntity existingTemplate = findByName(name);
         final UserEntity userEntity = userService.findActiveUserByEmail(userEmail);
 
@@ -252,12 +270,16 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateLogs.add(logEntity);
         existingTemplate.setTemplateLogs(templateLogs);
 
-        return templateRepository.save(existingTemplate);
+        final TemplateEntity savedTemplateEntity = templateRepository.save(existingTemplate);
+        log.info("Update template by name: {} and template: {} and email: {} was finished successfully", name, updatedTemplateEntity, userEmail);
+        return savedTemplateEntity;
     }
 
     @Override
     @Transactional
     public TemplateEntity createNewVersion(final String name, final byte[] data, final String email, final String comment, final String newTemplateName, List<TemplatePartModel> templateParts) {
+        log.info("Create new version of template by name: {} and email: {} and comment: {} and new name: {} and parts: {} was started",
+                name, email, comment, newTemplateName, templateParts);
         final TemplateEntity existingTemplateEntity = findByName(name);
         if (newTemplateName != null) {
             existingTemplateEntity.setName(newTemplateName);
@@ -267,30 +289,40 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-		return createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts, comment,
-				oldVersion + 1);
-	  }
+        final TemplateEntity templateEntity = createNewVersion(existingTemplateEntity, oldTemplateFileVersion, userEntity, data, templateParts, comment,
+                oldVersion + 1);
+        log.info("Create new version of template by name: {} and email: {} and comment: {} and new name: {} and parts: {} was finished successfully",
+                name, email, comment, newTemplateName, templateParts);
+        return templateEntity;
+    }
 
     @Override
     @Transactional
     public TemplateEntity createNewVersionAsCopy(final TemplateFileEntity fileEntityToCopy,
                                                  final UserEntity userEntity,
                                                  final String comment) {
+        log.info("Create new version as copy with templateFile: {} and user: {} and comment: {} was started", fileEntityToCopy, userEntity, comment);
         final TemplateEntity existingTemplateEntity = fileEntityToCopy.getTemplate();
 
         final TemplateFileEntity oldTemplateFileVersion = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplateEntity.getId());
         final Long oldVersion = oldTemplateFileVersion.getVersion();
 
-        return createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), getTemplatePartsList(fileEntityToCopy), comment, oldVersion + 1);
+        final TemplateEntity templateEntity = createNewVersion(existingTemplateEntity, fileEntityToCopy, userEntity, fileEntityToCopy.getData(), getTemplatePartsList(fileEntityToCopy), comment, oldVersion + 1);
+        log.info("Create new version as copy with templateFile: {} and user: {} and comment: {} was finished successfully", fileEntityToCopy, userEntity, comment);
+        return templateEntity;
     }
 
     @Override
     public TemplateEntity rollbackTemplate(final TemplateEntity existingTemplateEntity,
                                            final TemplateFileEntity templateVersionToBeRevertedTo,
                                            final UserEntity userEntity) {
+        log.info("Rollback template with exist template: {} and templateVersionToBeRevertedTo: {} and user: {} was started", existingTemplateEntity, templateVersionToBeRevertedTo, userEntity);
         final TemplateFileEntity currentTemplateFile = existingTemplateEntity.getLatestFile();
         final String comment = new StringBuilder().append("Rollback to version: ").append(templateVersionToBeRevertedTo.getVersion()).toString();
-        return createVersionForTemplateEntity(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
+
+        log.info("Rollback template with exist template: {} and templateVersionToBeRevertedTo: {} and user: {} was finished successfully", existingTemplateEntity, templateVersionToBeRevertedTo, userEntity);
+        final TemplateEntity templateEntity = createVersionForTemplateEntity(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
+        return templateEntity;
     }
 
     @Transactional
@@ -301,6 +333,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                                           final List<TemplateFilePartEntity> templateParts,
                                                           final String comment,
                                                           final Long newVersion) {
+        log.info("Create version for tamplate with template: {}, version: {}, user: {}, parts: {}, comment: {}, new version: {} was started",
+                existingTemplateEntity, fileEntityToCopyDependencies, userEntity, templateParts, comment, newVersion);
         final TemplateEntity result;
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
         final TemplateFileEntity fileEntity = createTemplateFileEntity((TemplateTypeEnum.COMPOSITION.equals(existingTemplateEntity.getType()) ? compositeTemplateConstructor.build(templateParts) : data),
@@ -320,7 +354,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         final List<TemplateFileEntity> updatedStandardTemplateFileEntities = templateFileRepository.saveAll(createNewVersionForDependentCompositions(result, fileEntityToCopyDependencies, userEntity));
         updatedStandardTemplateFileEntities.forEach(templateDeploymentService::promoteOnDefaultStage);
-
+        log.info("Create version for tamplate with template: {}, version: {}, user: {}, parts: {}, comment: {}, new version: {} was finished successfully",
+                existingTemplateEntity, fileEntityToCopyDependencies, userEntity, templateParts, comment, newVersion);
         return result;
     }
 
@@ -407,6 +442,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     @Override
     public TemplateEntity applyRole(final String templateName, final String roleName, final List<String> permissions, final String email) {
+        log.info("Apply role for template name: {} with roleName: {} , permissions: {} and email: {} was started", templateName, roleName, permissions, email);
         final TemplateEntity templateEntity = findByName(templateName);
 
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, templateEntity);
@@ -431,11 +467,14 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         slaveRoleEntity.getTemplates().add(templateEntity);
 
         templateEntity.getAppliedRoles().add(slaveRoleEntity);
-        return templateRepository.save(templateEntity);
+        final TemplateEntity updatedTemplateEntity = templateRepository.save(templateEntity);
+        log.info("Apply role for template name: {} with roleName: {} , permissions: {} and email: {} was finished successfully", templateName, roleName, permissions, email);
+        return updatedTemplateEntity;
     }
 
     @Override
     public TemplateEntity detachRole(final String templateName, final String roleName, final String email) {
+        log.info("Detach role by templateName: {} and roleName: {} and email: {} was started", templateName, roleName, email);
         final TemplateEntity templateEntity = findByName(templateName);
 
         final RoleEntity roleEntity = roleService.getSlaveRole(roleName, templateEntity);
@@ -446,11 +485,14 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         templateEntity.getAppliedRoles().remove(roleEntity);
         roleService.delete(roleEntity);
-        return templateRepository.save(templateEntity);
+        final TemplateEntity updatedTemplateEntity = templateRepository.save(templateEntity);
+        log.info("Detach role by templateName: {} and roleName: {} and email: {} was finished successfully", templateName, roleName, email);
+        return updatedTemplateEntity;
     }
 
     @Override
     public TemplateEntity delete(final String templateName) {
+        log.info("Delete template by name: {} was started", templateName);
         final TemplateEntity templateEntity = findByName(templateName);
         final Optional<TemplateFileEntity> deployedTemplateVersion = templateEntity.getFiles().stream()
                 .filter(TemplateFileEntity::getDeployed)
@@ -465,12 +507,13 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<TemplateFileEntity> templateFileEntities = templateEntity.getFiles();
         templateRepository.delete(templateEntity);
         templateDeploymentService.removeAllVersionsFromDefaultStage(templateFileEntities);
-
+        log.info("Delete template by name: {} was finished successfully", templateName);
         return templateEntity;
     }
 
     @Override
     public TemplateEntity block(final String userEmail, final String templateName) {
+        log.info("Block template with name: {} by user email: {} was started", templateName, userEmail);
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
         if (TemplateTypeEnum.COMPOSITION == templateEntity.getType()) {
@@ -481,11 +524,14 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
         templateEntity.setBlockedAt(new Date());
         templateEntity.setBlockedBy(currentUser);
-        return templateRepository.save(templateEntity);
+        final TemplateEntity updatedTemplateEntity = templateRepository.save(templateEntity);
+        log.info("Block template with name: {} by user email: {} was finished successfully", templateName, userEmail);
+        return updatedTemplateEntity;
     }
 
     @Override
     public TemplateEntity unblock(final String userEmail, final String templateName) {
+        log.info("Unblock template by userEmail: {} and templateName: {} was started", userEmail, templateName);
         final TemplateEntity templateEntity = findByName(templateName);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
         if (Objects.nonNull(templateEntity.getBlockedAt()) && !Objects.equals(currentUser, templateEntity.getBlockedBy())) {
@@ -493,7 +539,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         }
         templateEntity.setBlockedBy(null);
         templateEntity.setBlockedAt(null);
-        return templateRepository.save(templateEntity);
+        final TemplateEntity updatedTemplateEntity = templateRepository.save(templateEntity);
+        log.info("Unblock template by userEmail: {} and templateName: {} was finished successfully", userEmail, templateName);
+        return updatedTemplateEntity;
     }
 
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
@@ -529,8 +577,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                 .collect(Collectors.toList()));
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
-    
-	private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
-		return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
-	}
+
+    private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
+        return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
+    }
 }

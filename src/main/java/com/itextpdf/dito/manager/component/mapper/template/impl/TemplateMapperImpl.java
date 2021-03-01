@@ -56,6 +56,7 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     private TemplateDTO fillTemplateDTO(final TemplateEntity entity, final TemplateDTO result) {
+        log.info("Fill templateDto with template: {} and templateDto: {} was started", entity.getId(), result);
         result.setName(entity.getName());
         result.setType(entity.getType());
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
@@ -89,19 +90,23 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setDataCollection(Objects.nonNull(dataCollectionFileEntity) ? dataCollectionFileEntity.getDataCollection().getName() : null);
         }
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        log.info("Fill templateDto with template: {} and templateDto: {} was started", entity.getId(), result);
         return result;
     }
 
     @Override
     public TemplateEntity map(final TemplateUpdateRequestDTO dto) {
+        log.info("Convert {} to entity was started", dto);
         final TemplateEntity entity = new TemplateEntity();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
+        log.info("Convert {} to entity was finished successfully", dto);
         return entity;
     }
 
     @Override
     public TemplateMetadataDTO mapToMetadata(final TemplateEntity entity) {
+        log.info("Convert template: {} to templateMetadataDTO was started", entity.getId());
         final TemplateMetadataDTO result = new TemplateMetadataDTO();
         result.setName(entity.getName());
         result.setType(entity.getType());
@@ -146,6 +151,7 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setBlockedBy(new StringBuilder().append(blockedUser.getFirstName()).append(" ").append(blockedUser.getLastName()).toString());
         }
         result.setDeployedVersions(getDeployedVersions(entity));
+        log.info("Convert template: {} to templateMetadataDTO was finished successfully", entity);
         return result;
     }
 
@@ -167,15 +173,18 @@ public class TemplateMapperImpl implements TemplateMapper {
 
     @Override
     public TemplateWithSettingsDTO mapTemplateWithPart(final TemplateEntity entity) {
+        log.info("Convert template: {} to dto with part was started", entity.getId());
         final TemplateWithSettingsDTO templateWithSettingsDTO = new TemplateWithSettingsDTO();
         fillTemplateDTO(entity, templateWithSettingsDTO);
         final PartSettings partSettings = mapPartSettings(entity.getLatestFile().getCompositions().get(0));
         templateWithSettingsDTO.setStartOnNewPage(partSettings.getStartOnNewPage());
+        log.info("Convert template: {} to dto with part was finished successfully", entity.getId());
         return templateWithSettingsDTO;
     }
 
     @Override
     public PartSettings mapPartSettings(TemplateFilePartEntity entity) {
+        log.info("Get partSettings from {} was started", entity);
         PartSettings partSettings;
         try {
             partSettings = objectMapper.readValue(entity.getSettings(), PartSettings.class);
@@ -183,12 +192,13 @@ public class TemplateMapperImpl implements TemplateMapper {
             log.error("Failed to read PartSettings", e);
             partSettings = new PartSettings();
         }
+        log.info("Get partSettings from {} was finished successfully", entity);
         return partSettings;
     }
 
     @Override
     public TemplateDescriptorDTO mapToDescriptor(final TemplateFileEntity templateFileEntity, final boolean versionAliasRequired) {
-
+        log.info("Convert templateFile: {} and {} to templateDescriptor was started", templateFileEntity.getId(), versionAliasRequired);
         final TemplateDescriptorDTO result = new TemplateDescriptorDTO();
         final String templateName = templateFileEntity.getTemplate().getName();
         final String templateAlias = versionAliasRequired
@@ -197,6 +207,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setTemplateName(templateName);
         result.setAlias(templateAlias);
         result.setVersion(templateFileEntity.getVersion().toString());
+        log.info("Convert templateFile: {} and {} to templateDescriptor was finished successfully", templateFileEntity.getId(), versionAliasRequired);
         return result;
     }
 
@@ -207,11 +218,13 @@ public class TemplateMapperImpl implements TemplateMapper {
 
     @Override
     public TemplateDeployedVersionDTO map(final TemplateFileEntity templateFileEntity) {
+        log.info("Convert templateFile: {} to TemplateDeployedVersionDTO was started", templateFileEntity.getId());
         final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
         final StageEntity stageEntity = templateFileEntity.getStage();
         templateDeployedVersionDTO.setStageName(stageEntity != null ? stageEntity.getName() : null);
         templateDeployedVersionDTO.setVersion(templateFileEntity.getVersion());
         templateDeployedVersionDTO.setDeployed(templateFileEntity.getDeployed());
+        log.info("Convert templateFile: {} to TemplateDeployedVersionDTO was finished successfully", templateFileEntity.getId());
         return templateDeployedVersionDTO;
     }
 
@@ -250,23 +263,27 @@ public class TemplateMapperImpl implements TemplateMapper {
 
     @Override
     public TemplatePartModel mapPartDto(final TemplatePartDTO dto) {
+        log.info("Convert {} to templatePartModel was started", dto);
         final TemplatePartModel model = new TemplatePartModel();
         model.setTemplateName(dto.getName());
         model.setCondition(dto.getCondition());
         final PartSettings partSettings = new PartSettings();
         Optional.ofNullable(dto.getStartOnNewPage()).ifPresent(partSettings::setStartOnNewPage);
         model.setPartSettings(partSettings);
+        log.info("Convert {} to templatePartModel was finished successfully", dto);
         return model;
     }
 
     @Override
     public List<TemplatePartModel> mapPartDto(final List<TemplatePartDTO> dto) {
+        log.info("Convert {} to list templatePartModel was started", dto);
         final List<TemplatePartModel> result;
         if (dto != null) {
             result = dto.stream().map(this::mapPartDto).collect(Collectors.toList());
         } else {
             result = null;
         }
+        log.info("Convert {} to list templatePartModel was finished successfully", dto);
         return result;
     }
 

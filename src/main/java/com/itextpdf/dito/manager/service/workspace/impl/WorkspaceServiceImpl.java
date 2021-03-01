@@ -13,6 +13,8 @@ import com.itextpdf.dito.manager.service.instance.InstanceService;
 import com.itextpdf.dito.manager.service.license.LicenseService;
 import com.itextpdf.dito.manager.service.stage.StageService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,6 +24,7 @@ import java.util.Optional;
 
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
+    private static final Logger log = LogManager.getLogger(WorkspaceServiceImpl.class);
     private final InstanceService instanceService;
     private final StageService stageService;
     private final LicenseService licenseService;
@@ -29,8 +32,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
 
     public WorkspaceServiceImpl(final InstanceService instanceService, final StageService stageService,
-            final LicenseService licenseService,
-            final WorkspaceRepository workspaceRepository) {
+                                final LicenseService licenseService,
+                                final WorkspaceRepository workspaceRepository) {
         this.instanceService = instanceService;
         this.stageService = stageService;
         this.licenseService = licenseService;
@@ -50,6 +53,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Transactional(rollbackOn = Exception.class)
     @Override
     public WorkspaceEntity create(final WorkspaceEntity workspace, final byte[] data, final String fileName, final String author, final String defaultDevelopInstance) {
+        log.info("Create workspace: {} by author: {} was started", workspace, author);
         // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
         if (!workspaceRepository.findAll().isEmpty()) {
             throw new OnlyOneWorkspaceAllowedException();
@@ -58,11 +62,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
         final WorkspaceEntity createdWorkspace = workspaceRepository.save(workspace);
         licenseService.uploadLicense(createdWorkspace, data, fileName);
+
+        log.info("Create workspace: {} by author: {} was finished ", workspace, author);
         return setInstanceAsDefault(createdWorkspace, defaultDevelopInstance);
     }
 
     @Override
     public WorkspaceEntity update(final String name, final WorkspaceEntity newWorkspace) {
+        log.info("Update workspase by name: {} and new workspace: {} was started", name, newWorkspace);
         WorkspaceEntity oldWorkspace = get(name);
 
         if (!newWorkspace.getName().equals(oldWorkspace.getName())) {
@@ -73,7 +80,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         oldWorkspace.setLanguage(newWorkspace.getLanguage());
         oldWorkspace.setTimezone(newWorkspace.getTimezone());
 
-        return workspaceRepository.save(oldWorkspace);
+        final WorkspaceEntity savedWorkspaceEntity = workspaceRepository.save(oldWorkspace);
+        log.info("Update workspase by name: {} and new workspace: {} was finished successfully", name, newWorkspace);
+        return savedWorkspaceEntity;
     }
 
     @Override
@@ -84,7 +93,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Transactional(rollbackOn = Exception.class)
     @Override
     public PromotionPathEntity updatePromotionPath(final String workspace, final PromotionPathEntity newPromotionPathEntity) {
-
+        log.info("Update promotion path with workspace: {} and promotion path: {} was started", workspace, newPromotionPathEntity);
         if (Optional.ofNullable(newPromotionPathEntity)
                 .map(PromotionPathEntity::getStages)
                 .map(stages -> stages.get(0))
@@ -103,7 +112,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         final List<StageEntity> newStages = fillStages(newPromotionPathEntity.getStages(), oldPromotionPathEntity);
         oldPromotionPathEntity.addStages(newStages);
 
-        return workspaceRepository.save(workspaceEntity).getPromotionPath();
+        final PromotionPathEntity savedPromotionPathEntity = workspaceRepository.save(workspaceEntity).getPromotionPath();
+        log.info("Update promotion path with workspace: {} and promotion path: {} was finished successfully", workspace, newPromotionPathEntity);
+        return savedPromotionPathEntity;
     }
 
     @Override

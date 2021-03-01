@@ -22,6 +22,8 @@ import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.token.TokenService;
 import com.itextpdf.dito.manager.service.user.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,8 +46,9 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
 public class UserServiceImpl extends AbstractService implements UserService {
-	
-	private static final String ACTIVE = "active";
+    private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
+
+    private static final String ACTIVE = "active";
 	
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -68,16 +71,20 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public UserEntity updateUser(final UserEntity userEntity, final String email) {
+        log.info("Update user by email: {} with user: {} was started", email, userEntity);
         final UserEntity persistedUserEntity = findActiveUserByEmail(email);
         persistedUserEntity.setFirstName(userEntity.getFirstName());
         persistedUserEntity.setLastName(userEntity.getLastName());
         persistedUserEntity.setPasswordUpdatedByAdmin(false);
-        return userRepository.save(persistedUserEntity);
+        final UserEntity savedUserEntity = userRepository.save(persistedUserEntity);
+        log.info("Update user by email: {} with user: {} was finished successfully", email, userEntity);
+        return savedUserEntity;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserEntity create(final UserEntity userEntity, final List<String> roles, final UserEntity currentUser) {
+        log.info("Create userEntity: {} with roles: {} by user:{} was started", userEntity.getEmail(), roles, currentUser.getEmail());
         if (userRepository.findByEmailAndActiveTrue(userEntity.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException(userEntity.getEmail());
         }
@@ -96,11 +103,13 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (mailClient != null) {
             mailClient.sendRegistrationMessage(savedUser, password, currentUser);
         }
+        log.info("Create userEntity: {} with roles: {} by user:{} was finished successfully", userEntity.getEmail(), roles, currentUser.getEmail());
         return savedUser;
     }
 
     @Override
     public Page<UserEntity> getAll(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
+        log.info("Get all users by filter: {} and search was started", userFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -110,19 +119,23 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final List<String> securityRoles = userFilter.getRoles();
         final Boolean active = getBooleanMultiselectFromFilter(userFilter.getActive());
 
-        return StringUtils.isEmpty(searchParam)
+        final Page<UserEntity> userEntities = StringUtils.isEmpty(searchParam)
                 ? userRepository.filter(pageWithSort, email, firstName, lastName, securityRoles, active)
                 : userRepository.search(pageWithSort, email, firstName, lastName, securityRoles, active, searchParam.toLowerCase());
+        log.info("Get all users by filter: {} and search was finished successfully", userFilter, searchParam);
+        return userEntities;
     }
 
     @Override
     @Transactional
     public void updateActivationStatus(final List<String> emails, final boolean activateAction) {
+        log.info("Update activation status for emails: {} and status: {} was started", emails, activateAction);
         Integer activeUsers = userRepository.countDistinctByEmailIn(emails);
         if (activeUsers != emails.size()) {
             throw new UserNotFoundException();
         }
         userRepository.updateActivationStatus(emails, activateAction);
+        log.info("Update activation status for emails: {} and status: {} was finished successfully", emails, activateAction);
     }
 
     @Override
@@ -134,11 +147,13 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     @Transactional
     public UserEntity unblock(final String email) {
+        log.info("Unblock user by with email: {} was started", email);
         final UserEntity user = userRepository.findByEmailAndActiveTrue(email).orElseThrow(() ->
                 new UserNotFoundException(email));
         user.setLocked(Boolean.FALSE);
         failedLoginRepository.deleteByUser(user);
         userRepository.save(user);
+        log.info("Unblock user by with email: {} was finished successfully", email);
         return user;
     }
 
@@ -146,6 +161,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public UserEntity updatePassword(final String oldPassword,
                                      final String newPassword,
                                      final String userEmail) {
+        log.info("Update password for user: {} was started", userEmail);
         final UserEntity user = findActiveUserByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException();
@@ -154,11 +170,13 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
         user.setPasswordUpdatedByAdmin(false);
+        log.info("Update password for user: {} was finished successfully", userEmail);
         return userRepository.save(user);
     }
 
     @Override
     public UserEntity updatePassword(final String newPassword, final String userEmail) {
+        log.info("Update password for user: {} was started", userEmail);
         final UserEntity user = findActiveUserByEmail(userEmail);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         user.setPassword(encoder.encode(newPassword));
@@ -169,17 +187,20 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (mailClient != null) {
             mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword);
         }
+        log.info("Update password for user: {} was finished successfully", userEmail);
         return savedUser;
     }
 
     @Override
     public UserEntity updatePasswordSpecifiedByAdmin(final String newPassword, final String email) {
+        log.info("Update password for user: {} was started", email);
         final UserEntity user = findActiveUserByEmail(email);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         checkUserPasswordIsSpecifiedByAdmin(user);
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
         user.setPasswordUpdatedByAdmin(false);
+        log.info("Update password for user: {} was finished successfully", email);
         return userRepository.save(user);
     }
 
@@ -196,6 +217,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     public List<UserEntity> updateUsersRoles(final List<String> emails, final List<String> roles,
                                              final UpdateUsersRolesActionEnum actionEnum) {
+        log.info("Update user roles for emails: {} with roles: {} and actionEnum: {} was started", emails, roles, actionEnum);
         if (isGlobalAdminRolePresented(roles)) {
             throw new AttemptToAttachGlobalAdministratorRoleException();
         }
@@ -227,6 +249,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
                 break;
         }
 
+        log.info("Update user roles for emails: {} with roles: {} and actionEnum: {} was finished successfully", emails, roles, actionEnum);
         return userRepository.saveAll(userEntities);
     }
 
@@ -298,21 +321,25 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public void forgotPassword(final String email) {
+        log.info("Forgot password for email: {} was started", email);
         final Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         if (userEntity.isPresent()) {
             final String token = tokenService.generateResetPasswordToken(userEntity.get());
             mailClient.sendResetMessage(userEntity.get(), token);
         }
+        log.info("Forgot password for email: {} was finished successfully", email);
     }
 
     @Override
     public void resetPassword(final ResetPasswordDTO resetPasswordDTO) {
+        log.info("Reset password with token: {} was started", resetPasswordDTO.getToken());
         final UserEntity userEntity = tokenService.checkResetPasswordToken(resetPasswordDTO.getToken())
                 .orElseThrow(InvalidResetPasswordTokenException::new);
         userEntity.setPassword(encoder.encode(resetPasswordDTO.getPassword()));
         userEntity.setModifiedAt(new Date());
         userEntity.setResetPasswordTokenDate(null);
         userEntity.setPasswordUpdatedByAdmin(false);
+        log.info("Reset password with token: {} was finished successfully", resetPasswordDTO.getToken());
         userRepository.save(userEntity);
     }
 

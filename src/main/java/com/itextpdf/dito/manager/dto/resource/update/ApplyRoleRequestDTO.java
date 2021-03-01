@@ -26,4 +26,11 @@ public class ApplyRoleRequestDTO {
         this.permissions = permissions;
     }
 
+    @Override
+    public String toString() {
+        return "ApplyRoleRequestDTO{" +
+                "roleName='" + roleName + '\'' +
+                ", permissions=" + permissions +
+                '}';
+    }
 }

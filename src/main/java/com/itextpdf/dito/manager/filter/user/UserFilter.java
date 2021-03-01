@@ -48,4 +48,15 @@ public class UserFilter {
     public void setActive(List<Boolean> active) {
         this.active = active;
     }
+
+    @Override
+    public String toString() {
+        return "UserFilter{" +
+                "email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", roles=" + roles +
+                ", active=" + active +
+                '}';
+    }
 }

@@ -170,4 +170,15 @@ public class ResourceEntity {
     public void setAppliedRoles(Set<RoleEntity> appliedRoles) {
         this.appliedRoles = appliedRoles;
     }
+
+    @Override
+    public String toString() {
+        return "ResourceEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", type=" + type +
+                ", createdOn=" + createdOn +
+                '}';
+    }
 }

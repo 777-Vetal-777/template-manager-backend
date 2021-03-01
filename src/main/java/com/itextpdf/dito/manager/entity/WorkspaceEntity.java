@@ -88,4 +88,14 @@ public class WorkspaceEntity {
 		this.licenseEntity = licenseEntity;
 	}
 
+    @Override
+    public String toString() {
+        return "WorkspaceEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", language='" + language + '\'' +
+                ", timezone='" + timezone + '\'' +
+                ", adjustForDaylight=" + adjustForDaylight +
+                '}';
+    }
 }

@@ -106,4 +106,15 @@ public class InstanceEntity {
     public void setRegisterToken(String registerToken) {
         this.registerToken = registerToken;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", socket='" + socket + '\'' +
+                ", createdOn=" + createdOn +
+                ", registerToken='" + registerToken + '\'' +
+                '}';
+    }
 }

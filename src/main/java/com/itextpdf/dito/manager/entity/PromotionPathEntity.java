@@ -60,4 +60,11 @@ public class PromotionPathEntity {
     public void setStages(List<StageEntity> stages) {
         this.stages = stages;
     }
+
+    @Override
+    public String toString() {
+        return "PromotionPathEntity{" +
+                "id=" + id +
+                '}';
+    }
 }

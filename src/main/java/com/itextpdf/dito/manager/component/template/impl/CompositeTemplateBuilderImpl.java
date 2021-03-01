@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.template.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.template.CompositeTemplateBuilder;
+import com.itextpdf.dito.manager.component.validator.json.impl.JsonValidatorImpl;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -24,6 +25,7 @@ import java.util.function.BiFunction;
 
 @Component
 public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
+    private static final Logger log = LogManager.getLogger(CompositeTemplateBuilderImpl.class);
 
     private static final String DATA_DITO_ELEMENT = "data-dito-element";
     private static final String DATA_DITO_VERTICAL_ALIGN = "data-dito-page-margin-vertical-align";
