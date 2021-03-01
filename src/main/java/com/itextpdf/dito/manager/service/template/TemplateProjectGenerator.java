@@ -12,4 +12,6 @@ public interface TemplateProjectGenerator {
     File generateZippedProjectByTemplate(TemplateEntity templateEntity, DataSampleFileEntity dataSampleFileEntity);
 
     File generateZippedProjectByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities);
+
+    File generateZippedProjectByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities, boolean exportDependencies);
 }

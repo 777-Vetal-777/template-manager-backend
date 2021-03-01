@@ -36,7 +36,7 @@ public class InstanceClientImpl implements InstanceClient {
 
     private static final Logger log = LogManager.getLogger(InstanceClientImpl.class);
 
-    //uri for validating iText SDK appilcation status
+    //uri for validating iText SDK application status
     private static final String INSTANCE_API_STATUS_URL = "/api/status";
     private static final String INSTANCE_REGISTER_ENDPOINT = "/api/admin/register";
     private static final String INSTANCE_UNREGISTER_ENDPOINT = "/api/admin/unregister";

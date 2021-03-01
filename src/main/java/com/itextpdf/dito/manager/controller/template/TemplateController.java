@@ -312,7 +312,8 @@ public interface TemplateController {
             @ApiResponse(responseCode = "404", description = "Template not found"),
             @ApiResponse(responseCode = "422", description = "Could not proceed with template export.")
     })
-    ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName);
+    ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
+                                  @Parameter(description = "Export dependencies flag (default is true)") @RequestParam(value = "exportDependencies", required = false) Boolean dependenciesFlag);
 
     @PostMapping(value = TEMPLATE_IMPORT_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('E9_US25_IMPORT_TEMPLATE_DATA')")

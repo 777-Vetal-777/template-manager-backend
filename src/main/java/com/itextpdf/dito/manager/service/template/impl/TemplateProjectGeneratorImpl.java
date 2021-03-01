@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.DATA_FOLDER;
+import static com.itextpdf.dito.manager.util.FilesUtils.RESOURCES_FOLDER;
 import static com.itextpdf.dito.manager.util.FilesUtils.TEMPLATES_FOLDER;
 import static com.itextpdf.dito.manager.util.FilesUtils.createTemplateDirectoryForPreview;
 import static com.itextpdf.dito.manager.util.FilesUtils.zipFolder;
@@ -103,18 +104,23 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
     }
 
     @Override
-    public File generateProjectFolderByTemplate(TemplateEntity templateEntity, DataSampleFileEntity dataSampleFileEntity) {
+    public File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final DataSampleFileEntity dataSampleFileEntity) {
         return generateProjectFolderByTemplate(templateEntity, toDataSampleList(templateEntity, dataSampleFileEntity));
     }
 
     @Override
-    public File generateZippedProjectByTemplate(TemplateEntity templateEntity, DataSampleFileEntity dataSampleFileEntity) {
+    public File generateZippedProjectByTemplate(final TemplateEntity templateEntity, final DataSampleFileEntity dataSampleFileEntity) {
         return generateZippedProjectByTemplate(templateEntity, toDataSampleList(templateEntity, dataSampleFileEntity));
     }
 
     @Override
-    public File generateZippedProjectByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities) {
-        final Path projectFolder = generateProjectFolderByTemplate(templateEntity, dataSampleFileEntities).toPath();
+    public File generateZippedProjectByTemplate(final TemplateEntity templateEntity, final List<DataSampleFileEntity> dataSampleFileEntities) {
+        return generateZippedProjectByTemplate(templateEntity, dataSampleFileEntities, true);
+    }
+
+    @Override
+    public File generateZippedProjectByTemplate(final TemplateEntity templateEntity, final List<DataSampleFileEntity> dataSampleFileEntities, final boolean exportDependencies) {
+        final Path projectFolder = generateProjectFolderByTemplate(templateEntity, dataSampleFileEntities, exportDependencies).toPath();
         final File zippedProject;
 
         try {
@@ -127,7 +133,11 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         return zippedProject;
     }
 
-    private File generateProjectFolderByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities) {
+    private File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final List<DataSampleFileEntity> dataSampleFileEntities) {
+        return generateProjectFolderByTemplate(templateEntity, dataSampleFileEntities, true);
+    }
+
+    private File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final List<DataSampleFileEntity> dataSampleFileEntities, final boolean exportDependencies) {
         final File projectFolder;
         try {
             projectFolder = Files.createTempDirectory(FilesUtils.TEMP_DIRECTORY.toPath(), "preview_".concat(templateEntity.getName())).toFile();
@@ -143,6 +153,12 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
             } finally {
                 deleteQuietly(zippedProject);
             }
+
+            if (!exportDependencies) {
+                deleteQuietly(Path.of(projectFolder.getAbsolutePath(), DATA_FOLDER).toFile());
+                deleteQuietly(Path.of(projectFolder.getAbsolutePath(), RESOURCES_FOLDER).toFile());
+            }
+
         } catch (IOException ex) {
             log.error(ex);
             throw new TemplateProjectGenerationException("Error while generating PDF preview for template");

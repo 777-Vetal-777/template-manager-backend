@@ -40,10 +40,10 @@ public class TemplateExportServiceImpl implements TemplateExportService {
     }
 
     @Override
-    public byte[] export(final String templateName) {
-        log.info("Export template by templateName: {} was started", templateName);
+    public byte[] export(final String templateName, boolean exportDependencies) {
+        log.info("Export template by templateName: {} and exportDependencies: {} was started", templateName, exportDependencies);
         final TemplateEntity templateEntity = templateService.get(templateName);
-        final File zippedProject = exportToDito(templateEntity);
+        final File zippedProject = exportToDito(templateEntity, exportDependencies);
         final File result;
 
         try {
@@ -62,33 +62,14 @@ public class TemplateExportServiceImpl implements TemplateExportService {
             throw new TemplateProjectGenerationException("Error while reading zipped project");
         } finally {
             deleteQuietly(result);
-            log.info("Export template by templateName: {} was finished successfully", templateName);
+            log.info("Export template by templateName: {} and exportDependencies: {} was finished successfully", templateName, exportDependencies);
         }
     }
 
-    private File exportToDito(final TemplateEntity templateEntity) {
+    private File exportToDito(final TemplateEntity templateEntity, final boolean exportDependencies) {
         final List<DataSampleFileEntity> dataSampleFileEntities = dataSampleService.getListByTemplateName(templateEntity.getName()).stream().map(DataSampleEntity::getLatestVersion).collect(Collectors.toList());
 
-        final File zippedProject = templateProjectGenerator.generateZippedProjectByTemplate(templateEntity, dataSampleFileEntities);
-        return zippedProject;
+        return templateProjectGenerator.generateZippedProjectByTemplate(templateEntity, dataSampleFileEntities, exportDependencies);
     }
-
-/*
-    private byte[] exportToDito(final String templateName) {
-        final TemplateEntity templateEntity = templateService.get(templateName);
-        final List<DataSampleFileEntity> dataSampleFileEntities = dataSampleService.getListByTemplateName(templateName).stream().map(DataSampleEntity::getLatestVersion).collect(Collectors.toList());
-
-        final File zippedProject = templateProjectGenerator.generateZippedProjectByTemplate(templateEntity, dataSampleFileEntities);
-        try {
-            return Files.readAllBytes(zippedProject.toPath());
-        } catch (IOException e) {
-            log.error(e);
-            throw new TemplateProjectGenerationException("Error while reading zipped project");
-        } finally {
-            deleteQuietly(zippedProject);
-        }
-    }
-*/
-
 
 }

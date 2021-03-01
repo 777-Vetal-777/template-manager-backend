@@ -55,6 +55,7 @@ import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
@@ -308,16 +309,17 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<byte[]> export(final String templateName) {
-        log.info("Export template by templateName: {} was started", templateName);
+    public ResponseEntity<byte[]> export(final String templateName, final Boolean dependenciesFlag) {
+        log.info("Export template by templateName: {} and dependenciesFlag: {} was started", templateName, dependenciesFlag);
+        final boolean exportDependencies = Optional.ofNullable(dependenciesFlag).orElse(true);
         final String decodedTemplateName = decodeBase64(templateName);
-        final byte[] zippedProject = templateExportService.export(decodedTemplateName);
+        final byte[] zippedProject = templateExportService.export(decodedTemplateName, exportDependencies);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final String filename = decodedTemplateName.concat(".zip");
         headers.setContentDispositionFormData("attachment", filename);
-        log.info("Export template by templateName: {} was finished successfully", templateName);
+        log.info("Export template by templateName: {} and dependenciesFlag: {} was finished successfully", templateName, dependenciesFlag);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }
 

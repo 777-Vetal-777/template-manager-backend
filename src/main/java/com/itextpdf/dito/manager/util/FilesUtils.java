@@ -23,6 +23,7 @@ public final class FilesUtils {
     public static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
     public static final String TEMPLATES_FOLDER = "templates";
     public static final String DATA_FOLDER = "data";
+    public static final String RESOURCES_FOLDER = "resources";
 
 
     public static byte[] getFileBytes(final MultipartFile file) {
