@@ -175,7 +175,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity updatePassword(final String newPassword, final String userEmail) {
+    public UserEntity updatePassword(final String newPassword, final String userEmail, final UserEntity admin) {
         log.info("Update password for user: {} was started", userEmail);
         final UserEntity user = findActiveUserByEmail(userEmail);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
@@ -185,7 +185,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setPasswordUpdatedByAdmin(true);
         final UserEntity savedUser = userRepository.save(user);
         if (mailClient != null) {
-            mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword);
+            mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword, admin);
         }
         log.info("Update password for user: {} was finished successfully", userEmail);
         return savedUser;

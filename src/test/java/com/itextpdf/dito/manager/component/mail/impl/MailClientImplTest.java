@@ -38,7 +38,7 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        Assertions.assertDoesNotThrow(()-> mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345"));
+        Assertions.assertDoesNotThrow(()-> mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345", userEntity));
     }
 
     @Test

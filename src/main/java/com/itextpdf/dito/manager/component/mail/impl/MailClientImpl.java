@@ -83,12 +83,11 @@ public class MailClientImpl implements MailClient {
     }
 
     @Override
-    public void sendPasswordsWasUpdatedByAdminMessage(final UserEntity savedUser, final String password) {
-        final String mailBody = generatePasswordUpdatedByAdminHtml(savedUser, password);
+    public void sendPasswordsWasUpdatedByAdminMessage(final UserEntity savedUser, final String password, final UserEntity admin) {
+        final String mailBody = generatePasswordUpdatedByAdminHtml(savedUser, admin, password);
         try {
             send(username, savedUser.getEmail(), MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT, mailBody);
         } catch (Exception ex) {
-            log.info(ex.getMessage());
             throw new MailingException(ex.getMessage());
         }
     }
@@ -120,14 +119,15 @@ public class MailClientImpl implements MailClient {
         return stringBuilder.toString();
     }
 
-    private String generatePasswordUpdatedByAdminHtml(final UserEntity userEntity, final String password) {
+    private String generatePasswordUpdatedByAdminHtml(final UserEntity userEntity, final UserEntity admin, final String password) {
         final List<String> list = readFile("templates/passwordUpdatedByAdminEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
-        list.set(41, String.format(list.get(41), userEntity.getEmail()));
-        list.set(45, String.format(list.get(45), password));
-        list.set(49, String.format(list.get(49), FRONT_URL.concat("/login")));
-        list.set(65, String.format(list.get(65), PRIVACY_INFORMATION_URL));
-        list.set(62, String.format(list.get(62), Year.now().getValue()));
+        list.set(29, String.format(list.get(29), admin.getFirstName() + " "+ admin.getLastName()));
+        list.set(36, String.format(list.get(36), userEntity.getEmail()));
+        list.set(40, String.format(list.get(40), password));
+        list.set(44, String.format(list.get(44), FRONT_URL.concat("/login")));
+        list.set(60, String.format(list.get(60), PRIVACY_INFORMATION_URL));
+        list.set(57, String.format(list.get(57), Year.now().getValue()));
         final StringBuilder stringBuilder = new StringBuilder();
         for (final String str2 : list) {
             stringBuilder.append(str2);

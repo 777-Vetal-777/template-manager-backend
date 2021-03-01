@@ -29,7 +29,7 @@ public interface UserService {
 
     UserEntity updatePassword(String oldPassword, String newPassword, String userEmail);
 
-    UserEntity updatePassword(String newPassword, String userEmail);
+    UserEntity updatePassword(String newPassword, String userEmail, UserEntity admin);
 
     UserEntity updatePasswordSpecifiedByAdmin(String newPassword, String email);
 

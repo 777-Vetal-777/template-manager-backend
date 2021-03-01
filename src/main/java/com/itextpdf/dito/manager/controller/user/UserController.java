@@ -98,7 +98,7 @@ public interface UserController {
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
     ResponseEntity<UserDTO> updatePassword(@Parameter(name = USER_NAME_PATH_VARIABLE, description = "Encoded with base64 username", required = true) @PathVariable(USER_NAME_PATH_VARIABLE) String userName,
-            @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO);
+            @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E3_US_9_USERS_TABLE', 'E2_US6_SETTINGS_PANEL')")

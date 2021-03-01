@@ -61,9 +61,10 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO) {
+    public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO, final Principal principal) {
         log.info("Update password by userName: {} was started", userName);
-        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(),decodeBase64(userName));
+        final UserEntity adminEntity = userService.findByEmail(principal.getName());
+        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), decodeBase64(userName), adminEntity);
         log.info("Update password by userName: {} was finished successfully");
         return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
