@@ -49,7 +49,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
 
     private static final String ACTIVE = "active";
-
+	
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final FailedLoginRepository failedLoginRepository;
