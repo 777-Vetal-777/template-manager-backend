@@ -11,7 +11,7 @@
     <groupId>com.itextpdf.dito</groupId>
     <artifactId>template-manager</artifactId>
     <version>0.0.9-SNAPSHOT</version>
-    <name>DITO PDF Template Manager</name>
+    <name>DITO Template Manager Backend</name>
 
     <properties>
         <java.version>11</java.version>
