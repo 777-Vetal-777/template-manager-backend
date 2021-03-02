@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud.permissions;
 
+import com.itextpdf.dito.manager.controller.permission.PermissionController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
@@ -112,5 +113,22 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
         //Delete permission
         mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES, IMAGES, encodedResourceName, encodeStringToBase64(roleName)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getAll() throws Exception {
+        mockMvc.perform(get(PermissionController.BASE_NAME)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getAllPageable() throws Exception {
+        mockMvc.perform(get(PermissionController.BASE_NAME + PermissionController.PAGEABLE_ENDPOINT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(20)));
     }
 }
