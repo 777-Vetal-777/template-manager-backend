@@ -109,7 +109,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public Page<UserEntity> getAll(final Pageable pageable, final UserFilter userFilter, final String searchParam) {
-        log.info("Get all users by filter: {} and search was started", userFilter, searchParam);
+        log.info("Get all users by filter: {} and search: {} was started", userFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
         final Pageable pageWithSort = updateSort(pageable);
@@ -122,7 +122,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final Page<UserEntity> userEntities = StringUtils.isEmpty(searchParam)
                 ? userRepository.filter(pageWithSort, email, firstName, lastName, securityRoles, active)
                 : userRepository.search(pageWithSort, email, firstName, lastName, securityRoles, active, searchParam.toLowerCase());
-        log.info("Get all users by filter: {} and search was finished successfully", userFilter, searchParam);
+        log.info("Get all users by filter: {} and search: {} was finished successfully", userFilter, searchParam);
         return userEntities;
     }
 
@@ -176,7 +176,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     public UserEntity updatePassword(final String newPassword, final String userEmail, final UserEntity admin) {
-        log.info("Update password for user: {} was started", userEmail);
+        log.info("Update password for user: {} was started by admin: {}", userEmail, admin);
         final UserEntity user = findActiveUserByEmail(userEmail);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         user.setPassword(encoder.encode(newPassword));
@@ -187,20 +187,20 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (mailClient != null) {
             mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword, admin);
         }
-        log.info("Update password for user: {} was finished successfully", userEmail);
+        log.info("Update password for user: {} by admin: {} was finished successfully", userEmail, admin);
         return savedUser;
     }
 
     @Override
     public UserEntity updatePasswordSpecifiedByAdmin(final String newPassword, final String email) {
-        log.info("Update password for user: {} was started", email);
+        log.info("Update password specified by admin for user: {} was started", email);
         final UserEntity user = findActiveUserByEmail(email);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         checkUserPasswordIsSpecifiedByAdmin(user);
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
         user.setPasswordUpdatedByAdmin(false);
-        log.info("Update password for user: {} was finished successfully", email);
+        log.info("Update password specified by admin for user: {} was finished successfully", email);
         return userRepository.save(user);
     }
 

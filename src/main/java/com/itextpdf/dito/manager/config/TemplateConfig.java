@@ -20,6 +20,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TemplateConfig {
 
+    private static final String DITO_ASSET_TAG = "dito-asset://";
+
     private final ResourceRepository resourceRepository;
     private final TemplateRepository templateRepository;
     private final ResourceMapper resourceMapper;
@@ -50,7 +52,7 @@ public class TemplateConfig {
 
             @Override
             public boolean isUriSupported(final String url) {
-                return url.startsWith("dito-asset://");
+                return url.startsWith(DITO_ASSET_TAG);
             }
         };
     }
@@ -70,14 +72,14 @@ public class TemplateConfig {
 
             @Override
             public boolean isUriSupported(final String url) {
-                return url.startsWith("dito-asset://");
+                return url.startsWith(DITO_ASSET_TAG);
             }
         };
     }
 
     @NotNull
     private String getIdFromTag(final String resourceId) {
-        final String cuttedId = StringUtils.substringAfter(resourceId, "dito-asset://");
+        final String cuttedId = StringUtils.substringAfter(resourceId, DITO_ASSET_TAG);
         return resourceMapper.decode(cuttedId);
     }
 }

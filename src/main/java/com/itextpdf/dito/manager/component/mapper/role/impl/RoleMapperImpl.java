@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.role.impl;
 
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
-import com.itextpdf.dito.manager.component.mapper.resource.impl.ResourceMapperImpl;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;

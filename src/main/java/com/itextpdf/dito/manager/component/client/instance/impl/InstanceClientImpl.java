@@ -6,7 +6,6 @@ import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterRequestDT
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDeploymentDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
-import com.itextpdf.dito.manager.entity.WorkspaceEntity;
 import com.itextpdf.dito.manager.exception.instance.InstanceConnectionException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
@@ -20,10 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -178,14 +175,5 @@ public class InstanceClientImpl implements InstanceClient {
         builder.part("template_project", new FileSystemResource(templateZipFile), MediaType.APPLICATION_OCTET_STREAM);
         builder.part("descriptor", templateDescriptorDTO, MediaType.APPLICATION_JSON);
         return builder.build();
-    }
-
-    //TODO use this method to be set as subject in register and unregister endpoints when multiple workspace support is implemented
-    private String getCurrentWorkspaceName() {
-        final List<WorkspaceEntity> workspaceEntityList = workspaceRepository.findAll();
-        if (CollectionUtils.isEmpty(workspaceEntityList)) {
-            throw new IllegalArgumentException("No default workspace was set");
-        }
-        return workspaceEntityList.get(0).getName();
     }
 }

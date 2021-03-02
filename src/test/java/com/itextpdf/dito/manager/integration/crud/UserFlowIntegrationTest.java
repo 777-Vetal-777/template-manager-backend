@@ -49,9 +49,9 @@ import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACT
 import static com.itextpdf.dito.manager.controller.user.UserController.USER_UPDATE_PASSWORD_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -199,13 +199,16 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void deactivateUsersWhenUserNotFound() throws Exception {
+        final String userEmail = "unknown@email.com";
         UsersActivateRequestDTO deleteRequest = new UsersActivateRequestDTO();
-        deleteRequest.setEmails(List.of("unknown@email.com"));
+        deleteRequest.setEmails(List.of(userEmail));
         mockMvc.perform(patch(UserController.BASE_NAME + USERS_ACTIVATION_ENDPOINT)
                 .content(objectMapper.writeValueAsString(deleteRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+
+        assertFalse(userRepository.findByEmail(userEmail).isPresent());
     }
 
     @Test
@@ -339,29 +342,33 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         final Optional<UserEntity> userAfterUpdatePassword = userRepository.findByEmail(user2.getEmail());
         assertTrue(userAfterUpdatePassword.isPresent());
         final UserEntity userWhichUpdatedPasswordEntity = userAfterUpdatePassword.get();
-        assertFalse(userWhichUpdatedPasswordEntity.getPassword().equals(password2));
+        assertNotEquals(userWhichUpdatedPasswordEntity.getPassword(), password2);
     }
 
     @Test
     public void updatePassword() throws Exception {
+        final String userEmail = "user1@email.com";
         final UpdatePasswordRequestDTO updatePasswordRequestDTO = new UpdatePasswordRequestDTO();
         updatePasswordRequestDTO.setPassword("NewPassword12345");
         user1.setPasswordUpdatedByAdmin(false);
-        mockMvc.perform(patch(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com") + CHANGE_PASSWORD)
+        mockMvc.perform(patch(UserController.BASE_NAME + "/" + Base64.encode(userEmail) + CHANGE_PASSWORD)
                 .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("passwordUpdatedByAdmin").value(true));
+        assertTrue(userRepository.findByEmail(userEmail).isPresent());
+        assertTrue(userRepository.findByEmail(userEmail).get().getPasswordUpdatedByAdmin());
     }
 
     @Test
     public void updateUser() throws Exception {
+        final String userEmail = "user1@email.com";
         final UserUpdateRequestDTO updatePasswordRequestDTO = new UserUpdateRequestDTO();
         updatePasswordRequestDTO.setFirstName("newFirstName");
         updatePasswordRequestDTO.setLastName("newLastName");
         user1.setPasswordUpdatedByAdmin(true);
-        mockMvc.perform(patch(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com"))
+        mockMvc.perform(patch(UserController.BASE_NAME + "/" + Base64.encode(userEmail))
                 .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -369,6 +376,8 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("passwordUpdatedByAdmin").value(false))
                 .andExpect(jsonPath("firstName").value("newFirstName"))
                 .andExpect(jsonPath("lastName").value("newLastName"));
+        assertTrue(userRepository.findByEmail(userEmail).isPresent());
+        assertEquals(userRepository.findByEmail(userEmail).get().getFirstName(), "newFirstName");
     }
 
     @Test
@@ -396,10 +405,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void shouldThrowNoSuchUserException() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME + "/" + Base64.encode("bad_user@email.com"))
+        final String userEmail = "bad_user@email.com";
+        mockMvc.perform(get(UserController.BASE_NAME + "/" + Base64.encode(userEmail))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+        assertFalse(userRepository.findByEmail(userEmail).isPresent());
     }
 
     @Test

@@ -109,7 +109,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
         dataSampleEntity.setDataSampleLog(Arrays.asList(logEntity));
 
 		log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was finished successfully",
-				dataCollectionEntity, fileName, sample, comment, email);
+				dataCollectionEntity, name, fileName, sample, comment, email);
 		return dataSampleRepository.save(dataSampleEntity);
     }
 
@@ -248,7 +248,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 
 		final DataSampleEntity savedDataSampleEntity = dataSampleRepository.save(existingDataSampleEntity);
 		log.info("Create new version with name: {}, sample: {} and fileName: {}, email: {}, comment: {} was finished successfully",
-				name, sample, email, comment);
+				name, sample, fileName, email, comment);
 		return savedDataSampleEntity;
 	}
 

@@ -123,7 +123,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final byte[] data = getBytesFromMultipart(multipartFile);
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.createNewVersion(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName(), comment);
-        log.info("Create new version of dataCollection with name: {} is finished successfully");
+        log.info("Create new version of dataCollection with name: {} is finished successfully", name);
         return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
     }
 

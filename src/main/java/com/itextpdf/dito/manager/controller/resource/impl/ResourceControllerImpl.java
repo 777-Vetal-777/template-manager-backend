@@ -269,7 +269,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<ResourceDTO> rollbackVersion(final Principal principal, final String name, final String type, final Long version) {
         log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was started", decodeBase64(name), type, version);
         final ResourceEntity rollBackEntity = resourceVersionsService.rollbackVersion(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName(), version);
-        log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was finished successfully");
+        log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was finished successfully", name, type, version);
         return new ResponseEntity<>(resourceMapper.map(rollBackEntity), HttpStatus.OK);
     }
 

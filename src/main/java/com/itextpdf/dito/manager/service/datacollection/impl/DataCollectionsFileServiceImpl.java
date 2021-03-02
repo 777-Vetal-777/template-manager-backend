@@ -73,12 +73,13 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
     }
 
     private Pageable updateSort(final Pageable pageable) {
+        final String version = "version";
         Sort newSort;
         if (pageable.getSort().isSorted()) {
             newSort = Sort.by(pageable.getSort().stream()
                     .map(sortParam -> {
-                        if (sortParam.getProperty().equals("version")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "version");
+                        if (sortParam.getProperty().equals(version)) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), version);
                         }
                         if (sortParam.getProperty().equals("modifiedBy")) {
                             sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
@@ -96,7 +97,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
                     })
                     .collect(Collectors.toList()));
         } else {
-            newSort = Sort.by("version").descending();
+            newSort = Sort.by(version).descending();
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }

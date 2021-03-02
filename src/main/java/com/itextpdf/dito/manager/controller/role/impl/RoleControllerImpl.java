@@ -57,7 +57,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
         log.info("Update role by name: {} and params: {} was started", name, roleUpdateRequestDTO);
         final RoleEntity roleEntity = roleMapper.map(roleUpdateRequestDTO);
         final RoleEntity updatedRole = roleService.update(decodeBase64(name), roleEntity, roleUpdateRequestDTO.getPermissions());
-        log.info("Update role by name: {} and params: {} was finished successfully");
+        log.info("Update role by name: {} and params: {} was finished successfully", name, roleUpdateRequestDTO);
         return new ResponseEntity<>(
                 roleMapper.map(updatedRole),
                 HttpStatus.OK);

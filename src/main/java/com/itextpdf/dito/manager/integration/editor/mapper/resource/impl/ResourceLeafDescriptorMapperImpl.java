@@ -23,6 +23,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.util.StringUtils;
 
 @Component
 public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorMapper {
@@ -77,9 +78,7 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         resourceIdDTO.setType(resourceTypeEnum);
         resourceIdDTO.setSubName(subName);
         final String json = serialize(resourceIdDTO);
-        result = encode(json);
-
-        return result;
+        return !StringUtils.isEmpty(json) ? encode(json) : "";
     }
 
     private List<FontFileDescriptor> getFontFiles(final ResourceEntity resourceEntity) {

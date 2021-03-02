@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.component.mapper.dependency.impl;
 
-import com.itextpdf.dito.manager.component.mapper.datacollection.impl.DataCollectionMapperImpl;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;

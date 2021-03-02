@@ -65,7 +65,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
         log.info("Update password by userName: {} was started", userName);
         final UserEntity adminEntity = userService.findByEmail(principal.getName());
         final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), decodeBase64(userName), adminEntity);
-        log.info("Update password by userName: {} was finished successfully");
+        log.info("Update password by userName: {} was finished successfully", userName);
         return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
 
