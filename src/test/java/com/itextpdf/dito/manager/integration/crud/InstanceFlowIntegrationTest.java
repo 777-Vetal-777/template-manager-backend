@@ -47,6 +47,18 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void shouldThrowInstanceAlreadyExist() throws Exception {
+        final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
+        createInstanceForTest(request.getInstances().get(0).getName());
+
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     public void test_remember_success() throws Exception {
         final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
 
