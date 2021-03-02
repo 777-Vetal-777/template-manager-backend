@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,24 +43,14 @@ public class TemplateExportServiceImpl implements TemplateExportService {
         log.info("Export template by templateName: {} and exportDependencies: {} was started", templateName, exportDependencies);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final File zippedProject = exportToDito(templateEntity, exportDependencies);
-        final File result;
 
         try {
-            result = zipFile(Path.of(templateEntity.getName().concat(".zip")), zippedProject.toPath());
+            return Files.readAllBytes(zippedProject.toPath());
         } catch (IOException e) {
             log.error(e);
-            throw new TemplateProjectGenerationException("Error while packing zipped project");
+            throw new TemplateProjectGenerationException("Error while reading dito project after packing");
         } finally {
             deleteQuietly(zippedProject);
-        }
-
-        try {
-            return Files.readAllBytes(result.toPath());
-        } catch (IOException e) {
-            log.error(e);
-            throw new TemplateProjectGenerationException("Error while reading zipped project");
-        } finally {
-            deleteQuietly(result);
             log.info("Export template by templateName: {} and exportDependencies: {} was finished successfully", templateName, exportDependencies);
         }
     }

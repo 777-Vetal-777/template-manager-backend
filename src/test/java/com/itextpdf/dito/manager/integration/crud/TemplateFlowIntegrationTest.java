@@ -26,7 +26,6 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -60,7 +59,7 @@ import static com.itextpdf.dito.manager.controller.template.TemplateController.T
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController.TEMPLATE_URL;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -591,7 +590,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldThrowTemplateInvalidNameException() throws Exception{
+    void shouldThrowTemplateInvalidNameException() throws Exception {
         final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         request.setName("BAD_NAME!@#$%^&()*//`");
         mockMvc.perform(post(TemplateController.BASE_NAME)
@@ -620,22 +619,18 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @SafeVarargs
-    private <T> ResultMatcher zipMatch(Matcher<? super T>... entries) {
+    private ResultMatcher zipMatch(Matcher<Iterable<? super String>>... entries) {
         return mvcResult -> {
-            try (final ZipInputStream preZipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
-                final List<String> zipEntries = new LinkedList<>();
-                while (preZipStream.getNextEntry() != null) {
-                    final byte[] ditoEntry = preZipStream.readAllBytes();
-                    try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(ditoEntry))) {
-                        ZipEntry ze;
-                        while ((ze = zipStream.getNextEntry()) != null) {
-                            zipEntries.add(ze.getName());
-                        }
-                    }
+            final List<String> zipEntries = new LinkedList<>();
+            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
+                ZipEntry ze;
+                while ((ze = zipStream.getNextEntry()) != null) {
+                    //replace used for Windows machines
+                    zipEntries.add(ze.getName().replace('\\', '/'));
                 }
-                for (Matcher<?> entry : entries) {
-                    assertThat(entry.matches(zipEntries));
-                }
+            }
+            for (Matcher<Iterable<? super String>> entry : entries) {
+                assertThat(zipEntries, entry);
             }
         };
     }
