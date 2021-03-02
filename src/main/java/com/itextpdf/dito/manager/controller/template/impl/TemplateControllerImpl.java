@@ -14,12 +14,12 @@ import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
-import com.itextpdf.dito.manager.dto.template.TemplateImportRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.setting.TemplateImportSettingDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.StageEntity;
@@ -324,9 +324,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<TemplateDTO> importData(final Principal principal,
-                                                  final MultipartFile templateFile,
-                                                  final TemplateImportRequestDTO templateImportRequestDTO) {
+    public ResponseEntity<TemplateDTO> importData(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }

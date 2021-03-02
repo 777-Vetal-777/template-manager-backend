@@ -7,12 +7,12 @@ import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
-import com.itextpdf.dito.manager.dto.template.TemplateImportRequestDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.setting.TemplateImportSettingDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -325,6 +325,6 @@ public interface TemplateController {
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)})
     ResponseEntity<TemplateDTO> importData(Principal principal,
                                            @Parameter(name = "template", description = "Template dito file", required = true, style = ParameterStyle.FORM) @RequestPart(value = "template") MultipartFile templateFile,
-                                           @RequestBody TemplateImportRequestDTO templateImportRequestDTO);
+                                           @Parameter(name = "settings", description = "Name of data collections and renaming files", required = true, style = ParameterStyle.FORM) @RequestPart(value = "settings", required = false) List<TemplateImportSettingDTO> templateImportSettings);
 
 }
