@@ -282,7 +282,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].blocked").value("false"));
         UserEntity user = userRepository.findByEmail(user1.getEmail()).orElseThrow();
-        assertTrue(failedLoginRepository.findByUser(user1).isEmpty());
+        assertTrue(!failedLoginRepository.findByUser(user1).isEmpty() && failedLoginRepository.findByUser(user1).get().isEmpty());
         assertFalse(user.getLocked());
     }
 
