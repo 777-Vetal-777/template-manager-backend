@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.util.StringUtils;
 
 @Component
 public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorMapper {
@@ -71,14 +71,12 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
 
     @Override
     public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
-        String result;
-
         final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
         resourceIdDTO.setName(name);
         resourceIdDTO.setType(resourceTypeEnum);
         resourceIdDTO.setSubName(subName);
         final String json = serialize(resourceIdDTO);
-        return !StringUtils.isEmpty(json) ? encode(json) : "";
+        return Optional.ofNullable(json).map(this::encode).orElse("");
     }
 
     private List<FontFileDescriptor> getFontFiles(final ResourceEntity resourceEntity) {

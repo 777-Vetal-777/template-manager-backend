@@ -16,6 +16,7 @@ import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.entity.FailedLoginAttemptEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.itextpdf.dito.manager.service.user.impl.UserServiceImpl;
 import com.itextpdf.kernel.xmp.impl.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -382,13 +385,15 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void getUser() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com"))
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME + "/" + Base64.encode("user1@email.com"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("passwordUpdatedByAdmin").value(false))
                 .andExpect(jsonPath("firstName").value("Harry"))
-                .andExpect(jsonPath("lastName").value("Kane"));
+                .andExpect(jsonPath("lastName").value("Kane"))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -396,11 +401,13 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         final PasswordChangeRequestDTO passwordChangeRequestDTO = new PasswordChangeRequestDTO();
         passwordChangeRequestDTO.setOldPassword("WRONG_OLD_PASSWORD");
         passwordChangeRequestDTO.setNewPassword("NEW_PASSWORD");
-        mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
+        final MvcResult result = mockMvc.perform(patch(UserController.BASE_NAME + CURRENT_USER_CHANGE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(passwordChangeRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -417,11 +424,13 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     public void shouldThrowPasswordIsNotSpecifiedByAdmin() throws Exception {
         final UpdatePasswordRequestDTO updatePasswordRequestDTO = new UpdatePasswordRequestDTO();
         updatePasswordRequestDTO.setPassword("test");
-        mockMvc.perform(patch(UserController.BASE_NAME + USER_UPDATE_PASSWORD_ENDPOINT)
+        final MvcResult result = mockMvc.perform(patch(UserController.BASE_NAME + USER_UPDATE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test

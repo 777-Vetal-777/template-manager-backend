@@ -128,6 +128,8 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         } catch (IOException e) {
             log.error(e);
             throw new TemplateProjectGenerationException("Error while generating zipped project");
+        } finally {
+            deleteQuietly(projectFolder.toFile());
         }
 
         return zippedProject;

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
@@ -23,6 +24,7 @@ import static com.itextpdf.dito.manager.controller.datacollection.DataCollection
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,12 +82,13 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)));
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
                 .param("comment", "comment7")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(6, 7)));
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(6, 7))).andReturn();
+        assertNotNull(result.getResponse());
 
     }
 
@@ -99,22 +102,24 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(6, 7)));
 
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
                 .param("search", "comment")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content", hasSize(7)));
+                .andExpect(jsonPath("$.content", hasSize(7))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : DataSampleFileRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
+            final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
                     .param("sort", field)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -122,12 +127,13 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : DataSampleFileRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
+            final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME + VERSIONS_ENDPOINT)
                     .param("version", "2")
                     .param("sort", field)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 }

@@ -10,8 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,11 +39,12 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
 
     @Test
     public void getAll_WhenSortedByUnsupportedField_ThenResponseIsBadRequest() throws Exception {
-        mockMvc.perform(get(DataCollectionController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("sort", "unsupportedField")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -50,10 +53,12 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
         mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("name", "data-COLLECTION-search-test"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
-        mockMvc.perform(get(DataCollectionController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("modifiedOn", "01/01/1970")
                 .param("modifiedOn", "01/01/1980"))
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -63,21 +68,24 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
                 .param("search", "data-COLLECTION-search-test"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(DataCollectionController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("search", "admin")
                 .param("name", "unknown-template"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : DataCollectionRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(DataCollectionController.BASE_NAME)
+            final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME)
                     .param("sort", field)
                     .param("search", "template"))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -85,9 +93,10 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : DataCollectionRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(DataCollectionController.BASE_NAME)
+            final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME)
                     .param("sort", field))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 }

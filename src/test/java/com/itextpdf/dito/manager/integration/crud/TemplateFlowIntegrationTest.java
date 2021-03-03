@@ -27,7 +27,6 @@ import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
-
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -167,11 +166,11 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         filter.setName(list); 
         final Pageable pageable = PageRequest.of(0, 8);
         templateService.getRoles(pageable, request.getName(), filter);
-        
-        assertTrue(!templateService.getAll().isEmpty());
+
+        assertFalse(templateService.getAll().isEmpty());
         
         final TemplateListFilter templateListFilter = new TemplateListFilter();
-        assertTrue(!templateService.getAll(templateListFilter).isEmpty());
+        assertFalse(templateService.getAll(templateListFilter).isEmpty());
         
         assertTrue(templateService.getAllParts(request.getName()).isEmpty());
         
@@ -482,7 +481,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF));
 
-        //get preview
+        //delete
         mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
                 .andExpect(status().isOk());
     }
@@ -557,7 +556,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.blocked").value(true))
                 .andExpect(jsonPath("$.blockedBy").isNotEmpty())
-                .andExpect(jsonPath("$.version").value(1l));
+                .andExpect(jsonPath("$.version").value(1L));
         final Optional<TemplateEntity> optionalTemplate = templateRepository.findByName(templateCreateRequestDTO.getName());
         assertTrue(optionalTemplate.isPresent());
         final TemplateEntity templateEntity = optionalTemplate.get();
@@ -566,7 +565,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName)).andExpect(status().isOk());
         final Optional<TemplateEntity> optionalUpdatedTemplate = templateRepository.findByName(templateCreateRequestDTO.getName());
-        assertTrue(optionalTemplate.isPresent());
+        assertTrue(optionalUpdatedTemplate.isPresent());
         final TemplateEntity updatedTemplateEntity = optionalUpdatedTemplate.get();
         assertTrue(Objects.isNull(updatedTemplateEntity.getBlockedBy()));
         assertTrue(Objects.isNull(updatedTemplateEntity.getBlockedAt()));

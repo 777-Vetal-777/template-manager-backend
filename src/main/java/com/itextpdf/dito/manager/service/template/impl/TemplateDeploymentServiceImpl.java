@@ -28,7 +28,9 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
+import com.itextpdf.dito.manager.util.FilesUtils;
 import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -170,11 +172,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final TemplateDescriptorDTO templateDescriptorDTO = templateMapper.mapToDescriptor(templateFileEntity, isDefaultInstance);
         final File templateProjectFile = templateProjectGenerator.generateZippedProjectByTemplate(templateEntity, (DataSampleFileEntity) null);
         promoteTemplateToInstance(instanceRegisterToken, instanceSocket, templateDescriptorDTO, templateProjectFile);
-        try {
-			Files.delete(templateProjectFile.toPath());
-		} catch (IOException e) {
-			//Do nothing
-		} 
+        FileUtils.deleteQuietly(templateProjectFile);
     }
 
     private TemplateDeploymentDTO promoteTemplateToInstance(final String instanceRegisterToken,

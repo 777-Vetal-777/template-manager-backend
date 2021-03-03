@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -35,6 +36,7 @@ import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.workspace.WorkspaceController.WORKSPACE_CHECK_LICENSE_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -64,7 +66,8 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private LicenseRepository licenseRepository;
 
-    WorkspaceFlowIntegrationTest() throws IOException { }
+    WorkspaceFlowIntegrationTest() throws IOException {
+    }
 
     @AfterEach
     public void teardown() {
@@ -75,26 +78,30 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     @BeforeEach
     void tearUp() throws Exception {
         final InstancesRememberRequestDTO instancesRememberRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/workspaces/instances-create-request.json"), InstancesRememberRequestDTO.class);
-        mockMvc.perform(post(InstanceController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
-    void testShouldGetAllWorkspaces() throws Exception{
-        mockMvc.perform(get(WorkspaceController.BASE_NAME)
+    void testShouldGetAllWorkspaces() throws Exception {
+        final MvcResult result = mockMvc.perform(get(WorkspaceController.BASE_NAME)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].name").value(WORKSPACE_NAME))
                 .andExpect(jsonPath("$.[0].timezone").isNotEmpty())
                 .andExpect(jsonPath("$.[0].language").value(WORKSPACE_LANGUAGE))
-                .andExpect(jsonPath("$.[0].adjustForDaylight").isNotEmpty());
+                .andExpect(jsonPath("$.[0].adjustForDaylight").isNotEmpty())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
-    void testShouldCheckWorkspaceIsExistByName() throws Exception{
+    void testShouldCheckWorkspaceIsExistByName() throws Exception {
         final String base64EncodedName = Base64.getEncoder().encodeToString("workspace-test".getBytes());
         final URI uriWithValidName = UriComponentsBuilder.fromUriString(WorkspaceController.BASE_NAME + "/" + base64EncodedName + "/exist").build().encode().toUri();
         mockMvc.perform(get(uriWithValidName)
@@ -104,19 +111,21 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
         final String base64BadWorkspaceEncodedName = Base64.getEncoder().encodeToString("!@#!@#BadWorkspace".getBytes());
         final URI uriWithBadName = UriComponentsBuilder.fromUriString(WorkspaceController.BASE_NAME + "/" + base64BadWorkspaceEncodedName + "/exist").build().encode().toUri();
-        mockMvc.perform(get(uriWithBadName)
+        final MvcResult result = mockMvc.perform(get(uriWithBadName)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(false));
-
+                .andExpect(jsonPath("$").value(false))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void testLicenceShouldCheckValidLicenseSuccessfully() throws Exception {
         final URI uri = UriComponentsBuilder
                 .fromUriString(WorkspaceController.BASE_NAME + WORKSPACE_CHECK_LICENSE_ENDPOINT).build().encode().toUri();
-        mockMvc.perform(MockMvcRequestBuilders.multipart(uri).file(licensePart).contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk());
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(uri).file(licensePart).contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -133,7 +142,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
     void testCreateWorkspaceWithExistingName() throws Exception {
         createWorkspace(workspaceNamePart);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
                 .file(workspaceNamePart)
                 .file(workspaceTimeZonePart)
                 .file(workspaceLanguagePart)
@@ -141,14 +150,15 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(licensePart)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void testCreateWorkspaceWithWrongLicense() throws Exception {
         final MockMultipartFile badLicense = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", "Wrong staff".getBytes(StandardCharsets.UTF_8));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
                 .file(workspaceNamePart)
                 .file(workspaceTimeZonePart)
                 .file(workspaceLanguagePart)
@@ -156,14 +166,16 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(badLicense)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
-    void shouldNotCreateWorkspaceWithoutInstance() throws Exception{
+    void shouldNotCreateWorkspaceWithoutInstance() throws Exception {
         final MockMultipartFile notExistingInstance = new MockMultipartFile("unknownInstance", MAIN_DEVELOP_INSTANCE_NAME, "text/xml", MAIN_DEVELOP_INSTANCE_NAME.getBytes(StandardCharsets.UTF_8));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
                 .file(workspaceNamePart)
                 .file(workspaceTimeZonePart)
                 .file(workspaceLanguagePart)
@@ -172,7 +184,9 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(licensePart)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -191,52 +205,56 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         final WorkspaceDTO updateRequest = objectMapper.readValue(new File("src/test/resources/test-data/workspaces/workspace-create-request.json"), WorkspaceDTO.class);
-        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WORKSPACE_BASE64_ENCODED_NAME)
+        final MvcResult result = mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WORKSPACE_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(updateRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value(updateRequest.getName()))
                 .andExpect(jsonPath("language").value(updateRequest.getLanguage()))
-                .andExpect(jsonPath("timezone").value(updateRequest.getTimezone()));
+                .andExpect(jsonPath("timezone").value(updateRequest.getTimezone())).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void testGetWorkspace() throws Exception {
         final String base64EncodedName = Base64.getEncoder()
                 .encodeToString("workspace-test".getBytes());
-        mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
+        final MvcResult result = mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").isNotEmpty())
                 .andExpect(jsonPath("language").isNotEmpty())
-                .andExpect(jsonPath("timezone").isNotEmpty());
+                .andExpect(jsonPath("timezone").isNotEmpty()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void testGetWorkspaceNotFound() throws Exception {
         final String base64EncodedName = Base64.getEncoder()
                 .encodeToString("fake-workspace".getBytes());
-        mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
+        final MvcResult result = mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + base64EncodedName)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void test_getStageNames() throws Exception {
         final String base64EncodedName = Base64.getEncoder()
                 .encodeToString("workspace-test".getBytes());
-        mockMvc.perform(get(WorkspaceController.BASE_NAME + WorkspaceController.WORKSPACE_STAGES_ENDPOINT, base64EncodedName))
-                .andExpect(status().isOk());
-
+        final MvcResult result = mockMvc.perform(get(WorkspaceController.BASE_NAME + WorkspaceController.WORKSPACE_STAGES_ENDPOINT, base64EncodedName))
+                .andExpect(status().isOk()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void testGetPromotionPath() throws Exception {
         createWorkspace(workspaceNamePart);
-        mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
+        final MvcResult result = mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
                 .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
-                .andExpect(jsonPath("stages[0].name").value("Development"));
+                .andExpect(jsonPath("stages[0].name").value("Development")).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -257,12 +275,13 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         final PromotionPathDTO request = objectMapper
                 .readValue(new File("src/test/resources/test-data/workspaces/promotion-path-update-request.json"), PromotionPathDTO.class);
 
-        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
+        final MvcResult result = mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
                 .andExpect(jsonPath("stages[0].name").value("test-promotion-path"))
-                .andExpect(jsonPath("stages[0].instances[0].name").value("test-name"));
+                .andExpect(jsonPath("stages[0].instances[0].name").value("test-name")).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -293,10 +312,11 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
 
         final String base64EncodedName = Base64.getEncoder().encodeToString(workspaceCreateRequestDTO.getName().getBytes());
 
-        mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
+        final MvcResult result = mockMvc.perform(patch(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, base64EncodedName)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     private WorkspaceCreateRequestDTO createTestWorkspace() throws Exception {

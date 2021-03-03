@@ -11,8 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,11 +41,12 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
 
     @Test
     public void getAll_WhenSortedByUnsupportedField_ThenResponseIsBadRequest() throws Exception {
-        mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
+        final MvcResult result = mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .param("sort", "unsupportedField")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest()).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -52,9 +55,10 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
         mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .param("comment", "first"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
-        mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
+        final MvcResult result = mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .param("comment", "comment"))
-                .andExpect(jsonPath("$.content", hasSize(2)));
+                .andExpect(jsonPath("$.content", hasSize(2))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -64,22 +68,24 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
                 .param("search", "first"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
+        final MvcResult result = mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .param("search", "admin")
                 .param("modifiedBy", "unknown"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : DataCollectionFileRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
+            final MvcResult result = mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                     .param("sort", field)
                     .param("search", "comment"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)));
+                    .andExpect(jsonPath("$.content", hasSize(2))).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -87,15 +93,16 @@ public class DataCollectionVersionSearchAndFilterIntegrationTest extends Abstrac
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : DataCollectionFileRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
+            final MvcResult result = mockMvc.perform(get(VERSIONS_URN, DATACOLLECTION_BASE64_ENCODED_NAME)
                     .param("sort", field)
                     .param("deployed", String.valueOf(false)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(3)));
+                    .andExpect(jsonPath("$.content", hasSize(3))).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
-    private void createDatacollectionVersion(String  comment) {
+    private void createDatacollectionVersion(String comment) {
         dataCollectionService.createNewVersion(DATACOLLECTION_NAME, DataCollectionType.valueOf(TYPE), "{\"file\":\"modified data\"}".getBytes(), "datacollection.json", "admin@email.com", comment);
     }
 }

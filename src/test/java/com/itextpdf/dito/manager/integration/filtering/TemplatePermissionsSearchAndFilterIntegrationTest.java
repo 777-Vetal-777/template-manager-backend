@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.integration.filtering;
 
-import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
@@ -17,15 +16,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.itextpdf.dito.manager.controller.template.TemplateController.BASE_NAME;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
+class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
 
     @Autowired
     private PermissionRepository permissionRepository;
@@ -33,19 +36,19 @@ public class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractI
     @Autowired
     private TemplateRepository templateRepository;
 
-    private final static String ROLES = "/roles";
-
-    private TemplateEntity templateEntity = new TemplateEntity();
-
-    private String templateName = "Template";
-    private RoleEntity roleEntity1;
-    private RoleEntity roleEntity2;
-    private PermissionEntity permissionEntity1;
-    private PermissionEntity permissionEntity2;
+    private final static String TEMPLATE_NAME = "Template";
+    private final Base64.Encoder encoder = Base64.getEncoder();
 
 
     @BeforeEach
-    public void init() {
+    void init() {
+        final TemplateEntity templateEntity = new TemplateEntity();
+
+        final RoleEntity roleEntity1;
+        final RoleEntity roleEntity2;
+        final PermissionEntity permissionEntity1;
+        final PermissionEntity permissionEntity2;
+
         roleEntity1 = new RoleEntity();
         roleEntity1.setName("ADMIN");
         roleEntity1.setType(RoleTypeEnum.CUSTOM);
@@ -62,12 +65,11 @@ public class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractI
         set.add(roleEntity1);
         set.add(roleEntity2);
         templateEntity.setAppliedRoles(set);
-        templateEntity.setName(templateName);
+        templateEntity.setName(TEMPLATE_NAME);
         templateEntity.setType(TemplateTypeEnum.HEADER);
         permissionRepository.saveAll(Arrays.asList(permissionEntity1, permissionEntity2));
-        roleEntity1.setTemplates(new HashSet<>(Arrays.asList(templateEntity)));
+        roleEntity1.setTemplates(Collections.singleton(templateEntity));
         templateRepository.save(templateEntity);
-
     }
 
     @AfterEach
@@ -78,91 +80,97 @@ public class TemplatePermissionsSearchAndFilterIntegrationTest extends AbstractI
     @Override
     @Test
     public void test_filtering() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "GLOBAL_ADMINISTRATOR"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME+ TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "GLOBAL_ADMINISTRATOR"))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME+ TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "false,true"))
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].E9_US75_EDIT_TEMPLATE_METADATA_STANDARD").value("true"))
                 .andExpect(jsonPath("$.content[0].E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD").value("true"));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME+ TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "false,true"))
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].E9_US24_EXPORT_TEMPLATE_DATA").value("false"))
                 .andExpect(jsonPath("$.content[0].E9_US81_PREVIEW_TEMPLATE_STANDARD").value("false"));
 
+        assertEquals(1, templateRepository.findAll().size());
+
     }
 
     @Override
     @Test
     public void test_searchAndFiltering() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("search", "ADMIN"))
                 .andExpect(jsonPath("$.content", hasSize(2)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "true")
                 .param("search", "ADMIN"))
                 .andExpect(jsonPath("$.content", hasSize(2)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "true")
                 .param("search", "ADMIN"))
                 .andExpect(jsonPath("$.content", hasSize(2)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US81_PREVIEW_TEMPLATE_STANDARD", "false")
                 .param("search", "ADMIN"))
                 .andExpect(jsonPath("$.content", hasSize(2)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+        mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                 .param("name", "ADMIN, GLOBAL_ADMINISTRATOR")
                 .param("E9_US81_PREVIEW_TEMPLATE_STANDARD", "false")
                 .param("search", "ADMIN"))
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD").value(true))
                 .andExpect(jsonPath("$.content[1].E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD").value(true));
+
+        assertEquals(1, templateRepository.findAll().size());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : TemplatePermissionRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+            mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                     .param("name", "ADMIN")
                     .param("sort", field)
                     .param("search", "ADMIN"))
                     .andExpect(status().isOk());
         }
 
+        assertEquals(1, templateRepository.findAll().size());
     }
 
     @Override
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : TemplatePermissionRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(TemplateController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(templateName.getBytes()) + ROLES)
+            mockMvc.perform(get(BASE_NAME + TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encoder.encodeToString(TEMPLATE_NAME.getBytes()))
                     .param("name", "ADMIN")
                     .param("sort", field))
                     .andExpect(status().isOk());
         }
+
+        assertEquals(1, templateRepository.findAll().size());
     }
 }

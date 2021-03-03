@@ -70,8 +70,8 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
     public DataSampleEntity create(final DataCollectionEntity dataCollectionEntity, final String name, final String fileName,
                                    final String sample, final String comment, final String email) {
         log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was started",
-                dataCollectionEntity, fileName, sample, comment, email);
-        if (dataSampleRepository.existsByName(name)) {
+                dataCollectionEntity, name, fileName, sample, comment, email);
+        if (Boolean.TRUE.equals(dataSampleRepository.existsByName(name))) {
             throw new DataSampleAlreadyExistsException(name);
         }
 
@@ -197,7 +197,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	@Override
 	public List<DataSampleEntity> delete(final List<String> dataSamplesList) {
 		log.info("Delete list dataSample: {} was started", dataSamplesList);
-		final List<DataSampleEntity> dataSampleListToDelete = dataSamplesList.stream().map(e->get(e)).collect(Collectors.toList());
+		final List<DataSampleEntity> dataSampleListToDelete = dataSamplesList.stream().map(this::get).collect(Collectors.toList());
 		dataSampleRepository.deleteAll(dataSampleListToDelete);
 		log.info("Delete list dataSample: {} was finished successfully", dataSamplesList);
 		return dataSampleListToDelete;
@@ -216,7 +216,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 	@Override
 	public DataSampleEntity createNewVersion(final String name, final String sample, final String fileName, final String email, final String comment) {
 		log.info("Create new version with name: {}, sample: {} and fileName: {}, email: {}, comment: {} was started",
-				name, sample, email, comment);
+				name, sample, fileName, email, comment);
 		if (!jsonValidator.isValid(sample.getBytes())) {
 			throw new InvalidDataSampleException();
 		}
@@ -269,7 +269,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
 		final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
 		final String newName = updatedEntity.getName();
-		if (!name.equals(newName) && dataSampleRepository.existsByName(newName)) {
+		if (!name.equals(newName) && Boolean.TRUE.equals(dataSampleRepository.existsByName(newName))) {
 			throw new DataSampleAlreadyExistsException(newName);
 		}
 		existingEntity.setName(newName);

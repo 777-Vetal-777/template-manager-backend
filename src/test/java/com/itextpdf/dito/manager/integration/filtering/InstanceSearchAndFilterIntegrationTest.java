@@ -1,19 +1,18 @@
 package com.itextpdf.dito.manager.integration.filtering;
 
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
-import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
-import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,13 +21,15 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
 
     @Autowired
     private InstanceRepository instanceRepository;
-    
+
     @Autowired
     private UserRepository userRepository;
 
     @Override
     @Test
     public void test_filtering() throws Exception {
+        assertEquals(1, instanceRepository.findAll().size());
+
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
                 .param("name", "default"))
                 .andExpect(status().isOk())
@@ -51,6 +52,8 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
     @Override
     @Test
     public void test_searchAndFiltering() throws Exception {
+        assertEquals(1, instanceRepository.findAll().size());
+
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.PAGEABLE_ENDPOINT)
                 .param("name", "instance")
                 .param("search", "default"))
@@ -68,6 +71,8 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
+        assertEquals(1, instanceRepository.findAll().size());
+
         for (String field : InstanceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(InstanceController.BASE_NAME)
                     .param("sort", field)
@@ -79,6 +84,8 @@ public class InstanceSearchAndFilterIntegrationTest extends AbstractIntegrationT
     @Override
     @Test
     public void test_sortWithFiltering() throws Exception {
+        assertEquals(1, instanceRepository.findAll().size());
+
         for (String field : InstanceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(InstanceController.BASE_NAME)
                     .param("sort", field)

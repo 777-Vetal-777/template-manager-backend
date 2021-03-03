@@ -13,11 +13,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for filtering and search in {@link TemplateEntity} table.
  */
-public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
+class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationTest implements FilterAndSearchTest {
     @Autowired
     private TemplateRepository templateRepository;
     @Autowired
@@ -37,8 +39,8 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
     private TemplateCreateRequestDTO request;
 
     @BeforeEach
-    public void init() throws Exception {
-        dataCollectionService.create("data-collection-test", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json","admin@email.com");
+    void init() throws Exception {
+        dataCollectionService.create("data-collection-test", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
         request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-with-data-collection.json"), TemplateCreateRequestDTO.class);
         request.setDataCollectionName("data-collection-test");
@@ -49,19 +51,22 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
     }
 
     @AfterEach
-    public void clearDb() {
+    void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
         dataCollectionService.delete("data-collection-test", "admin@email.com");
     }
 
     @Test
-    public void getAll_WhenSortedByUnsupportedField_ThenResponseIsBadRequest() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME)
+    void getAll_WhenSortedByUnsupportedField_ThenResponseIsBadRequest() throws Exception {
+        final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME)
                 .param("sort", "unsupportedField")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -79,10 +84,14 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
                 .param("type", "STANDARD"))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].name", is(request.getName())));
-        mockMvc.perform(get(TemplateController.BASE_NAME)
-                .param("dataCollection", request.getDataCollectionName()))
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(request.getName())));
+        final MvcResult result =
+                mockMvc.perform(get(TemplateController.BASE_NAME)
+                        .param("dataCollection", request.getDataCollectionName()))
+                        .andExpect(jsonPath("$.content", hasSize(1)))
+                        .andExpect(jsonPath("$.content[0].name", is(request.getName())))
+                        .andReturn();
+
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -94,21 +103,29 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
 
-        mockMvc.perform(get(TemplateController.BASE_NAME)
-                .param("search", request.getName()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].name", is(request.getName())));
+        final MvcResult result =
+                mockMvc.perform(get(TemplateController.BASE_NAME)
+                        .param("search", request.getName()))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content", hasSize(1)))
+                        .andExpect(jsonPath("$.content[0].name", is(request.getName())))
+                        .andReturn();
+
+        assertNotNull(result.getResponse());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : TemplateRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(TemplateController.BASE_NAME)
-                    .param("sort", field)
-                    .param("search", "template"))
-                    .andExpect(status().isOk());
+            final MvcResult result =
+                    mockMvc.perform(get(TemplateController.BASE_NAME)
+                            .param("sort", field)
+                            .param("search", "template"))
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -116,9 +133,13 @@ public class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationT
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : TemplateRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(TemplateController.BASE_NAME)
-                    .param("sort", field))
-                    .andExpect(status().isOk());
+            final MvcResult result =
+                    mockMvc.perform(get(TemplateController.BASE_NAME)
+                            .param("sort", field))
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            assertNotNull(result.getResponse());
         }
     }
 }

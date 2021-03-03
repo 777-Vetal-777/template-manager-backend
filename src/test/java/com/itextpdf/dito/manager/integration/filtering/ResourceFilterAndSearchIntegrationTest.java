@@ -11,11 +11,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +46,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     @Test
     @Override
     public void test_filtering() throws Exception {
+        assertEquals(1, resourceRepository.findAll().size());
 
         mockMvc.perform(get(ResourceController.BASE_NAME)
                 .param("name", NAME))
@@ -62,6 +66,8 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     @Test
     @Override
     public void test_searchAndFiltering() throws Exception {
+        assertEquals(1, resourceRepository.findAll().size());
+
         mockMvc.perform(get(ResourceController.BASE_NAME)
                 .param("type", "IMAGE")
                 .param("search", "resource-name"))
@@ -78,6 +84,8 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
+        assertEquals(1, resourceRepository.findAll().size());
+
         for (String field : ResourceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(ResourceController.BASE_NAME)
                     .param("sort", field)
@@ -89,15 +97,20 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
     @Override
     @Test
     public void test_sortWithFiltering() throws Exception {
+        assertEquals(1, resourceRepository.findAll().size());
+
         for (String field : ResourceRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(ResourceController.BASE_NAME)
                     .param("sort", field))
                     .andExpect(status().isOk());
         }
+
     }
 
     @Test
     public void test_sortVersionsWithFiltering() throws Exception {
+        assertEquals(1, resourceRepository.findAll().size());
+
         for (String field : ResourceFileRepository.SUPPORTED_SORT_FIELDS) {
             mockMvc.perform(get(RESOURCE_VERSIONS_URI, "images", encodeStringToBase64(NAME))
                     .param("type", "IMAGE")
@@ -109,6 +122,7 @@ public class ResourceFilterAndSearchIntegrationTest extends AbstractIntegrationT
 
     @Test
     public void test_searchVersionsWithFiltering() throws Exception {
+        assertEquals(1, resourceRepository.findAll().size());
 
         mockMvc.perform(get(RESOURCE_VERSIONS_URI, "images", encodeStringToBase64(NAME))
                 .param("type", "IMAGE")

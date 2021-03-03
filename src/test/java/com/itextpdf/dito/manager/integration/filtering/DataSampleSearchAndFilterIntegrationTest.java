@@ -15,10 +15,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.PAGEABLE_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,11 +73,12 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .param("name", "name2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1))).andReturn();
+        assertNotNull(result.getResponse());
 
     }
 
@@ -87,12 +90,13 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(3)));
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
+        final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + PAGEABLE_ENDPOINT)
                 .param("search", "name")
                 .param("name", "name2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1))).andReturn();
+        assertNotNull(result.getResponse());
 
     }
 
@@ -100,11 +104,12 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : DataSampleRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+            final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
                     .param("sort", field)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -113,12 +118,13 @@ public class DataSampleSearchAndFilterIntegrationTest extends AbstractIntegratio
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : DataSampleRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+            final MvcResult result = mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
                     .param("name", "name2")
                     .param("sort", field)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 }
