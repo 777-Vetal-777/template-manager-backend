@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -26,9 +27,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private String defaultAdminPassword;
 
     private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
 
-    public UserDetailsServiceImpl(final UserRepository userRepository) {
+    public UserDetailsServiceImpl(final UserRepository userRepository,
+                                  final PasswordEncoder encoder) {
         this.userRepository = userRepository;
+        this.encoder = encoder;
     }
 
     @Override
@@ -51,7 +55,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (!StringUtils.isEmpty(defaultAdminEmail) && !StringUtils.isEmpty(defaultAdminPassword)) {
             final UserEntity userEntity = userRepository.findById(defaultAdminId).orElseThrow(() -> new UserNotFoundException("Admin user not found"));
             userEntity.setEmail(defaultAdminEmail);
-            userEntity.setPassword(defaultAdminPassword);
+            userEntity.setPassword(encoder.encode(defaultAdminPassword));
             userRepository.save(userEntity);
         } else {
             LOG.warn("No email and password for default admin user were set. Default credentials will be used");
