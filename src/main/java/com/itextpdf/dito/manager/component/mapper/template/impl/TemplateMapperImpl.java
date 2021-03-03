@@ -257,7 +257,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();
         templateDeployedVersionDTO.setStageName(stageEntity.getName());
         templateDeployedVersionDTO.setVersion(templateFileEntity != null ? templateFileEntity.getVersion() : null);
-        templateDeployedVersionDTO.setDeployed(templateFileEntity != null ? templateFileEntity.getDeployed() : false);
+        templateDeployedVersionDTO.setDeployed(templateFileEntity != null && templateFileEntity.getDeployed());
         return templateDeployedVersionDTO;
     }
 

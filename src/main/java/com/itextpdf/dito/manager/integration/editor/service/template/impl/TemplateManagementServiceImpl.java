@@ -83,6 +83,13 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     }
 
     @Override
+    public TemplateEntity create(final String name, final byte[] data, final String dataCollectionName, final String email) {
+        final TemplateEntity templateEntity = templateService.create(name, TemplateTypeEnum.STANDARD, dataCollectionName, email, data, null);
+        templateEntity.getLatestFile().setResourceFiles(provideConsistency(templateEntity.getLatestFile().getData()));
+        return templateRepository.save(templateEntity);
+    }
+
+    @Override
     public TemplateEntity delete(final String templateName) {
         return templateService.delete(templateName);
     }

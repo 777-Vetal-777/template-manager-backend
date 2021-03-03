@@ -1,9 +1,10 @@
 package com.itextpdf.dito.manager.integration.editor.mapper.resource.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.ImageDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.StylesheetDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.UnknownResource;
-
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontFileDescriptor;
@@ -13,19 +14,15 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorMapper {
@@ -41,11 +38,11 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         final ResourceTypeEnum type = resourceEntity.getType();
         final String id = encodeId(name, type, null);
         switch (type) {
-			case FONT:
-				final FontDescriptor fontDescriptor = new FontDescriptor(id);
-				fontDescriptor.setFontFiles(getFontFiles(resourceEntity));
-				resourceLeafDescriptor = fontDescriptor;
-	            break;
+            case FONT:
+                final FontDescriptor fontDescriptor = new FontDescriptor(id);
+                fontDescriptor.setFontFiles(getFontFiles(resourceEntity));
+                resourceLeafDescriptor = fontDescriptor;
+                break;
             case IMAGE:
                 resourceLeafDescriptor = new ImageDescriptor(id);
                 break;
@@ -71,7 +68,8 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         return deserialize(decode(id));
     }
 
-    private String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
+    @Override
+    public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
         String result;
 
         final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
@@ -84,17 +82,17 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         return result;
     }
 
-	private List<FontFileDescriptor> getFontFiles(final ResourceEntity resourceEntity) {
-		final List<FontFileDescriptor> fontFilesList = new ArrayList<>();
-		for (final ResourceFileEntity fileEntity : resourceEntity.getResourceFiles()) {
-			final String id = encodeId(resourceEntity.getName(), ResourceTypeEnum.FONT, fileEntity.getFontName());
-			final FontFileDescriptor fileDescriptor = new FontFileDescriptor(id);
-			fileDescriptor.setStyle(FontStyle.valueOf(fileEntity.getFontName()));
-			fontFilesList.add(fileDescriptor);
-		}
-		return fontFilesList;
-	}
-    
+    private List<FontFileDescriptor> getFontFiles(final ResourceEntity resourceEntity) {
+        final List<FontFileDescriptor> fontFilesList = new ArrayList<>();
+        for (final ResourceFileEntity fileEntity : resourceEntity.getResourceFiles()) {
+            final String id = encodeId(resourceEntity.getName(), ResourceTypeEnum.FONT, fileEntity.getFontName());
+            final FontFileDescriptor fileDescriptor = new FontFileDescriptor(id);
+            fileDescriptor.setStyle(FontStyle.valueOf(fileEntity.getFontName()));
+            fontFilesList.add(fileDescriptor);
+        }
+        return fontFilesList;
+    }
+
     protected ResourceIdDTO deserialize(final String data) {
         ResourceIdDTO result = null;
 

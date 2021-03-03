@@ -88,4 +88,8 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
             + "left join templates.template template "
             + "where template.name =:templateName")
     List<DataSampleEntity> findDataSamplesByTemplateName(@Param("templateName") String templateName);
+
+    @Query("select max(CAST(SUBSTR(name, LENGTH(:pattern) + 2, LENGTH(name) - LENGTH(:pattern) - 2 ) as int)) from DataSampleEntity where name like CONCAT(:pattern, '(%)')")
+    Optional<Integer> findMaxIntegerByNamePattern(@Param("pattern") String pattern);
+
 }

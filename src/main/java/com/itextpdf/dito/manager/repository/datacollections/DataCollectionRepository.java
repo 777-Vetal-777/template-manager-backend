@@ -68,5 +68,7 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
                                       @Param("types") @Nullable List<DataCollectionType> types,
                                       @Param("search") String searchParam);
 
+    @Query("select max(CAST(SUBSTR(name, LENGTH(:pattern) + 2, LENGTH(name) - LENGTH(:pattern) - 2 ) as int)) from DataCollectionEntity where name like CONCAT(:pattern, '(%)')")
+    Optional<Integer> findMaxIntegerByNamePattern(@Param("pattern") String pattern);
 
 }

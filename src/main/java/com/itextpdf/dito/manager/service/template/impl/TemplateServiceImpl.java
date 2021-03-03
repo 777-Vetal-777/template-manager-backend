@@ -48,7 +48,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -58,6 +57,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
@@ -104,7 +104,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
                                  final String dataCollectionName, final String email) {
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {} and email: {} was started", templateName, templateTypeEnum, dataCollectionName, email);
@@ -115,9 +115,16 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
                                  final String dataCollectionName, final String email, final List<TemplatePartModel> templateParts) {
+        return create(templateName, templateTypeEnum, dataCollectionName, email, null, templateParts);
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public TemplateEntity create(final String templateName, final TemplateTypeEnum templateTypeEnum,
+                                 final String dataCollectionName, final String email, final byte[] data, final List<TemplatePartModel> templateParts) {
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was started",
                 templateName, templateTypeEnum, dataCollectionName, email, templateParts);
         throwExceptionIfTemplateNameIsInvalid(templateName);
@@ -135,7 +142,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateFileEntity.setAuthor(author);
         templateFileEntity.setVersion(1L);
         templateFileEntity.setDeployed(false);
-        templateFileEntity.setData(templateLoader.load());
+        templateFileEntity.setData(Optional.ofNullable(data).orElseGet(templateLoader::load));
         templateFileEntity.setTemplate(templateEntity);
         templateFileEntity.setAuthor(author);
         templateFileEntity.setCreatedOn(new Date());
@@ -153,9 +160,9 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             templateFileEntity.setData(compositeTemplateConstructor.build(templateFileEntity));
         }
 
-        templateEntity.setFiles(Collections.singletonList(templateFileEntity));
+        templateEntity.setFiles(Stream.of(templateFileEntity).collect(Collectors.toList()));
         templateEntity.setLatestFile(templateFileEntity);
-        templateEntity.setTemplateLogs(Collections.singletonList(logEntity));
+        templateEntity.setTemplateLogs(Stream.of(logEntity).collect(Collectors.toList()));
 
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         templateFileEntity.getInstance().addAll(developerStageInstances);
@@ -320,8 +327,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity currentTemplateFile = existingTemplateEntity.getLatestFile();
         final String comment = new StringBuilder().append("Rollback to version: ").append(templateVersionToBeRevertedTo.getVersion()).toString();
 
-        log.info("Rollback template with exist template: {} and templateVersionToBeRevertedTo: {} and user: {} was finished successfully", existingTemplateEntity, templateVersionToBeRevertedTo, userEntity);
         final TemplateEntity templateEntity = createVersionForTemplateEntity(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
+        log.info("Rollback template with exist template: {} and templateVersionToBeRevertedTo: {} and user: {} was finished successfully", existingTemplateEntity, templateVersionToBeRevertedTo, userEntity);
         return templateEntity;
     }
 
@@ -333,7 +340,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                                           final List<TemplateFilePartEntity> templateParts,
                                                           final String comment,
                                                           final Long newVersion) {
-        log.info("Create version for tamplate with template: {}, version: {}, user: {}, parts: {}, comment: {}, new version: {} was started",
+        log.info("Create version for template with template: {}, version: {}, user: {}, parts: {}, comment: {}, new version: {} was started",
                 existingTemplateEntity, fileEntityToCopyDependencies, userEntity, templateParts, comment, newVersion);
         final TemplateEntity result;
         final TemplateLogEntity logEntity = createLogEntity(existingTemplateEntity, userEntity);
@@ -354,7 +361,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         final List<TemplateFileEntity> updatedStandardTemplateFileEntities = templateFileRepository.saveAll(createNewVersionForDependentCompositions(result, fileEntityToCopyDependencies, userEntity));
         updatedStandardTemplateFileEntities.forEach(templateDeploymentService::promoteOnDefaultStage);
-        log.info("Create version for tamplate with template: {}, version: {}, user: {}, parts: {}, comment: {}, new version: {} was finished successfully",
+        log.info("Create version for template with template: {}, version: {}, user: {}, parts: {}, comment: {}, new version: {} was finished successfully",
                 existingTemplateEntity, fileEntityToCopyDependencies, userEntity, templateParts, comment, newVersion);
         return result;
     }
@@ -578,7 +585,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
-    private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
-        return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
-    }
+	private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
+		return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
+	}
 }

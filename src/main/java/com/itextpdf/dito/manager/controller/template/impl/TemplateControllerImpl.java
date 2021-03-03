@@ -19,6 +19,8 @@ import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.setting.SettingType;
+import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportSettingDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO;
@@ -36,10 +38,12 @@ import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateExportService;
+import com.itextpdf.dito.manager.service.template.TemplateImportService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
 import com.itextpdf.dito.manager.service.template.TemplatePreviewGenerator;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.template.TemplateVersionsService;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -54,7 +58,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
@@ -75,6 +83,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateExportService templateExportService;
     private final PermissionHandler permissionHandler;
     private final WorkspaceMapper workspaceMapper;
+    private final TemplateImportService templateImportService;
 
     public TemplateControllerImpl(final TemplateService templateService,
                                   final TemplateMapper templateMapper,
@@ -88,6 +97,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplatePreviewGenerator templatePreviewGenerator,
                                   final TemplateExportService templateExportService,
                                   final WorkspaceMapper workspaceMapper,
+                                  final TemplateImportService templateImportService,
                                   final PermissionHandler permissionHandler) {
         this.templateService = templateService;
         this.templateMapper = templateMapper;
@@ -102,6 +112,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateExportService = templateExportService;
         this.permissionHandler = permissionHandler;
         this.workspaceMapper = workspaceMapper;
+        this.templateImportService = templateImportService;
     }
 
     @Override
@@ -325,6 +336,11 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> importData(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        final byte[] data = getFileBytes(templateFile);
+        final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
+                ? new EnumMap<>(SettingType.class)
+                : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> (TemplateImportNameModel) a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
+        final String fileName = FilenameUtils.removeExtension(templateFile.getOriginalFilename()).concat("-import");
+        return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models.getOrDefault(SettingType.TEMPLATE, Collections.emptyMap()), models.getOrDefault(SettingType.DATA_COLLECTION, Collections.emptyMap()))), HttpStatus.OK);
     }
 }

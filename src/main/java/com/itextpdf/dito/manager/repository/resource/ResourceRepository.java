@@ -79,4 +79,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
 													  @Param("type") ResourceTypeEnum type,
 													  @Param("fontName") String fontName);
 
+    @Query("select max(CAST(SUBSTR(name, LENGTH(:pattern) + 2, LENGTH(name) - LENGTH(:pattern) - 2 ) as int)) from ResourceEntity where name like CONCAT(:pattern, '(%)')")
+    Optional<Integer> findMaxIntegerByNamePattern(@Param("pattern") String pattern);
+
 }

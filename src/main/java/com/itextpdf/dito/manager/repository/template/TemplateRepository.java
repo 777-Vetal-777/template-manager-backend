@@ -212,4 +212,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     @Query(value = SELECT_CLAUSE_TEMPLATE_HARD_DEPENDENCIES, nativeQuery = true)
     List<DependencyModel> getTemplateHardRelations(@Param("id") Long templateId);
+
+    @Query("select max(CAST(SUBSTR(name, LENGTH(:pattern) + 2, LENGTH(name) - LENGTH(:pattern) - 2 ) as int)) from TemplateEntity where name like CONCAT(:pattern, '(%)')")
+    Optional<Integer> findMaxIntegerByNamePattern(@Param("pattern") String pattern);
+
 }

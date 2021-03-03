@@ -1,12 +1,15 @@
 package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
+import com.itextpdf.dito.manager.dto.error.TemplateImportErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.instance.deployment.InstanceDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
+import com.itextpdf.dito.manager.exception.template.TemplateImportHasDuplicateNamesException;
+import com.itextpdf.dito.manager.exception.template.TemplateImportProjectException;
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import com.itextpdf.dito.manager.exception.template.TemplateProjectGenerationException;
 import com.itextpdf.dito.manager.exception.template.TemplateVersionNotFoundException;
@@ -69,4 +72,16 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> templateInvalidNameExceptionHandler(final TemplateInvalidNameException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(TemplateImportProjectException.class)
+    public ResponseEntity<ErrorResponseDTO> templateImportProjectExceptionHandler(final TemplateImportProjectException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(TemplateImportHasDuplicateNamesException.class)
+    public ResponseEntity<TemplateImportErrorResponseDTO> templateImportHasDuplicateNamesExceptionHandler(final TemplateImportHasDuplicateNamesException ex) {
+        return new ResponseEntity<>(new TemplateImportErrorResponseDTO(ex.getMessage(), ex.getDuplicates()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+
 }

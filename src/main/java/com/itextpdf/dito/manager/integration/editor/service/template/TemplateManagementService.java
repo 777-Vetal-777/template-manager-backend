@@ -13,5 +13,7 @@ public interface TemplateManagementService {
 
     TemplateEntity create(String templateName, String email);
 
+    TemplateEntity create(String name, byte[] data, String dataCollectionName, String email);
+
     TemplateEntity delete(String templateName);
 }

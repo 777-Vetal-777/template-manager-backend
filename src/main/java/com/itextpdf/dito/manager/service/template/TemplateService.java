@@ -20,6 +20,10 @@ public interface TemplateService {
 
     TemplateEntity create(String templateName, TemplateTypeEnum templateTypeEnum, String dataCollectionName, String email);
 
+    TemplateEntity create(String templateName, TemplateTypeEnum templateTypeEnum,
+                          String dataCollectionName, String email, byte[] data,
+                          List<TemplatePartModel> templateParts);
+
     Page<TemplateEntity> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam);
 
     List<TemplateEntity> getAll();
