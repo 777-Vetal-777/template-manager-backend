@@ -88,7 +88,7 @@ public class InstanceClientImpl implements InstanceClient {
                         final Mono<InstanceRegisterErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceRegisterErrorResponseDTO.class);
                         return errorMessage.flatMap(message->{
                             log.warn(message.getMessage());
-                            throw new InstanceConnectionException();
+                            throw new InstanceConnectionException(message.getCode(), message.getMessage());
                         });
                     })
                     .bodyToMono(InstanceRegisterResponseDTO.class);
@@ -122,9 +122,9 @@ public class InstanceClientImpl implements InstanceClient {
 
     @Override
     public TemplateDeploymentDTO promoteTemplateToInstance(final String instanceRegisterToken,
-                                                            final String instanceSocket,
-                                                            final TemplateDescriptorDTO descriptorDTO,
-                                                            final File templateProject) {
+                                                           final String instanceSocket,
+                                                           final TemplateDescriptorDTO descriptorDTO,
+                                                           final File templateProject) {
         final String forceDeployParam = "?forceReplace=true";
         final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT).append(forceDeployParam).toString();
@@ -146,8 +146,8 @@ public class InstanceClientImpl implements InstanceClient {
 
     @Override
     public TemplateDeploymentDTO removeTemplateFromInstance(final String instanceRegisterToken,
-                                                             final String instanceSocket,
-                                                             final String templateAlias) {
+                                                            final String instanceSocket,
+                                                            final String templateAlias) {
         final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT)
                 .append("/")
