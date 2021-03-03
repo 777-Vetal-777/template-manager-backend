@@ -42,17 +42,15 @@ public class DataCollectionImportServiceImpl implements DataCollectionImportServ
         this.dataSampleRepository = dataSampleRepository;
     }
 
-    private DataSampleEntity importDataSample(final Streamable stream, final String dataSampleName, final DataCollectionEntity entity, final String email) throws IOException {
+    private DataSampleEntity importDataSample(final String fileName, final Streamable stream, final String dataSampleName, final DataCollectionEntity entity, final String email) throws IOException {
         final byte[] json = readStreamable(stream);
-
-        final String dataCollectionName = entity.getName();
 
         DataSampleEntity dataSampleEntity;
         try {
             dataSampleService.get(dataSampleName);
 
-            int currentNumber = dataSampleRepository.findMaxIntegerByNamePattern(dataCollectionName).orElse(0) + 1;
-            dataSampleEntity = dataSampleService.create(entity, new StringBuilder(dataCollectionName).append("(").append(currentNumber).append(")").toString(), dataSampleName, new String(json), "Import template", email);
+            int currentNumber = dataSampleRepository.findMaxIntegerByNamePattern(fileName).orElse(0) + 1;
+            dataSampleEntity = dataSampleService.create(entity, new StringBuilder(fileName).append("(").append(currentNumber).append(")").toString(), dataSampleName, new String(json), "Import template", email);
         } catch (DataSampleNotFoundException e) {
             dataSampleEntity = dataSampleService.create(entity, dataSampleName, dataSampleName, new String(json), "Import template", email);
         }
@@ -103,7 +101,7 @@ public class DataCollectionImportServiceImpl implements DataCollectionImportServ
                                 dataCollectionSettings.get(dataSample.getDataSampleName()), email);
 
                 for (final var dataSampleElement : dataSamples) {
-                    importDataSample(dataSampleElement.getDataSampleStream(),
+                    importDataSample(fileName, dataSampleElement.getDataSampleStream(),
                             dataSampleElement.getDataSampleName(),
                             dataCollectionEntity,
                             email);
