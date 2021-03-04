@@ -66,6 +66,7 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     void init() throws Exception {
         dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
+        templateRepository.deleteAll();
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer.json");

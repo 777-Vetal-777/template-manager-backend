@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,6 +39,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     private ObjectMapper objectMapper;
 
     @AfterEach
+    @BeforeEach
     void clearDb() {
         templateRepository.deleteAll();
         dataSampleRepository.deleteAll();

@@ -574,7 +574,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldThrowTemplateBlockedByAnotherUser() throws Exception {
-        final UserCreateRequestDTO anotherUser = createAnotherUser("src/test/resources/test-data/users/user-create-request.json");
+        final UserCreateRequestDTO anotherUser = createAnotherUser("src/test/resources/test-data/users/user2-create-request.json");
         final TemplateCreateRequestDTO templateCreateRequestDTO = performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
         final String encTemplateName = Base64.getEncoder().encodeToString(templateCreateRequestDTO.getName().getBytes());
         mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName)).andExpect(status().isOk());
