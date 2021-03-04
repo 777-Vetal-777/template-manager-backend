@@ -16,6 +16,7 @@ import com.itextpdf.dito.manager.dto.user.update.UserUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.update.UsersActivateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.filter.user.UserFilter;
+import com.itextpdf.dito.manager.service.auth.AuthenticationService;
 import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.security.Principal;
@@ -36,10 +37,12 @@ public class UserControllerImpl extends AbstractController implements UserContro
     private static final Logger log = LogManager.getLogger(UserControllerImpl.class);
     private final UserService userService;
     private final UserMapper userMapper;
+    private final AuthenticationService authenticationService;
 
-    public UserControllerImpl(final UserService userService, final UserMapper userMapper) {
+    public UserControllerImpl(final UserService userService, final UserMapper userMapper, final AuthenticationService authenticationService) {
         this.userService = userService;
         this.userMapper = userMapper;
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -121,15 +124,17 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<AuthenticationDTO> updatePassword(final @Valid PasswordChangeRequestDTO passwordChangeRequestDTO,
                                                             final Principal principal) {
-        final AuthenticationDTO authenticationDTO = userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
+        final UserEntity userEntity= userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
                 passwordChangeRequestDTO.getNewPassword(),
                 principal.getName());
-        return new ResponseEntity<>(authenticationDTO, HttpStatus.OK);
+        final AuthenticationDTO newTokenDto = authenticationService.authenticate(userEntity.getEmail(), userEntity.getPassword());
+        return new ResponseEntity<>(newTokenDto, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<AuthenticationDTO> updateAdminPasswordToUser(final UpdatePasswordRequestDTO updatePasswordRequestDTO, final Principal principal) {
-        final AuthenticationDTO authenticationDTO = userService.updatePasswordSpecifiedByAdmin(updatePasswordRequestDTO.getPassword(), principal.getName());
+        final UserEntity userEntity = userService.updatePasswordSpecifiedByAdmin(updatePasswordRequestDTO.getPassword(), principal.getName());
+        final AuthenticationDTO authenticationDTO = authenticationService.authenticate(userEntity.getEmail(), userEntity.getPassword());
         return new ResponseEntity<>(authenticationDTO, HttpStatus.OK);
     }
 
