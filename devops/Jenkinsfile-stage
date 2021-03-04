@@ -44,7 +44,7 @@ pipeline {
         }
         stage('Sonarqube analysis') {
             steps {
-                catcherror {
+                catchError {
                     script {
                         withSonarQubeEnv('SonarQube_8.3') {
                             withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
