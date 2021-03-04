@@ -214,4 +214,22 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(6, resourceRepository.findAll().size());
     }
 
+    @Test
+    void shouldImportTemplateWithDifferentTypesOfResources() throws Exception {
+        final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-different-resource-types.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-different-resource-types.dito"));
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+                .file(ditoFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value("Standard"))
+                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("version").value(1));
+
+        assertEquals(1, templateRepository.findAll().size());
+        assertEquals(1, dataCollectionRepository.findAll().size());
+        assertEquals(2, dataSampleRepository.findAll().size());
+        assertEquals(3, resourceRepository.findAll().size());
+    }
+
 }

@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.component.validator.resource.impl;
 
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
-import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
 import com.itextpdf.io.image.ImageDataFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,13 +13,15 @@ public class ResourceImageContentValidator implements ContentValidator {
 
     @Override
     public boolean isValid(final byte[] content) {
+        boolean contentValid;
         try {
             ImageDataFactory.create(content);
-            return true;
+            contentValid = true;
         } catch (Exception e) {
-            log.info(e.getMessage());
-            throw new InvalidResourceContentException(e);
+            log.info("Exception during validation image content: {}", e.getMessage());
+            contentValid = false;
         }
+        return contentValid;
     }
 
     @Override

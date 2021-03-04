@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.component.validator.resource.impl;
 
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
-import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
 import com.steadystate.css.parser.CSSOMParser;
 import com.steadystate.css.parser.SACParserCSS3;
 import org.apache.logging.log4j.LogManager;
@@ -29,14 +28,16 @@ public class ResourceStyleSheetContentValidatorImpl implements ContentValidator 
 
     @Override
     public boolean isValid(final byte[] content) {
+        boolean contentValid;
         try (final InputStreamReader inputStream = new InputStreamReader(new ByteArrayInputStream(content))) {
             final InputSource source = new InputSource(inputStream);
             parser.parseStyleSheet(source, null, null);
-            return true;
+            contentValid = true;
         } catch (IOException | CSSException e) {
-            log.info(e.getMessage());
-            throw new InvalidResourceContentException(e);
+            log.info("Exception during validation stylesheet content: {}", e.getMessage());
+            contentValid = false;
         }
+        return contentValid;
     }
 
     @Override
@@ -48,6 +49,7 @@ public class ResourceStyleSheetContentValidatorImpl implements ContentValidator 
 
         @Override
         public void warning(CSSParseException exception) {
+            //we should not stop parsing on warning messages
         }
 
         @Override

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +30,7 @@ public class ResourceFontContentValidatorTest {
     @ParameterizedTest
     @CsvSource({"src/test/resources/test-data/resources/random.png"})
     void testInvalidContent(String fileName) throws IOException {
-        assertThrows(InvalidResourceContentException.class, () -> validator.isValid(Files.readAllBytes(Path.of(fileName))));
+        assertFalse(validator.isValid(Files.readAllBytes(Path.of(fileName))));
     }
 
 }
