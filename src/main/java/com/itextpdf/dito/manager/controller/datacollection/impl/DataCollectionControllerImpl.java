@@ -5,7 +5,6 @@ import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
-import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
@@ -64,7 +63,6 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataSampleService dataSampleService;
     private final DataSampleFileService dataSampleFileService;
     private final FileVersionMapper fileVersionMapper;
-    private final PermissionHandler permissionHandler;
     private final Long sizeJsonLimit;
     private static final Logger log = LogManager.getLogger(DataCollectionControllerImpl.class);
 
@@ -79,7 +77,6 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataSampleService dataSampleService,
                                         final DataSampleFileService dataSampleFileService,
                                         final FileVersionMapper fileVersionMapper,
-                                        final PermissionHandler permissionHandler,
                                         @Value("${data-collection.json.size-limit}") final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
@@ -93,7 +90,6 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.fileVersionMapper = fileVersionMapper;
         this.sizeJsonLimit = sizeJsonLimit;
         this.dataSampleFileService = dataSampleFileService;
-        this.permissionHandler = permissionHandler;
     }
 
     @Override
@@ -112,7 +108,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         log.info("Started getting list of Dependencies by name: {}", name);
         final String decodedName = decodeBase64(name);
         final List<DependencyDTO> dependencyDTOs = dependencyMapper.map(dataCollectionDependencyService.list(decodedName));
-        log.info(String.format("get listOfDependencies by name: {} is finished successfully", name));
+        log.info("get listOfDependencies by name: {} is finished successfully", name);
         return new ResponseEntity<>(dependencyDTOs, HttpStatus.OK);
     }
 

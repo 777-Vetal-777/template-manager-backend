@@ -19,18 +19,18 @@ public abstract class AbstractResourceNotFoundException extends RuntimeException
     }
 
     private String buildMessage(final String resourceId) {
-        final StringBuilder message = new StringBuilder(getResourceAlias());
-        message.append(" with id ");
-        message.append(resourceId);
-        message.append(" is not found.");
-        return message.toString();
+        final StringBuilder messageBuilder = new StringBuilder(getResourceAlias());
+        messageBuilder.append(" with id ");
+        messageBuilder.append(resourceId);
+        messageBuilder.append(" is not found.");
+        return messageBuilder.toString();
     }
 
     private String buildMessage() {
-        final StringBuilder message = new StringBuilder("No ");
-        message.append(getResourceAlias());
-        message.append("s are found.");
-        return message.toString();
+        final StringBuilder messageBuilder = new StringBuilder("No ");
+        messageBuilder.append(getResourceAlias());
+        messageBuilder.append("s are found.");
+        return messageBuilder.toString();
     }
 
     protected abstract String getResourceAlias();

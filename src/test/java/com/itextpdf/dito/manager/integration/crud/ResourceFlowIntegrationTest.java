@@ -61,8 +61,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String DATA_COLLECTION_NAME = "DataCollectionName";
-    private static final String IMAGES = "images";
-    private static final String FONTS = "fonts";
+    private static final String IMAGES = ResourceTypeEnum.IMAGE.pluralName;
+    private static final String FONTS = ResourceTypeEnum.FONT.pluralName;
     private static final String STYLESHEETS = ResourceTypeEnum.STYLESHEET.pluralName;
     private static final Integer AMOUNT_VERSIONS = 5;
     private static final String AUTHOR_NAME = "admin admin";
@@ -483,11 +483,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void testGetDependenciesPageable() throws Exception {
         final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
-        final String encodedResourceType = Base64.getEncoder().encodeToString(IMAGE_TYPE.getBytes());
         mockMvc.perform(get(ResourceController.BASE_NAME
-                        + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, encodedResourceName,
-                encodedResourceType))
+                        + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, encodedResourceName))
                 .andExpect(status().isNotFound());
+
+        assertEquals(0, resourceRepository.findAll().size());
     }
     
     @Test

@@ -12,11 +12,11 @@ public class UnreadableDataCollectionException extends RuntimeException {
     }
 
     private String buildMessage(final String name) {
-        final StringBuilder message = new StringBuilder(AliasConstants.DATA_COLLECTION);
-        message.append(" with name ");
-        message.append(name);
-        message.append("can't be read.");
-        return message.toString();
+        final StringBuilder messageBuilder = new StringBuilder(AliasConstants.DATA_COLLECTION);
+        messageBuilder.append(" with name ");
+        messageBuilder.append(name);
+        messageBuilder.append("can't be read.");
+        return messageBuilder.toString();
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.itextpdf.dito.manager.controller.workspace.impl;
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
-import com.itextpdf.dito.manager.controller.user.impl.UserControllerImpl;
 import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
@@ -15,6 +14,11 @@ import com.itextpdf.dito.manager.exception.license.UnreadableLicenseException;
 import com.itextpdf.dito.manager.exception.workspace.WorkspaceHasBlankParameterException;
 import com.itextpdf.dito.manager.service.license.LicenseService;
 import com.itextpdf.dito.manager.service.workspace.WorkspaceService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -22,33 +26,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
 @Validated
 @RestController
 public class WorkspaceControllerImpl extends AbstractController implements WorkspaceController {
-    private static final Logger log = LogManager.getLogger(WorkspaceControllerImpl.class);
-
     private final WorkspaceService workspaceService;
     private final WorkspaceMapper workspaceMapper;
     private final LicenseService licenseService;
     private final LicenseMapper licenseMapper;
 
-	public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper,
-            final LicenseService licenseService, final LicenseMapper licenseMapper) {
-		this.workspaceService = workspaceService;
-		this.workspaceMapper = workspaceMapper;
-		this.licenseService = licenseService;
-		this.licenseMapper = licenseMapper;
+    public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper,
+                                   final LicenseService licenseService, final LicenseMapper licenseMapper) {
+        this.workspaceService = workspaceService;
+        this.workspaceMapper = workspaceMapper;
+        this.licenseService = licenseService;
+        this.licenseMapper = licenseMapper;
     }
 
     @Override
@@ -75,9 +68,9 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
                 throw new WorkspaceHasBlankParameterException(keyName);
             }
         });
-	    //TODO FIX String as boolean, find solution to improve. Request part support only string
+        //TODO FIX String as boolean, find solution to improve. Request part support only string
         final boolean adjustForDayLight = !Objects.isNull(adjustForDaylight);
-	    final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);
+        final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);
         final byte[] licenseFile = getBytesFromMultipart(license);
         final WorkspaceEntity result = workspaceService.create(workspaceEntity, licenseFile, license.getOriginalFilename(), principal.getName(), mainDevelopInstance);
         return new ResponseEntity<>(workspaceMapper.map(result), HttpStatus.CREATED);
@@ -122,29 +115,29 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
         return new ResponseEntity<>(stageNames, HttpStatus.OK);
     }
 
-	@Override
-	public ResponseEntity<LicenseDTO> uploadLicense(final String workspaceName, final MultipartFile multipartFile, final Principal principal) {
-		final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
-		final byte[] data = getBytesFromMultipart(multipartFile);
-		final String fileName = multipartFile.getOriginalFilename();
-		return new ResponseEntity<>(licenseMapper.map(licenseService.uploadLicense(workspaceEntity, data, fileName)),
-				HttpStatus.OK);
-	}
+    @Override
+    public ResponseEntity<LicenseDTO> uploadLicense(final String workspaceName, final MultipartFile multipartFile, final Principal principal) {
+        final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
+        final byte[] data = getBytesFromMultipart(multipartFile);
+        final String fileName = multipartFile.getOriginalFilename();
+        return new ResponseEntity<>(licenseMapper.map(licenseService.uploadLicense(workspaceEntity, data, fileName)),
+                HttpStatus.OK);
+    }
 
-	@Override
-	public ResponseEntity<LicenseDTO> getLicense(final String workspaceName, final Principal principal) {
-		final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
-		return new ResponseEntity<>(licenseMapper.map(licenseService.getWorkspaceLicense(workspaceEntity)),
-				HttpStatus.OK);
-	}
-	
-	@Override
-	protected RuntimeException throwEmptyFileException() {
-		throw new EmptyLicenseFileException();
-	}
+    @Override
+    public ResponseEntity<LicenseDTO> getLicense(final String workspaceName, final Principal principal) {
+        final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
+        return new ResponseEntity<>(licenseMapper.map(licenseService.getWorkspaceLicense(workspaceEntity)),
+                HttpStatus.OK);
+    }
 
-	@Override
-	protected RuntimeException throwUnreadableFileException(final String fileName) {
-		throw new UnreadableLicenseException(fileName);
-	}
+    @Override
+    protected RuntimeException throwEmptyFileException() {
+        throw new EmptyLicenseFileException();
+    }
+
+    @Override
+    protected RuntimeException throwUnreadableFileException(final String fileName) {
+        throw new UnreadableLicenseException(fileName);
+    }
 }

@@ -69,6 +69,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -630,6 +631,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
+        assertEquals(5, templateRepository.findAll().size());
+
         final String encTemplateName = Base64.getEncoder().encodeToString(request.getName().getBytes());
         mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
                 .andExpect(status().isBadRequest());
@@ -644,6 +647,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+        assertEquals(0, templateRepository.findAll().size());
     }
 
     private void generateStageEntity(final List<TemplateFileEntity> files) {

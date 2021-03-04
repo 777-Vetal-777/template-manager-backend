@@ -4,12 +4,10 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.Base64DecodeException;
-import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
+import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.mail.MailingException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,8 +19,6 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
-    private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
-
     @ExceptionHandler(AbstractResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> resourceNotFoundExceptionHandler(
             final AbstractResourceNotFoundException ex) {

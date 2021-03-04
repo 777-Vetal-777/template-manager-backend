@@ -8,7 +8,6 @@ import com.itextpdf.dito.manager.dto.template.deployment.TemplateDeploymentDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import com.itextpdf.dito.manager.exception.instance.InstanceConnectionException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
-import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +25,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.time.Duration;
-import java.util.List;
 
 @Component
 public class InstanceClientImpl implements InstanceClient {
@@ -44,10 +42,8 @@ public class InstanceClientImpl implements InstanceClient {
     private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 1L;
 
     private final WebClient webClient;
-    private final WorkspaceRepository workspaceRepository;
 
-    public InstanceClientImpl(final WorkspaceRepository workspaceRepository) {
-        this.workspaceRepository = workspaceRepository;
+    public InstanceClientImpl() {
         webClient = WebClient.create();
     }
 
@@ -83,7 +79,7 @@ public class InstanceClientImpl implements InstanceClient {
                     .retrieve()
                     .onStatus(HttpStatus::isError, clientResponse -> {
                         final Mono<InstanceRegisterErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceRegisterErrorResponseDTO.class);
-                        return errorMessage.flatMap(message->{
+                        return errorMessage.flatMap(message -> {
                             log.warn(message.getMessage());
                             throw new InstanceConnectionException(message.getCode(), message.getMessage());
                         });

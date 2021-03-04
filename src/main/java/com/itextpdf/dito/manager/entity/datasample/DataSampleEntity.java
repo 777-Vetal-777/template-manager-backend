@@ -26,7 +26,7 @@ public class DataSampleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "data_sample_gen")
     @SequenceGenerator(name = "data_sample_gen", sequenceName = "data_sample_sequence", allocationSize = 1)
-    private Long Id;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "data_collection_id")
@@ -85,11 +85,11 @@ public class DataSampleEntity {
 	
 
 	public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public DataCollectionEntity getDataCollection() {
@@ -143,7 +143,7 @@ public class DataSampleEntity {
 	}
 
     public Boolean getDefault() {
-        return isDefault;
+        return getIsDefault();
     }
 
     public void setDefault(Boolean aDefault) {
@@ -189,7 +189,7 @@ public class DataSampleEntity {
     @Override
     public String toString() {
         return "DataSampleEntity{" +
-                "Id=" + Id +
+                "Id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", modifiedOn=" + modifiedOn +

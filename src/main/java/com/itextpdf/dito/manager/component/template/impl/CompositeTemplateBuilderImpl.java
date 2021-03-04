@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -62,10 +63,8 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
 
     private void processSettings(final Element child, final TemplateFilePartEntity templateFilePartEntity) {
         final PartSettings settings = parseSettings(templateFilePartEntity);
-        if (settings != null) {
-            if (Boolean.TRUE.equals(settings.getStartOnNewPage())) {
+        if (settings != null && Boolean.TRUE.equals(settings.getStartOnNewPage())) {
                 child.attr("style", "page-break-before:always");
-            }
         }
     }
 
@@ -102,7 +101,7 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
 
     @Override
     public byte[] build(final List<TemplateFilePartEntity> entities) {
-        final Document templateData = Jsoup.parse(new String(templateLoader.load()));
+        final Document templateData = Jsoup.parse(new String(templateLoader.load(), StandardCharsets.UTF_8));
 
         if (entities != null) {
             for (TemplateFilePartEntity part : entities) {

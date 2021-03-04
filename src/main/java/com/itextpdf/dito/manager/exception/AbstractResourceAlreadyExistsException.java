@@ -15,11 +15,11 @@ public abstract class AbstractResourceAlreadyExistsException extends RuntimeExce
     }
 
     private String buildMessage(final String resourceId) {
-        final StringBuilder message = new StringBuilder(getResourceAlias());
-        message.append(" with id ");
-        message.append(resourceId);
-        message.append(" already exists.");
-        return message.toString();
+        final StringBuilder messageBuilder = new StringBuilder(getResourceAlias());
+        messageBuilder.append(" with id ");
+        messageBuilder.append(resourceId);
+        messageBuilder.append(" already exists.");
+        return messageBuilder.toString();
     }
 
     protected abstract String getResourceAlias();

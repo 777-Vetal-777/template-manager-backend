@@ -47,62 +47,6 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         this.extendedProjectPreprocessor = new ExtendedProjectPreprocessor(resourceAssetRetriever, templateAssetRetriever);
     }
 
-    /**
-     * Generate template project with template file and data sample.
-     *
-     * @param templateEntity   - to be generated in project.
-     * @param sampleFileEntity - using Data Sample file
-     * @return .zip template project file
-     */
-    private File generateZipByTemplateName(final TemplateEntity templateEntity,
-                                           final DataSampleFileEntity sampleFileEntity) {
-        return generateZipByTemplate(templateEntity, toDataSampleList(templateEntity, sampleFileEntity));
-    }
-
-    /**
-     * Generate template project with template file and data sample.
-     *
-     * @param templateEntity         - to be generated in project.
-     * @param dataSampleFileEntities - list of used Data Sample files
-     * @return .zip template project file
-     */
-    private File generateZipByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities) {
-        try {
-            final String templateName = templateEntity.getName();
-            final Map<String, Path> directories = createTemplateDirectoryForPreview(templateName);
-            createFile(TEMPLATES_FOLDER, templateName, templateEntity.getLatestFile().getData(), directories);
-            //write all data samples to root of tmp folder
-            if (Objects.nonNull(dataSampleFileEntities)) {
-                dataSampleFileEntities.forEach(fileEntity -> {
-                    if (fileEntity != null) {
-                        createFile(DATA_FOLDER, fileEntity.getFileName(), fileEntity.getData(), directories);
-                    }
-                });
-            }
-            //write folder to zip
-            final Path folders = directories.get(templateName);
-            final File createdZip = zipFolder(folders, Path.of(folders.getParent().toString(), templateName.concat(".zip")));
-            FileUtils.deleteDirectory(directories.get(templateName).toFile());
-            return createdZip;
-        } catch (IOException exception) {
-            log.error(exception);
-            throw new TemplateProjectGenerationException(exception.getMessage());
-        }
-    }
-
-    private void createFile(final String templateName, final String fileName, final byte[] file,
-                            final Map<String, Path> folders) {
-        try {
-            final Path newFile = Path
-                    .of(new StringBuilder(folders.get(templateName).toAbsolutePath().toString()).append("/")
-                            .append(fileName).toString());
-            Files.write(newFile, file, CREATE);
-        } catch (IOException exception) {
-            log.error(exception);
-            throw new TemplateProjectGenerationException(exception.getMessage());
-        }
-    }
-
     @Override
     public File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final DataSampleFileEntity dataSampleFileEntity) {
         return generateProjectFolderByTemplate(templateEntity, toDataSampleList(templateEntity, dataSampleFileEntity));
@@ -173,6 +117,50 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         return Collections.singletonList(Optional.ofNullable(sampleFileEntity).orElseGet(() ->
                 dataSampleRepository.findDataSampleByTemplateId(templateEntity.getId()).map(
                         DataSampleEntity::getLatestVersion).orElse(null)));
+    }
+
+    /**
+     * Generate template project with template file and data sample.
+     *
+     * @param templateEntity         - to be generated in project.
+     * @param dataSampleFileEntities - list of used Data Sample files
+     * @return .zip template project file
+     */
+    private File generateZipByTemplate(TemplateEntity templateEntity, List<DataSampleFileEntity> dataSampleFileEntities) {
+        try {
+            final String templateName = templateEntity.getName();
+            final Map<String, Path> directories = createTemplateDirectoryForPreview(templateName);
+            createFile(TEMPLATES_FOLDER, templateName, templateEntity.getLatestFile().getData(), directories);
+            //write all data samples to root of tmp folder
+            if (Objects.nonNull(dataSampleFileEntities)) {
+                dataSampleFileEntities.forEach(fileEntity -> {
+                    if (fileEntity != null) {
+                        createFile(DATA_FOLDER, fileEntity.getFileName(), fileEntity.getData(), directories);
+                    }
+                });
+            }
+            //write folder to zip
+            final Path folders = directories.get(templateName);
+            final File createdZip = zipFolder(folders, Path.of(folders.getParent().toString(), templateName.concat(".zip")));
+            FileUtils.deleteDirectory(directories.get(templateName).toFile());
+            return createdZip;
+        } catch (IOException exception) {
+            log.error(exception);
+            throw new TemplateProjectGenerationException(exception.getMessage());
+        }
+    }
+
+    private void createFile(final String templateName, final String fileName, final byte[] file,
+                            final Map<String, Path> folders) {
+        try {
+            final Path newFile = Path
+                    .of(new StringBuilder(folders.get(templateName).toAbsolutePath().toString()).append("/")
+                            .append(fileName).toString());
+            Files.write(newFile, file, CREATE);
+        } catch (IOException exception) {
+            log.error(exception);
+            throw new TemplateProjectGenerationException(exception.getMessage());
+        }
     }
 
 }

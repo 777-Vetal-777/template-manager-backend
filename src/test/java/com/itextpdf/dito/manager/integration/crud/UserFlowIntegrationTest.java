@@ -382,7 +382,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("firstName").value("newFirstName"))
                 .andExpect(jsonPath("lastName").value("newLastName"));
         assertTrue(userRepository.findByEmail(userEmail).isPresent());
-        assertEquals(userRepository.findByEmail(userEmail).get().getFirstName(), "newFirstName");
+        assertEquals("newFirstName", userRepository.findByEmail(userEmail).get().getFirstName());
     }
 
     @Test

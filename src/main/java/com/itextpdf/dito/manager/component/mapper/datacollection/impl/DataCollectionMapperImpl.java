@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         log.info("Convert dataCollection: {} to dto wit file was started", entity.getId());
         final DataCollectionDTO dto = map(entity);
         final DataCollectionFileEntity latestVersion = entity.getLatestVersion();
-        dto.setAttachment(new String(latestVersion.getData()));
+        dto.setAttachment(new String(latestVersion.getData(), StandardCharsets.UTF_8));
         dto.setVersion(latestVersion.getVersion());
         dto.setComment(latestVersion.getComment());
         dto.setFileName(latestVersion.getFileName());

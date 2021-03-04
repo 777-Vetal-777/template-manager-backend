@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,8 +40,8 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setIsDefault(entity.getIsDefault());
         dto.setComment(entity.getLatestVersion().getComment());
         dto.setVersion(entity.getLatestVersion().getVersion());
-        dto.setIsActual(checkJsonsEquality(new String(entity.getDataCollection().getLatestVersion().getData()),
-                new String(entity.getLatestVersion().getData())));
+        dto.setIsActual(checkJsonsEquality(new String(entity.getDataCollection().getLatestVersion().getData(), StandardCharsets.UTF_8),
+                new String(entity.getLatestVersion().getData(), StandardCharsets.UTF_8)));
         log.info("Convert dataSample: {} to dto was finished successfully", entity.getId());
         return dto;
     }
@@ -50,7 +51,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         log.info("Convert dataSample: {} to dto was started", entity.getId());
         final DataSampleDTO dto = map(entity);
         final DataSampleFileEntity latestVersion = entity.getLatestVersion();
-        dto.setFile(new String(latestVersion.getData()));
+        dto.setFile(new String(latestVersion.getData(), StandardCharsets.UTF_8));
         dto.setVersion(latestVersion.getVersion());
         dto.setComment(latestVersion.getComment());
         dto.setFileName(latestVersion.getFileName());

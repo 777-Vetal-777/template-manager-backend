@@ -4,7 +4,6 @@ import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
-import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
@@ -46,6 +45,7 @@ import java.security.Principal;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.FONT;
 import static com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum.IMAGE;
@@ -66,7 +66,6 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final Map<ResourceTypeEnum, List<String>> supportedExtensions = new EnumMap<>(ResourceTypeEnum.class);
     private final ResourcePermissionService resourcePermissionService;
     private final PermissionMapper permissionMapper;
-    private final PermissionHandler permissionHandler;
     private final FileVersionMapper fileVersionMapper;
     private final Map<ResourceTypeEnum, Long> sizeLimit = new EnumMap<>(ResourceTypeEnum.class);
 
@@ -82,8 +81,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final ResourcePermissionService resourcePermissionService,
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
-            final FileVersionMapper fileVersionMapper,
-            final PermissionHandler permissionHandler) {
+            final FileVersionMapper fileVersionMapper) {
         this.supportedExtensions.put(IMAGE, supportedPictureExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.FONT, supportedFontExtensions);
@@ -96,7 +94,6 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourcePermissionService = resourcePermissionService;
         this.permissionMapper = permissionMapper;
         this.fileVersionMapper = fileVersionMapper;
-        this.permissionHandler = permissionHandler;
     }
 
     @Override
@@ -280,7 +277,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     }
 
     private void checkFileExtensionIsSupported(final ResourceTypeEnum resourceType, final MultipartFile resource) {
-        final String resourceExtension = FilenameUtils.getExtension(resource.getOriginalFilename()).toLowerCase();
+        final String resourceExtension = Optional.ofNullable(FilenameUtils.getExtension(resource.getOriginalFilename())).map(String::toLowerCase).orElse("");
         if (this.supportedExtensions.containsKey(resourceType) && !this.supportedExtensions.get(resourceType)
                 .contains(resourceExtension)) {
             throw new ResourceExtensionNotSupportedException(resourceExtension);

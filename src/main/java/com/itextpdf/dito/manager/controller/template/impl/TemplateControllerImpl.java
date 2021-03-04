@@ -5,7 +5,6 @@ import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
-import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDTO;
@@ -62,8 +61,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
 
@@ -81,7 +80,6 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateDeploymentService templateDeploymentService;
     private final TemplatePreviewGenerator templatePreviewGenerator;
     private final TemplateExportService templateExportService;
-    private final PermissionHandler permissionHandler;
     private final WorkspaceMapper workspaceMapper;
     private final TemplateImportService templateImportService;
 
@@ -97,8 +95,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplatePreviewGenerator templatePreviewGenerator,
                                   final TemplateExportService templateExportService,
                                   final WorkspaceMapper workspaceMapper,
-                                  final TemplateImportService templateImportService,
-                                  final PermissionHandler permissionHandler) {
+                                  final TemplateImportService templateImportService) {
         this.templateService = templateService;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
@@ -110,7 +107,6 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateDeploymentService = templateDeploymentService;
         this.templatePreviewGenerator = templatePreviewGenerator;
         this.templateExportService = templateExportService;
-        this.permissionHandler = permissionHandler;
         this.workspaceMapper = workspaceMapper;
         this.templateImportService = templateImportService;
     }
@@ -340,7 +336,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
                 ? new EnumMap<>(SettingType.class)
                 : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> (TemplateImportNameModel) a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
-        final String fileName = FilenameUtils.removeExtension(templateFile.getOriginalFilename()).concat("-import");
+        final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).orElse("unknown").concat("-import");
         return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models.getOrDefault(SettingType.TEMPLATE, Collections.emptyMap()), models.getOrDefault(SettingType.DATA_COLLECTION, Collections.emptyMap()))), HttpStatus.OK);
     }
 }

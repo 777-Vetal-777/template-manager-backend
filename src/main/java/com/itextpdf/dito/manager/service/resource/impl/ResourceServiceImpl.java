@@ -40,11 +40,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -392,11 +390,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     private ResourceLogEntity createResourceLogEntry(final ResourceEntity resourceEntity, final UserEntity userEntity) {
-        final ResourceLogEntity log = new ResourceLogEntity();
-        log.setResource(resourceEntity);
-        log.setDate(new Date());
-        log.setAuthor(userEntity);
-        return log;
+        final ResourceLogEntity logEntity = new ResourceLogEntity();
+        logEntity.setResource(resourceEntity);
+        logEntity.setDate(new Date());
+        logEntity.setAuthor(userEntity);
+        return logEntity;
     }
 
     private ResourceFileEntity createFileEntry(final UserEntity userEntity, final ResourceEntity resourceEntity,
