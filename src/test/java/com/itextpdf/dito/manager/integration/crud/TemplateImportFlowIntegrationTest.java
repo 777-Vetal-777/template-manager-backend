@@ -56,7 +56,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
 
         assertEquals(1, templateRepository.findAll().size());
@@ -93,7 +93,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
 
         assertEquals(1, templateRepository.findAll().size());
@@ -135,7 +135,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
 
         assertEquals(1, templateRepository.findAll().size());
@@ -149,7 +149,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(3));
 
         assertEquals(1, templateRepository.findAll().size());
@@ -171,7 +171,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
 
         assertEquals(1, templateRepository.findAll().size());
@@ -205,7 +205,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(2));
 
         assertEquals(2, templateRepository.findAll().size());
@@ -223,7 +223,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Standard"))
-                .andExpect(jsonPath("dataCollection").value("datasample.json"))
+                .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("version").value(1));
 
         assertEquals(1, templateRepository.findAll().size());
