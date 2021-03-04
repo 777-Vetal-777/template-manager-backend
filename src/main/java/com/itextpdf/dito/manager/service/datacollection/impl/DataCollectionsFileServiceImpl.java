@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -73,31 +74,24 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
     }
 
     private Pageable updateSort(final Pageable pageable) {
-        final String version = "version";
+        final Map<String, String> orderRenamingValues = Map.of(
+                "modifiedBy", "author.firstName",
+                "modifiedOn", "createdOn",
+                "comment", "comment",
+                "stage", "stage.name");
+
         Sort newSort;
         if (pageable.getSort().isSorted()) {
             newSort = Sort.by(pageable.getSort().stream()
                     .map(sortParam -> {
-                        if (sortParam.getProperty().equals(version)) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), version);
-                        }
-                        if (sortParam.getProperty().equals("modifiedBy")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "author.firstName");
-                        }
-                        if (sortParam.getProperty().equals("modifiedOn")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "createdOn");
-                        }
-                        if (sortParam.getProperty().equals("comment")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "comment");
-                        }
-                        if (sortParam.getProperty().equals("stage")) {
-                            sortParam = new Sort.Order(sortParam.getDirection(), "stage.name");
+                        if (orderRenamingValues.containsKey(sortParam.getProperty())) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), orderRenamingValues.get(sortParam.getProperty()));
                         }
                         return sortParam.getProperty().equals("createdOn") ? sortParam : sortParam.ignoreCase();
                     })
                     .collect(Collectors.toList()));
         } else {
-            newSort = Sort.by(version).descending();
+            newSort = Sort.by("version").descending();
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
