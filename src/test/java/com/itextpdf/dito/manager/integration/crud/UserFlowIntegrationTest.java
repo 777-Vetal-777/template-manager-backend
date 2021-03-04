@@ -146,10 +146,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testGetAll() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.editor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -235,12 +237,14 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.andExpect(jsonPath("id").value(TEMPLATE_ID))
 				.andExpect(jsonPath("displayName").value(TEMPLATE_NAME))
 				.andExpect(jsonPath("type").value("outputTemplate"));
-		
-		mockMvc.perform(delete(integrationTemplateUri)
+
+		final MvcResult result = mockMvc.perform(delete(integrationTemplateUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("message").value("Lowest stage has not met development stage requirements"));
+				.andExpect(jsonPath("message").value("Lowest stage has not met development stage requirements"))
+				.andReturn();
+		assertNotNull(result.getResponse());
 
 	}
 }

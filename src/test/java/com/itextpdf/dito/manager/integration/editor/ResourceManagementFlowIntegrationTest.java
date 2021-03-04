@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.editor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -99,10 +101,11 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 		// CHECK UPDATE
-		mockMvc.perform(get(uriUpdate)
+		final MvcResult result = mockMvc.perform(get(uriUpdate)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk()).andReturn();
+		assertNotNull(result.getResponse());
 	}
 	
 	@Test
@@ -149,10 +152,11 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.andExpect(jsonPath("$[0].type").value("image"));
 
 		// Delete Integrated Resource By Id
-		mockMvc.perform(delete(integratedResourceUri)
+		final MvcResult result = mockMvc.perform(delete(integratedResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk()).andReturn();
+		assertNotNull(result.getResponse());
 		
 	}
 }

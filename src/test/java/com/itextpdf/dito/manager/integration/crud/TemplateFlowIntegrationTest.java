@@ -35,6 +35,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -69,6 +70,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -272,25 +274,31 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post(TemplateController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     public void testGetAll() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     public void testGetAllTemplateTypes() throws Exception {
-        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT))
-                .andExpect(status().isOk());
+        final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     private TemplateCreateRequestDTO performCreateTemplateRequest(final String pathname) throws Exception {
@@ -369,9 +377,11 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("some-template", "some-header-template", "another-footer-template")));
 
         //check export
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+        final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
-                .andExpect(zipMatch(hasItem("templates/composite-template")));
+                .andExpect(zipMatch(hasItem("templates/composite-template")))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -482,8 +492,10 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF));
 
         //delete
-        mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
-                .andExpect(status().isOk());
+        final MvcResult result = mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     private StageEntity addStage() {

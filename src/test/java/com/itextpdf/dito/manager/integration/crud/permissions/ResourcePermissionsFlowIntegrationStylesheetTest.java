@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.crud.permissions;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -111,7 +113,9 @@ public class ResourcePermissionsFlowIntegrationStylesheetTest extends AbstractIn
         }
 
         //Delete permission
-        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES, STYLESHEETS, encodedResourceName, encodeStringToBase64(roleName)))
-                .andExpect(status().isOk());
+        final MvcResult result = mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES, STYLESHEETS, encodedResourceName, encodeStringToBase64(roleName)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 }

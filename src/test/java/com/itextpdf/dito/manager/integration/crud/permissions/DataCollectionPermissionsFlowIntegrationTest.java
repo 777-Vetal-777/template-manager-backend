@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -20,6 +21,7 @@ import java.io.File;
 import java.net.URI;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -102,8 +104,10 @@ public class DataCollectionPermissionsFlowIntegrationTest extends AbstractIntegr
 
 
         //Delete data collection permission
-        mockMvc.perform(delete(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES, encodedDataCollectionName, encodeStringToBase64(roleName)))
-                .andExpect(status().isOk());
+        final MvcResult result = mockMvc.perform(delete(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES, encodedDataCollectionName, encodeStringToBase64(roleName)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
 }

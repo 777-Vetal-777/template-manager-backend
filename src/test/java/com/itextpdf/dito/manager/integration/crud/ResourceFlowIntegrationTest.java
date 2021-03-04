@@ -31,6 +31,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -48,6 +49,7 @@ import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.H
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -524,7 +526,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA));
         //create new version of resource
-        mockMvc.perform(
+        final MvcResult result = mockMvc.perform(
                 MockMvcRequestBuilders.multipart(resourcesVersionsURI).file(NAME_PART).file(IMAGE_FILE_PART).file(
                         IMAGE_TYPE_PART)
                         .file(getUpdateTemplateBooleanPart(true)).contentType(MediaType.MULTIPART_FORM_DATA))
@@ -534,7 +536,9 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty())
                 .andExpect(jsonPath("version").value(2L))
                 .andExpect(jsonPath("$.metadataUrls[0].fileName").value(IMAGE_FILE_NAME))
-                .andExpect(jsonPath("deployed").value(false));
+                .andExpect(jsonPath("deployed").value(false))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -609,7 +613,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                     .file(IMAGE_TYPE_PART).file(getUpdateTemplateBooleanPart(true))
                     .contentType(MediaType.MULTIPART_FORM_DATA));
         }
-        mockMvc.perform(
+        final MvcResult result = mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
                         IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk())
@@ -618,16 +622,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
-                .andExpect(jsonPath("$.content[0].stage").isEmpty());
+                .andExpect(jsonPath("$.content[0].stage").isEmpty())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     void test_failure_get() throws Exception {
         final String notExistingResourceName = "unknown-resource";
-        mockMvc.perform(
+        final MvcResult result = mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
                         IMAGES, Base64.getEncoder().encodeToString(notExistingResourceName.getBytes())))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andReturn();
+        assertNotNull(result.getResponse());
 
     }
 
@@ -636,12 +644,14 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile wrongFile = new MockMultipartFile("resource", "any-name.dtf", "text/plain",
                 "{\"file\":\"data\"}".getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode().toUri();
-        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
                 .file(wrongFile)
                 .file(NAME_PART)
                 .file(IMAGE_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test

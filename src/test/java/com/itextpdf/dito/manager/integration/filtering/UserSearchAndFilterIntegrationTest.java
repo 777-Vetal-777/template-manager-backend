@@ -12,12 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Collections;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,11 +78,13 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
 
     @Test
     public void getAll_WhenUnsupportedSortField_ThenResponseIsBadRequest() throws Exception {
-        mockMvc.perform(get(UserController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME)
                 .param("sort", "unknownField")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -96,11 +100,12 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
-        mockMvc.perform(get(UserController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME)
                 .param("lastName", user1.getLastName()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
+                .andExpect(jsonPath("$.content[0].email", is(user1.getEmail()))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -114,24 +119,26 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].email", is(user1.getEmail())));
 
-        mockMvc.perform(get(UserController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME)
                 .param("search", "StringThatDoesntMatchAnything")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : UserRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(UserController.BASE_NAME)
+            final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME)
                     .param("sort", field)
                     .param("search", "test")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -139,11 +146,12 @@ public class UserSearchAndFilterIntegrationTest extends AbstractIntegrationTest 
     @Test
     public void test_sortWithFiltering() throws Exception {
         for (String field : UserRepository.SUPPORTED_SORT_FIELDS) {
-            mockMvc.perform(get(UserController.BASE_NAME)
+            final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME)
                     .param("sort", field)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk()).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 }

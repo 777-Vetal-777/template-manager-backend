@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.editor;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -118,11 +120,13 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 		// CHECK UPDATE
-		mockMvc.perform(get(uriUpdate)
+		final MvcResult result = mockMvc.perform(get(uriUpdate)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("file").value("NewData"));
+				.andExpect(jsonPath("file").value("NewData"))
+				.andReturn();
+		assertNotNull(result.getResponse());
 	}
 
 	@Test
@@ -130,10 +134,12 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		final URI uri = UriComponentsBuilder
 				.fromUriString(DataManagementController.CREATE_DATA_SAMPLE_URL + "/" + NOT_EXISTED_SAMPLE).build()
 				.encode().toUri();
-		mockMvc.perform(get(uri)
+		final MvcResult result = mockMvc.perform(get(uri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNotFound());
+				.andExpect(status().isNotFound())
+				.andReturn();
+		assertNotNull(result.getResponse());
 	}
 
 	@Test
@@ -178,11 +184,13 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$[0].collectionIdList[0]").value("ZGF0YS1jb2xsZWN0aW9uLXRlc3Q="));
 
 		// Delete Data Sample
-		mockMvc.perform(delete(uri)
+		final MvcResult result = mockMvc.perform(delete(uri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("id").value(Base64.encode(EXISTED_SAMPLE)));
+				.andExpect(jsonPath("id").value(Base64.encode(EXISTED_SAMPLE)))
+				.andReturn();
+		assertNotNull(result.getResponse());
 	}
 
 }

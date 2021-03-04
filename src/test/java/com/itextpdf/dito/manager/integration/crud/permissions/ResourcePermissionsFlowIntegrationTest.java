@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Base64;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -111,24 +113,30 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
         }
 
         //Delete permission
-        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES, IMAGES, encodedResourceName, encodeStringToBase64(roleName)))
-                .andExpect(status().isOk());
+        final MvcResult result = mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_AND_ROLE_PATH_VARIABLES, IMAGES, encodedResourceName, encodeStringToBase64(roleName)))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     public void getAll() throws Exception {
-        mockMvc.perform(get(PermissionController.BASE_NAME)
+        final MvcResult result = mockMvc.perform(get(PermissionController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Test
     public void getAllPageable() throws Exception {
-        mockMvc.perform(get(PermissionController.BASE_NAME + PermissionController.PAGEABLE_ENDPOINT)
+        final MvcResult result = mockMvc.perform(get(PermissionController.BASE_NAME + PermissionController.PAGEABLE_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(20)));
+                .andExpect(jsonPath("$.content", hasSize(20)))
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 }

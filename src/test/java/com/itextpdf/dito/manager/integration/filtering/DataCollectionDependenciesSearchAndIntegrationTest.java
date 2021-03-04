@@ -13,10 +13,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.BASE_NAME;
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,10 +96,11 @@ class DataCollectionDependenciesSearchAndIntegrationTest extends AbstractIntegra
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
 
-        mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
+        final MvcResult result = mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
                 .param("version", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(2)));
+                .andExpect(jsonPath("$.content", hasSize(2))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
@@ -114,22 +117,24 @@ class DataCollectionDependenciesSearchAndIntegrationTest extends AbstractIntegra
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
-        mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
+        final MvcResult result = mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
                 .param("version", "1")
                 .param("search", "Harry"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0))).andReturn();
+        assertNotNull(result.getResponse());
     }
 
     @Override
     @Test
     public void test_sortWithSearch() throws Exception {
         for (String field : DataCollectionFileRepository.SUPPORTED_DEPENDENCY_SORT_FIELDS) {
-            mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
+            final MvcResult result = mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
                     .param("search", "template")
                     .param("sort", field))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)));
+                    .andExpect(jsonPath("$.content", hasSize(2))).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 
@@ -144,12 +149,13 @@ class DataCollectionDependenciesSearchAndIntegrationTest extends AbstractIntegra
                     .andExpect(jsonPath("$.content", hasSize(2)));
         }
         for (String field : DataCollectionFileRepository.SUPPORTED_DEPENDENCY_SORT_FIELDS) {
-            mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
+            final MvcResult result = mockMvc.perform(get(BASE_NAME + DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE, DATA_COLLECTION_WITH_TWO_DEPENDENCIES_NAME_ENCODED)
                     .param("version", "1")
                     .param("sort", field)
                     .param("sort", "desc"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)));
+                    .andExpect(jsonPath("$.content", hasSize(2))).andReturn();
+            assertNotNull(result.getResponse());
         }
     }
 }

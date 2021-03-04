@@ -5,9 +5,9 @@ public enum FontTypeEnum {
     BOLD("bold"),
     ITALIC("italic"),
     BOLD_ITALIC("bold_italic");
-    public final String name;
+    public final String fontFace;
 
     FontTypeEnum(final String name) {
-        this.name = name;
+        this.fontFace = name;
     }
 }

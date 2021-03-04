@@ -43,7 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,12 +63,12 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final ResourceDependencyService resourceDependencyService;
     private final ResourceMapper resourceMapper;
     private final DependencyMapper dependencyMapper;
-    private final Map<ResourceTypeEnum, List<String>> supportedExtensions = new HashMap<>();
+    private final Map<ResourceTypeEnum, List<String>> supportedExtensions = new EnumMap<>(ResourceTypeEnum.class);
     private final ResourcePermissionService resourcePermissionService;
     private final PermissionMapper permissionMapper;
     private final PermissionHandler permissionHandler;
     private final FileVersionMapper fileVersionMapper;
-    private final Map<ResourceTypeEnum, Long> sizeLimit = new HashMap<>();
+    private final Map<ResourceTypeEnum, Long> sizeLimit = new EnumMap<>(ResourceTypeEnum.class);
 
     public ResourceControllerImpl(
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
@@ -115,13 +115,13 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         if (typeEnum != FONT) {
             throw new IncorrectResourceTypeException(type);
         }
-        final HashMap<FontTypeEnum, MultipartFile> fileMap = new HashMap<>();
+        final Map<FontTypeEnum, MultipartFile> fileMap = new EnumMap<>(FontTypeEnum.class);
         fileMap.put(REGULAR, regular);
         fileMap.put(BOLD, bold);
         fileMap.put(ITALIC, italic);
         fileMap.put(BOLD_ITALIC, boldItalic);
 
-        fileMap.entrySet().forEach(entry -> checkFileExtensionIsSupported(typeEnum, entry.getValue()));
+        fileMap.forEach((key, value) -> checkFileExtensionIsSupported(typeEnum, value));
         final ResourceEntity resourceEntity = resourceService
                 .createNewFont(principal.getName(), name, typeEnum, fileMap);
         log.info("Create  resource(font) with name: {} and type: {} was finished successfully", name, type);
