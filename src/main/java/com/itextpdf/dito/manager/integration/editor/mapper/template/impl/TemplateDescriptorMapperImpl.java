@@ -23,7 +23,7 @@ public class TemplateDescriptorMapperImpl implements TemplateDescriptorMapper {
         final String templateName = templateEntity.getName();
         result = new OutputTemplateDescriptor(encodeToBase64(templateName));
         result.setDisplayName(templateName);
-        result.setTemplateFragmentType(TemplateFragmentType.valueOf(templateEntity.getType().toString()));
+        result.setFragmentType(TemplateFragmentType.valueOf(templateEntity.getType().toString()));
         final String dataCollectionNameEncoded = Optional.ofNullable(templateEntity)
                 .map(TemplateEntity::getLatestFile)
                 .map(TemplateFileEntity::getDataCollectionFile)
