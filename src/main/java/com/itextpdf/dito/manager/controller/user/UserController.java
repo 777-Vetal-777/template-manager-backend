@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.user;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.dto.user.EmailDTO;
 import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
@@ -151,7 +152,7 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
-    ResponseEntity<UserDTO> updatePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO, Principal principal);
+    ResponseEntity<AuthenticationDTO> updatePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO, Principal principal);
 
     @PatchMapping(USER_UPDATE_PASSWORD_ENDPOINT)
     @PreAuthorize("hasAnyAuthority('E1_US3_FORGOT_PASSWORD', 'E10_US86_CHANGE_PASSWORD', 'E2_US6_SETTINGS_PANEL')")
@@ -161,7 +162,7 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
-    ResponseEntity<UserDTO> updateAdminPasswordToUser(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
+    ResponseEntity<AuthenticationDTO> updateAdminPasswordToUser(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
 
     @PatchMapping(UPDATE_USERS_ROLES_ENDPOINT)
     @PreAuthorize("hasAuthority('E3_US11_CHANGE_ROLE_TO_THE_USER')")

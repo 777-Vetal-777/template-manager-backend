@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.service.user;
 
-import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 
@@ -27,11 +27,11 @@ public interface UserService {
 
     UserEntity unblock(String email);
 
-    UserEntity updatePassword(String oldPassword, String newPassword, String userEmail);
+    AuthenticationDTO updatePassword(String oldPassword, String newPassword, String userEmail);
 
     UserEntity updatePassword(String newPassword, String userEmail, UserEntity admin);
 
-    UserEntity updatePasswordSpecifiedByAdmin(String newPassword, String email);
+    AuthenticationDTO updatePasswordSpecifiedByAdmin(String newPassword, String email);
 
     List<UserEntity> updateUsersRoles(List<String> emails, List<String> roles,
                                       UpdateUsersRolesActionEnum actionEnum);

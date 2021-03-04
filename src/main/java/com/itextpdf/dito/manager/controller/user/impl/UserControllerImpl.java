@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.controller.user.impl;
 
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
-import com.itextpdf.dito.manager.controller.token.impl.TokenControllerImpl;
 import com.itextpdf.dito.manager.controller.user.UserController;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.dto.user.EmailDTO;
 import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
@@ -119,18 +119,18 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> updatePassword(final @Valid PasswordChangeRequestDTO passwordChangeRequestDTO,
-            final Principal principal) {
-        final UserEntity userEntity = userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
+    public ResponseEntity<AuthenticationDTO> updatePassword(final @Valid PasswordChangeRequestDTO passwordChangeRequestDTO,
+                                                            final Principal principal) {
+        final AuthenticationDTO authenticationDTO = userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
                 passwordChangeRequestDTO.getNewPassword(),
                 principal.getName());
-        return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
+        return new ResponseEntity<>(authenticationDTO, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<UserDTO> updateAdminPasswordToUser(final UpdatePasswordRequestDTO updatePasswordRequestDTO, final Principal principal) {
-        final UserEntity userEntity = userService.updatePasswordSpecifiedByAdmin(updatePasswordRequestDTO.getPassword(), principal.getName());
-        return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
+    public ResponseEntity<AuthenticationDTO> updateAdminPasswordToUser(final UpdatePasswordRequestDTO updatePasswordRequestDTO, final Principal principal) {
+        final AuthenticationDTO authenticationDTO = userService.updatePasswordSpecifiedByAdmin(updatePasswordRequestDTO.getPassword(), principal.getName());
+        return new ResponseEntity<>(authenticationDTO, HttpStatus.OK);
     }
 
     @Override

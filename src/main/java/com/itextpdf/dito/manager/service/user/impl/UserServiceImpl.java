@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
-import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
+import com.itextpdf.dito.manager.dto.auth.AuthenticationDTO;
 import com.itextpdf.dito.manager.dto.user.update.UpdateUsersRolesActionEnum;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -20,6 +20,7 @@ import com.itextpdf.dito.manager.repository.login.FailedLoginRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
+import com.itextpdf.dito.manager.service.auth.AuthenticationService;
 import com.itextpdf.dito.manager.service.token.TokenService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -56,17 +57,20 @@ public class UserServiceImpl extends AbstractService implements UserService {
     private final PasswordEncoder encoder;
     private MailClient mailClient;
     private final TokenService tokenService;
+    private final AuthenticationService authenticationService;
 
     public UserServiceImpl(final UserRepository userRepository,
                            final RoleRepository roleRepository,
                            final FailedLoginRepository failedLoginRepository,
                            final PasswordEncoder encoder,
-                           final TokenService tokenService) {
+                           final TokenService tokenService,
+                           final AuthenticationService authenticationService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.failedLoginRepository = failedLoginRepository;
         this.encoder = encoder;
         this.tokenService = tokenService;
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -158,9 +162,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity updatePassword(final String oldPassword,
-                                     final String newPassword,
-                                     final String userEmail) {
+    public AuthenticationDTO updatePassword(final String oldPassword,
+                                            final String newPassword,
+                                            final String userEmail) {
         log.info("Update password for user: {} was started", userEmail);
         final UserEntity user = findActiveUserByEmail(userEmail);
         if (!encoder.matches(oldPassword, user.getPassword())) {
@@ -171,7 +175,9 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setModifiedAt(new Date());
         user.setPasswordUpdatedByAdmin(false);
         log.info("Update password for user: {} was finished successfully", userEmail);
-        return userRepository.save(user);
+        userRepository.save(user);
+        final AuthenticationDTO newTokenDto = authenticationService.authenticate(userEmail, newPassword);
+        return newTokenDto;
     }
 
     @Override
@@ -192,7 +198,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity updatePasswordSpecifiedByAdmin(final String newPassword, final String email) {
+    public AuthenticationDTO updatePasswordSpecifiedByAdmin(final String newPassword, final String email) {
         log.info("Update password specified by admin for user: {} was started", email);
         final UserEntity user = findActiveUserByEmail(email);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
@@ -200,8 +206,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setPassword(encoder.encode(newPassword));
         user.setModifiedAt(new Date());
         user.setPasswordUpdatedByAdmin(false);
+        userRepository.save(user);
+        final AuthenticationDTO newTokenDto = authenticationService.authenticate(email, newPassword);
         log.info("Update password specified by admin for user: {} was finished successfully", email);
-        return userRepository.save(user);
+        return newTokenDto;
     }
 
     @Override
