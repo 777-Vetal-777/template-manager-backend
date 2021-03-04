@@ -44,18 +44,17 @@ pipeline {
         }
         stage('Sonarqube analysis') {
             steps {
-                script {
-                    withSonarQubeEnv('SonarQube_8.3') {
-                        withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
-                            sh 'mvn -s ${MVN_SONAR_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                catcherror {
+                    script {
+                        withSonarQubeEnv('SonarQube_8.3') {
+                            withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
+                                sh 'mvn -s ${MVN_SONAR_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                            }
                         }
                     }
+                    waitForQualityGate abortPipeline: false
                 }
-            }
-        }
-        stage('Quality Gate'){
-            steps{
-                waitForQualityGate abortPipeline: false
+                echo currentBuild.result
             }
         }
         stage("Deploy image to nexus"){
