@@ -127,14 +127,14 @@ public class UserControllerImpl extends AbstractController implements UserContro
         final UserEntity userEntity= userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
                 passwordChangeRequestDTO.getNewPassword(),
                 principal.getName());
-        final AuthenticationDTO newTokenDto = authenticationService.authenticate(userEntity.getEmail(), userEntity.getPassword());
+        final AuthenticationDTO newTokenDto = authenticationService.authenticate(userEntity.getEmail(), passwordChangeRequestDTO.getNewPassword());
         return new ResponseEntity<>(newTokenDto, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<AuthenticationDTO> updateAdminPasswordToUser(final UpdatePasswordRequestDTO updatePasswordRequestDTO, final Principal principal) {
         final UserEntity userEntity = userService.updatePasswordSpecifiedByAdmin(updatePasswordRequestDTO.getPassword(), principal.getName());
-        final AuthenticationDTO authenticationDTO = authenticationService.authenticate(userEntity.getEmail(), userEntity.getPassword());
+        final AuthenticationDTO authenticationDTO = authenticationService.authenticate(userEntity.getEmail(), updatePasswordRequestDTO.getPassword());
         return new ResponseEntity<>(authenticationDTO, HttpStatus.OK);
     }
 
