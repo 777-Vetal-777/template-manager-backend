@@ -28,6 +28,8 @@ public class InstanceMapperImpl implements InstanceMapper {
         final InstanceEntity instanceEntity = new InstanceEntity();
         instanceEntity.setName(dto.getName());
         instanceEntity.setSocket(dto.getSocket());
+        instanceEntity.setHeaderName(dto.getHeaderName());
+        instanceEntity.setHeaderValue(dto.getHeaderValue());
         log.info("Convert dto: {} to entity was finished successfully", dto);
         return instanceEntity;
     }
@@ -43,6 +45,8 @@ public class InstanceMapperImpl implements InstanceMapper {
                 .append(entity.getCreatedBy().getLastName())
                 .toString());
         instanceDTO.setCreatedOn(entity.getCreatedOn());
+        instanceDTO.setHeaderName(entity.getHeaderName());
+        instanceDTO.setHeaderValue(entity.getHeaderValue());
         final List<TemplateFileEntity> templateFileEntities = entity.getTemplateFile();
         if (!CollectionUtils.isEmpty(templateFileEntities)) {
             instanceDTO.setTemplates(templateFileEntities.stream().map(templateFileEntity -> {
@@ -66,6 +70,8 @@ public class InstanceMapperImpl implements InstanceMapper {
         final InstanceEntity entity = new InstanceEntity();
         entity.setName(dto.getName());
         entity.setSocket(dto.getSocket());
+        entity.setHeaderName(dto.getHeaderName());
+        entity.setHeaderValue(dto.getHeaderValue());
         log.info("Convert {} to entity was finished successfully", dto);
         return entity;
     }

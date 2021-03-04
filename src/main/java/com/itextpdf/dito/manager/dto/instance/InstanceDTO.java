@@ -13,6 +13,8 @@ public class InstanceDTO {
     private String createdBy;
     private Date createdOn;
     private String stage;
+    private String headerName;
+    private String headerValue;
     private List<TemplateInstanceVersionDTO> templates = new ArrayList<>();
 
     public String getCreatedBy() {
@@ -63,7 +65,23 @@ public class InstanceDTO {
         this.templates = templates;
     }
 
-    @Override
+    public String getHeaderName() {
+		return headerName;
+	}
+
+	public void setHeaderName(String headerName) {
+		this.headerName = headerName;
+	}
+
+	public String getHeaderValue() {
+		return headerValue;
+	}
+
+	public void setHeaderValue(String headerValue) {
+		this.headerValue = headerValue;
+	}
+
+	@Override
     public String toString() {
         return "InstanceDTO{" +
                 "name='" + name + '\'' +
@@ -71,6 +89,8 @@ public class InstanceDTO {
                 ", createdBy='" + createdBy + '\'' +
                 ", createdOn=" + createdOn +
                 ", stage='" + stage + '\'' +
+                ", headerName='" + headerName + '\'' +
+                ", headerValue='" + headerValue + '\'' +
                 ", templates=" + templates +
                 '}';
     }

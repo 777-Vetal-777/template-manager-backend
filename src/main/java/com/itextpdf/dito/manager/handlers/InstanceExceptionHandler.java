@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.instance.DefaultInstanceException;
 import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.instance.InstanceCustomHeaderValidationException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
@@ -51,4 +52,11 @@ public class InstanceExceptionHandler extends AbstractExceptionHandler {
             final WorkspaceHasNoDevelopmentStageException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
+
+	@ExceptionHandler(InstanceCustomHeaderValidationException.class)
+	public ResponseEntity<ErrorResponseDTO> instanceCustomHeaderValidationExceptionHandler(
+			final InstanceCustomHeaderValidationException ex) {
+		return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+	}
+
 }

@@ -37,6 +37,10 @@ public class InstanceEntity {
     private List<TemplateFileEntity> templateFile;
     @Column(name = "register_token")
     private String registerToken;
+    @Column(name = "header_name")
+    private String headerName;
+    @Column(name = "header_value")
+    private String headerValue;
 
     @PrePersist
     public void onPrePersist() {
@@ -107,13 +111,31 @@ public class InstanceEntity {
         this.registerToken = registerToken;
     }
 
-    @Override
+    public String getHeaderName() {
+		return headerName;
+	}
+
+	public void setHeaderName(String headerName) {
+		this.headerName = headerName;
+	}
+
+	public String getHeaderValue() {
+		return headerValue;
+	}
+
+	public void setHeaderValue(String headerValue) {
+		this.headerValue = headerValue;
+	}
+
+	@Override
     public String toString() {
         return "InstanceEntity{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", socket='" + socket + '\'' +
                 ", createdOn=" + createdOn +
+                ", headerName='" + headerName + '\'' +
+                ", headerValue='" + headerValue + '\'' +
                 ", registerToken='" + registerToken + '\'' +
                 '}';
     }

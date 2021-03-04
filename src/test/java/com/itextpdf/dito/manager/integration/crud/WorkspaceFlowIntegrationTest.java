@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.workspace.WorkspaceController.WORKSPACE_CHECK_LICENSE_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -292,7 +293,6 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         InstanceRememberRequestDTO instanceDTO = new InstanceRememberRequestDTO();
         instanceDTO.setName("test-name");
         instanceDTO.setSocket("localhost:9999");
-
         instancesRememberRequestDTO.setInstances(Collections.singletonList(instanceDTO));
         mockMvc.perform(post(InstanceController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(instancesRememberRequestDTO))
@@ -348,5 +348,56 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("language").value("ENG"))
                 .andExpect(jsonPath("timezone").value("America/Sao_Paulo"))
                 .andExpect(jsonPath("adjustForDaylight").value(true));
+    }
+    
+    @Test
+    public void test_remember_success_with_custom_header() throws Exception {
+        final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
+        request.getInstances().get(0).setHeaderName("MyHeader");
+        request.getInstances().get(0).setHeaderValue("MyHeaderValue");
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$.[0].socket", is(request.getInstances().get(0).getSocket())))
+                .andExpect(jsonPath("$.[0].headerName", is("MyHeader")))
+                .andExpect(jsonPath("$.[0].headerValue", is("MyHeaderValue")));
+        assertTrue(!instanceRepository.findByName(request.getInstances().get(0).getName()).isEmpty());
+    }
+    
+    @Test
+    public void test_remember_fail_with_custom_header() throws Exception {
+        final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
+        request.getInstances().get(0).setHeaderName("MyHeader");
+        request.getInstances().get(0).setHeaderValue("");
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        request.getInstances().get(0).setHeaderName("");
+        request.getInstances().get(0).setHeaderValue("MyHeaderValue");
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        request.getInstances().get(0).setHeaderName(null);
+        request.getInstances().get(0).setHeaderValue("MyHeaderValue");
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        request.getInstances().get(0).setHeaderName("MyHeader");
+        request.getInstances().get(0).setHeaderValue(null);
+        mockMvc.perform(post(InstanceController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        assertTrue(instanceRepository.findByName(request.getInstances().get(0).getName()).isEmpty());
     }
 }

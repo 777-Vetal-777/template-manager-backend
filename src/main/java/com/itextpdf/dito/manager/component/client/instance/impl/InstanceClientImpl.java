@@ -66,7 +66,7 @@ public class InstanceClientImpl implements InstanceClient {
     }
 
     @Override
-    public InstanceRegisterResponseDTO register(final String instanceSocket) {
+    public InstanceRegisterResponseDTO register(final String instanceSocket, final String customHeaderName, final String customHeaderValue) {
         final String instanceRegisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_REGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
         instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
@@ -75,6 +75,11 @@ public class InstanceClientImpl implements InstanceClient {
                     .post()
                     .uri(instanceRegisterUrl)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+					.headers(h -> {
+						if (!StringUtils.isEmpty(customHeaderName)) {
+							h.add(customHeaderName, customHeaderValue);
+						}
+					})
                     .bodyValue(instanceRegisterRequestDTO)
                     .retrieve()
                     .onStatus(HttpStatus::isError, clientResponse -> {

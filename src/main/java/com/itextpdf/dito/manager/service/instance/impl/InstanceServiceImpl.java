@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.instance.InstanceAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.instance.InstanceCustomHeaderValidationException;
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
@@ -60,7 +61,10 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         if (instanceRepository.findBySocket(instance.getSocket()).isPresent()) {
             throw new InstanceAlreadyExistsException(instance.getSocket());
         }
-        final String instanceToken = instanceClient.register(instance.getSocket()).getToken();
+		if (StringUtils.isEmpty(instance.getHeaderName()) ^ StringUtils.isEmpty(instance.getHeaderValue())) {
+			throw new InstanceCustomHeaderValidationException(instance.getName());
+		}
+        final String instanceToken = instanceClient.register(instance.getSocket(), instance.getHeaderName(), instance.getHeaderValue()).getToken();
         instance.setCreatedBy(userEntity);
         instance.setRegisterToken(instanceToken);
         final InstanceEntity instanceEntity = instanceRepository.save(instance);

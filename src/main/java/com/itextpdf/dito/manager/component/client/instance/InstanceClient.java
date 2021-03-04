@@ -9,7 +9,7 @@ import java.io.File;
 public interface InstanceClient {
     void ping(String socket);
 
-    InstanceRegisterResponseDTO register(String instanceSocket);
+    InstanceRegisterResponseDTO register(String instanceSocket, String customHeaderName, String customHeaderValue);
 
     void unregister(String instanceSocket, String token);
 

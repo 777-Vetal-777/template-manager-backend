@@ -92,7 +92,7 @@ public abstract class AbstractIntegrationTest {
 
         InstanceRegisterResponseDTO sdkRegisterResponse = new InstanceRegisterResponseDTO();
         sdkRegisterResponse.setToken("test-token");
-        when(instanceClientMock.register(any(String.class))).thenReturn(sdkRegisterResponse);
+        when(instanceClientMock.register(any(String.class), any(), any())).thenReturn(sdkRegisterResponse);
 
         generateDefaultPromotionPath();
     }
