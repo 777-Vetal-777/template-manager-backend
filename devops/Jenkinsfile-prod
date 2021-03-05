@@ -71,8 +71,8 @@ pipeline {
         stage("Remove unused docker image"){
             steps{
                 sh """
-                docker rmi -f ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1
-                docker rmi -f ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1
+                docker rmi -f ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
+                docker rmi -f ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
                 docker rmi -f ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
                 docker rmi -f ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
                 """
