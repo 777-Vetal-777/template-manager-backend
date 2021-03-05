@@ -87,7 +87,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldNotRepeatedlyImportTemplate() throws Exception {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-data-collection.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-data-collection.dito"));
-        final MockMultipartFile settings = new MockMultipartFile("settings", "settings.json", "application/json", "[ {\"name\": \"datasample.json\",\"type\": \"DATA_COLLECTION\",\"new_version\": false}]".getBytes());
+        final MockMultipartFile settings = new MockMultipartFile("settings", "settings.json", "application/json", "[ {\"name\": \"datasample.json\",\"type\": \"DATA_COLLECTION\",\"new_version\": false}, {\"name\": \"sample-json-file.json\",\"type\": \"DATA_COLLECTION\",\"new_version\": false} ]".getBytes());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
                 .file(ditoFile)
