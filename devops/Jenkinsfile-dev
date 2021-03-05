@@ -52,7 +52,7 @@ pipeline {
                             }
                         }
                     }
-                    waitForQualityGate abortPipeline: false
+                    waitForQualityGate abortPipeline: true
                 }
                 echo currentBuild.result
             }
