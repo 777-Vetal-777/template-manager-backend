@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -107,7 +108,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("message").value("Template file got duplicates"))
                 .andExpect(jsonPath("$.duplicates[*].type", containsInAnyOrder("DATA_COLLECTION", "TEMPLATE")))
-                .andExpect(jsonPath("$.duplicates[*].name", containsInAnyOrder("datasample.json", "Standard")));
+                .andExpect(jsonPath("$.duplicates[*].name", hasItems("Standard")));
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
                 .file(ditoFile)

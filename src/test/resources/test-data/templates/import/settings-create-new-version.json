@@ -5,6 +5,11 @@
     "new_version": true
   },
   {
+    "name": "sample-json-file.json",
+    "type": "DATA_COLLECTION",
+    "new_version": true
+  },
+  {
     "name": "Standard",
     "type": "TEMPLATE",
     "new_version": true
