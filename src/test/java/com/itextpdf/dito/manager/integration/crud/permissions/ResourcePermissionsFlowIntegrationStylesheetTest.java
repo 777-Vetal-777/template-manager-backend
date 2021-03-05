@@ -12,6 +12,7 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Base64;
 
 import org.junit.jupiter.api.AfterEach;
@@ -71,7 +72,7 @@ public class ResourcePermissionsFlowIntegrationStylesheetTest extends AbstractIn
         //Clear DB
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                		STYLESHEETS, Base64.getEncoder().encodeToString(NAME.getBytes())))
+                        STYLESHEETS, Base64.getEncoder().encodeToString(NAME.getBytes())))
                 .andExpect(status().isOk());
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + encodeStringToBase64(roleName)))
                 .andExpect(status().isOk());
@@ -83,6 +84,7 @@ public class ResourcePermissionsFlowIntegrationStylesheetTest extends AbstractIn
 
         //Create permission
         ApplyRoleRequestDTO applyRoleRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/permissions/resource-apply-role-request.json"), ApplyRoleRequestDTO.class);
+        applyRoleRequestDTO.setPermissions(Arrays.asList("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET"));
         mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE, STYLESHEETS, encodedResourceName)
                 .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)

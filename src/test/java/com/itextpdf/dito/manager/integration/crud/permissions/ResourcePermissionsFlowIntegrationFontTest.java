@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Base64;
 
 import org.junit.jupiter.api.AfterEach;
@@ -92,6 +93,7 @@ public class ResourcePermissionsFlowIntegrationFontTest extends AbstractIntegrat
 
         //Create permission
         ApplyRoleRequestDTO applyRoleRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/permissions/resource-apply-role-request.json"), ApplyRoleRequestDTO.class);
+        applyRoleRequestDTO.setPermissions(Arrays.asList("E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT","E8_US58_EDIT_RESOURCE_METADATA_FONT"));
         mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE, FONTS, encodedResourceName)
                 .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
