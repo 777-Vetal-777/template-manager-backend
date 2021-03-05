@@ -1,6 +1,6 @@
 package com.itextpdf.dito.manager.dto.instance.register;
 
-public class InstanceRegisterErrorResponseDTO {
+public class InstanceErrorResponseDTO {
     private String message;
     private Integer code;
 

@@ -1,13 +1,13 @@
 package com.itextpdf.dito.manager.component.client.instance.impl;
 
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
-import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterErrorResponseDTO;
+import com.itextpdf.dito.manager.dto.instance.register.InstanceErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDeploymentDTO;
 import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
-import com.itextpdf.dito.manager.exception.instance.InstanceConnectionException;
 import com.itextpdf.dito.manager.exception.instance.NotReachableInstanceException;
+import com.itextpdf.dito.manager.exception.instance.deployment.SdkInstanceException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,10 +78,11 @@ public class InstanceClientImpl implements InstanceClient {
                     .bodyValue(instanceRegisterRequestDTO)
                     .retrieve()
                     .onStatus(HttpStatus::isError, clientResponse -> {
-                        final Mono<InstanceRegisterErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceRegisterErrorResponseDTO.class);
+                        final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
                         return errorMessage.flatMap(message -> {
                             log.warn(message.getMessage());
-                            throw new InstanceConnectionException(message.getCode(), message.getMessage());
+                            final String errorText = "Failed to register API instance: ";
+                            throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
                         });
                     })
                     .bodyToMono(InstanceRegisterResponseDTO.class);
@@ -102,14 +103,16 @@ public class InstanceClientImpl implements InstanceClient {
                 .headers(h -> h.setBearerAuth(instanceToken))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(instanceRegisterRequestDTO)
-                .exchange()
-                .flatMap(clientResponse -> {
-                    //Error handling
-                    if (clientResponse.statusCode().isError()) {
-                        return clientResponse.createException().flatMap(Mono::error);
-                    }
-                    return clientResponse.bodyToMono(Void.class);
-                });
+                .retrieve()
+                .onStatus(HttpStatus::isError, clientResponse -> {
+                    final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
+                    return errorMessage.flatMap(message -> {
+                        log.warn(message.getMessage());
+                        final String errorText = "Failed to unregister API instance: ";
+                        throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
+                    });
+                })
+                .bodyToMono(Void.class);
         response.block();
     }
 
@@ -127,13 +130,16 @@ public class InstanceClientImpl implements InstanceClient {
                 .headers(h -> h.setBearerAuth(instanceRegisterToken))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(fromFile(descriptorDTO, templateProject)))
-                .exchange()
-                .flatMap(clientResponse -> {
-                    if (clientResponse.statusCode().isError()) {
-                        return clientResponse.createException().flatMap(Mono::error);
-                    }
-                    return clientResponse.bodyToMono(TemplateDeploymentDTO.class);
-                });
+                .retrieve()
+                .onStatus(HttpStatus::isError, clientResponse -> {
+                    final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
+                    return errorMessage.flatMap(message -> {
+                        log.warn(message.getMessage());
+                        final String errorText = "Failed to promote template to API instance: ";
+                        throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
+                    });
+                })
+                .bodyToMono(TemplateDeploymentDTO.class);
         return response.block();
     }
 
@@ -150,18 +156,16 @@ public class InstanceClientImpl implements InstanceClient {
                 .delete()
                 .uri(instanceDeploymentUrl)
                 .headers(h -> h.setBearerAuth(instanceRegisterToken))
-                .exchange()
-                .flatMap(clientResponse -> {
-                    if (clientResponse.statusCode().isError()) {
-                        if (HttpStatus.NOT_FOUND == clientResponse.statusCode()) {
-                            final String message = new StringBuilder().append("Template ").append(templateAlias).append(" was already removed from instance:").append(instanceSocket).toString();
-                            log.warn(message);
-                            return clientResponse.bodyToMono(TemplateDeploymentDTO.class);
-                        }
-                        return clientResponse.createException().flatMap(Mono::error);
-                    }
-                    return clientResponse.bodyToMono(TemplateDeploymentDTO.class);
-                });
+                .retrieve()
+                .onStatus(HttpStatus::isError, clientResponse -> {
+                    final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
+                    return errorMessage.flatMap(message -> {
+                        log.warn(message.getMessage());
+                        final String errorText = "Failed to un-deploy template from API instance: ";
+                        throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
+                    });
+                })
+                .bodyToMono(TemplateDeploymentDTO.class);
         return response.block();
     }
 

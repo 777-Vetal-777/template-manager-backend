@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.error.TemplateImportErrorResponseDTO;
-import com.itextpdf.dito.manager.exception.instance.deployment.InstanceDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
@@ -30,11 +29,6 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(TemplateCannotBeBlockedException.class)
     public ResponseEntity<ErrorResponseDTO> templateCannotBeBlockedExceptionHandler(final TemplateCannotBeBlockedException ex) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InstanceDeploymentException.class)
-    public ResponseEntity<ErrorResponseDTO> instanceDeploymentExceptionHandler(final InstanceDeploymentException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
