@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
@@ -99,7 +100,7 @@ public interface UserController {
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
     ResponseEntity<UserDTO> updatePassword(@Parameter(name = USER_NAME_PATH_VARIABLE, description = "Encoded with base64 username", required = true) @PathVariable(USER_NAME_PATH_VARIABLE) String userName,
-            @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
+            @Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E3_US_9_USERS_TABLE', 'E2_US6_SETTINGS_PANEL')")
@@ -152,7 +153,7 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
-    ResponseEntity<AuthenticationDTO> updatePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO, Principal principal);
+    ResponseEntity<AuthenticationDTO> updatePassword(@RequestBody @Valid PasswordChangeRequestDTO passwordChangeRequestDTO, Principal principal);
 
     @PatchMapping(USER_UPDATE_PASSWORD_ENDPOINT)
     @PreAuthorize("hasAnyAuthority('E1_US3_FORGOT_PASSWORD', 'E10_US86_CHANGE_PASSWORD', 'E2_US6_SETTINGS_PANEL')")
@@ -162,7 +163,7 @@ public interface UserController {
             @ApiResponse(responseCode = "200", description = "Successfully updated password", content = @Content),
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
-    ResponseEntity<AuthenticationDTO> updateAdminPasswordToUser(@RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
+    ResponseEntity<AuthenticationDTO> updateAdminPasswordToUser(@RequestBody @Valid UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
 
     @PatchMapping(UPDATE_USERS_ROLES_ENDPOINT)
     @PreAuthorize("hasAuthority('E3_US11_CHANGE_ROLE_TO_THE_USER')")
