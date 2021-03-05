@@ -24,8 +24,6 @@ public interface PermissionHandler {
     boolean checkPermissionsByUser(String email, String permission);
 
     //  Templates
-    boolean checkTemplateCommonPermissionByType(Authentication authentication, String type);
-
     boolean checkTemplateDeletePermissions(Authentication authentication, String templateName);
 
     boolean checkTemplateCommonPermissionByType(Authentication authentication, TemplateCreateRequestDTO request);

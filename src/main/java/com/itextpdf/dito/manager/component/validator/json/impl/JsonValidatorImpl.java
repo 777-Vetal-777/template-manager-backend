@@ -1,16 +1,13 @@
 package com.itextpdf.dito.manager.component.validator.json.impl;
 
-import com.itextpdf.dito.manager.component.mapper.datacollection.impl.DataCollectionMapperImpl;
-import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-
+import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class JsonValidatorImpl implements JsonValidator {

@@ -12,14 +12,7 @@ import com.itextpdf.dito.manager.exception.token.InvalidRefreshTokenException;
 import com.itextpdf.dito.manager.exception.token.InvalidResetPasswordTokenException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
-import com.itextpdf.dito.manager.service.template.impl.TemplateVersionsServiceImpl;
 import com.itextpdf.dito.manager.service.token.TokenService;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Optional;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +20,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class TokenServiceImpl implements TokenService {

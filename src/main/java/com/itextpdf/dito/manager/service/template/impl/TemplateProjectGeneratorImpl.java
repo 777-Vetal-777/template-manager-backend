@@ -49,7 +49,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
 
     @Override
     public File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final DataSampleFileEntity dataSampleFileEntity) {
-        return generateProjectFolderByTemplate(templateEntity, toDataSampleList(templateEntity, dataSampleFileEntity));
+        return generateProjectFolderByTemplate(templateEntity, toDataSampleList(templateEntity, dataSampleFileEntity), true);
     }
 
     @Override
@@ -77,10 +77,6 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         }
 
         return zippedProject;
-    }
-
-    private File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final List<DataSampleFileEntity> dataSampleFileEntities) {
-        return generateProjectFolderByTemplate(templateEntity, dataSampleFileEntities, true);
     }
 
     private File generateProjectFolderByTemplate(final TemplateEntity templateEntity, final List<DataSampleFileEntity> dataSampleFileEntities, final boolean exportDependencies) {

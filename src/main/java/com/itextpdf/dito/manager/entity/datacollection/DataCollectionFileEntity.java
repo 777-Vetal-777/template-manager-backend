@@ -15,7 +15,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class DataCollectionFileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "data_collection_file_gen")
     @SequenceGenerator(name = "data_collection_file_gen", sequenceName = "data_collection_file_sequence", allocationSize = 1)
-    private Long Id;
+    private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "data_collection_id")
     private DataCollectionEntity dataCollection;
@@ -58,11 +57,11 @@ public class DataCollectionFileEntity {
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public DataCollectionEntity getDataCollection() {
@@ -132,7 +131,7 @@ public class DataCollectionFileEntity {
     @Override
     public String toString() {
         return "DataCollectionFileEntity{" +
-                "Id=" + Id +
+                "Id=" + id +
                 ", version=" + version +
                 ", comment='" + comment + '\'' +
                 ", createdOn=" + createdOn +

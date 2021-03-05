@@ -57,7 +57,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
             final List<String> stages = getListStringsFromFilter(filter.getStage());
-            final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
+            final boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             final Pageable pageWithSort = updateSort(pageable);
 
             //a condition if the search contains a resource of type - image, or a HARD dependence. Because all dependencies in this case are a IMAGE or a HARD

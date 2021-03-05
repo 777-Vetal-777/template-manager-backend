@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
-import com.itextpdf.dito.manager.component.mapper.permission.impl.PermissionMapperImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
@@ -13,20 +14,16 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceMapperImpl implements ResourceMapper {
@@ -57,7 +54,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         final Collection<ResourceFileEntity> files = entity.getLatestFile();
         if (Objects.nonNull(files) && !files.isEmpty()) {
             final ResourceFileEntity fileEntity = files.stream().findFirst().get();
-            final List<FileMetaInfoDTO> fileMetaInfoDTOS = files.stream().map(file -> map(file))
+            final List<FileMetaInfoDTO> fileMetaInfoDTOS = files.stream().map(ResourceMapperImpl::map)
                     .collect(Collectors.toList());
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
@@ -66,9 +63,9 @@ public class ResourceMapperImpl implements ResourceMapper {
         }
         final Collection<ResourceLogEntity> logs = entity.getResourceLogs();
         if (Objects.nonNull(logs) && !logs.isEmpty()) {
-            final ResourceLogEntity log = logs.stream().findFirst().get();
-            result.setModifiedOn(log.getDate());
-            final UserEntity updatedBy = log.getAuthor();
+            final ResourceLogEntity logEntity = logs.stream().findFirst().get();
+            result.setModifiedOn(logEntity.getDate());
+            final UserEntity updatedBy = logEntity.getAuthor();
             if (Objects.nonNull(updatedBy)) {
                 result.setModifiedBy(
                         new StringBuilder(updatedBy.getFirstName()).append(" ").append(updatedBy.getLastName())
@@ -126,7 +123,7 @@ public class ResourceMapperImpl implements ResourceMapper {
     //TODO In the future, replace this code with an integration code.
     @Override
     public ResourceIdDTO deserialize(final String data) {
-        ResourceIdDTO result = null;
+        final ResourceIdDTO result;
         try {
             result = objectMapper.readValue(data, ResourceIdDTO.class);
         } catch (JsonProcessingException e) {
@@ -138,7 +135,7 @@ public class ResourceMapperImpl implements ResourceMapper {
     //TODO In the future, replace this code with an integration code.
     @Override
     public String serialize(final Object data) {
-        String result = null;
+        final String result;
 
         try {
             result = objectMapper.writeValueAsString(data);

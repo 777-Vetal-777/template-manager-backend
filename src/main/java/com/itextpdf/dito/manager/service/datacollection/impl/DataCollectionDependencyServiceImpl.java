@@ -52,7 +52,7 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
         final String depend = getStringFromFilter(filter.getName());
         final List<String> stages = filter.getStage();
         final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d -> d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
-        final Boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
+        final boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
         if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType().contains(DependencyType.TEMPLATE)) {
             searchResult = isSearchEmpty
                     ? dataCollectionFileRepository.filter(pageWithSort, dataCollectionEntity.getId(), depend, version, directionType, stages)

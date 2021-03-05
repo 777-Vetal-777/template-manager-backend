@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.workspace.impl;
 
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
-import com.itextpdf.dito.manager.component.mapper.template.impl.TemplateMapperImpl;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
@@ -10,14 +9,13 @@ import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 @Component
 public class WorkspaceMapperImpl implements WorkspaceMapper {

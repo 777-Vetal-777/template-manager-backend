@@ -41,8 +41,8 @@ public class MailClientImpl implements MailClient {
     private static final String MAIL_SUBJECT = "DITO registration";
     private static final String MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT = "DITO password was updated by admin";
     private static final String MAIL_RESET_PASSWORD_SUBJECT = "DITO reset password";
-    private final String FRONT_URL;
-    private final String PRIVACY_INFORMATION_URL;
+    private final String frontURL;
+    private final String privacyInformationUrl;
 
     public MailClientImpl(@Value("${spring.mail.host}") final String host,
                           @Value("${spring.mail.port}") final Integer port,
@@ -58,8 +58,8 @@ public class MailClientImpl implements MailClient {
         this.password = password;
         this.auth = auth;
         this.tls = tls;
-        this.FRONT_URL = frontUrl;
-        this.PRIVACY_INFORMATION_URL = privacyInformation;
+        this.frontURL = frontUrl;
+        this.privacyInformationUrl = privacyInformation;
     }
 
     @PostConstruct
@@ -109,9 +109,9 @@ public class MailClientImpl implements MailClient {
         log.info("Generate reset password html for user: {} was started", userEntity);
         final List<String> list = readFile("templates/resetPasswordEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
-        list.set(35, String.format(list.get(35), FRONT_URL.concat("/forgot_password?token=").concat(token)));
+        list.set(35, String.format(list.get(35), frontURL.concat("/forgot_password?token=").concat(token)));
         list.set(48, String.format(list.get(48), Year.now().getValue()));
-        list.set(51, String.format(list.get(51), PRIVACY_INFORMATION_URL));
+        list.set(51, String.format(list.get(51), privacyInformationUrl));
         final StringBuilder stringBuilder = new StringBuilder();
         for (final String str2 : list) {
             stringBuilder.append(str2);
@@ -125,8 +125,8 @@ public class MailClientImpl implements MailClient {
         list.set(29, String.format(list.get(29), admin.getFirstName() + " "+ admin.getLastName()));
         list.set(36, String.format(list.get(36), userEntity.getEmail()));
         list.set(40, String.format(list.get(40), password));
-        list.set(44, String.format(list.get(44), FRONT_URL.concat("/login")));
-        list.set(60, String.format(list.get(60), PRIVACY_INFORMATION_URL));
+        list.set(44, String.format(list.get(44), frontURL.concat("/login")));
+        list.set(60, String.format(list.get(60), privacyInformationUrl));
         list.set(57, String.format(list.get(57), Year.now().getValue()));
         final StringBuilder stringBuilder = new StringBuilder();
         for (final String str2 : list) {
@@ -143,8 +143,8 @@ public class MailClientImpl implements MailClient {
         list.set(29, String.format(list.get(29), currentUser.getFirstName() + " " + currentUser.getLastName()));
         list.set(41, String.format(list.get(41), userEntity.getFirstName()));
         list.set(45, String.format(list.get(45), password));
-        list.set(49, String.format(list.get(49), FRONT_URL.concat("/login")));
-        list.set(65, String.format(list.get(65), PRIVACY_INFORMATION_URL));
+        list.set(49, String.format(list.get(49), frontURL.concat("/login")));
+        list.set(65, String.format(list.get(65), privacyInformationUrl));
         list.set(62, String.format(list.get(62), Year.now().getValue()));
         final StringBuilder stringBuilder = new StringBuilder();
         for (final String str2 : list) {
@@ -184,18 +184,18 @@ public class MailClientImpl implements MailClient {
     }
 
     private JavaMailSenderImpl buildMailClient() {
-        final JavaMailSenderImpl client = new JavaMailSenderImpl();
-        client.setHost(host);
-        client.setPort(port);
-        client.setUsername(username);
-        client.setPassword(password);
+        final JavaMailSenderImpl mailClient = new JavaMailSenderImpl();
+        mailClient.setHost(host);
+        mailClient.setPort(port);
+        mailClient.setUsername(username);
+        mailClient.setPassword(password);
 
-        final Properties props = client.getJavaMailProperties();
+        final Properties props = mailClient.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", auth);
         props.put("mail.smtp.starttls.enable", tls);
         props.put("mail.debug", log.isDebugEnabled());
 
-        return client;
+        return mailClient;
     }
 }

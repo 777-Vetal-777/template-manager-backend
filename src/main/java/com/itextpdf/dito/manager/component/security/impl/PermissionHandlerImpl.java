@@ -21,7 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -138,14 +140,6 @@ public class PermissionHandlerImpl implements PermissionHandler {
 
     //  Templates
     @Override
-    public boolean checkTemplateCommonPermissionByType(final Authentication authentication,
-                                                       final String type) {
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(templateCommonPermissionsByType.get(type));
-    }
-
-    @Override
     public boolean checkTemplateDeletePermissions(final Authentication authentication, final String templateName) {
         final TemplateEntity templateEntity = templateService.get(templateName);
         return authentication.getAuthorities().stream()
@@ -204,13 +198,14 @@ public class PermissionHandlerImpl implements PermissionHandler {
     @Override
     public boolean checkPermissionsByUser(final String email, final String permission) {
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
-        final List<RoleEntity> roles = userEntity.getRoles().stream().collect(Collectors.toList());
+        final List<RoleEntity> roles = new ArrayList<>(userEntity.getRoles());
         boolean existPermission = false;
         for (final RoleEntity roleEntity : roles) {
             final Set<PermissionEntity> permissionEntities = roleEntity.getPermissions();
             for (final PermissionEntity permissionEntity : permissionEntities) {
                 if (permissionEntity.getName().equals(permission)) {
                     existPermission = true;
+                    break;
                 }
             }
         }
@@ -245,8 +240,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
         final ResourceEntity resourceEntity = resourceService.getResource(resourceName, resourceType);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
-        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(resourceEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
+        return checkUserPermissions(userEntity, resourceEntity.getAppliedRoles(), checkingPermission);
     }
 
     @Override
@@ -254,14 +248,12 @@ public class PermissionHandlerImpl implements PermissionHandler {
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(dataCollectionName);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
-        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(dataCollectionEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
+        return checkUserPermissions(userEntity, dataCollectionEntity.getAppliedRoles(), checkingPermission);
     }
 
     @Override
     public boolean checkTemplatePermissions(final UserEntity userEntity, final TemplateEntity templateEntity, final String checkingPermission) {
-        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(templateEntity.getAppliedRoles(), userEntity.getRoles()), checkingPermission);
+        return checkUserPermissions(userEntity, templateEntity.getAppliedRoles(), checkingPermission);
     }
 
     @Override
@@ -275,7 +267,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
     private Set<RoleEntity> retrieveEntityAppliedRoles(final Set<RoleEntity> entityAppliedRoles, final Set<RoleEntity> userMasterRoles) {
         final Map<String, RoleEntity> appliedRoles = entityAppliedRoles.stream().collect(toMap(RoleEntity::getName, role -> role));
         userMasterRoles.forEach(role -> appliedRoles.putIfAbsent(role.getName(), role));
-        return appliedRoles.values().stream().collect(Collectors.toSet());
+        return new HashSet<>(appliedRoles.values());
     }
 
     private Set<String> retrieveSetOfRoleNames(final Set<RoleEntity> roleEntities) {
@@ -287,15 +279,10 @@ public class PermissionHandlerImpl implements PermissionHandler {
     }
 
     boolean checkUserPermissions(final UserEntity userEntity,
-                                 final Set<RoleEntity> entityAppliedRoles,
+                                 final Set<RoleEntity> entityRoles,
                                  final String requiredPermission) {
-        return checkUserPermissions(retrieveSetOfRoleNames(userEntity.getRoles()),
-                retrieveEntityAppliedRoles(entityAppliedRoles, userEntity.getRoles()), requiredPermission);
-    }
-
-    private boolean checkUserPermissions(final Set<String> userRoleNames,
-                                         final Set<RoleEntity> entityAppliedRoles,
-                                         final String requiredPermission) {
+        final Set<String> userRoleNames = retrieveSetOfRoleNames(userEntity.getRoles());
+        final Set<RoleEntity> entityAppliedRoles =  retrieveEntityAppliedRoles(entityRoles, userEntity.getRoles());
         boolean isPermissionRolePresented = false;
 
         if (!isUserAdmin(userRoleNames) && !entityAppliedRoles.isEmpty()) {

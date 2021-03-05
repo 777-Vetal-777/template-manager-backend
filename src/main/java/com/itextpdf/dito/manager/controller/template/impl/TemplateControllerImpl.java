@@ -335,7 +335,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final byte[] data = getFileBytes(templateFile);
         final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
                 ? new EnumMap<>(SettingType.class)
-                : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> (TemplateImportNameModel) a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
+                : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
         final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).orElse("unknown").concat("-import");
         return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models.getOrDefault(SettingType.TEMPLATE, Collections.emptyMap()), models.getOrDefault(SettingType.DATA_COLLECTION, Collections.emptyMap()))), HttpStatus.OK);
     }

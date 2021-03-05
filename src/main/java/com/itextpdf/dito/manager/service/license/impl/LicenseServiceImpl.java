@@ -51,14 +51,14 @@ public class LicenseServiceImpl implements LicenseService {
 
 	}
 
-	public void checkDitoLicense(final byte[] data) throws DitoLicenseException{
+	public void checkDitoLicense(final byte[] data) {
 		DitoLicense.parseLicense(new ByteArrayInputStream(data));
 	}
 
 	@Override
 	public LicenseEntity getWorkspaceLicense(WorkspaceEntity workspaceEntity) {
 		final LicenseEntity entity = licenseRepository.findByWorkspace(workspaceEntity)
-				.orElseThrow(() -> new LicenseNotFoundException());
+				.orElseThrow(LicenseNotFoundException::new);
 		try {
 			checkDitoLicense(entity.getData());
 		} catch (DitoLicenseException e) {
@@ -72,7 +72,7 @@ public class LicenseServiceImpl implements LicenseService {
 		Boolean result = true;
 		try {
 			checkDitoLicense(data);
-		}catch (DitoLicenseException e){
+		} catch (DitoLicenseException e) {
 			result = false;
 		}
 		return result;
