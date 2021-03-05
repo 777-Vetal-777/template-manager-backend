@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
+import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -22,6 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
@@ -307,4 +309,20 @@ public class PermissionHandlerImpl implements PermissionHandler {
                 .map(RoleEntity::getName).collect(
                         Collectors.toSet());
     }
+
+    @Override
+    public boolean checkPermissionsByType(final String permission, final ResourceTypeEnum resourceType) {
+        final Map<ResourceTypeEnum, List<String>> allowedPermissions = Map.of(
+                ResourceTypeEnum.IMAGE, Arrays.asList("E8_US66_DELETE_RESOURCE_IMAGE", "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE", "E8_US55_EDIT_RESOURCE_METADATA_IMAGE", "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE"),
+                ResourceTypeEnum.FONT, Arrays.asList("E8_US66_1_DELETE_RESOURCE_FONT", "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT", "E8_US58_EDIT_RESOURCE_METADATA_FONT", "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT"),
+                ResourceTypeEnum.STYLESHEET, Arrays.asList("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET", "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET", "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET")
+                );
+
+        if (allowedPermissions.containsKey(resourceType) && allowedPermissions.get(resourceType).contains(permission)) {
+            return true;
+        } else {
+            throw new PermissionIsNotAllowedForResourceTypeException(permission);
+        }
+    }
+
 }

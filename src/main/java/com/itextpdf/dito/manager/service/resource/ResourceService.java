@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ResourceService {
@@ -29,6 +30,7 @@ public interface ResourceService {
     
     ResourceEntity delete(String name, ResourceTypeEnum type, String mail);
 
+    @PreFilter(filterTarget = "permissions", value = "@permissionHandlerImpl.checkPermissionsByType(filterObject, #resourceType)")
     ResourceEntity applyRole(String resourceName, ResourceTypeEnum resourceType, String roleName, List<String> permissions);
 
     ResourceEntity detachRole(String name, ResourceTypeEnum type, String roleName);

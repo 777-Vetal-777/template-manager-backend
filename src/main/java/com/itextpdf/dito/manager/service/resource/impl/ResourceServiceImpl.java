@@ -231,7 +231,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                                     final List<String> permissions) {
         log.info("Apply resource roles by name: {} and type: {} and roleName: {} and permissions: {} was started", resourceName, resourceType, roleName, permissions);
         final ResourceEntity resourceEntity = getResource(resourceName, resourceType);
-
         RoleEntity slaveRoleEntity = roleService.getSlaveRole(roleName, resourceEntity);
         if (slaveRoleEntity == null) {
             // line below will throw not found exception in case if user tries to create slave role which doesn't have master role.
