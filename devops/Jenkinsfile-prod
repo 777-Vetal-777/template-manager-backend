@@ -52,9 +52,8 @@ pipeline {
                             }
                         }
                     }
-                    waitForQualityGate abortPipeline: true
                 }
-                echo currentBuild.result
+            echo currentBuild.result
             }
         }
         stage("Deploy image to nexus"){
