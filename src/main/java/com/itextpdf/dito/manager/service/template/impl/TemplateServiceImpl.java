@@ -36,6 +36,7 @@ import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateFilePartService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
+import com.itextpdf.dito.manager.service.template.TemplateRefreshLinksService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -77,6 +78,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final TemplateDeploymentService templateDeploymentService;
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateFilePartService templateFilePartService;
+    private final TemplateRefreshLinksService refreshLinksService;
 	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{0,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
@@ -89,7 +91,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final InstanceRepository instanceRepository,
                                final TemplateDeploymentService templateDeploymentService,
                                final CompositeTemplateBuilder compositeTemplateConstructor,
-                               final TemplateFilePartService templateFilePartService) {
+                               final TemplateFilePartService templateFilePartService,
+                               final TemplateRefreshLinksService refreshLinksService) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -101,6 +104,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.templateDeploymentService = templateDeploymentService;
         this.compositeTemplateConstructor = compositeTemplateConstructor;
         this.templateFilePartService = templateFilePartService;
+        this.refreshLinksService = refreshLinksService;
     }
 
     @Override
@@ -261,14 +265,16 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public TemplateEntity update(final String name, final TemplateEntity updatedTemplateEntity, final String userEmail) {
         log.info("Update template by name: {} and template: {} and email: {} was started", name, updatedTemplateEntity, userEmail);
         final TemplateEntity existingTemplate = findByName(name);
         final UserEntity userEntity = userService.findActiveUserByEmail(userEmail);
 
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
-            existingTemplate.setName(updatedTemplateEntity.getName());
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
+            existingTemplate.setName(updatedTemplateEntity.getName());
+            refreshLinksService.updateTemplateLinksInTemplates(existingTemplate, updatedTemplateEntity.getName());
         }
         existingTemplate.setDescription(updatedTemplateEntity.getDescription());
 

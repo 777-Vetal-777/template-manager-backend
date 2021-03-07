@@ -9,4 +9,6 @@ public interface TemplateDescriptorMapper {
     TemplateDescriptor map(TemplateEntity entity);
 
     List<TemplateDescriptor> map(List<TemplateEntity> entities);
+
+    String encodeToBase64(final String value);
 }

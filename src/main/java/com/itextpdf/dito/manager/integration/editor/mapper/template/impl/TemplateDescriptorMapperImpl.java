@@ -41,7 +41,8 @@ public class TemplateDescriptorMapperImpl implements TemplateDescriptorMapper {
         return entities.stream().map(this::map).collect(Collectors.toList());
     }
 
-    private String encodeToBase64(final String value) {
+    @Override
+    public String encodeToBase64(final String value) {
         return new String(Base64.getUrlEncoder().encode(value.getBytes()));
     }
 }

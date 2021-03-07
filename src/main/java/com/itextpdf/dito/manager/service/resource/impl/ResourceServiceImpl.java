@@ -25,6 +25,7 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
+import com.itextpdf.dito.manager.service.template.TemplateRefreshLinksService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -65,6 +66,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private final UserService userService;
     private final RoleService roleService;
     private final PermissionService permissionService;
+    private final TemplateRefreshLinksService templateRefreshLinksService;
     private final Map<ResourceTypeEnum, ContentValidator> contentValidators = new EnumMap<>(ResourceTypeEnum.class);
 
     public ResourceServiceImpl(
@@ -75,7 +77,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             final RoleService roleService,
             final PermissionService permissionService,
             final TemplateService templateService,
-            final List<ContentValidator> contentValidators) {
+            final List<ContentValidator> contentValidators,
+            final TemplateRefreshLinksService templateRefreshLinksService) {
         this.resourceRepository = resourceRepository;
         this.resourceFileRepository = resourceFileRepository;
         this.templateRepository = templateRepository;
@@ -83,6 +86,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         this.roleService = roleService;
         this.permissionService = permissionService;
         this.templateService = templateService;
+        this.templateRefreshLinksService = templateRefreshLinksService;
         this.contentValidators.putAll(contentValidators.stream().collect(Collectors.toMap(ContentValidator::getType, Function.identity())));
     }
 
@@ -208,6 +212,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
         log.info("Update resource by name: {} and new resource: {} and email: {} was started", name, entity, mail);
         final ResourceEntity existingResource = getResource(name, entity.getType());
@@ -216,8 +221,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         if (!existingResource.getName().equals(entity.getName())) {
             throwExceptionIfResourceExists(entity.getName(), entity.getType());
         }
-        existingResource.setName(entity.getName());
         existingResource.setDescription(entity.getDescription());
+        existingResource.setName(entity.getName());
+        templateRefreshLinksService.updateResourceLinksInTemplates(existingResource, entity.getName());
 
         final ResourceLogEntity logEntity = createResourceLogEntry(existingResource, userEntity);
         existingResource.getResourceLogs().add(logEntity);

@@ -217,4 +217,20 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     @Query("select max(CAST(SUBSTR(name, LENGTH(:pattern) + 2, LENGTH(name) - LENGTH(:pattern) - 2 ) as int)) from TemplateEntity where name like CONCAT(:pattern, '(%)')")
     Optional<Integer> findMaxIntegerByNamePattern(@Param("pattern") String pattern);
 
+    @Query(value = "select file from TemplateFileEntity file "
+            + "left join file.resourceFiles resources "
+            + "join resources.resource resource "
+            + "where resource.id = :resourceId ")
+    List<TemplateFileEntity> findTemplateFilesByResourceId(@Param("resourceId") Long resourceId);
+
+    @Query("select data from TemplateFileEntity data "
+            + "join fetch data.template template "
+            + "join fetch template.latestFile file "
+            + "join fetch file.compositions compositions "
+            + "join fetch compositions.composition composition "
+            + "join composition.template compositionTemplate "
+            + "left join fetch file.dataCollectionFile dataCollectionFile "
+            + "left join fetch dataCollectionFile.dataCollection dataCollection "
+            + "where compositionTemplate.latestFile.version = composition.version and compositionTemplate.id = :id order by template.id")
+    List<TemplateFileEntity> getTemplatesPartsFilesByTemplateId(@Param("id") Long templateId);
 }
