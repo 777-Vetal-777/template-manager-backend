@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -168,7 +170,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         }
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         user.setPassword(encoder.encode(newPassword));
-        user.setModifiedAt(new Date());
+        user.setModifiedAt(getCurrentTimeWithSecondPrecise());
         user.setPasswordUpdatedByAdmin(false);
         log.info("Update password for user: {} was finished successfully", userEmail);
         return userRepository.save(user);
@@ -198,7 +200,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
         checkUserPasswordIsSpecifiedByAdmin(user);
         user.setPassword(encoder.encode(newPassword));
-        user.setModifiedAt(new Date());
+        user.setModifiedAt(getCurrentTimeWithSecondPrecise());
         user.setPasswordUpdatedByAdmin(false);
         log.info("Update password specified by admin for user: {} was finished successfully", email);
         return userRepository.save(user);
@@ -353,5 +355,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (!userEntity.getPasswordUpdatedByAdmin()) {
             throw new PasswordNotSpecifiedByAdminException();
         }
+    }
+
+    private Date getCurrentTimeWithSecondPrecise() {
+        Instant instant = new Date().toInstant();
+        instant = instant.truncatedTo(ChronoUnit.SECONDS);
+        return Date.from(instant);
     }
 }
