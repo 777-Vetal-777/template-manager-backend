@@ -28,28 +28,28 @@ public class TemplatePermissionFilter {
         this.editTemplateMetadata = editTemplateMetadata;
     }
 
-    public void setE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD(List<Boolean> E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD) {
-        this.createNewTemplateVersionStandard = E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD;
+    public void setE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD(List<Boolean> createNewTemplateVersionStandard) {
+        this.createNewTemplateVersionStandard = createNewTemplateVersionStandard;
     }
 
-    public void setE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE(List<Boolean> E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE) {
-        this.rollbackVersionStandard = E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE;
+    public void setE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE(List<Boolean> rollbackVersionStandard) {
+        this.rollbackVersionStandard = rollbackVersionStandard;
     }
 
-    public void setE9_US81_PREVIEW_TEMPLATE_STANDARD(List<Boolean> E9_US81_PREVIEW_TEMPLATE_STANDARD) {
-        this.previewTemplate = E9_US81_PREVIEW_TEMPLATE_STANDARD;
+    public void setE9_US81_PREVIEW_TEMPLATE_STANDARD(List<Boolean> previewTemplate) {
+        this.previewTemplate = previewTemplate;
     }
 
-    public void setE9_US24_EXPORT_TEMPLATE_DATA(List<Boolean> E9_US24_EXPORT_TEMPLATE_DATA) {
-        this.exportTemplate = E9_US24_EXPORT_TEMPLATE_DATA;
+    public void setE9_US24_EXPORT_TEMPLATE_DATA(List<Boolean> exportTemplate) {
+        this.exportTemplate = exportTemplate;
     }
 
-    public void setE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED(List<Boolean> E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED) {
-        this.createNewTemplateVersionComposition = E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED;
+    public void setE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED(List<Boolean> createNewTemplateVersionComposition) {
+        this.createNewTemplateVersionComposition = createNewTemplateVersionComposition;
     }
 
-    public void setE9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE(List<Boolean> E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE) {
-        this.rollbackVersionComposition = E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE;
+    public void setE9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE(List<Boolean> rollbackVersionComposition) {
+        this.rollbackVersionComposition = rollbackVersionComposition;
     }
 
     public List<Boolean> getEditTemplateMetadata() {
