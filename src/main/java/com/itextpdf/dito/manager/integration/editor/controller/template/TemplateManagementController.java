@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,12 +47,14 @@ public interface TemplateManagementController {
     List<TemplateDescriptor> getAllDescriptors(@PathVariable("workspace-id") String workspaceId);
 
     @PutMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, @permissionHandlerImpl.decodeBase64(#descriptor.name), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
                               @RequestPart(required = false) TemplateUpdateDescriptor descriptor,
                               @RequestPart byte[] data);
 
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateDeletePermissions(authentication, @permissionHandlerImpl.decodeBase64(#templateId))")
     @DeleteMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     TemplateDescriptor delete(@PathVariable("template-id") String templateId);

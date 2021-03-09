@@ -46,9 +46,9 @@ public class DataManagementControllerImpl extends AbstractController implements 
     }
 
     @Override
-    public DataSampleDescriptor createOrUpdate(final Principal principal, final String dataSampleId,
-            final DataSampleDescriptor descriptor,
-            final String data) {
+    public DataSampleDescriptor createNewDataSampleVersion(final Principal principal, final String dataSampleId,
+                                                           final DataSampleDescriptor descriptor,
+                                                           final String data) {
         final String decodedDataSampleId = decodeBase64(dataSampleId);
         log.info("Request to create or update data sample with id {} received.", decodedDataSampleId);
         final String newName = descriptor != null ? descriptor.getDisplayName() : null;

@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +45,7 @@ public interface ResourceManagementController {
                                      @RequestPart ResourceLeafDescriptor descriptor, @RequestPart byte[] data);
 
     @DeleteMapping(RESOURCE_URL)
+    @PreAuthorize("hasAnyAuthority('E8_US68_MANAGE_RESOURCE_PERMISSIONS_IMAGE')")
 	@Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     void deleteResourceById(Principal principal, @PathVariable("resource-id") String resourceId);
 }

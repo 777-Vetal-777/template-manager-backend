@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,16 +32,19 @@ public interface DataManagementController {
     byte[] fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @PutMapping(DATA_SAMPLE_URL)
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), @permissionHandlerImpl.decodeBase64(#descriptor.getCollectionIdList().get(0)), 'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    DataSampleDescriptor createOrUpdate(Principal principal, @PathVariable("sample-id") String dataSampleId,
-                                        @RequestPart(required = false) DataSampleDescriptor descriptor, @RequestPart String data);
+    DataSampleDescriptor createNewDataSampleVersion(Principal principal, @PathVariable("sample-id") String dataSampleId,
+                                                    @RequestPart(required = false) DataSampleDescriptor descriptor, @RequestPart String data);
 
     @PostMapping(CREATE_DATA_SAMPLE_URL)
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), @permissionHandlerImpl.decodeBase64(#descriptor.getCollectionIdList().get(0)), 'E7_US45_CREATE_DATA_SAMPLE_BASED_ON_DATA_COLLECTION_JSON_FILE')")
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     DataSampleDescriptor add(Principal principal, @RequestPart DataSampleDescriptor descriptor,
             @RequestPart String data);
 
     @DeleteMapping(DATA_SAMPLE_URL)
+    @PreAuthorize("hasAuthority('E7_US50_DELETE_DATA_SAMPLE')")
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     DataSampleDescriptor deleteDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
