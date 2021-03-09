@@ -425,7 +425,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void shouldThrowPasswordIsNotSpecifiedByAdmin() throws Exception {
         final UpdatePasswordRequestDTO updatePasswordRequestDTO = new UpdatePasswordRequestDTO();
-        updatePasswordRequestDTO.setPassword("test");
+        updatePasswordRequestDTO.setPassword("testtesttest");
         final MvcResult result = mockMvc.perform(patch(UserController.BASE_NAME + USER_UPDATE_PASSWORD_ENDPOINT)
                 .content(objectMapper.writeValueAsString(updatePasswordRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
