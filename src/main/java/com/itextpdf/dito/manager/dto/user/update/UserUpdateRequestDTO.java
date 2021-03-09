@@ -1,7 +1,11 @@
 package com.itextpdf.dito.manager.dto.user.update;
 
+import javax.validation.constraints.NotBlank;
+
 public class UserUpdateRequestDTO {
+    @NotBlank
     String firstName;
+    @NotBlank
     String lastName;
 
     public String getFirstName() {

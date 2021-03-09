@@ -56,7 +56,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> update(final String userName, final UserUpdateRequestDTO userUpdateRequestDTO) {
+    public ResponseEntity<UserDTO> update(final String userName, @Valid final UserUpdateRequestDTO userUpdateRequestDTO) {
         log.info("Update user by name: {} and  with params: {} was started", userName, userUpdateRequestDTO);
         final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), decodeBase64(userName)));
         log.info("Update user by name: {} and  with params: {} was finished successfully", userName, userUpdateRequestDTO);
@@ -103,7 +103,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> updateCurrentUser(final UserUpdateRequestDTO userUpdateRequestDTO,
+    public ResponseEntity<UserDTO> updateCurrentUser(@Valid final UserUpdateRequestDTO userUpdateRequestDTO,
             Principal principal) {
         final UserDTO user = userMapper
                 .map(userService.updateUser(userMapper.map(userUpdateRequestDTO), principal.getName()));
