@@ -46,7 +46,7 @@ public abstract class JwtTokenHelper implements TokenHelper {
         boolean result = true;
 
         if (date != null) {
-            result = parse(token).getBody().getIssuedAt().after(date);
+            result = parse(token).getBody().getIssuedAt().after(date) || parse(token).getBody().getIssuedAt().equals(date);
         }
 
         return result;
