@@ -65,6 +65,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.util.FilesUtils.getFileBytes;
+import static com.itextpdf.dito.sdk.core.pkg.PackageConstant.TEMPLATE_PACKAGE_EXTENSION;
 
 @RestController
 public class TemplateControllerImpl extends AbstractController implements TemplateController {
@@ -324,7 +325,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        final String filename = decodedTemplateName.concat(".dito");
+        final String filename = decodedTemplateName.concat(TEMPLATE_PACKAGE_EXTENSION);
         headers.setContentDispositionFormData("attachment", filename);
         log.info("Export template by templateName: {} and dependenciesFlag: {} was finished successfully", templateName, dependenciesFlag);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);

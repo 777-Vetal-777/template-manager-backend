@@ -29,6 +29,8 @@ import static com.itextpdf.dito.manager.util.FilesUtils.RESOURCES_FOLDER;
 import static com.itextpdf.dito.manager.util.FilesUtils.TEMPLATES_FOLDER;
 import static com.itextpdf.dito.manager.util.FilesUtils.createTemplateDirectoryForPreview;
 import static com.itextpdf.dito.manager.util.FilesUtils.zipFolder;
+import static com.itextpdf.dito.sdk.core.pkg.PackageConstant.SPECIAL_TEMPLATE_PROJECT_FOLDERS;
+import static com.itextpdf.dito.sdk.core.pkg.PackageConstant.TEMPLATE_PACKAGE_EXTENSION;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
@@ -68,7 +70,7 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
         final File zippedProject;
 
         try {
-            zippedProject = zipFolder(projectFolder, Path.of(projectFolder.getParent().toString(), templateEntity.getName().concat(".dito")));
+            zippedProject = zipFolder(projectFolder, Path.of(projectFolder.getParent().toString(), templateEntity.getName().concat(TEMPLATE_PACKAGE_EXTENSION)));
         } catch (IOException e) {
             log.error(e);
             throw new TemplateProjectGenerationException("Error while generating zipped project");
@@ -100,6 +102,8 @@ public class TemplateProjectGeneratorImpl implements TemplateProjectGenerator {
                 deleteQuietly(Path.of(projectFolder.getAbsolutePath(), DATA_FOLDER).toFile());
                 deleteQuietly(Path.of(projectFolder.getAbsolutePath(), RESOURCES_FOLDER).toFile());
             }
+
+            SPECIAL_TEMPLATE_PROJECT_FOLDERS.forEach(folder -> new File(projectFolder, folder).mkdir());
 
         } catch (IOException ex) {
             log.error(ex);
