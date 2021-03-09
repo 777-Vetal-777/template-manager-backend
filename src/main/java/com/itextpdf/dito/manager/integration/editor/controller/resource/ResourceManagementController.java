@@ -45,7 +45,7 @@ public interface ResourceManagementController {
                                      @RequestPart ResourceLeafDescriptor descriptor, @RequestPart byte[] data);
 
     @DeleteMapping(RESOURCE_URL)
-    @PreAuthorize("hasAnyAuthority('E8_US68_MANAGE_RESOURCE_PERMISSIONS_IMAGE')")
+    @PreAuthorize("hasAuthority('E8_US68_MANAGE_RESOURCE_PERMISSIONS_IMAGE')")
 	@Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     void deleteResourceById(Principal principal, @PathVariable("resource-id") String resourceId);
 }
