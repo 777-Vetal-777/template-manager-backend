@@ -45,7 +45,7 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
     @Override
     public void updateResourceLinksInTemplates(final ResourceEntity existingResource, final String newName) {
         final List<TemplateFileEntity> templateFiles = templateRepository.findTemplateFilesByResourceId(existingResource.getId());
-        if(templateFiles.isEmpty()){
+        if(!templateFiles.isEmpty()){
             final String oldId = resourceLeafDescriptorMapper.encodeId(existingResource.getName(), existingResource.getType(), null);
             final String newId = resourceLeafDescriptorMapper.encodeId(newName, existingResource.getType(), null);
             final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
@@ -64,8 +64,8 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
     @Override
     public void updateTemplateLinksInTemplates(final TemplateEntity templateEntity, final String newName) {
         //what about old versions
-       final List<TemplateFileEntity> nestedTemplates = templateRepository.getTemplatesPartsFilesByTemplateId(templateEntity.getId());
-       if(nestedTemplates.isEmpty()){
+       final List<TemplateFileEntity> nestedTemplates = templateRepository.getAllTemplateFileVersions(templateEntity.getId());
+       if(!nestedTemplates.isEmpty()){
            final String oldId = templateDescriptorMapper.encodeToBase64(templateEntity.getName());
            final String newId = templateDescriptorMapper.encodeToBase64(newName);
            final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);

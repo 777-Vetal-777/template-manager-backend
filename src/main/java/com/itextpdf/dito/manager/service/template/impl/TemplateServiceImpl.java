@@ -273,8 +273,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
-            existingTemplate.setName(updatedTemplateEntity.getName());
             refreshLinksService.updateTemplateLinksInTemplates(existingTemplate, updatedTemplateEntity.getName());
+            existingTemplate.setName(updatedTemplateEntity.getName());
         }
         existingTemplate.setDescription(updatedTemplateEntity.getDescription());
 
