@@ -20,12 +20,12 @@ import java.util.Optional;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> {
-	
+
 	String UNION_ALL = " union all";
 	String LEFT_JOIN_STAGE_ON_STAGE_ID = " left join {h-schema}stage stage on instance.stage_id = stage.id";
 	String LEFT_JOIN_INSTANCE_ON_INSTANCE_ID = " left join {h-schema}instance as instance on tfi.instance_id = instance.id";
 	String LEFT_JOIN_TEMPLATE_FILE_INSTANCE_ON_TEMPLATE_FILE_ID = " left join {h-schema}template_file_instance as tfi on tfi.template_file_id = templateFile.id";
-	
+
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "modifiedOn");
 
     String TEMPLATE_TABLE_SELECT_CLAUSE = "select template from TemplateEntity template "
@@ -37,11 +37,12 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "and (COALESCE(:types) is null or template.type in (:types)) "
             + "and (:modifiedBy='' or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or template.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and ((:dataCollectionName <> '' and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))"
-            + "or (:dataCollectionName = '' and (dataCollection.name is null or  (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))))";
+            + "and ((dataCollection.name is not null and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))" +
+            " or (dataCollection.name is null and ('no data collection' like CONCAT('%',:dataCollectionName,'%'))))";
 
     String SEARCH_CONDITION = "(LOWER(template.name) like CONCAT('%',:search,'%') "
             + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
+            + "or (dataCollection.name is null and 'no data collection' like CONCAT('%',:search,'%')) "
             + "or LOWER(template.type) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%') "
             + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%')) ";
