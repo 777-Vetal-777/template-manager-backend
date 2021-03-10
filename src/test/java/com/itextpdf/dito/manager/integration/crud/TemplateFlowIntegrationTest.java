@@ -134,7 +134,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isConflict());
 
         //Create new version
-        final MockMultipartFile file = new MockMultipartFile("template", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/resources/random.png")));
+        final MockMultipartFile file = new MockMultipartFile("template", "src/test/resources/test-data/templates/template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/resources/random.png")));
         final MockMultipartFile description = new MockMultipartFile("description", "description", "text/plain", "test description".getBytes());
         final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", request.getName().getBytes());
         final URI uri = UriComponentsBuilder.fromUriString(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT).build().encode().toUri();
@@ -540,7 +540,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         final String encodeTemplatePartString = encodeStringToBase64("some-template");
 
         //Create new version
-        final MockMultipartFile file = new MockMultipartFile("data", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/templates/template-update-request-data.html")));
+        final MockMultipartFile file = new MockMultipartFile("data", "src/test/resources/test-data/templates/template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/templates/template-update-request-data.html")));
         mockMvc.perform(MockMvcRequestBuilders.multipart(TEMPLATE_URL, encodeTemplatePartString)
                 .file(file)
                 .with(request -> {
