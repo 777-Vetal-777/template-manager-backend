@@ -29,6 +29,7 @@ import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -313,6 +314,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void testCreateCompositionTemplateWithoutDataCollection() throws Exception {
         dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
@@ -386,6 +388,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void testCreateCompositionTemplateWithDataCollection() throws Exception {
         dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
@@ -513,6 +516,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         return stageEntity;
     }
 
+    @Disabled
     @Test
     void shouldCreateAndExportCompositionTemplateWithAllResources() throws Exception {
         final String userEmail = "admin@email.com";
@@ -616,6 +620,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
     
     @Test
+    @Disabled
     void shouldThrowTemplateCannotBeBlockedException() throws Exception {
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
