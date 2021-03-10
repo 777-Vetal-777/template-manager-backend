@@ -11,17 +11,27 @@ import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDesc
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateRefreshLinksService;
+import com.itextpdf.dito.sdk.core.preprocess.common.FontResourceUriInternalStyleTagProcessor;
 import com.itextpdf.dito.sdk.core.preprocess.common.FragmentLinkProcessor;
 import com.itextpdf.dito.sdk.core.preprocess.common.StylesheetLinkTagProcessor;
 import com.itextpdf.dito.sdk.core.process.MutableItemProcessingResult;
 import com.itextpdf.dito.sdk.core.process.ProjectImmutableItemProcessor;
 import com.itextpdf.dito.sdk.core.process.template.TemplateSubTreeProcessor;
+import com.itextpdf.dito.sdk.core.process.template.calculation.CalculationExpressionPrimitiveProcessor;
+import com.itextpdf.dito.sdk.core.process.template.css.CssDeclarationValueProcessor;
+import com.itextpdf.dito.sdk.core.process.template.css.CssPropertyValueUriProcessor;
+import com.itextpdf.dito.sdk.core.process.template.css.CssStatementDeclarationAndRuleSetProcessor;
+import com.itextpdf.dito.sdk.core.process.template.css.CssStyleSheetStatementProcessor;
 import com.itextpdf.dito.sdk.core.process.template.node.ImageTagUriProcessor;
+import com.itextpdf.dito.sdk.core.process.template.node.NodeCalculatedStyleAttributePropertyProcessor;
+import com.itextpdf.dito.sdk.core.process.template.node.NodeStyleAttributeContentProcessor;
+import com.itextpdf.dito.sdk.core.process.template.node.StyleTagContentProcessor;
 import com.itextpdf.dito.sdk.internal.core.template.parser.impl.jsoup.JsoupDocument;
 import com.itextpdf.dito.sdk.internal.core.template.parser.impl.jsoup.JsoupTemplateParser;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,16 +55,50 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
     @Override
     public void updateResourceLinksInTemplates(final ResourceEntity existingResource, final String newName) {
         final List<TemplateFileEntity> templateFiles = templateRepository.findTemplateFilesByResourceId(existingResource.getId());
-        if(!templateFiles.isEmpty()){
+        if (!templateFiles.isEmpty()) {
             final String oldId = resourceLeafDescriptorMapper.encodeId(existingResource.getName(), existingResource.getType(), null);
             final String newId = resourceLeafDescriptorMapper.encodeId(newName, existingResource.getType(), null);
             final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
             final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = templateFileLinkRenamingContext.getRenamingUrlProcessor();
             TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor;
             if (existingResource.getType() == ResourceTypeEnum.IMAGE) {
-                processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new ImageTagUriProcessor<>(renamingUrlProcessor)));
-            } else {
-                processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new StylesheetLinkTagProcessor<>(renamingUrlProcessor)));
+                processor = new TemplateSubTreeProcessor<>(
+                        Arrays.asList(
+                                new ImageTagUriProcessor<>(renamingUrlProcessor),
+                                new NodeCalculatedStyleAttributePropertyProcessor<>(
+                                        new CalculationExpressionPrimitiveProcessor<>(
+                                                new CssPropertyValueUriProcessor<>(
+                                                        renamingUrlProcessor
+                                                )
+                                        )
+                                ),
+                                new StyleTagContentProcessor<>(
+                                        new CssStyleSheetStatementProcessor<>(
+                                                new CssStatementDeclarationAndRuleSetProcessor<>(
+                                                        new CssDeclarationValueProcessor<>(
+                                                                new CssPropertyValueUriProcessor<>(
+                                                                        renamingUrlProcessor
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                ),
+                                new NodeStyleAttributeContentProcessor<>(
+                                        new CssDeclarationValueProcessor<>(
+                                                new CssPropertyValueUriProcessor<>(
+                                                        renamingUrlProcessor
+                                                )
+                                        ))
+                        ));
+            }
+            else if (existingResource.getType() == ResourceTypeEnum.FONT) {
+                processor = new TemplateSubTreeProcessor<>(Collections.singletonList(
+                        new FontResourceUriInternalStyleTagProcessor<>(
+                                renamingUrlProcessor
+                        ))
+                );
+            }else {
+                processor =  new TemplateSubTreeProcessor<>(Collections.singletonList(new StylesheetLinkTagProcessor<>(renamingUrlProcessor)));
             }
             updateOldLinksInFiles(templateFiles, oldId, newId, processor);
             templateFileRepository.saveAll(templateFiles);
@@ -64,21 +108,21 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
     @Override
     public void updateTemplateLinksInTemplates(final TemplateEntity templateEntity, final String newName) {
         //what about old versions
-       final List<TemplateFileEntity> nestedTemplates = templateRepository.getAllTemplateFileVersions(templateEntity.getId());
-       if(!nestedTemplates.isEmpty()){
-           final String oldId = templateDescriptorMapper.encodeToBase64(templateEntity.getName());
-           final String newId = templateDescriptorMapper.encodeToBase64(newName);
-           final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
-           final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = templateFileLinkRenamingContext.getRenamingUrlProcessor();
-           //this processor only for tag, update later, when sdk team make new release
-           final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new FragmentLinkProcessor<>(renamingUrlProcessor)));
-           updateOldLinksInFiles(nestedTemplates, oldId, newId, processor);
-           templateFileRepository.saveAll(nestedTemplates);
-       }
+        final List<TemplateFileEntity> nestedTemplates = templateRepository.getAllTemplateFileVersions(templateEntity.getId());
+        if (!nestedTemplates.isEmpty()) {
+            final String oldId = templateDescriptorMapper.encodeToBase64(templateEntity.getName());
+            final String newId = templateDescriptorMapper.encodeToBase64(newName);
+            final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
+            final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = templateFileLinkRenamingContext.getRenamingUrlProcessor();
+            //this processor only for tag, update later, when sdk team make new release
+            final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new FragmentLinkProcessor<>(renamingUrlProcessor)));
+            updateOldLinksInFiles(nestedTemplates, oldId, newId, processor);
+            templateFileRepository.saveAll(nestedTemplates);
+        }
 
     }
 
-    private void updateOldLinksInFiles( final List<TemplateFileEntity> templateFiles, final String oldId, final String newId, final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor) {
+    private void updateOldLinksInFiles(final List<TemplateFileEntity> templateFiles, final String oldId, final String newId, final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor) {
         templateFiles.forEach(file -> {
             try {
                 final JsoupDocument template = JsoupTemplateParser.parse(new ByteArrayInputStream(file.getData()), null, "");
