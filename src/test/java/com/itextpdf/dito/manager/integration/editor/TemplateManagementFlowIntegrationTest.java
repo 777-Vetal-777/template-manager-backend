@@ -12,9 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
-import com.itextpdf.kernel.xmp.impl.Base64;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 	
 	private static final String WORKSPACE_ID = "c29tZS10ZW1wbGF0ZQ==";
 	private static final String TEMPLATE_NAME = "some-template";
-	private static final String TEMPLATE_ID = Base64.encode(TEMPLATE_NAME);
+	private static final String TEMPLATE_ID = Base64.getUrlEncoder().encodeToString(TEMPLATE_NAME.getBytes(StandardCharsets.UTF_8));
 
 	@Autowired
 	private TemplateRepository templateRepository;

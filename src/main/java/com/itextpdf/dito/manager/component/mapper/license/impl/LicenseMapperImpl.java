@@ -7,13 +7,18 @@ import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.dto.license.LicenseDTO;
 import com.itextpdf.dito.manager.entity.LicenseEntity;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Component
 public class LicenseMapperImpl implements LicenseMapper{
+
+	private final Map<Long, DitoLicenseInfoHelper> ditoHelpers = new ConcurrentHashMap<>();
 
 	@Override
 	public LicenseDTO map(final LicenseEntity entity) {
 		final LicenseDTO dto = new LicenseDTO();
-		final DitoLicenseInfoHelper ditoHelper = getDitoHelper(entity.getData());
+		final DitoLicenseInfoHelper ditoHelper = getDitoHelper(entity.getId(), entity.getData());
 		dto.setFileName(entity.getFileName());
 		dto.setType(ditoHelper.getType());
 		dto.setExpirationDate(ditoHelper.getExpirationDate());
@@ -30,7 +35,17 @@ public class LicenseMapperImpl implements LicenseMapper{
 		return dto;
 	}
 
+	private DitoLicenseInfoHelper getDitoHelper(final Long id, final byte[] data) {
+		final DitoLicenseInfoHelper result;
+		if (id != null) {
+			result = ditoHelpers.computeIfAbsent(id, key -> new DitoLicenseInfoHelper(data));
+		} else {
+			result = new DitoLicenseInfoHelper(data);
+		}
+		return result;
+	}
+
 	public DitoLicenseInfoHelper getDitoHelper(final byte[] data) {
-		return new DitoLicenseInfoHelper(data);
+		return getDitoHelper(null, data);
 	}
 }
