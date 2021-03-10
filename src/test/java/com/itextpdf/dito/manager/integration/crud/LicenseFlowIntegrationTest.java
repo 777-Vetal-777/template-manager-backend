@@ -1,17 +1,15 @@
 package com.itextpdf.dito.manager.integration.crud;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-
+import com.itextpdf.dito.manager.component.mapper.license.impl.DitoLicenseInfoHelper;
+import com.itextpdf.dito.manager.component.mapper.license.impl.LicenseMapperImpl;
+import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.repository.license.LicenseRepository;
+import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
+import com.itextpdf.dito.manager.service.license.impl.LicenseServiceImpl;
+import com.itextpdf.dito.sdk.license.DitoLicenseException;
 import com.itextpdf.kernel.xmp.impl.Base64;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,24 +20,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.itextpdf.dito.manager.component.mapper.license.impl.DitoLicenseInfoHelper;
-import com.itextpdf.dito.manager.component.mapper.license.impl.LicenseMapperImpl;
-import com.itextpdf.dito.manager.controller.instance.InstanceController;
-import com.itextpdf.dito.manager.controller.workspace.WorkspaceController;
-import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
-import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
-import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
-import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
-import com.itextpdf.dito.manager.repository.license.LicenseRepository;
-import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
-import com.itextpdf.dito.manager.service.license.impl.LicenseServiceImpl;
-import com.itextpdf.dito.sdk.license.DitoLicenseException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class LicenseFlowIntegrationTest  extends AbstractIntegrationTest {
 
@@ -74,7 +68,7 @@ public class LicenseFlowIntegrationTest  extends AbstractIntegrationTest {
 
 	@BeforeEach
     void tearUp() throws Exception {
-		Mockito.when(licenseMapper.getDitoHelper(Files.readAllBytes(Paths.get("src/test/resources/test-data/license/volume-andersen.xml")))).thenReturn(ditoHelper);
+		Mockito.when(licenseMapper.getDitoHelper(Files.readAllBytes(Path.of("src/test/resources/test-data/license/volume-andersen.xml")))).thenReturn(ditoHelper);
     }
  
 	@Test
@@ -144,7 +138,7 @@ public class LicenseFlowIntegrationTest  extends AbstractIntegrationTest {
 				.andExpect(jsonPath("fileName").value("volume-andersen.xml"))
 				.andExpect(jsonPath("volumeLimit").value(50))
 				.andExpect(jsonPath("isUnlimited").value(false));
-		assertTrue(!licenseRepository.findAll().isEmpty());
+		assertFalse(licenseRepository.findAll().isEmpty());
 
 	}
 

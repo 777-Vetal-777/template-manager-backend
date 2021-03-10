@@ -38,14 +38,15 @@ public class LicenseMapperImpl implements LicenseMapper{
 	private DitoLicenseInfoHelper getDitoHelper(final Long id, final byte[] data) {
 		final DitoLicenseInfoHelper result;
 		if (id != null) {
-			result = ditoHelpers.computeIfAbsent(id, key -> new DitoLicenseInfoHelper(data));
+			result = ditoHelpers.computeIfAbsent(id, key -> this.getDitoHelper(data));
 		} else {
-			result = new DitoLicenseInfoHelper(data);
+			result = getDitoHelper(data);
 		}
 		return result;
 	}
 
 	public DitoLicenseInfoHelper getDitoHelper(final byte[] data) {
-		return getDitoHelper(null, data);
+		return new DitoLicenseInfoHelper(data);
 	}
+
 }
