@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateCommitDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
@@ -51,6 +52,7 @@ public interface TemplateManagementController {
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
                               @RequestPart(required = false) TemplateUpdateDescriptor descriptor,
+                              @RequestPart(required = false) TemplateCommitDescriptor commitDescriptor,
                               @RequestPart byte[] data);
 
     @PreAuthorize("@permissionHandlerImpl.checkTemplateDeletePermissions(authentication, @permissionHandlerImpl.decodeBase64(#templateId))")

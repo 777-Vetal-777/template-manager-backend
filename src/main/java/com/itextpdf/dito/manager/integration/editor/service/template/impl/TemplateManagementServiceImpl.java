@@ -31,7 +31,6 @@ import java.util.Set;
 
 @Service
 public class TemplateManagementServiceImpl implements TemplateManagementService {
-    private static final String DEFAULT_COMMENT_FOR_NEW_VERSION = "Updated with iText DITO Editor";
 
     private final TemplateService templateService;
     private final TemplateAssetRetriever resourceAssetRetriever;
@@ -75,12 +74,6 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
         templateEntity.getLatestFile().setResourceFiles(provideConsistency(templateEntity.getLatestFile().getData()));
         provideFirstVersionTemplateCreation(templateEntity);
         return templateRepository.save(templateEntity);
-    }
-
-    @Override
-    @Transactional(rollbackOn = InconsistencyException.class)
-    public TemplateEntity createNewVersion(String name, byte[] data, String email, String newName) {
-        return createNewVersion(name, data, email, newName, DEFAULT_COMMENT_FOR_NEW_VERSION);
     }
 
     @Override

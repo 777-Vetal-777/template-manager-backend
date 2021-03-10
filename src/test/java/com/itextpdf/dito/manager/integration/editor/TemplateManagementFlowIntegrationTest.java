@@ -102,7 +102,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("PUT");
+				request.setMethod("POST");
 				return request;
 			}
 		});
@@ -122,6 +122,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		final List<TemplateFileEntity> templateFileList = templateFileRepository.findAll();
 		assertTrue(templateFileList.size() == 1);
 		assertTrue(templateFileList.get(0).getVersion() == 1L);
+		assertTrue(templateFileList.get(0).getComment() == null);
 	}
 	
 	@Test
@@ -155,7 +156,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("PUT");
+				request.setMethod("POST");
 				return request;
 			}
 		});
@@ -174,7 +175,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("PUT");
+				request.setMethod("POST");
 				return request;
 			}
 		});

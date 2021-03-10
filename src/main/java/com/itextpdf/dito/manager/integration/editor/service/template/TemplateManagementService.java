@@ -10,8 +10,6 @@ public interface TemplateManagementService {
 
     List<TemplateEntity> getAll();
 
-    TemplateEntity createNewVersion(String name, byte[] data, String email, String newName);
-
     TemplateEntity createNewVersion(String name, byte[] data, String email, String newName, String comment);
 
     TemplateEntity create(String templateName, String email);

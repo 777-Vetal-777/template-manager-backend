@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateCommitDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -55,13 +56,14 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     @Override
     public TemplateDescriptor update(final Principal principal, final String templateId,
             final TemplateUpdateDescriptor descriptor,
+            final TemplateCommitDescriptor commitDescriptor,
             final byte[] data) {
         final String email = principal.getName();
         final String id = decodeBase64(templateId);
         log.info("Request to create new version of template with id {} received.", id);
         final String newName = descriptor != null ? descriptor.getName() : null;
-
-        final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName);
+        final String commitMessage = commitDescriptor != null ? commitDescriptor.getMessage() : null;
+        final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName, commitMessage);
         log.info("Response to create new version of template with id {} processed.",id);
         return templateDescriptorMapper.map(templateEntity);
     }
