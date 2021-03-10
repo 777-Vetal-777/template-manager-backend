@@ -15,6 +15,7 @@ import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsExcepti
 import com.itextpdf.dito.manager.exception.template.TemplateImportHasDuplicateNamesException;
 import com.itextpdf.dito.manager.exception.template.TemplateImportProjectException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
+import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.model.template.duplicates.DuplicatesList;
 import com.itextpdf.dito.manager.model.template.duplicates.impl.DuplicatesListImpl;
@@ -22,6 +23,8 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionImportService;
 import com.itextpdf.dito.manager.service.resource.ResourceImportService;
 import com.itextpdf.dito.manager.service.template.TemplateImportService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -36,6 +39,7 @@ import static com.itextpdf.dito.manager.util.TemplateImportUtils.readStreamable;
 
 @Service
 public class TemplateImportServiceImpl implements TemplateImportService {
+    private static final Logger log = LogManager.getLogger(TemplateImportServiceImpl.class);
 
     private final TemplateRepository templateRepository;
     private final TemplateManagementService templateManagementService;
@@ -57,11 +61,10 @@ public class TemplateImportServiceImpl implements TemplateImportService {
     public TemplateEntity importTemplate(final String fileName,
                                          final byte[] ditoData,
                                          final String email,
-                                         final Map<String, TemplateImportNameModel> templateSettings,
-                                         final Map<String, TemplateImportNameModel> dataCollectionSettings) {
+                                         final Map<SettingType, Map<String, TemplateImportNameModel>> settings) {
         try {
             final DuplicatesList duplicatesList = new DuplicatesListImpl();
-            final ResourceUriGenerator resourcesUriGenerator = resourceImportService.getResourceUriGenerator(fileName);
+            final ResourceUriGenerator resourcesUriGenerator = resourceImportService.getResourceUriGenerator(fileName, email, settings, duplicatesList);
 
             final ProjectElements projectElements = new DefaultFromLegacyProjectElementsConverter(
                     new DefaultToDataSampleElementsConverter(),
@@ -69,16 +72,9 @@ public class TemplateImportServiceImpl implements TemplateImportService {
                     new DefaultToTemplateElementsConverter()
             ).convert(new ByteArrayInputStream(ditoData));
 
-            for (final var resourceElement : projectElements.getResources()) {
-                resourceImportService.importResource(resourceElement.getResourceStream(),
-                        resourceElement.getResourceName(),
-                        resourceElement.getResourceUri(),
-                        email);
-            }
+            final DataCollectionEntity dataCollectionEntity = dataCollectionImportService.importDataCollectionAndSamples(fileName, projectElements.getDataSamples(), settings.get(SettingType.DATA_COLLECTION), duplicatesList, email);
 
-            final DataCollectionEntity dataCollectionEntity = dataCollectionImportService.importDataCollectionAndSamples(fileName, projectElements.getDataSamples(), dataCollectionSettings, duplicatesList, email);
-
-            final List<TemplateEntity> templateEntityList = importTemplates(fileName, projectElements.getTemplates(), templateSettings, dataCollectionEntity, duplicatesList, email);
+            final List<TemplateEntity> templateEntityList = importTemplates(fileName, projectElements.getTemplates(), settings.get(SettingType.TEMPLATE), dataCollectionEntity, duplicatesList, email);
 
             if (!duplicatesList.isEmpty()) {
                 throw new TemplateImportHasDuplicateNamesException("Template file got duplicates", duplicatesList);
@@ -100,6 +96,9 @@ public class TemplateImportServiceImpl implements TemplateImportService {
                     TemplateEntity entity;
                     try {
                         entity = importTemplateEntity(fileName, templateElement, dataCollection, templateSettings.get(templateElement.getTemplateName()), email);
+                    } catch (TemplatePreviewGenerationException e) {
+                        log.warn("Could not provide consistency for imported template: {}", e.getMessage());
+                        entity = null;
                     } catch (TemplateAlreadyExistsException e) {
                         duplicatesList.putToDuplicates(SettingType.TEMPLATE, templateElement.getTemplateName());
                         entity = null;
@@ -128,7 +127,7 @@ public class TemplateImportServiceImpl implements TemplateImportService {
             }
 
             if (Boolean.TRUE.equals(templateName.getAllowedNewVersion())) {
-                templateEntity = templateManagementService.createNewVersion(templateElement.getTemplateName(), data, email, null);
+                templateEntity = templateManagementService.createNewVersion(templateElement.getTemplateName(), data, email, null, "Import template");
             } else {
                 int currentNumber = templateRepository.findMaxIntegerByNamePattern(fileName).orElse(0) + 1;
                 templateEntity = templateManagementService.create(new StringBuilder(fileName).append("(").append(currentNumber).append(")").toString(),

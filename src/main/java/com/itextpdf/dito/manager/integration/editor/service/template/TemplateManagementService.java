@@ -5,11 +5,14 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import java.util.List;
 
 public interface TemplateManagementService {
+
     TemplateEntity get(String name);
 
     List<TemplateEntity> getAll();
 
     TemplateEntity createNewVersion(String name, byte[] data, String email, String newName);
+
+    TemplateEntity createNewVersion(String name, byte[] data, String email, String newName, String comment);
 
     TemplateEntity create(String templateName, String email);
 

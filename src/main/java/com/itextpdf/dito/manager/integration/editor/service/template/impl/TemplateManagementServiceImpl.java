@@ -70,11 +70,17 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     @Override
     @Transactional(rollbackOn = InconsistencyException.class)
     public TemplateEntity createNewVersion(final String name, final byte[] data, final String email,
-                                           final String newName) {
-        final TemplateEntity templateEntity = templateService.createNewVersion(name, data, email, DEFAULT_COMMENT_FOR_NEW_VERSION, newName, null);
+                                           final String newName, final String comment) {
+        final TemplateEntity templateEntity = templateService.createNewVersion(name, data, email, comment, newName, null);
         templateEntity.getLatestFile().setResourceFiles(provideConsistency(templateEntity.getLatestFile().getData()));
         provideFirstVersionTemplateCreation(templateEntity);
         return templateRepository.save(templateEntity);
+    }
+
+    @Override
+    @Transactional(rollbackOn = InconsistencyException.class)
+    public TemplateEntity createNewVersion(String name, byte[] data, String email, String newName) {
+        return createNewVersion(name, data, email, newName, DEFAULT_COMMENT_FOR_NEW_VERSION);
     }
 
     @Override

@@ -13,5 +13,15 @@
     "name": "Standard",
     "type": "TEMPLATE",
     "new_version": true
+  },
+  {
+    "name":"dito_asset_725fcd2b-fefd-47f1-a0d1-d278c4066251",
+    "type":"IMAGE",
+    "new_version": false
+  },
+  {
+    "name":"dito_asset_d088bac7-c994-4b3d-88a2-e092a5a6d339",
+    "type":"IMAGE",
+    "new_version": false
   }
 ]

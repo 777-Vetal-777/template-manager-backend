@@ -57,6 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -337,7 +338,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
                 ? new EnumMap<>(SettingType.class)
                 : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
+        Arrays.stream(SettingType.values()).forEach(type -> models.putIfAbsent(type, Collections.emptyMap()));
+
         final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).orElse("unknown").concat("-import");
-        return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models.getOrDefault(SettingType.TEMPLATE, Collections.emptyMap()), models.getOrDefault(SettingType.DATA_COLLECTION, Collections.emptyMap()))), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models)), HttpStatus.OK);
     }
 }
