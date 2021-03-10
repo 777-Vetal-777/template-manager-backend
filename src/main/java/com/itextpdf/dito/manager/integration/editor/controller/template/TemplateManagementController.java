@@ -47,7 +47,7 @@ public interface TemplateManagementController {
     List<TemplateDescriptor> getAllDescriptors(@PathVariable("workspace-id") String workspaceId);
 
     @PutMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, @permissionHandlerImpl.decodeBase64(#descriptor.name), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, @permissionHandlerImpl.decodeBase64(#templateId), 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD')")
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
