@@ -58,7 +58,17 @@ public final class FilesUtils {
         final File zipFile = zipPath.toFile();
 		try (final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
 			Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<>() {
-				@Override
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    final FileVisitResult fileVisitResult = super.preVisitDirectory(dir, attrs);
+                    if (FileVisitResult.CONTINUE.equals(fileVisitResult) && !sourceFolderPath.equals(dir)) {
+                        zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(dir).toString().concat("/")));
+                        zos.closeEntry();
+                    }
+                    return fileVisitResult;
+                }
+
+                @Override
 				public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
 					zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(file).toString()));
 					Files.copy(file, zos);
