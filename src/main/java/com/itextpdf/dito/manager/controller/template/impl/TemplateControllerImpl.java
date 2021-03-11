@@ -340,7 +340,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                 : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
         Arrays.stream(SettingType.values()).forEach(type -> models.putIfAbsent(type, Collections.emptyMap()));
 
-        final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).orElse("unknown").concat("-import");
+        final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).map(file -> file.replace(' ', '_')).orElse("unknown").concat("-import");
         return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models)), HttpStatus.OK);
     }
 }
