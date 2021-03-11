@@ -104,7 +104,7 @@ pipeline {
             cleanWs() 
         }
         failure {
-            mail to: 'a.bykau@andersenlab.com,v.sorokin@andersenlab.com',
+            mail to: 'a.bykau@andersenlab.com,s.nemets@andersenlab.com',
             subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
             body: "Something is wrong with ${env.BUILD_URL}"
         }
