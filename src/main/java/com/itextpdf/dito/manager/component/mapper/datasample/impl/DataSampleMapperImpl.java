@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.mapper.datasample.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -84,7 +87,11 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         final ObjectMapper mapper = new ObjectMapper();
         boolean equals = false;
         try {
-            equals = mapper.readTree(dataCollectionJson).equals(mapper.readTree(dataSampleJson));
+        	final Set<String> dataCollectionKeySet = mapper.readValue(dataCollectionJson, new TypeReference<Map<String, String>>() {}).keySet();
+        	final Set<String>  dataSampleKeySet = mapper.readValue(dataSampleJson, new TypeReference<Map<String, String>>() {}).keySet();
+        	dataCollectionKeySet.removeAll(dataSampleKeySet);
+        	dataSampleKeySet.retainAll(dataCollectionKeySet);
+        	equals =  dataCollectionKeySet.isEmpty() &&  dataSampleKeySet.isEmpty();
         } catch (JsonProcessingException e) {
             log.error("Failed to check jsons equality");
         }
