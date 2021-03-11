@@ -6,6 +6,8 @@ import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 
 import java.util.Set;
+
+import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
 import org.springframework.data.domain.Page;
 
 public interface RoleMapper {
@@ -14,6 +16,10 @@ public interface RoleMapper {
     RoleEntity map(RoleUpdateRequestDTO dto);
 
     RoleDTO map(RoleEntity entity);
+
+    RoleDTO mapModel(RoleWithUsersModel roleModel);
+
+    Page<RoleDTO> mapModels(Page<RoleWithUsersModel> models);
 
     RoleDTO mapWithoutUsers(RoleEntity entity);
 

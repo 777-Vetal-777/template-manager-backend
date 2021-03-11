@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.model.role.RoleModel;
+import com.itextpdf.dito.manager.model.role.RolePermissionsModel;
+import com.itextpdf.dito.manager.model.role.RoleUsersModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -97,4 +100,36 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
                             @Param("types") @Nullable List<RoleTypeEnum> types,
                             @Param("search") String search);
 
+    @Query("select role.id as id, role.name as roleName, role.master as master, role.type as type from RoleEntity role" +
+            " where (:name='' or LOWER(role.name) like CONCAT('%',:name,'%')) "
+            + "and (COALESCE(:types) is null or role.type in (:types)) "
+            + "and role.master = true "
+            + "group by (role.id, role.type) ")
+    Page<RoleModel> filterModel(Pageable pageable, @Param("name") @Nullable String name, @Param("types") @Nullable List<RoleTypeEnum> types);
+
+    @Query("select role.id as id, role.name as roleName, role.master as master, role.type as type from RoleEntity role "
+            + "left join role.users user"
+            + " where  "
+            //filtering
+            + " (:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
+            + " and (COALESCE(:types) is null or role.type in (:types)) "
+            + " and role.master = true"
+            //search
+            + " and (LOWER(user.email) like  LOWER(CONCAT('%',:search,'%')) "
+            + " or LOWER(role.type) like  LOWER(CONCAT('%',:search,'%')) "
+            + "or (LOWER(role.name) = 'global_administrator' and 'global administrator' like CONCAT('%',:search,'%')) "
+            + "or (LOWER(role.name) = 'template_designer' and 'template designer' like CONCAT('%',:search,'%')) "
+            + " or  LOWER(role.name) like  LOWER(CONCAT('%',:search,'%'))) "
+            + "group by (role.id, role.type)")
+    Page<RoleModel> searchModel(Pageable pageable, @Param("name") @Nullable String name, @Param("types") @Nullable List<RoleTypeEnum> types, @Param("search") String search);
+
+    @Query("select role.id as id, user.email as userEmail from RoleEntity role" +
+            " left join role.users user" +
+            " where role.id in (:listId)")
+    List<RoleUsersModel> getUsers(@Param("listId") List<Long> listId);
+
+    @Query("select role.id as id, permission.optionalForCustomRole as optionalForCustomRole, permission.name as name from RoleEntity  role " +
+            " left join role.permissions permission" +
+            " where role.id in (:listId)")
+    List<RolePermissionsModel> getPermissions(@Param("listId") List<Long> listId);
 }

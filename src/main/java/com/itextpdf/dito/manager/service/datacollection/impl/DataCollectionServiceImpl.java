@@ -1,7 +1,12 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionRoleModel;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModel;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
+import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -42,10 +47,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -174,11 +183,9 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     @Override
-    public Page<DataCollectionEntity> list(final Pageable pageable, final DataCollectionFilter dataCollectionFilter, final String searchParam) {
-        log.info("Get list dataCollections with pageable by filter: {} and searchParam: {} was started", dataCollectionFilter, searchParam);
+    public Page<DataCollectionModelWithRoles> listDataCollectionModel(final Pageable pageable, final DataCollectionFilter dataCollectionFilter, final String searchParam) {
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
-        final Pageable pageWithSort = updateSort(pageable);
         final String name = getStringFromFilter(dataCollectionFilter.getName());
         final String modifiedBy = getStringFromFilter(dataCollectionFilter.getModifiedBy());
 
@@ -194,11 +201,97 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         }
 
         final List<DataCollectionType> types = dataCollectionFilter.getType();
-        log.info("Get list dataCollections with pageable by filter: {} and searchParam: {} was finished successfully", dataCollectionFilter, searchParam);
-        return StringUtils.isEmpty(searchParam)
-                ? dataCollectionRepository.filter(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types)
-                : dataCollectionRepository.search(pageWithSort, name, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, types, searchParam.toLowerCase());
+        final Pageable pageWithSort = updateSort(pageable);
+
+        final Page<DataCollectionModel> dataCollectionModels = StringUtils.isEmpty(searchParam)
+                ? dataCollectionRepository.filter(pageWithSort, name, modifiedOnStartDate, modifiedOnEndDate, modifiedBy, types)
+                : dataCollectionRepository.search(pageWithSort, name, modifiedOnStartDate, modifiedOnEndDate, modifiedBy, types, searchParam.toLowerCase());
+        final List<Long> listId = dataCollectionModels.stream().map(data -> data.getId()).collect(Collectors.toList());
+        final List<DataCollectionRoleModel> roleModels = dataCollectionRepository.getListRoleWithPermissions(listId);
+        return getListDataDataCollectionsWithRoles(roleModels, dataCollectionModels);
     }
+
+    private Page<DataCollectionModelWithRoles> getListDataDataCollectionsWithRoles(final List<DataCollectionRoleModel> listRoles, final Page<DataCollectionModel> collections) {
+        final Map<Long, List<DataCollectionRoleModel>> map = listRoles.stream().collect(Collectors.groupingBy(DataCollectionRoleModel::getDataCollectionId));
+        return collections.map(data -> createDataCollectionModelWithRoles(data, map));
+    }
+
+    private DataCollectionModelWithRoles createDataCollectionModelWithRoles(final DataCollectionModel data, final Map<Long, List<DataCollectionRoleModel>> listRoles) {
+        final DataCollectionModelWithRoles model = new DataCollectionModelWithRoles();
+        model.setName(data.getDataName());
+        model.setCreatedOn(data.getCreatedOn());
+        model.setModifiedBy(data.getModifiedBy());
+        model.setModifiedOn(data.getModifiedOn());
+        model.setAuthorFirstName(data.getAuthorFirstName());
+        model.setAuthorLastName(data.getAuthorLastName());
+        model.setDescription(data.getDescription());
+        model.setType(data.getType());
+        model.setAppliedRoles(addListRolesToModel(listRoles, data.getId()));
+        return model;
+    }
+
+    private Set<RoleDTO> addListRolesToModel(final Map<Long, List<DataCollectionRoleModel>> map, final Long dataCollectionId) {
+        final List<DataCollectionRoleModel> roles = new ArrayList<>();
+        if (map.get(dataCollectionId) != null) {
+            roles.addAll(map.get(dataCollectionId));
+        }
+        final Set<RoleDTO> roleDTOS = new HashSet<>();
+        for (final DataCollectionRoleModel role : roles) {
+            final RoleDTO roleDTO = new RoleDTO();
+            roleDTO.setId(role.getId());
+            roleDTO.setName(role.getRoleName());
+            roleDTO.setType(role.getType());
+            roleDTO.setMaster(false);
+            roleDTO.setPermissions(createListPermissions(role));
+            roleDTOS.add(roleDTO);
+        }
+        return roleDTOS;
+    }
+
+    private List<PermissionDTO> createListPermissions(final DataCollectionRoleModel role) {
+        final List<PermissionDTO> list = new ArrayList<>();
+        if (role.getE6_US34_EDIT_DATA_COLLECTION_METADATA()) {
+            final PermissionDTO permissionDTO = createPermission("E6_US34_EDIT_DATA_COLLECTION_METADATA");
+            list.add(permissionDTO);
+        }
+        if (role.getE6_US38_DELETE_DATA_COLLECTION()) {
+            final PermissionDTO permissionDTO = createPermission("E6_US38_DELETE_DATA_COLLECTION");
+            list.add(permissionDTO);
+        }
+        if (role.getE6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON()) {
+            final PermissionDTO permissionDTO = createPermission("E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON");
+            list.add(permissionDTO);
+        }
+        if (role.getE6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION()) {
+            final PermissionDTO permissionDTO = createPermission("E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION");
+            list.add(permissionDTO);
+        }
+        if (role.getE7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE()) {
+            final PermissionDTO permissionDTO = createPermission("E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE");
+            list.add(permissionDTO);
+        }
+        if (role.getE7_US47_EDIT_SAMPLE_METADATA()) {
+            final PermissionDTO permissionDTO = createPermission("E7_US47_EDIT_SAMPLE_METADATA");
+            list.add(permissionDTO);
+        }
+        if (role.getE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE()) {
+            final PermissionDTO permissionDTO = createPermission("E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE");
+            list.add(permissionDTO);
+        }
+        if (role.getE7_US50_DELETE_DATA_SAMPLE()) {
+            final PermissionDTO permissionDTO = createPermission("E7_US50_DELETE_DATA_SAMPLE");
+            list.add(permissionDTO);
+        }
+        return list;
+    }
+
+    private PermissionDTO createPermission(final String name) {
+        final PermissionDTO permissionDTO = new PermissionDTO();
+        permissionDTO.setOptionalForCustomRole(true);
+        permissionDTO.setName(name);
+        return permissionDTO;
+    }
+
 
     @Override
     public List<DataCollectionEntity> list(final DataCollectionFilter dataCollectionFilter, final String searchParam) {
@@ -352,17 +445,22 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     }
 
     private Pageable updateSort(final Pageable pageable) {
-        Sort newSort = Sort.by(pageable.getSort().stream()
-                .map(sortParam -> {
-                    if (sortParam.getProperty().equals("modifiedBy")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.author.firstName");
-                    }
-                    if (sortParam.getProperty().equals("modifiedOn")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.date");
-                    }
-                    return sortParam.getProperty().equals("lastLog.date") ? sortParam : sortParam.ignoreCase();
-                })
-                .collect(Collectors.toList()));
+        Sort newSort;
+        if (pageable.getSort().isSorted()) {
+            newSort = Sort.by(pageable.getSort().stream().
+                    map(sortParam -> {
+                        if (sortParam.getProperty().equals("modifiedBy")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.author.firstName");
+                        }
+                        if (sortParam.getProperty().equals("modifiedOn")) {
+                            sortParam = new Sort.Order(sortParam.getDirection(), "lastLog.date");
+                        }
+                        return sortParam.getProperty().equals("lastLog.date") ? sortParam : sortParam.ignoreCase();
+                    })
+                    .collect(Collectors.toList()));
+        } else {
+            newSort = Sort.by("modifiedOn").descending();
+        }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 

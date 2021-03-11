@@ -10,9 +10,11 @@ import com.itextpdf.dito.manager.dto.template.version.TemplateDeployedVersionDTO
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
+import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import org.springframework.data.domain.Page;
+import com.itextpdf.dito.manager.model.template.TemplateModel;
 
 import java.util.List;
 
@@ -40,4 +42,10 @@ public interface TemplateMapper {
     List<TemplatePartModel> mapPartDto(List<TemplatePartDTO> dto);
 
     PartSettings mapPartSettings(TemplateFilePartEntity entity);
+
+    Page<TemplateDTO> mapModels(Page<TemplateModelWithRoles> models);
+
+    TemplateDTO mapModel(TemplateModelWithRoles model);
+
+
 }

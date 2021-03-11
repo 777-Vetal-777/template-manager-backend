@@ -1,6 +1,8 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.manager.component.template.CompositeTemplateBuilder;
+import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -25,6 +27,12 @@ import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModel;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionRoleModel;
+import com.itextpdf.dito.manager.model.resource.ResourceRoleModel;
+import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
+import com.itextpdf.dito.manager.model.template.TemplateRoleModel;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
@@ -47,12 +55,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.itextpdf.dito.manager.model.template.TemplateModel;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -79,7 +91,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateFilePartService templateFilePartService;
     private final TemplateRefreshLinksService refreshLinksService;
-	private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{0,199}";
+    private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{0,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -199,7 +211,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
-    public Page<TemplateEntity> getAll(final Pageable pageable, final TemplateFilter templateFilter, final String searchParam) {
+    public Page<TemplateModelWithRoles> getAll(final Pageable pageable, final TemplateFilter templateFilter, final String searchParam) {
         log.info("Get all templates by filter: {} and search: {} was started", templateFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
@@ -220,14 +232,95 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
             editedOnEndDate = getEndDateFromRange(editedOnDateRange);
         }
 
-        final Page<TemplateEntity> templateEntities = StringUtils.isEmpty(searchParam)
+        final Page<TemplateModel> templateEntities = StringUtils.isEmpty(searchParam)
                 ? templateRepository
                 .filter(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate, editedOnEndDate)
                 : templateRepository
                 .search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate,
                         editedOnEndDate, searchParam.toLowerCase());
+        final List<Long> listId = templateEntities.stream().map(template -> template.getId()).collect(Collectors.toList());
+        final List<TemplateRoleModel> roles = templateRepository.getRoles(listId);
+        final Page<TemplateModelWithRoles> templateModelWithRoles = getListTemplatesWithRoles(roles, templateEntities);
         log.info("Get all templates by filter: {} and search: {} was finished successfully", templateFilter, searchParam);
-        return templateEntities;
+        return templateModelWithRoles;
+    }
+
+    private Page<TemplateModelWithRoles> getListTemplatesWithRoles(final List<TemplateRoleModel> listRoles, final Page<TemplateModel> collections) {
+        final Map<Long, List<TemplateRoleModel>> map = listRoles.stream().collect(Collectors.groupingBy(TemplateRoleModel::getTemplateId));
+        return collections.map(template -> createTemplatesWithRoles(template, map));
+    }
+
+    private TemplateModelWithRoles createTemplatesWithRoles(final TemplateModel template, final Map<Long, List<TemplateRoleModel>> listRoles) {
+        final TemplateModelWithRoles model = new TemplateModelWithRoles();
+        model.setName(template.getTemplateName());
+        model.setType(template.getType());
+        model.setVersion(template.getVersion());
+        model.setAuthor(template.getAuthor());
+        model.setComment(template.getComment());
+        model.setCreatedBy(template.getCreatedBy());
+        model.setDataCollection(template.getDataCollection());
+        model.setCreatedOn(template.getCreatedOn());
+        model.setLastUpdate(template.getLastUpdate());
+        model.setAppliedRoles(addListRolesToModel(listRoles, template.getId()));
+        return model;
+    }
+
+    private Set<RoleDTO> addListRolesToModel(final Map<Long, List<TemplateRoleModel>> map, final Long templateId) {
+        final List<TemplateRoleModel> roles = new ArrayList<>();
+        if (map.get(templateId) != null) {
+            roles.addAll(map.get(templateId));
+        }
+        final Set<RoleDTO> roleDTOS = new HashSet<>();
+        for (final TemplateRoleModel role : roles) {
+            RoleDTO roleDTO = new RoleDTO();
+            roleDTO.setId(role.getId());
+            roleDTO.setName(role.getRoleName());
+            roleDTO.setType(role.getType());
+            roleDTO.setMaster(false);
+            roleDTO.setPermissions(createListPermissions(role));
+            roleDTOS.add(roleDTO);
+        }
+        return roleDTOS;
+    }
+
+    private List<PermissionDTO> createListPermissions(final TemplateRoleModel role) {
+        final List<PermissionDTO> list = new ArrayList<>();
+        if (role.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD");
+            list.add(permissionDTO);
+        }
+        if (role.getE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD");
+            list.add(permissionDTO);
+        }
+        if (role.getE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE");
+            list.add(permissionDTO);
+        }
+        if (role.getE9_US81_PREVIEW_TEMPLATE_STANDARD()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US81_PREVIEW_TEMPLATE_STANDARD");
+            list.add(permissionDTO);
+        }
+        if (role.getE9_US24_EXPORT_TEMPLATE_DATA()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US24_EXPORT_TEMPLATE_DATA");
+            list.add(permissionDTO);
+        }
+        if (role.getE9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE");
+            list.add(permissionDTO);
+        }
+        if (role.getE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED()) {
+            final PermissionDTO permissionDTO = createPermission("E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
+            list.add(permissionDTO);
+        }
+        return list;
+    }
+
+    private PermissionDTO createPermission(final String name) {
+        final PermissionDTO permissionDTO = new PermissionDTO();
+        permissionDTO.setOptionalForCustomRole(true);
+        permissionDTO.setName(name);
+        return permissionDTO;
     }
 
     @Override
@@ -577,10 +670,10 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         Sort newSort = Sort.by(pageable.getSort().stream()
                 .map(sortParam -> {
                     if (sortParam.getProperty().equals("dataCollection")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "dataCollection.name");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "data.name");
                     }
                     if (sortParam.getProperty().equals("modifiedBy")) {
-                        sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.author.firstName");
+                        sortParam = new Sort.Order(sortParam.getDirection(), "lastAuthorLog.firstName");
                     }
                     if (sortParam.getProperty().equals("modifiedOn")) {
                         sortParam = new Sort.Order(sortParam.getDirection(), "latestLogRecord.date");
@@ -591,7 +684,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
 
-	private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
-		return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
-	}
+    private List<TemplatePartModel> getTemplatePartsList(final TemplateFileEntity fileEntityToCopy) {
+        return fileEntityToCopy.getParts().stream().map(templateFilePartService::mapFromEntity).collect(Collectors.toList());
+    }
 }

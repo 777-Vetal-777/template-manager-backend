@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.resource;
 
+import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
@@ -13,6 +14,10 @@ public interface ResourceMapper {
     ResourceEntity map(ResourceUpdateRequestDTO dto);
 
     Page<ResourceDTO> map(Page<ResourceEntity> entities);
+
+    Page<ResourceDTO> mapModels(Page<ResourceModelWithRoles> models);
+
+    ResourceDTO mapModel(ResourceModelWithRoles model);
 
     //TODO REPLACE TO INTEGRATION ResourceLeafDescriptorMapperImpl
     String encodeId(String name, ResourceTypeEnum type, String additionals);

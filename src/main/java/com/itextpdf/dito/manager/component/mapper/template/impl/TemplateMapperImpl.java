@@ -20,6 +20,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
+import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
@@ -28,6 +29,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import com.itextpdf.dito.manager.model.template.TemplateModel;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,6 +105,27 @@ public class TemplateMapperImpl implements TemplateMapper {
         entity.setDescription(dto.getDescription());
         log.info("Convert {} to entity was finished successfully", dto);
         return entity;
+    }
+
+    @Override
+    public Page<TemplateDTO> mapModels(final Page<TemplateModelWithRoles> models) {
+        return models.map(this::mapModel);
+    }
+
+    @Override
+    public TemplateDTO mapModel(final TemplateModelWithRoles model) {
+        final TemplateDTO result = new TemplateDTO();
+        result.setName(model.getName());
+        result.setType(model.getType());
+        result.setVersion(model.getVersion());
+        result.setAuthor(model.getAuthor());
+        result.setComment(model.getComment());
+        result.setCreatedBy(model.getCreatedBy());
+        result.setDataCollection(model.getDataCollection());
+        result.setCreatedOn(model.getCreatedOn());
+        result.setLastUpdate(model.getLastUpdate());
+        result.setAppliedRoles(model.getAppliedRoles());
+        return result;
     }
 
     @Override

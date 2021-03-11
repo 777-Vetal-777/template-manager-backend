@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
+import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
+import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
@@ -90,8 +92,47 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     @Override
+    public Page<ResourceDTO> mapModels(final Page<ResourceModelWithRoles> models) {
+        return models.map(this::mapModel);
+    }
+
+    @Override
+    public ResourceDTO mapModel(final ResourceModelWithRoles model) {
+        final ResourceDTO resourceDTO = new ResourceDTO();
+        resourceDTO.setAppliedRoles(model.getAppliedRoles());
+        resourceDTO.setMetadataUrls(map(model.getMetadataUrls()));
+        resourceDTO.setName(model.getName());
+        resourceDTO.setComment(model.getComment());
+        resourceDTO.setDescription(model.getDescription());
+        resourceDTO.setType(model.getType());
+        resourceDTO.setDeployed(model.getDeployed());
+        resourceDTO.setCreatedBy(new StringBuilder(model.getAuthorFirstName())
+                .append(" ")
+                .append(model.getAuthorLastName())
+                .toString());
+        resourceDTO.setCreatedOn(model.getCreatedOn());
+        resourceDTO.setModifiedBy(model.getModifiedBy());
+        resourceDTO.setModifiedOn(model.getModifiedOn());
+        resourceDTO.setVersion(model.getVersion());
+        return resourceDTO;
+    }
+
+    @Override
     public Page<ResourceDTO> map(final Page<ResourceEntity> entities) {
         return entities.map(this::map);
+    }
+
+    private List<FileMetaInfoDTO> map(final List<MetaInfoModel> models) {
+        return models.stream().map(this::map).collect(Collectors.toList());
+
+    }
+
+    private FileMetaInfoDTO map(final MetaInfoModel model) {
+        final FileMetaInfoDTO fileMetaInfoDTO = new FileMetaInfoDTO();
+        fileMetaInfoDTO.setFileName(model.getFileName());
+        fileMetaInfoDTO.setUuid(model.getUuid());
+        fileMetaInfoDTO.setFontType(model.getFontType());
+        return fileMetaInfoDTO;
     }
 
     private static FileMetaInfoDTO map(final ResourceFileEntity file) {
@@ -103,6 +144,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         log.info("Convert resourceFile: {} to fileMetaInfoDto was finished successfully", file.getId());
         return fileMetaInfoDTO;
     }
+
     //TODO In the future, replace this code with an integration code.
     @Override
     public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
@@ -128,10 +170,11 @@ public class ResourceMapperImpl implements ResourceMapper {
             result = objectMapper.readValue(data, ResourceIdDTO.class);
         } catch (JsonProcessingException e) {
             log.info(e.getMessage());
-            throw new TemplatePreviewGenerationException( new StringBuilder("Exception when writing resources from the template. Exception: ").append(e.getMessage()).toString());
+            throw new TemplatePreviewGenerationException(new StringBuilder("Exception when writing resources from the template. Exception: ").append(e.getMessage()).toString());
         }
         return result;
     }
+
     //TODO In the future, replace this code with an integration code.
     @Override
     public String serialize(final Object data) {
@@ -141,7 +184,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             result = objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             log.info(e.getMessage());
-            throw new TemplatePreviewGenerationException( new StringBuilder("Exception when reading resources from the template. Exception: ").append(e.getMessage()).toString());
+            throw new TemplatePreviewGenerationException(new StringBuilder("Exception when reading resources from the template. Exception: ").append(e.getMessage()).toString());
         }
 
         return result;

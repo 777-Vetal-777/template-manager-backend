@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.mapper.datacollection;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import org.springframework.data.domain.Page;
 
 import java.util.Collection;
@@ -19,4 +20,7 @@ public interface DataCollectionMapper {
 
     List<DataCollectionDTO> map(Collection<DataCollectionEntity> entities);
 
+    Page<DataCollectionDTO> mapModels(Page<DataCollectionModelWithRoles> entities);
+
+    DataCollectionDTO mapModel(DataCollectionModelWithRoles entity);
 }

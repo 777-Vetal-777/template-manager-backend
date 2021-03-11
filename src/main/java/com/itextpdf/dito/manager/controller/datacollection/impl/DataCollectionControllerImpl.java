@@ -26,6 +26,7 @@ import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.datasample.DataSampleFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionPermissionsModel;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
@@ -127,9 +128,9 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<Page<DataCollectionDTO>> list(final Pageable pageable, final DataCollectionFilter filter,
                                                         final String searchParam) {
         log.info("Get list of dataCollections with params: {} and searchParam: {} was started", filter, searchParam);
-        final Page<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(pageable, filter, searchParam);
+        final Page<DataCollectionModelWithRoles> dataCollectionModelWithRoles = dataCollectionService.listDataCollectionModel(pageable, filter, searchParam);
         log.info("Get list of dataCollections with params: {} and searchParam: {} was finished successfully", filter, searchParam);
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapModels(dataCollectionModelWithRoles), HttpStatus.OK);
     }
 
     @Override

@@ -23,6 +23,7 @@ import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitE
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.filter.resource.ResourcePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.model.resource.ResourcePermissionModel;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
 import com.itextpdf.dito.manager.service.resource.ResourcePermissionService;
@@ -180,9 +181,10 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<Page<ResourceDTO>> list(final Pageable pageable,
                                                   final ResourceFilter filter, final String searchParam) {
         log.info("Get list resources by filter: {} and searchParam: {} was started", filter, searchParam);
-        final Page<ResourceDTO> dtos = resourceMapper.map(resourceService.list(pageable, filter, searchParam));
+        final Page<ResourceModelWithRoles> resourceModelWithRoles = resourceService.list(pageable, filter, searchParam);
         log.info("Get list resources by filter: {} and searchParam: {} was finished successfully", filter, searchParam);
-        return new ResponseEntity<>(dtos, HttpStatus.OK);
+        return new ResponseEntity<>(resourceMapper.mapModels(resourceModelWithRoles), HttpStatus.OK);
+
     }
 
     @Override

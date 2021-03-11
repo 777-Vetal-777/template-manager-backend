@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import java.util.List;
 
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
+import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,7 +31,7 @@ public interface RoleService {
 
     RoleEntity create(String name, List<String> permissions, Boolean master);
 
-    Page<RoleEntity> list(Pageable pageable, RoleFilter filter, String searchParam);
+    Page<RoleWithUsersModel> list(Pageable pageable, RoleFilter filter, String searchParam);
 
     RoleEntity update(String roleName, RoleEntity updatedRole, List<String> permissions);
 

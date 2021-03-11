@@ -70,6 +70,15 @@ public class TemplateEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
+            "SELECT min(log.id) " +
+            "FROM manager.template_log log " +
+            "WHERE log.template_id = id and log.date=(" +
+            "select min(log.date) from manager.template_log log where log.template_id = id)" +
+            ")")
+    private TemplateLogEntity firstLogRecord;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula("(" +
             "SELECT file.id " +
             "FROM manager.template_file file " +
             "WHERE file.template_id = id and file.version=(" +

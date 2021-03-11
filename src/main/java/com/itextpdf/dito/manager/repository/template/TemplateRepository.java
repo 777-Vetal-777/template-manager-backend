@@ -3,6 +3,8 @@ package com.itextpdf.dito.manager.repository.template;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.model.template.TemplateModel;
+import com.itextpdf.dito.manager.model.template.TemplateRoleModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
@@ -28,21 +30,25 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "modifiedOn");
 
-    String TEMPLATE_TABLE_SELECT_CLAUSE = "select template from TemplateEntity template "
+    String TEMPLATE_TABLE_SELECT_CLAUSE = "select template.name as templateName, template.id as id, template.type as type, data.name as dataCollection, CONCAT(firstAuthorLog.firstName,' ',firstAuthorLog.lastName) as createdBy, "
+            + "template.firstLogRecord.date as createdOn, CONCAT(lastAuthorLog.firstName,' ',lastAuthorLog.lastName) as author, lastAuthorLog.firstName as authorFirstName, "
+            + "template.latestFile.version as version, template.latestLogRecord.date as lastUpdate, template.latestFile.comment as comment from TemplateEntity template "
+            + "join template.firstLogRecord.author firstAuthorLog "
+            + "join template.latestLogRecord.author lastAuthorLog "
             + "left join template.latestFile templateFile "
             + "left join templateFile.dataCollectionFile dataCollectionFile "
-            + "left join dataCollectionFile.dataCollection dataCollection  ";
+            + "left join dataCollectionFile.dataCollection data ";
 
     String FILTER_CONDITION = "(:name='' or LOWER(template.name) like CONCAT('%',:name,'%')) "
             + "and (COALESCE(:types) is null or template.type in (:types)) "
             + "and (:modifiedBy='' or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or template.latestLogRecord.date between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and ((dataCollection.name is not null and (LOWER(dataCollection.name) like CONCAT('%',:dataCollectionName,'%')))" +
-            " or (dataCollection.name is null and ('no data collection' like CONCAT('%',:dataCollectionName,'%'))))";
+            + "and ((data.name is not null and (LOWER(data.name) like CONCAT('%',:dataCollectionName,'%')))" +
+            " or (data.name is null and ('no data collection' like CONCAT('%',:dataCollectionName,'%'))))";
 
     String SEARCH_CONDITION = "(LOWER(template.name) like CONCAT('%',:search,'%') "
-            + "or LOWER(dataCollection.name) like CONCAT('%',:search,'%') "
-            + "or (dataCollection.name is null and 'no data collection' like CONCAT('%',:search,'%')) "
+            + "or LOWER(data.name) like CONCAT('%',:search,'%') "
+            + "or (data.name is null and 'no data collection' like CONCAT('%',:search,'%')) "
             + "or LOWER(template.type) like CONCAT('%',:search,'%') "
             + "or LOWER(CONCAT(template.latestLogRecord.author.firstName, ' ', template.latestLogRecord.author.lastName)) like CONCAT('%',:search,'%') "
             + "or CAST(CAST(template.latestLogRecord.date as date) as string) like CONCAT('%',:search,'%')) ";
@@ -121,24 +127,24 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 
     Optional<TemplateEntity> findByName(String name);
 
-    @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + " where " + FILTER_CONDITION)
-    Page<TemplateEntity> filter(Pageable pageable,
-                                @Param("name") @Nullable String name,
-                                @Param("modifiedBy") @Nullable String modifiedBy,
-                                @Param("types") @Nullable List<TemplateTypeEnum> types,
-                                @Param("dataCollectionName") @Nullable String dataCollectionName,
-                                @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
-                                @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate);
+    @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION)
+    Page<TemplateModel> filter(Pageable pageable,
+                               @Param("name") @Nullable String name,
+                               @Param("modifiedBy") @Nullable String modifiedBy,
+                               @Param("types") @Nullable List<TemplateTypeEnum> types,
+                               @Param("dataCollectionName") @Nullable String dataCollectionName,
+                               @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
+                               @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate);
 
     @Query(value = TEMPLATE_TABLE_SELECT_CLAUSE + "where " + FILTER_CONDITION + " and " + SEARCH_CONDITION)
-    Page<TemplateEntity> search(Pageable pageable,
-                                @Param("name") @Nullable String name,
-                                @Param("modifiedBy") @Nullable String modifiedBy,
-                                @Param("types") @Nullable List<TemplateTypeEnum> types,
-                                @Param("dataCollectionName") @Nullable String dataCollectionName,
-                                @Param("startDate") @Nullable @Temporal Date startDate,
-                                @Param("endDate") @Nullable @Temporal Date endDate,
-                                @Param("search") String searchParam);
+    Page<TemplateModel> search(Pageable pageable,
+                               @Param("name") @Nullable String name,
+                               @Param("modifiedBy") @Nullable String modifiedBy,
+                               @Param("types") @Nullable List<TemplateTypeEnum> types,
+                               @Param("dataCollectionName") @Nullable String dataCollectionName,
+                               @Param("startDate") @Nullable @Temporal Date modifiedOnStartDate,
+                               @Param("endDate") @Nullable @Temporal Date modifiedOnEndDate,
+                               @Param("search") String searchParam);
 
     @Override
     @Query(value = "select template from TemplateEntity template "
@@ -229,4 +235,28 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             + "join part.template compositionTemplate "
             + "where compositionTemplate.id = :id")
     List<TemplateFileEntity> getAllTemplateFileVersions(@Param("id") Long templateId);
+
+    @Query(value = "select id, type, templateId, roleName," +
+            " E9_US75_EDIT_TEMPLATE_METADATA_STANDARD," +
+            " E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD," +
+            " E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE," +
+            " E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE," +
+            " E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED," +
+            " E9_US81_PREVIEW_TEMPLATE_STANDARD," +
+            " E9_US24_EXPORT_TEMPLATE_DATA" +
+            " from (select r.id as id, r.type as type, max(template.id) as templateId, max(r.name) as roleName," +
+            " max(case when p.name = 'E9_US75_EDIT_TEMPLATE_METADATA_STANDARD' then 'true' else 'false' end) as E9_US75_EDIT_TEMPLATE_METADATA_STANDARD," +
+            " max(case when p.name = 'E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD' then 'true' else 'false' end) as E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD," +
+            " max(case when p.name = 'E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE' then 'true' else 'false' end) as E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE," +
+            " max(case when p.name = 'E9_US24_EXPORT_TEMPLATE_DATA' then 'true' else 'false' end) as E9_US24_EXPORT_TEMPLATE_DATA," +
+            " max(case when p.name = 'E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE' then 'true' else 'false' end) as E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE," +
+            " max(case when p.name = 'E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED' then 'true' else 'false' end) as E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED," +
+            " max(case when p.name = 'E9_US81_PREVIEW_TEMPLATE_STANDARD' then 'true' else 'false' end) as E9_US81_PREVIEW_TEMPLATE_STANDARD" +
+            " from {h-schema}template" +
+            " join {h-schema}template_role rr on template.id = rr.template_id" +
+            " join {h-schema}role r on r.id = rr.role_id and r.master = false" +
+            " left join {h-schema}role_permission rp on rp.role_id = r.id" +
+            " left join {h-schema}permission p on p.id = rp.permission_id group by r.id) as rolesTable  where  templateId in (:listId)", nativeQuery = true)
+    List<TemplateRoleModel> getRoles(@Param("listId") List<Long> listId);
+
 }

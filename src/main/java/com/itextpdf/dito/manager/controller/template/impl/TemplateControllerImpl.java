@@ -33,6 +33,7 @@ import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
+import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
@@ -137,10 +138,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                                            final TemplateFilter templateFilter,
                                                            final String searchParam) {
         log.info("Get list templates with pageable by filter: {} and searchParam: {} was started", templateFilter, searchParam);
-        final Page<TemplateEntity> templates = templateService.getAll(pageable, templateFilter, searchParam);
+        final Page<TemplateModelWithRoles> templateModelWithRoles = templateService.getAll(pageable, templateFilter, searchParam);
         log.info("Get list templates with pageable by filter: {} and searchParam: {} was finished successfully", templateFilter, searchParam);
-        return new ResponseEntity<>(templateMapper.map(templates),
-                HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapModels(templateModelWithRoles), HttpStatus.OK);
     }
 
     @Override

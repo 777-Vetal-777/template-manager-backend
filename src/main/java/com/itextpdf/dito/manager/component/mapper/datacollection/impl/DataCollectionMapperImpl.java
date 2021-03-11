@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,5 +81,26 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
         return entities.stream().map(this::map).collect(Collectors.toList());
     }
 
+    @Override
+    public Page<DataCollectionDTO> mapModels(final Page<DataCollectionModelWithRoles> entities) {
+        return entities.map(this::mapModel);
+    }
 
+    @Override
+    public DataCollectionDTO mapModel(final DataCollectionModelWithRoles entity) {
+        final DataCollectionDTO dataCollectionDTO = new DataCollectionDTO();
+        dataCollectionDTO.setName(entity.getName());
+        dataCollectionDTO.setType(entity.getType());
+        dataCollectionDTO.setComment(entity.getComment());
+        dataCollectionDTO.setModifiedOn(entity.getModifiedOn());
+        dataCollectionDTO.setModifiedBy(entity.getModifiedBy());
+        dataCollectionDTO.setCreatedOn(entity.getCreatedOn());
+        dataCollectionDTO.setAppliedRoles(entity.getAppliedRoles());
+        dataCollectionDTO.setCreatedBy(new StringBuilder(entity.getAuthorFirstName())
+                .append(" ")
+                .append(entity.getAuthorLastName())
+                .toString());
+        dataCollectionDTO.setVersion(entity.getVersion());
+        return dataCollectionDTO;
+    }
 }

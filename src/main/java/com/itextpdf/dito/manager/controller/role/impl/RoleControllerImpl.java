@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
 import com.itextpdf.dito.manager.service.role.RoleService;
 
 import javax.validation.Valid;
@@ -46,9 +47,9 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
                                               final RoleFilter roleFilter,
                                               final String searchParam) {
         log.info("Get role list by filter: {} and searchParam: {} was started", roleFilter, searchParam);
-        final Page<RoleEntity> roles = roleService.list(pageable, roleFilter, searchParam);
+        final Page<RoleWithUsersModel> roleWithUsersModels = roleService.list(pageable, roleFilter, searchParam);
         log.info("Get role list by filter: {} and searchParam: {} was finished successfully", roleFilter, searchParam);
-        return new ResponseEntity<>(roleMapper.map(roles), HttpStatus.OK);
+        return new ResponseEntity<>(roleMapper.mapModels(roleWithUsersModels), HttpStatus.OK);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.role.impl;
 
+import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.RoleTypeEnum;
@@ -16,6 +17,10 @@ import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleExceptio
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
+import com.itextpdf.dito.manager.model.role.RoleModel;
+import com.itextpdf.dito.manager.model.role.RolePermissionsModel;
+import com.itextpdf.dito.manager.model.role.RoleUsersModel;
+import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
@@ -30,7 +35,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -111,7 +118,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
+    public Page<RoleWithUsersModel> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
         log.info("Get list roles by roleFilter: {} and searchParam: {} was started", roleFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
@@ -119,12 +126,53 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         final String name = getStringFromFilter(roleFilter.getName());
         final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
 
-        final Page<RoleEntity> roleEntities = StringUtils.isEmpty(searchParam)
-                ? roleRepository.filter(pageWithSort, name, roleTypeEnums)
-                : roleRepository.search(pageWithSort, name, roleTypeEnums, searchParam.toLowerCase());
+        final Page<RoleModel> roleModels = StringUtils.isEmpty(searchParam)
+                ? roleRepository.filterModel(pageWithSort, name, roleTypeEnums)
+                : roleRepository.searchModel(pageWithSort, name, roleTypeEnums, searchParam.toLowerCase());
+        final List<Long> listId = roleModels.stream().map(role -> role.getId()).collect(Collectors.toList());
+        final List<RoleUsersModel> users = roleRepository.getUsers(listId);
+        final List<RolePermissionsModel> permissions = roleRepository.getPermissions(listId);
+        final Map<Long, List<RolePermissionsModel>> mapPermissions = permissions.stream().collect(Collectors.groupingBy(RolePermissionsModel::getId));
+        final Map<Long, List<RoleUsersModel>> mapUsers = users.stream().collect(Collectors.groupingBy(RoleUsersModel::getId));
+        final Page<RoleWithUsersModel> page = initRoleWithUsersModel(roleModels);
+        addListUsers(mapUsers, mapPermissions, page);
         log.info("Get list roles by roleFilter: {} and searchParam: {} was finished successfully", roleFilter, searchParam);
-        return roleEntities;
+        return page;
     }
+
+    private Page<RoleWithUsersModel> initRoleWithUsersModel(final Page<RoleModel> roleModels) {
+        return roleModels.map(this::init);
+    }
+
+    private RoleWithUsersModel init(final RoleModel roleModel) {
+        final RoleWithUsersModel role = new RoleWithUsersModel();
+        role.setId(roleModel.getId());
+        role.setMaster(roleModel.getMaster());
+        role.setName(roleModel.getRoleName());
+        role.setType(roleModel.getType());
+        return role;
+    }
+
+    private Page<RoleWithUsersModel> addListUsers(final Map<Long, List<RoleUsersModel>> mapUsers, final Map<Long, List<RolePermissionsModel>> mapPermissions,
+                                                  final Page<RoleWithUsersModel> roleModels) {
+        for (final RoleWithUsersModel role : roleModels) {
+            final List<String> list = mapUsers.get(role.getId()).stream().map(roleUsersModel -> roleUsersModel.getUserEmail()).collect(Collectors.toList());
+            role.setUsersEmails(list);
+            getPermissions(mapPermissions, role);
+        }
+        return roleModels;
+    }
+
+    private void getPermissions(final Map<Long, List<RolePermissionsModel>> map, final RoleWithUsersModel roleWithUsersModel) {
+        final List<RolePermissionsModel> roles = map.get(roleWithUsersModel.getId());
+        for (final RolePermissionsModel rolePermissionsModel : roles) {
+            final PermissionDTO permission = new PermissionDTO();
+            permission.setName(rolePermissionsModel.getName());
+            permission.setOptionalForCustomRole(rolePermissionsModel.getOptionalForCustomRole());
+            roleWithUsersModel.getPermissions().add(permission);
+        }
+    }
+
 
     @Override
     public RoleEntity update(final String name, final RoleEntity updatedRole, final List<String> permissions) {

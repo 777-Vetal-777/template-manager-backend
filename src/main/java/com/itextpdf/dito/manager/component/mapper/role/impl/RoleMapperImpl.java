@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.component.mapper.role.impl;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
+import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -56,6 +57,23 @@ public class RoleMapperImpl implements RoleMapper {
         dto.setPermissions(permissionMapper.map(entity.getPermissions()));
         log.info("Convert role: {} to roleDto was finished successfully", entity.getId());
         return dto;
+    }
+
+    @Override
+    public RoleDTO mapModel(final RoleWithUsersModel roleModel) {
+        final RoleDTO dto = new RoleDTO();
+        dto.setId(roleModel.getId());
+        dto.setName(roleModel.getName());
+        dto.setType(roleModel.getType());
+        dto.setMaster(roleModel.getMaster());
+        dto.setPermissions(roleModel.getPermissions());
+        dto.setUsersEmails(roleModel.getUsersEmails());
+        return dto;
+    }
+
+    @Override
+    public Page<RoleDTO> mapModels(final Page<RoleWithUsersModel> models) {
+        return models.map(this::mapModel);
     }
 
     @Override

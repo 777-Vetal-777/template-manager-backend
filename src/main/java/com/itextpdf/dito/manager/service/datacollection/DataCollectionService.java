@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +19,7 @@ public interface DataCollectionService {
 
     DataCollectionEntity rollbackVersion(String name, Long version, String email);
 
-    Page<DataCollectionEntity> list(Pageable pageable, DataCollectionFilter filter, String searchParam);
+    Page<DataCollectionModelWithRoles> listDataCollectionModel(Pageable pageable, DataCollectionFilter filter, String searchParam);
 
     List<DataCollectionEntity> list(DataCollectionFilter filter, String searchParam);
 
@@ -35,7 +36,7 @@ public interface DataCollectionService {
     DataCollectionEntity applyRole(String resourceName, String roleName, List<String> permissions);
 
     DataCollectionEntity detachRole(String name, String roleName);
-    
-    DataSampleEntity create(String  dataCollectionName, String name, String fileName, String sample, String comment, String email);
+
+    DataSampleEntity create(String dataCollectionName, String name, String fileName, String sample, String comment, String email);
 
 }

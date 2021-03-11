@@ -8,10 +8,12 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
+import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import com.itextpdf.dito.manager.model.template.TemplateModel;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ public interface TemplateService {
                           String dataCollectionName, String email, byte[] data,
                           List<TemplatePartModel> templateParts);
 
-    Page<TemplateEntity> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam);
+    Page<TemplateModelWithRoles> getAll(Pageable pageable, TemplateFilter templateFilter, String searchParam);
 
     List<TemplateEntity> getAll();
 
