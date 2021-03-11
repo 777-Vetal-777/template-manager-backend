@@ -93,11 +93,9 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
             }
             else if (existingResource.getType() == ResourceTypeEnum.FONT) {
                 processor = new TemplateSubTreeProcessor<>(Collections.singletonList(
-                        new FontResourceUriInternalStyleTagProcessor<>(
-                                renamingUrlProcessor
-                        ))
+                        new FontResourceUriInternalStyleTagProcessor<>(renamingUrlProcessor))
                 );
-            }else {
+            } else {
                 processor =  new TemplateSubTreeProcessor<>(Collections.singletonList(new StylesheetLinkTagProcessor<>(renamingUrlProcessor)));
             }
             updateOldLinksInFiles(templateFiles, oldId, newId, processor);
@@ -107,19 +105,16 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
 
     @Override
     public void updateTemplateLinksInTemplates(final TemplateEntity templateEntity, final String newName) {
-        //what about old versions
         final List<TemplateFileEntity> nestedTemplates = templateRepository.getAllTemplateFileVersions(templateEntity.getId());
         if (!nestedTemplates.isEmpty()) {
             final String oldId = templateDescriptorMapper.encodeToBase64(templateEntity.getName());
             final String newId = templateDescriptorMapper.encodeToBase64(newName);
             final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
             final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = templateFileLinkRenamingContext.getRenamingUrlProcessor();
-            //this processor only for tag, update later, when sdk team make new release
             final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new FragmentLinkProcessor<>(renamingUrlProcessor)));
             updateOldLinksInFiles(nestedTemplates, oldId, newId, processor);
             templateFileRepository.saveAll(nestedTemplates);
         }
-
     }
 
     private void updateOldLinksInFiles(final List<TemplateFileEntity> templateFiles, final String oldId, final String newId, final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor) {
