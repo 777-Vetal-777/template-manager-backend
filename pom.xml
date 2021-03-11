@@ -32,6 +32,7 @@
         <ph-css.version>0.9.29</ph-css.version>
         <io.netty.version>4.1.59.Final</io.netty.version>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.exclusions>**/*manager/dto/**/*,**/*manager/entity/**/*,**/*manager/exception/**/*,**/*manager/filter/**/*,**/TemplateManagerApplication.java</sonar.coverage.exclusions>
 
         <license.report.path>${project.basedir}/license/generated-report.xml</license.report.path>
     </properties>

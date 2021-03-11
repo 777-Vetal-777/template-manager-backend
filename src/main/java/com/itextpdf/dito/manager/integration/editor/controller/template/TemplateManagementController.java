@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 
 import java.security.Principal;
@@ -47,7 +46,7 @@ public interface TemplateManagementController {
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     List<TemplateDescriptor> getAllDescriptors(@PathVariable("workspace-id") String workspaceId);
 
-    @PutMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,

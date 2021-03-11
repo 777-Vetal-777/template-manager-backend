@@ -101,7 +101,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("PUT");
+				request.setMethod("POST");
 				return request;
 			}
 		});
@@ -127,7 +127,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 	@Test
 	public void templateAddUpdateTest() throws Exception {
 		// CREATE
-		final TemplateAddDescriptor descriptor=  new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
+		final TemplateAddDescriptor descriptor = new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
 		
 		final URI uri = UriComponentsBuilder.fromUriString("/workspace/" + WORKSPACE_ID + "/templates").build()
 				.encode().toUri();
@@ -155,7 +155,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("PUT");
+				request.setMethod("POST");
 				return request;
 			}
 		});
@@ -173,7 +173,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("PUT");
+				request.setMethod("POST");
 				return request;
 			}
 		});
