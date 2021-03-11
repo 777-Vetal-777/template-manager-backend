@@ -1,8 +1,8 @@
 package com.itextpdf.dito.manager.component.mapper.datasample.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDTO;
@@ -16,9 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -86,15 +86,35 @@ public class DataSampleMapperImpl implements DataSampleMapper {
     private boolean checkJsonsEquality(final String dataCollectionJson, final String dataSampleJson) {
         final ObjectMapper mapper = new ObjectMapper();
         boolean equals = false;
-        try {
-        	final Set<String> dataCollectionKeySet = mapper.readValue(dataCollectionJson, new TypeReference<Map<String, String>>() {}).keySet();
-        	final Set<String>  dataSampleKeySet = mapper.readValue(dataSampleJson, new TypeReference<Map<String, String>>() {}).keySet();
-        	dataCollectionKeySet.removeAll(dataSampleKeySet);
-        	dataSampleKeySet.retainAll(dataCollectionKeySet);
-        	equals =  dataCollectionKeySet.isEmpty() &&  dataSampleKeySet.isEmpty();
+        try {        	       	
+        	final List<String> dataCollectionKeyList = getAllKeys(mapper, dataCollectionJson);
+        	final List<String> dataSampleKeyList = getAllKeys(mapper, dataSampleJson);
+        
+        	dataCollectionKeyList.removeAll(dataSampleKeyList);
+        	dataSampleKeyList.retainAll(dataCollectionKeyList);
+        	equals =  dataCollectionKeyList.isEmpty() &&  dataSampleKeyList.isEmpty();
         } catch (JsonProcessingException e) {
             log.error("Failed to check jsons equality");
         }
         return equals;
     }
+
+	private List<String> getAllKeys(final ObjectMapper mapper, final String jsonObject) throws JsonProcessingException {
+		final Map<String, Object> treeMap = mapper.readValue(jsonObject, Map.class);
+		final List<String> keys = Lists.newArrayList();
+		return findKeys(treeMap, keys);
+
+	}
+
+	private List<String> findKeys(final Map<String, Object> treeMap, final List<String> keys) {
+		treeMap.forEach((key, value) -> {
+			if (value instanceof LinkedHashMap) {
+				final Map<String, Object> map = (LinkedHashMap) value;
+				findKeys(map, keys);
+			}
+			keys.add(key);
+		});
+
+		return keys;
+	}
 }
