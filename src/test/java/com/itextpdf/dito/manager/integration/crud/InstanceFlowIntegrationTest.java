@@ -42,7 +42,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     public void test_ping() throws Exception {
         final String encodedSocketName = new String(Base64.getEncoder().encode("localhost:9999".getBytes()));
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.INSTANCE_STATUS_ENDPOINT, encodedSocketName))
-                .andExpect(status().isBadGateway());
+                .andExpect(status().isGatewayTimeout());
         assertTrue(instanceRepository.findByName(encodedSocketName).isEmpty());
     }
 

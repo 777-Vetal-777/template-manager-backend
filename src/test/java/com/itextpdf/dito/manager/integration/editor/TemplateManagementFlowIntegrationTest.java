@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +101,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("POST");
+				request.setMethod("PUT");
 				return request;
 			}
 		});
@@ -152,16 +151,15 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		final MockMultipartFile newDataForFirstUpdate = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewDataFirst\"}".getBytes());
 		
-		 MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(uriUpdate);
+		MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(uriUpdate);
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("POST");
+				request.setMethod("PUT");
 				return request;
 			}
 		});
-		
-	
+
 		mockMvc.perform(builder
 				.file(decriptor)
 				.file(newDataForFirstUpdate)
@@ -175,7 +173,7 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("POST");
+				request.setMethod("PUT");
 				return request;
 			}
 		});
