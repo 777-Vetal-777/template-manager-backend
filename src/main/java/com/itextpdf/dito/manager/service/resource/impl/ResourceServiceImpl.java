@@ -222,8 +222,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             throwExceptionIfResourceExists(entity.getName(), entity.getType());
         }
         existingResource.setDescription(entity.getDescription());
-        existingResource.setName(entity.getName());
         templateRefreshLinksService.updateResourceLinksInTemplates(existingResource, entity.getName());
+        existingResource.setName(entity.getName());
 
         final ResourceLogEntity logEntity = createResourceLogEntry(existingResource, userEntity);
         existingResource.getResourceLogs().add(logEntity);
