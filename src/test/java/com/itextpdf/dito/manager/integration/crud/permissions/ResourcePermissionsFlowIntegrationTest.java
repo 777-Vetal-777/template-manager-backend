@@ -117,6 +117,14 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result.getResponse());
+
+        applyRoleRequestDTO.setRoleName("ADMINISTRATOR");
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE, IMAGES, encodedResourceName)
+                .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
     }
 
     @Test

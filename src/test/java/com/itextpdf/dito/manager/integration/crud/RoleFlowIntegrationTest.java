@@ -99,6 +99,15 @@ public class RoleFlowIntegrationTest extends AbstractIntegrationTest {
         testRole.setPermissions(Collections.emptySet());
         roleRepository.save(testRole);
         assertTrue(roleRepository.findByNameAndMasterTrue(roleToBeUpdatedName).isPresent());
+
+        final String encodedSystemRoleName = Base64.getEncoder().encodeToString("ADMINISTRATOR".getBytes());
+
+        mockMvc.perform(patch(RoleController.BASE_NAME + "/" + encodedSystemRoleName)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
     }
 
     @Test

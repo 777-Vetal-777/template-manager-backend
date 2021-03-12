@@ -98,6 +98,22 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("isDefault").value("true"));
         assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
 
+        request.setSample("{}");
+        request.setName("data-sample1");
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        request.setName("data-sample2");
+        request.setSample("{123A");
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
     }
 
     @Test

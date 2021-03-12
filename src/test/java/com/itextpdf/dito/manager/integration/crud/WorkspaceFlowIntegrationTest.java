@@ -256,6 +256,24 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
                 .andExpect(jsonPath("stages[0].name").value("Development")).andReturn();
         assertNotNull(result.getResponse());
+
+
+    }
+
+    @Test
+    void testThrowException() throws Exception {
+        workspaceRepository.deleteAll();
+        MockMultipartFile licensePart2 = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", "".getBytes());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+                .file(workspaceNamePart)
+                .file(workspaceTimeZonePart)
+                .file(workspaceLanguagePart)
+                .file(workspaceAdjustForDayLightPart)
+                .file(mainDevelopInstancePart)
+                .file(licensePart2)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -349,7 +367,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("timezone").value("America/Sao_Paulo"))
                 .andExpect(jsonPath("adjustForDaylight").value(true));
     }
-    
+
     @Test
     public void test_remember_success_with_custom_header() throws Exception {
         final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
@@ -366,7 +384,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.[0].headerValue", is("MyHeaderValue")));
         assertTrue(!instanceRepository.findByName(request.getInstances().get(0).getName()).isEmpty());
     }
-    
+
     @Test
     public void test_remember_fail_with_custom_header() throws Exception {
         final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);

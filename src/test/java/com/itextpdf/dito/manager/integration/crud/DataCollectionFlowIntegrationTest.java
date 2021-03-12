@@ -187,6 +187,23 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty());
         assertTrue(dataCollectionRepository.existsByName(NAME));
 
+        final MockMultipartFile multipartFile = new MockMultipartFile("attachment", "any-name.json", "text/plain", "".getBytes());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(multipartFile)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
+
+        final MockMultipartFile multipartFile2 = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{123A".getBytes());
+        final MockMultipartFile name2 = new MockMultipartFile("name2", "name2", "text/plain", NAME.getBytes());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(multipartFile2)
+                .file(name2 )
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
+
         //GET by name
         mockMvc.perform(
                 get(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(NAME.getBytes()))
