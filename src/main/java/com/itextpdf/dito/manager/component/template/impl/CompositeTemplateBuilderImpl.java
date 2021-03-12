@@ -27,6 +27,7 @@ import java.util.function.BiFunction;
 public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
     private static final String DATA_DITO_ELEMENT = "data-dito-element";
     private static final String DATA_DITO_VERTICAL_ALIGN = "data-dito-page-margin-vertical-align";
+    private static final String DATA_DITO_EDITOR_CALCULATED_HEIGHT = "data-dito-editor-calculated-height";
 
     private static final Logger LOG = LogManager.getLogger(CompositeTemplateBuilderImpl.class);
 
@@ -72,6 +73,7 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
         final Element child = new Element(Tag.valueOf("header"), parent.baseUri());
         child.attr(DATA_DITO_ELEMENT, "page-header");
         child.attr(DATA_DITO_VERTICAL_ALIGN, "middle");
+        child.attr(DATA_DITO_EDITOR_CALCULATED_HEIGHT, "0px");
 
         return parent.appendChild(addChildObject(child, templateFilePartEntity));
     }
@@ -80,6 +82,7 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
         final Element child = new Element(Tag.valueOf("footer"), parent.baseUri());
         child.attr(DATA_DITO_ELEMENT, "page-footer");
         child.attr(DATA_DITO_VERTICAL_ALIGN, "middle");
+        child.attr(DATA_DITO_EDITOR_CALCULATED_HEIGHT, "0px");
 
         return parent.appendChild(addChildObject(child, templateFilePartEntity));
     }
