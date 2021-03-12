@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.component.mapper.datasample.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.itextpdf.dito.manager.component.mapper.datasample.DataSampleMapper;
 import com.itextpdf.dito.manager.dto.datasample.DataSampleDTO;
 import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDTO;
@@ -16,9 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -87,8 +89,8 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         final ObjectMapper mapper = new ObjectMapper();
         boolean equals = false;
         try {        	       	
-        	final List<String> dataCollectionKeyList = getAllKeys(mapper, dataCollectionJson);
-        	final List<String> dataSampleKeyList = getAllKeys(mapper, dataSampleJson);
+        	final Set<String> dataCollectionKeyList = getAllKeys(mapper, dataCollectionJson);
+        	final Set<String> dataSampleKeyList = getAllKeys(mapper, dataSampleJson);
         
         	dataCollectionKeyList.removeAll(dataSampleKeyList);
         	dataSampleKeyList.retainAll(dataCollectionKeyList);
@@ -99,22 +101,30 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         return equals;
     }
 
-	private List<String> getAllKeys(final ObjectMapper mapper, final String jsonObject) throws JsonProcessingException {
+	private Set<String> getAllKeys(final ObjectMapper mapper, final String jsonObject) throws JsonProcessingException {
 		final Map<String, Object> treeMap = mapper.readValue(jsonObject, Map.class);
-		final List<String> keys = Lists.newArrayList();
-		return findKeys(treeMap, keys);
-
+		final Set<String> keys = new HashSet<>();
+		return findKeys("", treeMap, keys);
 	}
 
-	private List<String> findKeys(final Map<String, Object> treeMap, final List<String> keys) {
+	private Set<String> findKeys(final String prefix, final Map<String, Object> treeMap, final Set<String> keys) {
 		treeMap.forEach((key, value) -> {
-			if (value instanceof LinkedHashMap) {
+			if (isClassMap(value.getClass())) {
 				final Map<String, Object> map = (LinkedHashMap) value;
-				findKeys(map, keys);
+				final StringBuilder additionalPrefix = new StringBuilder(prefix);
+				additionalPrefix.append(key);
+				additionalPrefix.append("/");
+				findKeys(additionalPrefix.toString(), map, keys);
 			}
-			keys.add(key);
+			final StringBuilder resultKey = new StringBuilder(prefix);
+			resultKey.append(key);
+			keys.add(resultKey.toString());
 		});
-
 		return keys;
 	}
+	
+	private boolean isClassMap(Class<?> c) {
+		return Map.class.isAssignableFrom(c);
+	}
+
 }
