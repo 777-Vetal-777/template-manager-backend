@@ -27,8 +27,6 @@ public interface ResourceService {
 
     ResourceEntity get(String name, ResourceTypeEnum type);
 
-    ResourceEntity get(String name, ResourceTypeEnum type, String fontName);
-
     ResourceEntity update(String name, ResourceEntity entity, String mail);
 
     ResourceEntity delete(String name, ResourceTypeEnum type, String mail);

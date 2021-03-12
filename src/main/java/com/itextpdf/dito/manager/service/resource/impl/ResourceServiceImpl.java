@@ -36,7 +36,6 @@ import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -485,17 +484,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return resourceRepository.findByNameAndType(name, type).orElseThrow(() -> new ResourceNotFoundException(name));
     }
 
-    @Override
-    @ReadOnlyProperty
-    public ResourceEntity get(final String name, final ResourceTypeEnum type, final String fontName) {
-        //changing new font name back to db name
-        final StringBuilder sb = new StringBuilder();
-        sb.append("-");
-        sb.append(fontName);
-        sb.append("$");
-        return resourceRepository.getByNameTypeAndFontName(name.replaceFirst(sb.toString(), ""), type, fontName)
-                .orElseThrow(() -> new ResourceNotFoundException(name));
-    }
+
 
     @Override
     public byte[] getFile(final String uuid) {

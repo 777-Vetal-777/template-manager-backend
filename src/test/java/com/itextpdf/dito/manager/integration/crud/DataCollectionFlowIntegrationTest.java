@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.VERSIONS_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -96,7 +97,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("dataCollection").value(NAME));
         final Optional<TemplateEntity> template = templateRepository.findByName(request.getName());
         assertTrue(template.isPresent());
-
+        assertNotNull(dataCollectionService.getByTemplateName("some-template"));
         //DELETE by name
         mockMvc.perform(
                 delete(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(NAME.getBytes())))
@@ -306,4 +307,5 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     void testNoTemplateByDataCollectionException() {
     	assertThrows(TemplateNotFoundException.class,()->dataCollectionService.getByTemplateName("not-existing-template"));
     }
+    
 }
