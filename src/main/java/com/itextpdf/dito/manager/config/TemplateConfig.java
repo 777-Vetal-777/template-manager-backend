@@ -52,7 +52,7 @@ public class TemplateConfig {
 
             @Override
             public boolean isUriSupported(final String url) {
-                return url.startsWith(DITO_ASSET_TAG);
+                return (url != null && url.startsWith(DITO_ASSET_TAG));
             }
         };
     }
@@ -72,7 +72,7 @@ public class TemplateConfig {
 
             @Override
             public boolean isUriSupported(final String url) {
-                return url.startsWith(DITO_ASSET_TAG);
+                return (url != null && url.startsWith(DITO_ASSET_TAG));
             }
         };
     }

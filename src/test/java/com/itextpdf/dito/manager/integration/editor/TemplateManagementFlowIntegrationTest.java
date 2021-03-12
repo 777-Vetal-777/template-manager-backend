@@ -1,14 +1,27 @@
 package com.itextpdf.dito.manager.integration.editor;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateFragmentType;
+import com.itextpdf.dito.manager.controller.template.TemplateController;
+import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
+import com.itextpdf.dito.manager.repository.stage.StageRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
+import com.itextpdf.dito.manager.repository.template.TemplateRepository;
+import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
+import com.itextpdf.dito.manager.service.template.TemplateLoader;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
@@ -16,32 +29,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import org.springframework.web.util.UriComponentsBuilder;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
-import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateFragmentType;
-import com.itextpdf.dito.manager.controller.template.TemplateController;
-import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
-import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
-import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
-import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
-import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
-import com.itextpdf.dito.manager.repository.stage.StageRepository;
-import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
-import com.itextpdf.dito.manager.repository.template.TemplateRepository;
-import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
-
-public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
+class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	
 	private static final String WORKSPACE_ID = "c29tZS10ZW1wbGF0ZQ==";
 	private static final String TEMPLATE_NAME = "some-template";
@@ -59,9 +58,11 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 	private InstanceRepository instanceRepository;
 	@Autowired
 	private StageRepository stageRepository;
+	@Autowired
+	private TemplateLoader templateLoader;
 
 	@BeforeEach
-	public void clearDb() {
+	void clearDb() {
 		templateRepository.deleteAll();
 		templateFileRepository.deleteAll();
 		dataCollectionRepository.deleteAll();
@@ -71,20 +72,19 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 	}
 	
 	@Test
-	public void templateAddFirstVersionOfTemplateTest() throws Exception {
+	void templateAddFirstVersionOfTemplateTest() throws Exception {
 		// CREATE
-		final TemplateAddDescriptor descriptor=  new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
+		final TemplateAddDescriptor templateAddDescriptor = new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
 		
 		final URI uri = UriComponentsBuilder.fromUriString("/workspace/" + WORKSPACE_ID + "/templates").build()
 				.encode().toUri();
 
-		final MockMultipartFile decriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
-				objectMapper.writeValueAsString(descriptor).getBytes());
-		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json",
-				"{\"file\":\"data\"}".getBytes());
+		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
+				objectMapper.writeValueAsString(templateAddDescriptor).getBytes());
+		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", templateLoader.load());
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
-				.file(decriptor)
+				.file(descriptor)
 				.file(data)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -97,17 +97,8 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewData\"}".getBytes());
 		
-		final MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(uriUpdate);
-		builder.with(new RequestPostProcessor() {
-			@Override
-			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("POST");
-				return request;
-			}
-		});
-		
-		mockMvc.perform(builder
-				.file(decriptor)
+		mockMvc.perform(MockMvcRequestBuilders.multipart(uriUpdate)
+				.file(descriptor)
 				.file(newData)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -119,26 +110,26 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.andExpect(jsonPath("file").value("NewData"));
 
 		final List<TemplateFileEntity> templateFileList = templateFileRepository.findAll();
-		assertTrue(templateFileList.size() == 1);
-		assertTrue(templateFileList.get(0).getVersion() == 1L);
-		assertTrue(templateFileList.get(0).getComment() == null);
+		assertEquals(1,templateFileList.size());
+		assertEquals(1L, templateFileList.get(0).getVersion());
+		assertNull(templateFileList.get(0).getComment());
 	}
 	
 	@Test
-	public void templateAddUpdateTest() throws Exception {
+	void templateAddUpdateTest() throws Exception {
 		// CREATE
-		final TemplateAddDescriptor descriptor = new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
+		final TemplateAddDescriptor templateAddDescriptor = new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
 		
 		final URI uri = UriComponentsBuilder.fromUriString("/workspace/" + WORKSPACE_ID + "/templates").build()
 				.encode().toUri();
 
-		final MockMultipartFile decriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
-				objectMapper.writeValueAsString(descriptor).getBytes());
+		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
+				objectMapper.writeValueAsString(templateAddDescriptor).getBytes());
 		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json",
-				"{\"file\":\"data\"}".getBytes());
+				templateLoader.load());
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
-				.file(decriptor)
+				.file(descriptor)
 				.file(data)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -150,18 +141,9 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 
 		final MockMultipartFile newDataForFirstUpdate = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewDataFirst\"}".getBytes());
-		
-		MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(uriUpdate);
-		builder.with(new RequestPostProcessor() {
-			@Override
-			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("POST");
-				return request;
-			}
-		});
 
-		mockMvc.perform(builder
-				.file(decriptor)
+		mockMvc.perform(MockMvcRequestBuilders.multipart(uriUpdate)
+				.file(descriptor)
 				.file(newDataForFirstUpdate)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -169,16 +151,9 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		templateFileRepository.findAll().forEach(t->System.out.println(new String(t.getData())));
 		final MockMultipartFile newDataForSecondUpdate = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewDataSecond\"}".getBytes());
-		builder = MockMvcRequestBuilders.multipart(uriUpdate);
-		builder.with(new RequestPostProcessor() {
-			@Override
-			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-				request.setMethod("POST");
-				return request;
-			}
-		});
-		mockMvc.perform(builder
-				.file(decriptor)
+
+		mockMvc.perform(MockMvcRequestBuilders.multipart(uriUpdate)
+				.file(descriptor)
 				.file(newDataForSecondUpdate)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -192,9 +167,9 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.andExpect(jsonPath("file").value("NewDataSecond"));
 		
 		final List<TemplateFileEntity> templateFileList = templateFileRepository.findAll();
-		assertTrue(templateFileList.size() == 2);
-		assertTrue(templateFileList.get(0).getVersion() == 1L);
-		assertTrue(templateFileList.get(1).getVersion() == 2L);
+		assertEquals(2, templateFileList.size());
+		assertEquals(1L, templateFileList.get(0).getVersion());
+		assertEquals(2L, templateFileList.get(1).getVersion());
 	}
 	
 	@Test
@@ -247,4 +222,35 @@ public class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTe
 		assertNotNull(result.getResponse());
 
 	}
+
+	@Test
+	void shouldProcessTemplateWithEmptyImageTag() throws Exception {
+		// CREATE
+		final TemplateAddDescriptor templateAddDescriptor = new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
+
+		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json", objectMapper.writeValueAsString(templateAddDescriptor).getBytes());
+		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", readFileBytes("src/test/resources/test-data/templates/editor-template-with-empty-image.html"));
+
+		mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.CREATE_TEMPLATE_URL, WORKSPACE_ID)
+				.file(descriptor)
+				.file(data)
+				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		// UPDATE
+		mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, TEMPLATE_ID)
+				.file(descriptor)
+				.file(data)
+				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		final List<TemplateFileEntity> templateFileList = templateFileRepository.findAll();
+		assertEquals(2, templateFileList.size());
+		assertEquals(1L, templateFileList.get(0).getVersion());
+		assertEquals(2L, templateFileList.get(1).getVersion());
+		assertNull(templateFileList.get(0).getComment());
+	}
+
 }

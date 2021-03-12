@@ -74,7 +74,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
             final byte[] data) {
         log.info("Request to create new template with name {} received.", descriptor.getName());
         final String email = principal.getName();
-        final TemplateEntity templateEntity = templateManagementService.create(descriptor.getName(), email);
+        final TemplateEntity templateEntity = templateManagementService.create(descriptor.getName(), data, null, email);
         log.info("Response to create new template received with name {} processed. Created template id {}", descriptor.getName(), templateEntity.getId());
         return templateDescriptorMapper.map(templateEntity);
     }

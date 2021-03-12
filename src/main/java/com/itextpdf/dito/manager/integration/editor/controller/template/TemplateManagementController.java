@@ -55,9 +55,7 @@ public interface TemplateManagementController {
     @GetMapping(value = TEMPLATE_DESCRIPTOR_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Fetch template descriptor", description = "returns JSON descriptor of template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content =
-    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateDescriptor.class))
-    )
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateDescriptor.class)))
     @ApiResponse(responseCode = "404", description = "Template not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     TemplateDescriptor getDescriptor(@PathVariable("template-id") String templateId);
