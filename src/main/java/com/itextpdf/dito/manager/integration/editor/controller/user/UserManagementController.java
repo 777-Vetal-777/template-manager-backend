@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration.editor.controller.user;
 
 import java.security.Principal;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.UserInfoDescriptor;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+@Tag(name = "editor", description = "editor integration API")
 public interface UserManagementController {
 	String BASE_USERS_URL = "/users";
     String CURRENT = BASE_USERS_URL +"/current";

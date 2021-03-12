@@ -334,6 +334,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> importData(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
+        log.info("Import template by fileName: {} was started", templateFile.getOriginalFilename());
         final byte[] data = getFileBytes(templateFile);
         final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
                 ? new EnumMap<>(SettingType.class)
@@ -341,6 +342,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         Arrays.stream(SettingType.values()).forEach(type -> models.putIfAbsent(type, Collections.emptyMap()));
 
         final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).map(file -> file.replace(' ', '_')).orElse("unknown").concat("-import");
+        log.info("Import template by fileName: {} was finished successfully", templateFile.getOriginalFilename());
         return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models)), HttpStatus.OK);
     }
 }
