@@ -122,7 +122,7 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		// CHECK UPDATE
 		final MvcResult result = mockMvc.perform(get(uriUpdate)
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
+				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("file").value("NewData"))
 				.andReturn();
@@ -156,7 +156,7 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.build().encode().toUri();
 		mockMvc.perform(get(uri)
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
+				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("file").value("data"));
 

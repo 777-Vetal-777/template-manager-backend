@@ -38,11 +38,10 @@ public interface DataManagementController {
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     DataSampleDescriptor getDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
-    @GetMapping(value = DATA_SAMPLE_URL, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    @Operation(description = "retrieve data sample content", summary = "Get the contents of a datasample using its personal identifier ",security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @GetMapping(DATA_SAMPLE_URL)
+    @Operation(description = "retrieve data sample content", summary = "Get the contents of a data sample using its personal identifier ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
-    @ApiResponse(responseCode = "404", description = "DataSample not found by id", content = @Content)
-    @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
+    @ApiResponse(responseCode = "404", description = "DataSample not found by id", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     byte[] fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @PutMapping(value = DATA_SAMPLE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,14 +64,14 @@ public interface DataManagementController {
 
     @DeleteMapping(value = DATA_SAMPLE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('E7_US50_DELETE_DATA_SAMPLE')")
-    @Operation(description = "delete data sample by id", summary = "deletes sample, returnes descriptor of deleted sample. ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @Operation(description = "delete data sample by id", summary = "deletes sample, returns descriptor of deleted sample. ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DataSampleDescriptor.class)))
     @ApiResponse(responseCode = "404", description = "DataSample doesn't exist", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     DataSampleDescriptor deleteDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
-    @GetMapping(value = COLLECTION_DATA_SAMPLES_URL, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    @Operation(description = "Get data sample by datacollection id.", summary = "Get a list of datasamples that are in a datacollection using the datacollection identifier ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @GetMapping(value = COLLECTION_DATA_SAMPLES_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "Get data sample by datacollection id.", summary = "Get a list of data samples that are in a datacollection using the datacollection identifier ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = DataSampleDescriptor.class))))
     @ApiResponse(responseCode = "404", description = "DataSample doesn't exist", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)

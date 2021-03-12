@@ -58,14 +58,14 @@ public interface ResourceManagementController {
     ResourceLeafDescriptor createOrUpdate(Principal principal, @PathVariable("resource-id") String resourceId,
                                           @RequestPart ResourceLeafDescriptor descriptor, @RequestPart byte[] data);
 
-    @PostMapping(value = CREATE_RESOURCE_URL, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = CREATE_RESOURCE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Create a new resource", description = "creates new resources, returns JSON list of resource descriptors", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = ResourceLeafDescriptor.class))))
     @ApiResponse(responseCode = "404", description = "Workspace not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     List<ResourceLeafDescriptor> add(Principal principal, @RequestPart ResourceLeafDescriptor descriptor, @RequestPart byte[] data);
 
-    @DeleteMapping(value = RESOURCE_URL, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @DeleteMapping(value = RESOURCE_URL)
     @PreAuthorize("hasAuthority('E8_US68_MANAGE_RESOURCE_PERMISSIONS_IMAGE')")
 	@Operation(description = "Delete resource by id", summary = "deleting a resource by its identifier ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "404", description = "Template not found by id", content = @Content)

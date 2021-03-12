@@ -103,7 +103,7 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 		// CHECK UPDATE
 		final MvcResult result = mockMvc.perform(get(uriUpdate)
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
+				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk()).andReturn();
 		assertNotNull(result.getResponse());
 	}
@@ -136,7 +136,7 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.encode().toUri();
 		mockMvc.perform(get(integratedResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
+				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk());
 
 		// Get Integrated Resource By workspace Id
