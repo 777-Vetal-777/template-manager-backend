@@ -56,13 +56,13 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     @Override
     public TemplateDescriptor update(final Principal principal, final String templateId,
             final TemplateUpdateDescriptor descriptor,
-            final TemplateCommitDescriptor commitDescriptor,
+            final TemplateCommitDescriptor commit,
             final byte[] data) {
         final String email = principal.getName();
         final String id = decodeBase64(templateId);
         log.info("Request to create new version of template with id {} received.", id);
         final String newName = descriptor != null ? descriptor.getName() : null;
-        final String commitMessage = commitDescriptor != null ? commitDescriptor.getMessage() : null;
+        final String commitMessage = commit != null ? commit.getMessage() : null;
         final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName, commitMessage);
         log.info("Response to create new version of template with id {} processed.",id);
         return templateDescriptorMapper.map(templateEntity);

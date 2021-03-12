@@ -76,7 +76,7 @@ public interface TemplateManagementController {
     TemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
                               @Parameter(description = "update descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateUpdateDescriptor.class))) @RequestPart(required = false) TemplateUpdateDescriptor descriptor,
-                              @Parameter(description = "commit descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateCommitDescriptor.class))) @RequestPart(required = false) TemplateCommitDescriptor commitDescriptor,
+                              @Parameter(description = "commit descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateCommitDescriptor.class))) @RequestPart(required = false) TemplateCommitDescriptor commit,
                               @RequestPart byte[] data);
 
     @PreAuthorize("@permissionHandlerImpl.checkTemplateDeletePermissions(authentication, @permissionHandlerImpl.decodeBase64(#templateId))")
