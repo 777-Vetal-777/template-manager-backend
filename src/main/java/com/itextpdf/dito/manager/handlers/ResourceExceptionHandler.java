@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ResourceExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(ResourceFontCannotBeRenamedException.class)
-    public ResponseEntity<ErrorResponseDTO> ResourceFontCannotBeRenamedExceptionHandler(final ResourceFontCannotBeRenamedException ex){
+    public ResponseEntity<ErrorResponseDTO> resourceFontCannotBeRenamedExceptionHandler(final ResourceFontCannotBeRenamedException ex){
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
     }
 

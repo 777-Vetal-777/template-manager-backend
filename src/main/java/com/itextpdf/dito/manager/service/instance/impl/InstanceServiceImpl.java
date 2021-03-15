@@ -11,10 +11,12 @@ import com.itextpdf.dito.manager.exception.instance.InstanceCustomHeaderValidati
 import com.itextpdf.dito.manager.exception.instance.InstanceHasAttachedTemplateException;
 import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
+import com.itextpdf.dito.manager.exception.instance.deployment.SdkInstanceException;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
+import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +31,7 @@ import org.springframework.util.StringUtils;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -40,14 +43,17 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
     private static final Logger log = LogManager.getLogger(InstanceServiceImpl.class);
     private final UserService userService;
     private final InstanceRepository instanceRepository;
+    private final TemplateDeploymentService templateDeploymentService;
     private final InstanceClient instanceClient;
 
     public InstanceServiceImpl(final UserService userService,
                                final InstanceRepository instanceRepository,
-                               final InstanceClient instanceClient) {
+                               final InstanceClient instanceClient,
+                               final TemplateDeploymentService templateDeploymentService) {
         this.userService = userService;
         this.instanceRepository = instanceRepository;
         this.instanceClient = instanceClient;
+        this.templateDeploymentService = templateDeploymentService;
     }
 
 
@@ -61,9 +67,9 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         if (instanceRepository.findBySocket(instance.getSocket()).isPresent()) {
             throw new InstanceAlreadyExistsException(instance.getSocket());
         }
-		if (StringUtils.isEmpty(instance.getHeaderName()) ^ StringUtils.isEmpty(instance.getHeaderValue())) {
-			throw new InstanceCustomHeaderValidationException(instance.getName());
-		}
+        if (StringUtils.isEmpty(instance.getHeaderName()) ^ StringUtils.isEmpty(instance.getHeaderValue())) {
+            throw new InstanceCustomHeaderValidationException(instance.getName());
+        }
         final String instanceToken = instanceClient.register(instance.getSocket(), instance.getHeaderName(), instance.getHeaderValue()).getToken();
         instance.setCreatedBy(userEntity);
         instance.setRegisterToken(instanceToken);
@@ -151,10 +157,28 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         if (instanceRepository.findByName(instanceEntity.getName()).isPresent()) {
             throw new InstanceAlreadyExistsException(instanceEntity.getName());
         }
+        if (!Objects.equals(instanceEntity.getSocket(), oldInstanceEntity.getSocket())
+                && instanceRepository.findBySocket(instanceEntity.getSocket()).isPresent()) {
+            throw new InstanceAlreadyExistsException(instanceEntity.getSocket());
+        }
+
+        final String instanceToken = instanceClient.register(instanceEntity.getSocket(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue()).getToken();
+
+        try {
+            instanceClient.unregister(oldInstanceEntity.getSocket(), oldInstanceEntity.getRegisterToken());
+        } catch (SdkInstanceException e) {
+            log.warn("An error occurred during unregister instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
+        }
 
         oldInstanceEntity.setName(instanceEntity.getName());
         oldInstanceEntity.setSocket(instanceEntity.getSocket());
+
+        oldInstanceEntity.setRegisterToken(instanceToken);
+
         final InstanceEntity savedInstance = instanceRepository.save(oldInstanceEntity);
+
+        oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(savedInstance, templateFile, false));
+
         log.info("Update instance by name: {} and params: {} was finished successfully", name, instanceEntity);
         return savedInstance;
     }

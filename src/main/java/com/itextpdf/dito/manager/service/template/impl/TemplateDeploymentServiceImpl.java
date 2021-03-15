@@ -161,7 +161,8 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         return stageEntity;
     }
 
-    private void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {
+    @Override
+    public void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {
         final TemplateEntity templateEntity = templateFileEntity.getTemplate();
         final String instanceSocket = instanceEntity.getSocket();
         final String instanceRegisterToken = instanceEntity.getRegisterToken();

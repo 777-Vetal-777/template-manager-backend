@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.template;
 
+import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 
@@ -15,4 +16,6 @@ public interface TemplateDeploymentService {
     TemplateFileEntity undeploy(String templateName, Long version);
 
     StageEntity getNextStage(String templateName, Long version);
+
+    void promoteTemplateToInstance(InstanceEntity instanceEntity, TemplateFileEntity templateFileEntity, boolean isDefaultInstance);
 }

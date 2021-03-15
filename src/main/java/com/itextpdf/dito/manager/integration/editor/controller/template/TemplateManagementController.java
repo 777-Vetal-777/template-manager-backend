@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import java.security.Principal;
 import java.util.List;
 
-@Tag(name = "editor", description = "editor integration API")
+@Tag(name = "editor-template", description = "editor integration API")
 public interface TemplateManagementController {
     // Endpoints naming is used from the strict requirements for editor integration.
     String CREATE_TEMPLATE_URL = "/workspace/{workspace-id}/templates";

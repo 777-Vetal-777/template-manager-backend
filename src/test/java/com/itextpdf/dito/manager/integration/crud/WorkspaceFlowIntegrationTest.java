@@ -37,6 +37,7 @@ import java.util.Optional;
 import static com.itextpdf.dito.manager.controller.workspace.WorkspaceController.WORKSPACE_CHECK_LICENSE_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -255,16 +256,15 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
         final MvcResult result = mockMvc.perform(get(WorkspaceController.BASE_NAME + "/" + WorkspaceController.WORKSPACE_PROMOTION_PATH_ENDPOINT, WORKSPACE_BASE64_ENCODED_NAME)
                 .accept(MediaType.APPLICATION_JSON)).andExpect(jsonPath("stages").isArray()).andExpect(jsonPath("stages", hasSize(1)))
                 .andExpect(jsonPath("stages[0].name").value("Development")).andReturn();
+
         assertNotNull(result.getResponse());
-
-
     }
 
     @Test
-    void testThrowException() throws Exception {
+    void testUploadLicenseOnNonexistentWorkspace() throws Exception {
         workspaceRepository.deleteAll();
         MockMultipartFile licensePart2 = new MockMultipartFile("license", "volume-andersen.xml", "text/xml", "".getBytes());
-        mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(workspaceBaseUri)
                 .file(workspaceNamePart)
                 .file(workspaceTimeZonePart)
                 .file(workspaceLanguagePart)
@@ -273,7 +273,9 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(licensePart2)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest()).andReturn();
+
+        assertNotNull(result.getResponse());
     }
 
     @Test
@@ -382,7 +384,7 @@ class WorkspaceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.[0].socket", is(request.getInstances().get(0).getSocket())))
                 .andExpect(jsonPath("$.[0].headerName", is("MyHeader")))
                 .andExpect(jsonPath("$.[0].headerValue", is("MyHeaderValue")));
-        assertTrue(!instanceRepository.findByName(request.getInstances().get(0).getName()).isEmpty());
+        assertFalse(instanceRepository.findByName(request.getInstances().get(0).getName()).isEmpty());
     }
 
     @Test
