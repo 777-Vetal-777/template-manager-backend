@@ -217,13 +217,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceUpdateRequestDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("name").value(resourceUpdateRequestDTO.getName()))
-                .andExpect(jsonPath("description").value(resourceUpdateRequestDTO.getDescription()));
+                .andExpect(status().isConflict());
+
         //DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        FONTS, Base64.getEncoder().encodeToString(resourceUpdateRequestDTO.getName().getBytes())))
+                        FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
                 .andExpect(status().isOk());
         assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
         assertTrue(Objects.isNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId)));

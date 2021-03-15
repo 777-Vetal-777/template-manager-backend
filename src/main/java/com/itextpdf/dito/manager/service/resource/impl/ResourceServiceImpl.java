@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.service.resource.impl;
 
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
+import com.itextpdf.dito.manager.exception.resource.ResourceFontCannotBeRenamedException;
 import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModel;
 import com.itextpdf.dito.manager.model.resource.ResourceRoleModel;
@@ -225,6 +226,9 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         final UserEntity userEntity = userService.findActiveUserByEmail(mail);
 
         if (!existingResource.getName().equals(entity.getName())) {
+            if(entity.getType() == ResourceTypeEnum.FONT){
+                throw new ResourceFontCannotBeRenamedException();
+            }
             throwExceptionIfResourceExists(entity.getName(), entity.getType());
         }
         existingResource.setDescription(entity.getDescription());

@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentExcept
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupportedException;
 import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitException;
+import com.itextpdf.dito.manager.exception.resource.ResourceFontCannotBeRenamedException;
 import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesException;
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 
@@ -16,6 +17,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class ResourceExceptionHandler extends AbstractExceptionHandler {
+
+    @ExceptionHandler(ResourceFontCannotBeRenamedException.class)
+    public ResponseEntity<ErrorResponseDTO> ResourceFontCannotBeRenamedExceptionHandler(final ResourceFontCannotBeRenamedException ex){
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ResourceFileSizeExceedLimitException.class)
     public ResponseEntity<ErrorResponseDTO> resourceFileSizeExceedLimitExceptionHandler(
             final ResourceFileSizeExceedLimitException ex) {
