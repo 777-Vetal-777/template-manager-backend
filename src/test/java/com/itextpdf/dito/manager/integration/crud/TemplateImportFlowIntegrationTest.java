@@ -81,7 +81,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(0, dataCollectionRepository.findAll().size());
         assertEquals(0, dataSampleRepository.findAll().size());
-        assertEquals(2, resourceRepository.findAll().size());
+        assertEquals(4, resourceRepository.findAll().size());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
-        assertEquals(3, resourceRepository.findAll().size());
+        assertEquals(5, resourceRepository.findAll().size());
     }
 
 }

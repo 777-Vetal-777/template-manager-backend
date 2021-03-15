@@ -8,6 +8,8 @@ import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Node;
 import com.itextpdf.html2pdf.html.TagConstants;
 import org.springframework.util.StringUtils;
 
+import static com.itextpdf.html2pdf.html.AttributeConstants.HREF;
+
 public class StyleTagProcessor<C> implements NodeMutableProcessor<C> {
 
     private final ProjectMutableItemProcessor<Element, C> cssStyleSheetPreprocessor;
@@ -23,8 +25,8 @@ public class StyleTagProcessor<C> implements NodeMutableProcessor<C> {
         if (item instanceof Element) {
             Element element = (Element) item;
             if (TagConstants.STYLE.equals(element.tagName())
-                    && !StringUtils.isEmpty(element.attr(StyleSheetTagConstants.STYLESHEET_NAME))
-                    && StringUtils.isEmpty(element.attr(StyleSheetTagConstants.STYLESHEET_INTERNAL_NAME))) {
+                    && StringUtils.isEmpty(element.attr(StyleSheetTagConstants.STYLESHEET_INTERNAL_NAME))
+                    && (!StringUtils.isEmpty(element.attr(StyleSheetTagConstants.STYLESHEET_NAME)) || !StringUtils.isEmpty(element.attr(HREF)))) {
                 result.setModified(cssStyleSheetPreprocessor.process(element, context).isModified());
             }
         }

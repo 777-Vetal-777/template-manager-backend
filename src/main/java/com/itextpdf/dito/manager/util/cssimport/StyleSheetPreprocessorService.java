@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.setting.SettingType;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
+import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
@@ -13,11 +14,12 @@ import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Element;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.itextpdf.dito.manager.util.cssimport.StyleSheetTagConstants.DITO_ASSET_HREF;
-import static com.itextpdf.html2pdf.html.AttributeConstants.REL;
 import static com.itextpdf.html2pdf.html.AttributeConstants.HREF;
+import static com.itextpdf.html2pdf.html.AttributeConstants.REL;
 import static com.itextpdf.html2pdf.html.AttributeConstants.STYLESHEET;
 import static com.itextpdf.html2pdf.html.TagConstants.LINK;
 
@@ -39,10 +41,11 @@ public class StyleSheetPreprocessorService implements ProjectMutableItemProcesso
     @Override
     public MutableItemProcessingResult process(final Element element, final StyleTagRenamingContext context) {
         final MutableItemProcessingResult.Builder result = MutableItemProcessingResult.unmodified();
-        final String originalName = element.attr(StyleSheetTagConstants.STYLESHEET_NAME);
+        final String originalName =
+                Optional.ofNullable(element.attr(StyleSheetTagConstants.STYLESHEET_NAME)).orElseGet(() -> getNameFromHref(element));
 
         try {
-                final ResourceTypeEnum type = context.getType();
+            final ResourceTypeEnum type = context.getType();
             importStyleSheet(element, context, originalName, type);
             element.attr(REL,STYLESHEET);
             element.tagName(LINK);
@@ -54,6 +57,18 @@ public class StyleSheetPreprocessorService implements ProjectMutableItemProcesso
         }
 
         return result.build();
+    }
+
+    private String getNameFromHref(Element element) {
+        final String hrefName = element.attr(HREF).replace(DITO_ASSET_HREF, "");
+        String hrefDecodedName;
+        try {
+            final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(hrefName);
+            hrefDecodedName = Optional.ofNullable(resourceIdDTO).map(ResourceIdDTO::getName).orElse(hrefName);
+        } catch (IllegalArgumentException e) {
+            hrefDecodedName = hrefName;
+        }
+        return hrefDecodedName;
     }
 
     private void importStyleSheet(final Element element,
