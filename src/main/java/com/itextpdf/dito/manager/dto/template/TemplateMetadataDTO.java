@@ -25,6 +25,15 @@ public class TemplateMetadataDTO{
     private String blockedBy;
     private Set<RoleDTO> appliedRoles;
     private List<TemplateDeployedVersionDTO> deployedVersions;
+    private Set<String> permissions;
+
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
+    }
 
     public TemplateTypeEnum getType() {
         return type;

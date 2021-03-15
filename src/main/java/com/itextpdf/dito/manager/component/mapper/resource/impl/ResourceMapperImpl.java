@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
+import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
+import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
@@ -18,6 +20,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -32,13 +35,16 @@ public class ResourceMapperImpl implements ResourceMapper {
     private static final Logger log = LogManager.getLogger(ResourceMapperImpl.class);
     private final RoleMapper roleMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private PermissionCheckHandler permissionHandler;
+
 
     public ResourceMapperImpl(final RoleMapper roleMapper) {
         this.roleMapper = roleMapper;
     }
 
     @Override
-    public ResourceDTO map(final ResourceEntity entity) {
+    public ResourceDTO map(final ResourceEntity entity, final String email) {
         log.info("Convert resource:{} to resource dto was started", entity.getId());
         final ResourceDTO result = new ResourceDTO();
         result.setName(entity.getName());
@@ -76,6 +82,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         }
 
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        result.setPermissions(permissionHandler.getPermissionsByResource(entity, email));
         log.info("Convert resource:{} to resource dto was finished successfully", entity.getId());
         return result;
     }
@@ -92,12 +99,12 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     @Override
-    public Page<ResourceDTO> mapModels(final Page<ResourceModelWithRoles> models) {
-        return models.map(this::mapModel);
+    public Page<ResourceDTO> mapModels(final Page<ResourceModelWithRoles> models, String email) {
+        return models.map(resourceModelWithRoles -> mapModel(resourceModelWithRoles, email));
     }
 
     @Override
-    public ResourceDTO mapModel(final ResourceModelWithRoles model) {
+    public ResourceDTO mapModel(final ResourceModelWithRoles model, final String email) {
         final ResourceDTO resourceDTO = new ResourceDTO();
         resourceDTO.setAppliedRoles(model.getAppliedRoles());
         resourceDTO.setMetadataUrls(map(model.getMetadataUrls()));
@@ -114,12 +121,13 @@ public class ResourceMapperImpl implements ResourceMapper {
         resourceDTO.setModifiedBy(model.getModifiedBy());
         resourceDTO.setModifiedOn(model.getModifiedOn());
         resourceDTO.setVersion(model.getVersion());
+        resourceDTO.setPermissions(permissionHandler.getPermissionsByResource(model, email));
         return resourceDTO;
     }
 
     @Override
-    public Page<ResourceDTO> map(final Page<ResourceEntity> entities) {
-        return entities.map(this::map);
+    public Page<ResourceDTO> map(final Page<ResourceEntity> entities, final String email) {
+        return entities.map(resourceEntity -> map(resourceEntity, email));
     }
 
     private List<FileMetaInfoDTO> map(final List<MetaInfoModel> models) {

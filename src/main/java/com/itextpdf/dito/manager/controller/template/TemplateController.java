@@ -105,7 +105,7 @@ public interface TemplateController {
     @GetMapping(value = TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US74_VIEW_TEMPLATE_METADATA_STANDARD')")
     @Operation(summary = "Get nested templates in template by name.", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<List<TemplateWithSettingsDTO>> listCompositionTemplates(@Parameter(description = "The name of the template, which will be used to search for parts. ") @PathVariable(TEMPLATE_PATH_VARIABLE) String name);
+    ResponseEntity<List<TemplateWithSettingsDTO>> listCompositionTemplates(@Parameter(description = "The name of the template, which will be used to search for parts. ") @PathVariable(TEMPLATE_PATH_VARIABLE) String name, Principal principal);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
@@ -113,13 +113,14 @@ public interface TemplateController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<TemplateDTO>> listTemplates(Pageable pageable,
                                                     @ParameterObject TemplateFilter templateFilter,
-                                                    @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam);
+                                                    @Parameter(description = "search by template fields") @RequestParam(name = "search", required = false) String searchParam,
+                                                    Principal principal);
 
     @GetMapping(SEARCH_ENDPOINT)
     @PreAuthorize("hasAnyAuthority('E9_US70_TEMPLATES_TABLE', 'E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD')")
     @Operation(summary = "Get template list", description = "Get templates, return all templates satisfying the filter",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<List<TemplateDTO>> listTemplates(@ParameterObject TemplateListFilter templateListFilter);
+    ResponseEntity<List<TemplateDTO>> listTemplates(@ParameterObject TemplateListFilter templateListFilter, Principal principal);
 
     @GetMapping(TEMPLATE_TYPES_ENDPOINT)
     @Operation(summary = "Get template type list", description = "Get all template types",

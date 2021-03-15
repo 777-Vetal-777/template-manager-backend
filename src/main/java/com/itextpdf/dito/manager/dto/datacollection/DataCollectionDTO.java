@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.dto.datacollection;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class DataCollectionDTO {
@@ -19,6 +20,7 @@ public class DataCollectionDTO {
     private String attachment;
 
     private Set<RoleDTO> appliedRoles;
+    private Set<String> permissions;
 
     public Long getVersion() {
         return version;
@@ -114,5 +116,13 @@ public class DataCollectionDTO {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
     }
 }

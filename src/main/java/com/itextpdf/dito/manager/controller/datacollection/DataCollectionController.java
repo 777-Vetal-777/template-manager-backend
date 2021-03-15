@@ -117,14 +117,14 @@ public interface DataCollectionController {
     @Operation(summary = "Get list of data collections",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<DataCollectionDTO>> list(Pageable pageable, @ParameterObject DataCollectionFilter filter,
-                                                 @RequestParam(name = "search", required = false) String searchParam);
+                                                 @RequestParam(name = "search", required = false) String searchParam, Principal principal);
 
     @GetMapping(SEARCH_ENDPOINT)
     @PreAuthorize("hasAnyAuthority('E6_US30_TABLE_OF_DATA_COLLECTIONS', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
     @Operation(summary = "Get list of data collections",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<List<DataCollectionDTO>> list(@ParameterObject DataCollectionFilter filter,
-                                                 @RequestParam(name = "search", required = false) String searchParam);
+                                                 @RequestParam(name = "search", required = false) String searchParam, Principal principal);
 
     @GetMapping(DATA_COLLECTION_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAnyAuthority('E6_US33_VIEW_DATA_COLLECTION_METADATA', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")
@@ -173,14 +173,14 @@ public interface DataCollectionController {
     @Operation(summary = "Add role to a dataCollection", description = "Apply custom to a dataCollection", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> applyRole(
             @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
-            @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
+            @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO, Principal principal);
 
     @DeleteMapping(DATA_COLLECTION_APPLIED_ROLES_ENDPOINT_WITH_DATA_COLLECTION_AND_ROLE_PATH_VARIABLES)
     @PreAuthorize("hasAuthority('E6_US_40_MANAGE_DATA_COLLECTION_PERMISSIONS')")
     @Operation(summary = "Remove role from a dataCollection", description = "Detach custom from a resource", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<DataCollectionDTO> deleteRole(
             @Parameter(name = "data-collection-name", description = "Encoded with base64 new name of dataCollection", required = true) @PathVariable(DATA_COLLECTION_PATH_VARIABLE) String name,
-            @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
+            @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName, Principal principal);
 
     @GetMapping(DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE_PAGEABLE)
     @PreAuthorize("hasAnyAuthority('E6_US41_TABLE_OF_DATA_COLLECTION_DEPENDENCIES', 'E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU')")

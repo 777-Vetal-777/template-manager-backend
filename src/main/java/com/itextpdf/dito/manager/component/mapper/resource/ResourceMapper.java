@@ -9,15 +9,15 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import org.springframework.data.domain.Page;
 
 public interface ResourceMapper {
-    ResourceDTO map(ResourceEntity entity);
+    ResourceDTO map(ResourceEntity entity, String email);
 
     ResourceEntity map(ResourceUpdateRequestDTO dto);
 
-    Page<ResourceDTO> map(Page<ResourceEntity> entities);
+    Page<ResourceDTO> map(Page<ResourceEntity> entities, String email);
 
-    Page<ResourceDTO> mapModels(Page<ResourceModelWithRoles> models);
+    Page<ResourceDTO> mapModels(Page<ResourceModelWithRoles> models, String email);
 
-    ResourceDTO mapModel(ResourceModelWithRoles model);
+    ResourceDTO mapModel(ResourceModelWithRoles model, String email);
 
     //TODO REPLACE TO INTEGRATION ResourceLeafDescriptorMapperImpl
     String encodeId(String name, ResourceTypeEnum type, String additionals);

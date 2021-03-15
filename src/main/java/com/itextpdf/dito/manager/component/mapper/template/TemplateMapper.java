@@ -19,21 +19,21 @@ import com.itextpdf.dito.manager.model.template.TemplateModel;
 import java.util.List;
 
 public interface TemplateMapper {
-    TemplateDTO map(TemplateEntity entity);
+    TemplateDTO map(TemplateEntity entity, String email);
 
     TemplateEntity map(TemplateUpdateRequestDTO dto);
 
-    TemplateMetadataDTO mapToMetadata(TemplateEntity entity);
+    TemplateMetadataDTO mapToMetadata(TemplateEntity entity, String email);
 
     TemplateDescriptorDTO mapToDescriptor(TemplateFileEntity templateFileEntity, boolean versionAliasRequired);
 
-    List<TemplateDTO> map(List<TemplateEntity> entities);
+    List<TemplateDTO> map(List<TemplateEntity> entities, String email);
 
-    List<TemplateWithSettingsDTO> mapTemplatesWithPart(List<TemplateEntity> entities);
+    List<TemplateWithSettingsDTO> mapTemplatesWithPart(List<TemplateEntity> entities, String email);
 
-    TemplateWithSettingsDTO mapTemplateWithPart(TemplateEntity entity);
+    TemplateWithSettingsDTO mapTemplateWithPart(TemplateEntity entity, String email);
 
-    Page<TemplateDTO> map(Page<TemplateEntity> entities);
+    Page<TemplateDTO> map(Page<TemplateEntity> entities, String email);
 
     TemplateDeployedVersionDTO map(TemplateFileEntity templateFileEntity);
 
@@ -43,9 +43,8 @@ public interface TemplateMapper {
 
     PartSettings mapPartSettings(TemplateFilePartEntity entity);
 
-    Page<TemplateDTO> mapModels(Page<TemplateModelWithRoles> models);
+    Page<TemplateDTO> mapModels(Page<TemplateModelWithRoles> models, String email);
 
-    TemplateDTO mapModel(TemplateModelWithRoles model);
-
+    TemplateDTO mapModel(TemplateModelWithRoles model, String email);
 
 }

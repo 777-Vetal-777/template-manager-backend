@@ -18,6 +18,7 @@ import com.itextpdf.dito.manager.dto.dependency.filter.DependencyFilter;
 import com.itextpdf.dito.manager.dto.file.FileVersionDTO;
 import com.itextpdf.dito.manager.dto.permission.DataCollectionPermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionFileSizeExceedLimitException;
@@ -36,6 +37,7 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionPermission
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleFileService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
+import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,6 +66,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     private final DataSampleService dataSampleService;
     private final DataSampleFileService dataSampleFileService;
     private final FileVersionMapper fileVersionMapper;
+    private final UserService userService;
     private final Long sizeJsonLimit;
     private static final Logger log = LogManager.getLogger(DataCollectionControllerImpl.class);
 
@@ -78,6 +81,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
                                         final DataSampleService dataSampleService,
                                         final DataSampleFileService dataSampleFileService,
                                         final FileVersionMapper fileVersionMapper,
+                                        final UserService userService,
                                         @Value("${data-collection.json.size-limit}") final Long sizeJsonLimit) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionMapper = dataCollectionMapper;
@@ -90,6 +94,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         this.dataSampleService = dataSampleService;
         this.fileVersionMapper = fileVersionMapper;
         this.sizeJsonLimit = sizeJsonLimit;
+        this.userService = userService;
         this.dataSampleFileService = dataSampleFileService;
     }
 
@@ -101,7 +106,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.create(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName());
         log.info("Creating new dataCollection by name: {} and type: {} is finished successfully", name, dataCollectionType);
-        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity, principal.getName()), HttpStatus.CREATED);
     }
 
     @Override
@@ -121,24 +126,24 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         checkFileSizeIsNotExceededLimit(multipartFile.getSize());
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.createNewVersion(name, collectionType, data, multipartFile.getOriginalFilename(), principal.getName(), comment);
         log.info("Create new version of dataCollection with name: {} is finished successfully", name);
-        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.CREATED);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity, principal.getName()), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Page<DataCollectionDTO>> list(final Pageable pageable, final DataCollectionFilter filter,
-                                                        final String searchParam) {
+                                                        final String searchParam, final Principal principal) {
         log.info("Get list of dataCollections with params: {} and searchParam: {} was started", filter, searchParam);
         final Page<DataCollectionModelWithRoles> dataCollectionModelWithRoles = dataCollectionService.listDataCollectionModel(pageable, filter, searchParam);
         log.info("Get list of dataCollections with params: {} and searchParam: {} was finished successfully", filter, searchParam);
-        return new ResponseEntity<>(dataCollectionMapper.mapModels(dataCollectionModelWithRoles), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapModels(dataCollectionModelWithRoles, principal.getName()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<DataCollectionDTO>> list(DataCollectionFilter filter, String searchParam) {
+    public ResponseEntity<List<DataCollectionDTO>> list(final DataCollectionFilter filter, final String searchParam, final Principal principal) {
         log.info("Started getting list of dataCollections with params: {} and searchParam: {}", filter, searchParam);
         final List<DataCollectionEntity> dataCollectionEntities = dataCollectionService.list(filter, searchParam);
         log.info("Getting list of dataCollections with params: {} and searchParam: {} is finished successfully", filter, searchParam);
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntities, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -146,7 +151,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         log.info("Get dataCollection by name: {} was started", name);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(decodeBase64(name));
         log.info("Get dataCollection by name: {} was finished successfully", name);
-        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(dataCollectionEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -157,7 +162,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         final DataCollectionEntity entity = dataCollectionService.update(decodeBase64(name), dataCollectionMapper.map(dataCollectionUpdateRequestDTO),
                 principal.getName());
         log.info("Update dataCollection by name: {} and params: {} was finished successfully", name, dataCollectionUpdateRequestDTO);
-        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(entity), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(entity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -210,22 +215,22 @@ public class DataCollectionControllerImpl extends AbstractController implements 
 
     @Override
     public ResponseEntity<DataCollectionDTO> applyRole(final String name,
-                                                       @Valid final ApplyRoleRequestDTO applyRoleRequestDTO) {
+                                                       @Valid final ApplyRoleRequestDTO applyRoleRequestDTO, final Principal principal) {
         log.info("ApplyRole by dataCollectionName: {} and newRoleParams: {} was started", name, applyRoleRequestDTO);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
                 .applyRole(decodeBase64(name), applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
         log.info("ApplyRole by dataCollectionName: {} and newRoleParams: {} was finished successfully", name, applyRoleRequestDTO);
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<DataCollectionDTO> deleteRole(final String name, final String roleName) {
+    public ResponseEntity<DataCollectionDTO> deleteRole(final String name, final String roleName, final  Principal principal) {
         log.info("Delete role by dataCollectionName: {} and roleName: {} was started", name, roleName);
         final DataCollectionEntity dataCollectionEntity = dataCollectionService
                 .detachRole(decodeBase64(name), decodeBase64(roleName));
         log.info("Delete role by dataCollectionName: {} and roleName: {} was finished successfully", name, roleName);
-        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.map(dataCollectionEntity, principal.getName()), HttpStatus.OK);
 
     }
 
@@ -351,6 +356,6 @@ public class DataCollectionControllerImpl extends AbstractController implements 
         log.info("Rollback by dataCollectionName: {} and version: {} was started ", name, version);
         final DataCollectionEntity result = dataCollectionService.rollbackVersion(decodeBase64(name), version, principal.getName());
         log.info("Rollback by dataCollectionName: {} and version: {} was finished successfully", name, version);
-        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(result), HttpStatus.OK);
+        return new ResponseEntity<>(dataCollectionMapper.mapWithFile(result, principal.getName()), HttpStatus.OK);
     }
 }

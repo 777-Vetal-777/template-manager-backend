@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class TemplateDTO {
@@ -21,6 +22,15 @@ public class TemplateDTO {
     private String createdBy;
     private String comment;
     private Set<RoleDTO> appliedRoles;
+    private Set<String> permissions;
+
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
+    }
 
     public Long getVersion() {
         return version;

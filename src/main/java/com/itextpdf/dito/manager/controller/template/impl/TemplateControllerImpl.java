@@ -122,13 +122,13 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                 .create(templateCreateRequestDTO.getName(), templateCreateRequestDTO.getType(),
                         templateCreateRequestDTO.getDataCollectionName(), principal.getName(), templateMapper.mapPartDto(templateCreateRequestDTO.getTemplateParts()));
         log.info("Create template with params: {} was finished successfully", templateCreateRequestDTO);
-        return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.CREATED);
+        return new ResponseEntity<>(templateMapper.map(templateEntity, principal.getName()), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<List<TemplateWithSettingsDTO>> listCompositionTemplates(final String name) {
+    public ResponseEntity<List<TemplateWithSettingsDTO>> listCompositionTemplates(final String name, final Principal principal) {
         log.info("Get list composition templates by template name: {} was started", name);
-        final List<TemplateWithSettingsDTO> templateDTOS = templateMapper.mapTemplatesWithPart(templateService.getAllParts(decodeBase64(name)));
+        final List<TemplateWithSettingsDTO> templateDTOS = templateMapper.mapTemplatesWithPart(templateService.getAllParts(decodeBase64(name)), principal.getName());
         log.info("Get list composition templates by template name: {} was finished successfully", name);
         return new ResponseEntity<>(templateDTOS, HttpStatus.OK);
     }
@@ -136,19 +136,19 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<Page<TemplateDTO>> listTemplates(final Pageable pageable,
                                                            final TemplateFilter templateFilter,
-                                                           final String searchParam) {
+                                                           final String searchParam, final Principal principal) {
         log.info("Get list templates with pageable by filter: {} and searchParam: {} was started", templateFilter, searchParam);
         final Page<TemplateModelWithRoles> templateModelWithRoles = templateService.getAll(pageable, templateFilter, searchParam);
         log.info("Get list templates with pageable by filter: {} and searchParam: {} was finished successfully", templateFilter, searchParam);
-        return new ResponseEntity<>(templateMapper.mapModels(templateModelWithRoles), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapModels(templateModelWithRoles, principal.getName()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<TemplateDTO>> listTemplates(final TemplateListFilter templateListFilter) {
+    public ResponseEntity<List<TemplateDTO>> listTemplates(final TemplateListFilter templateListFilter, final Principal principal) {
         log.info("Get list templates by filter: {} was started", templateListFilter);
         final List<TemplateEntity> templates = templateService.getAll(templateListFilter);
         log.info("Get list templates by filter: {} was finished successfully", templateListFilter);
-        return new ResponseEntity<>(templateMapper.map(templates), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.map(templates, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -180,7 +180,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         log.info("Get template by name: {} was started", name);
         final TemplateEntity templateEntity = templateService.get(decodeBase64(name));
         log.info("Get template by name: {} was finished successfully", name);
-        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final TemplateEntity templateEntity = templateService
                 .update(decodeBase64(name), templateMapper.map(templateUpdateRequestDTO), principal.getName());
         log.info("Update template by name: {} and params: {} was finished successfully", name, templateUpdateRequestDTO);
-        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity),
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity, principal.getName()),
                 HttpStatus.OK);
     }
 
@@ -230,7 +230,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                 .createNewVersion(name, data, principal.getName(),
                         comment, null, templateMapper.mapPartDto(templateParts));
         log.info("Create new version of template with name: {} and comment: {} and templateParts: {} was finished successfully", name, comment, templateParts);
-        return new ResponseEntity<>(templateMapper.map(templateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.map(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                 .applyRole(decodeBase64(name), applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions(), principal.getName());
         log.info("Apply custom role to a template by templateName: {} and params: {} was finished successfully", name, applyRoleRequestDTO);
-        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -258,7 +258,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final TemplateEntity templateEntity = templateService
                 .detachRole(decodeBase64(name), decodeBase64(roleName), principal.getName());
         log.info("Delete role from a template by templateName {} and roleName: {} was finished successfully", name, roleName);
-        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -266,7 +266,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         log.info("Block template for editing by templateName: {} was started", name);
         final TemplateEntity templateEntity = templateService.block(principal.getName(), decodeBase64(name));
         log.info("Block template for editing by templateName: {} was finished successfully", name);
-        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -274,7 +274,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         log.info("Unblock template for editing by templateName: {} was started", name);
         final TemplateEntity templateEntity = templateService.unblock(principal.getName(), decodeBase64(name));
         log.info("Unblock template for editing by templateName: {} was finished successfully", name);
-        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToMetadata(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -298,7 +298,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         log.info("Rollback template version by templateName: {} and templateVersion: {} was started", templateName, templateVersion);
         final TemplateEntity updatedTemplateEntity = templateVersionsService.rollbackVersion(decodeBase64(templateName), templateVersion, principal.getName());
         log.info("Rollback template version by templateName: {} and templateVersion: {} was finished successfully", templateName, templateVersion);
-        return new ResponseEntity<>(templateMapper.map(updatedTemplateEntity), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.map(updatedTemplateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -343,6 +343,6 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
         final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).map(file -> file.replace(' ', '_')).orElse("unknown").concat("-import");
         log.info("Import template by fileName: {} was finished successfully", templateFile.getOriginalFilename());
-        return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models)), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models), principal.getName()), HttpStatus.OK);
     }
 }

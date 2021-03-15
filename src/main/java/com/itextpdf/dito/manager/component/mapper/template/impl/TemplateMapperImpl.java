@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
+import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateMetadataDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
@@ -46,19 +47,21 @@ public class TemplateMapperImpl implements TemplateMapper {
     private final RoleMapper roleMapper;
     private final ObjectMapper objectMapper;
     private static final Logger log = LogManager.getLogger(TemplateMapperImpl.class);
+    private PermissionCheckHandler permissionHandler;
 
-    public TemplateMapperImpl(final RoleMapper roleMapper, final ObjectMapper objectMapper) {
+    public TemplateMapperImpl(final RoleMapper roleMapper, final ObjectMapper objectMapper, final PermissionCheckHandler permissionHandler) {
         this.roleMapper = roleMapper;
         this.objectMapper = objectMapper;
+        this.permissionHandler = permissionHandler;
     }
 
     @Override
-    public TemplateDTO map(final TemplateEntity entity) {
+    public TemplateDTO map(final TemplateEntity entity, final String email) {
         final TemplateDTO result = new TemplateDTO();
-        return fillTemplateDTO(entity, result);
+        return fillTemplateDTO(entity, result, email);
     }
 
-    private TemplateDTO fillTemplateDTO(final TemplateEntity entity, final TemplateDTO result) {
+    private TemplateDTO fillTemplateDTO(final TemplateEntity entity, final TemplateDTO result, final String email) {
         log.info("Fill templateDto with template: {} and templateDto: {} was started", entity.getId(), result);
         result.setName(entity.getName());
         result.setType(entity.getType());
@@ -93,6 +96,7 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setDataCollection(Objects.nonNull(dataCollectionFileEntity) ? dataCollectionFileEntity.getDataCollection().getName() : null);
         }
         result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
+        result.setPermissions(permissionHandler.getPermissionsByTemplate(entity, email));
         log.info("Fill templateDto with template: {} and templateDto: {} was started", entity.getId(), result);
         return result;
     }
@@ -108,12 +112,12 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     @Override
-    public Page<TemplateDTO> mapModels(final Page<TemplateModelWithRoles> models) {
-        return models.map(this::mapModel);
+    public Page<TemplateDTO> mapModels(final Page<TemplateModelWithRoles> models, String email) {
+        return models.map(templateModelWithRoles -> mapModel(templateModelWithRoles, email));
     }
 
     @Override
-    public TemplateDTO mapModel(final TemplateModelWithRoles model) {
+    public TemplateDTO mapModel(final TemplateModelWithRoles model, String email) {
         final TemplateDTO result = new TemplateDTO();
         result.setName(model.getName());
         result.setType(model.getType());
@@ -125,11 +129,12 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setCreatedOn(model.getCreatedOn());
         result.setLastUpdate(model.getLastUpdate());
         result.setAppliedRoles(model.getAppliedRoles());
+        result.setPermissions(permissionHandler.getPermissionsByTemplate(model, email));
         return result;
     }
 
     @Override
-    public TemplateMetadataDTO mapToMetadata(final TemplateEntity entity) {
+    public TemplateMetadataDTO mapToMetadata(final TemplateEntity entity, final String email) {
         log.info("Convert template: {} to templateMetadataDTO was started", entity.getId());
         final TemplateMetadataDTO result = new TemplateMetadataDTO();
         result.setName(entity.getName());
@@ -175,31 +180,32 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setBlockedBy(new StringBuilder().append(blockedUser.getFirstName()).append(" ").append(blockedUser.getLastName()).toString());
         }
         result.setDeployedVersions(getDeployedVersions(entity));
+        result.setPermissions(permissionHandler.getPermissionsByTemplate(entity, email));
         log.info("Convert template: {} to templateMetadataDTO was finished successfully", entity);
         return result;
     }
 
     @Override
-    public List<TemplateDTO> map(final List<TemplateEntity> entities) {
+    public List<TemplateDTO> map(final List<TemplateEntity> entities, final String email) {
         final List<TemplateDTO> result = new ArrayList<>();
 
         for (final TemplateEntity entity : entities) {
-            result.add(map(entity));
+            result.add(map(entity, email));
         }
 
         return result;
     }
 
     @Override
-    public List<TemplateWithSettingsDTO> mapTemplatesWithPart(final List<TemplateEntity> entities) {
-        return entities.stream().map(this::mapTemplateWithPart).collect(Collectors.toList());
+    public List<TemplateWithSettingsDTO> mapTemplatesWithPart(final List<TemplateEntity> entities, final String email) {
+        return entities.stream().map(templateEntity -> mapTemplateWithPart(templateEntity, email)).collect(Collectors.toList());
     }
 
     @Override
-    public TemplateWithSettingsDTO mapTemplateWithPart(final TemplateEntity entity) {
+    public TemplateWithSettingsDTO mapTemplateWithPart(final TemplateEntity entity, final String email) {
         log.info("Convert template: {} to dto with part was started", entity.getId());
         final TemplateWithSettingsDTO templateWithSettingsDTO = new TemplateWithSettingsDTO();
-        fillTemplateDTO(entity, templateWithSettingsDTO);
+        fillTemplateDTO(entity, templateWithSettingsDTO, email);
         final PartSettings partSettings = mapPartSettings(entity.getLatestFile().getCompositions().get(0));
         templateWithSettingsDTO.setStartOnNewPage(partSettings.getStartOnNewPage());
         log.info("Convert template: {} to dto with part was finished successfully", entity.getId());
@@ -236,8 +242,8 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     @Override
-    public Page<TemplateDTO> map(final Page<TemplateEntity> entities) {
-        return entities.map(this::map);
+    public Page<TemplateDTO> map(final Page<TemplateEntity> entities, String email) {
+        return entities.map(templateEntity -> map(templateEntity, email));
     }
 
     @Override

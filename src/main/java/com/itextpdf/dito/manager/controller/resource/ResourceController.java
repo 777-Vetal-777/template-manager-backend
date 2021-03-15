@@ -165,7 +165,8 @@ public interface ResourceController {
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     ResponseEntity<Page<ResourceDTO>> list(Pageable pageable,
                                            @ParameterObject ResourceFilter filter,
-                                           @Parameter(description = "Universal filter to find resource name, modified by and version comment ") @RequestParam(name = "search", required = false) String searchParam);
+                                           @Parameter(description = "Universal filter to find resource name, modified by and version comment ") @RequestParam(name = "search", required = false) String searchParam,
+                                           Principal principal);
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -202,7 +203,7 @@ public interface ResourceController {
     ResponseEntity<ResourceDTO> applyRole(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
             @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
-            @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO);
+            @RequestBody ApplyRoleRequestDTO applyRoleRequestDTO, Principal principal);
 
 
     @GetMapping(RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE)
@@ -220,7 +221,8 @@ public interface ResourceController {
     ResponseEntity<ResourceDTO> deleteRole(
             @Parameter(name = "resource-name", description = "Encoded with base64 new name of resource", required = true) @PathVariable(RESOURCE_PATH_VARIABLE) String name,
             @Parameter(name = "resource-type", description = "Resource type, e.g. images, fonts, stylesheets", required = true) @PathVariable(RESOURCE_TYPE_PATH_VARIABLE) String type,
-            @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName);
+            @Parameter(name = "role-name", description = "Encoded with base64 role name", required = true) @PathVariable(ROLE_PATH_VARIABLE) String roleName,
+            Principal principal);
 
     @DeleteMapping(RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE)
     @PreAuthorize("@permissionHandlerImpl.checkResourceDeletePermissions(#principal.getName(), #type, @permissionHandlerImpl.decodeBase64(#name))")

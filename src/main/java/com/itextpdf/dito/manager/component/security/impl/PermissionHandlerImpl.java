@@ -2,7 +2,9 @@ package com.itextpdf.dito.manager.component.security.impl;
 
 import com.google.common.base.Predicates;
 import com.itextpdf.dito.manager.component.security.PermissionHandler;
+import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -14,6 +16,8 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
+import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
@@ -37,12 +41,12 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class PermissionHandlerImpl implements PermissionHandler {
-	
-	private static final String E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD = "E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD";
-	private static final String E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE = "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE";
-	private static final String E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA = "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA";
-	private static final String E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD = "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD";
-	private static final String E9_US126_DELETE_TEMPLATE_STANDARD = "E9_US126_DELETE_TEMPLATE_STANDARD";
+
+    private static final String E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD = "E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD";
+    private static final String E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE = "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE";
+    private static final String E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA = "E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA";
+    private static final String E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD = "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD";
+    private static final String E9_US126_DELETE_TEMPLATE_STANDARD = "E9_US126_DELETE_TEMPLATE_STANDARD";
 
     private final Map<TemplateTypeEnum, Predicate<String>> templateCommonPermissionsByType = Map.of(
             TemplateTypeEnum.STANDARD, Predicates.or(E9_US73_CREATE_NEW_TEMPLATE_WITH_DATA_STANDARD::equals, E9_US72_CREATE_NEW_TEMPLATE_WITHOUT_DATA::equals),
@@ -54,13 +58,13 @@ public class PermissionHandlerImpl implements PermissionHandler {
             Map.of(TemplateTypeEnum.STANDARD, E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE,
                     TemplateTypeEnum.FOOTER, E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE,
                     TemplateTypeEnum.HEADER, E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE,
-                    TemplateTypeEnum.COMPOSITION,"E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE");
+                    TemplateTypeEnum.COMPOSITION, "E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE");
 
     private static final Map<TemplateTypeEnum, String> TEMPLATE_CREATE_NEW_VERSION_PERMISSIONS =
             Map.of(TemplateTypeEnum.STANDARD, E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD,
                     TemplateTypeEnum.FOOTER, E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD,
                     TemplateTypeEnum.HEADER, E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD,
-                    TemplateTypeEnum.COMPOSITION,"E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
+                    TemplateTypeEnum.COMPOSITION, "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
 
 
     private static final Map<TemplateTypeEnum, Predicate<String>> TEMPLATE_DELETE_PERMISSIONS = Map.of(
@@ -284,7 +288,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
                                  final Set<RoleEntity> entityRoles,
                                  final String requiredPermission) {
         final Set<String> userRoleNames = retrieveSetOfRoleNames(userEntity.getRoles());
-        final Set<RoleEntity> entityAppliedRoles =  retrieveEntityAppliedRoles(entityRoles, userEntity.getRoles());
+        final Set<RoleEntity> entityAppliedRoles = retrieveEntityAppliedRoles(entityRoles, userEntity.getRoles());
         boolean isPermissionRolePresented = false;
 
         if (!isUserAdmin(userRoleNames) && !entityAppliedRoles.isEmpty()) {
@@ -316,7 +320,7 @@ public class PermissionHandlerImpl implements PermissionHandler {
                 ResourceTypeEnum.IMAGE, Arrays.asList("E8_US66_DELETE_RESOURCE_IMAGE", "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE", "E8_US55_EDIT_RESOURCE_METADATA_IMAGE", "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE"),
                 ResourceTypeEnum.FONT, Arrays.asList("E8_US66_1_DELETE_RESOURCE_FONT", "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT", "E8_US58_EDIT_RESOURCE_METADATA_FONT", "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT"),
                 ResourceTypeEnum.STYLESHEET, Arrays.asList("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET", "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET", "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET")
-                );
+        );
 
         if (allowedPermissions.containsKey(resourceType) && allowedPermissions.get(resourceType).contains(permission)) {
             return true;

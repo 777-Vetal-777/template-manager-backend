@@ -3,8 +3,13 @@ package com.itextpdf.dito.manager.component.security;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
+import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 public interface PermissionHandler {
     String decodeBase64(String name);

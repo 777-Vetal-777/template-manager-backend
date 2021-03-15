@@ -19,6 +19,15 @@ public class ResourceDTO {
     private List<FileMetaInfoDTO> metadataUrls;
     private Boolean deployed;
     private Set<RoleDTO> appliedRoles;
+    private Set<String> permissions;
+
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
+    }
 
     public Boolean getDeployed() {
         return deployed;
