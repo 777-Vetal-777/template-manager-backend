@@ -21,6 +21,7 @@ import com.itextpdf.dito.manager.model.template.duplicates.DuplicatesList;
 import com.itextpdf.dito.manager.model.template.duplicates.impl.DuplicatesListImpl;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionImportService;
+import com.itextpdf.dito.manager.service.resource.EmbeddedStylesheetImportService;
 import com.itextpdf.dito.manager.service.resource.ResourceImportService;
 import com.itextpdf.dito.manager.service.template.TemplateImportService;
 import org.apache.logging.log4j.LogManager;
@@ -45,15 +46,18 @@ public class TemplateImportServiceImpl implements TemplateImportService {
     private final TemplateManagementService templateManagementService;
     private final DataCollectionImportService dataCollectionImportService;
     private final ResourceImportService resourceImportService;
+    private final EmbeddedStylesheetImportService stylesheetImportService;
 
     public TemplateImportServiceImpl(final TemplateManagementService templateManagementService,
                                      final DataCollectionImportService dataCollectionImportService,
                                      final ResourceImportService resourceImportService,
-                                     final TemplateRepository templateRepository) {
+                                     final TemplateRepository templateRepository,
+                                     final EmbeddedStylesheetImportService stylesheetImportService) {
         this.templateManagementService = templateManagementService;
         this.dataCollectionImportService = dataCollectionImportService;
         this.resourceImportService = resourceImportService;
         this.templateRepository = templateRepository;
+        this.stylesheetImportService = stylesheetImportService;
     }
 
     @Override
@@ -74,7 +78,7 @@ public class TemplateImportServiceImpl implements TemplateImportService {
 
             final DataCollectionEntity dataCollectionEntity = dataCollectionImportService.importDataCollectionAndSamples(fileName, projectElements.getDataSamples(), settings.get(SettingType.DATA_COLLECTION), duplicatesList, email);
 
-            final List<TemplateEntity> templateEntityList = importTemplates(fileName, projectElements.getTemplates(), settings.get(SettingType.TEMPLATE), dataCollectionEntity, duplicatesList, email);
+            final List<TemplateEntity> templateEntityList = importTemplates(fileName, projectElements.getTemplates(), settings.get(SettingType.TEMPLATE), settings.get(SettingType.STYLESHEET), dataCollectionEntity, duplicatesList, email);
 
             if (!duplicatesList.isEmpty()) {
                 throw new TemplateImportHasDuplicateNamesException("Template file got duplicates", duplicatesList);
@@ -90,12 +94,13 @@ public class TemplateImportServiceImpl implements TemplateImportService {
     private List<TemplateEntity> importTemplates(final String fileName,
                                                  final List<TemplateElement> templateElements,
                                                  final Map<String, TemplateImportNameModel> templateSettings,
+                                                 final Map<String, TemplateImportNameModel> stylesheetsSettings,
                                                  final DataCollectionEntity dataCollection,
                                                  final DuplicatesList duplicatesList, final String email) {
         return templateElements.stream().map(templateElement -> {
                     TemplateEntity entity;
                     try {
-                        entity = importTemplateEntity(fileName, templateElement, dataCollection, templateSettings.get(templateElement.getTemplateName()), email);
+                        entity = importTemplateEntity(fileName, templateElement, dataCollection, templateSettings.get(templateElement.getTemplateName()), stylesheetsSettings, duplicatesList, email);
                     } catch (TemplatePreviewGenerationException e) {
                         log.warn("Could not provide consistency for imported template: {}", e.getMessage());
                         entity = null;
@@ -114,9 +119,13 @@ public class TemplateImportServiceImpl implements TemplateImportService {
                                                 final TemplateElement templateElement,
                                                 final DataCollectionEntity dataCollectionEntity,
                                                 final TemplateImportNameModel templateName,
+                                                final Map<String, TemplateImportNameModel> stylesheetsSettings,
+                                                final DuplicatesList duplicatesList,
                                                 final String email) throws IOException {
-        final byte[] data = readStreamable(templateElement.getTemplateStream());
+        final byte[] originalData = readStreamable(templateElement.getTemplateStream());
         final String dataCollection = Optional.ofNullable(dataCollectionEntity).map(DataCollectionEntity::getName).orElse(null);
+
+        final byte[] data = stylesheetImportService.importEmbedded(originalData, fileName, stylesheetsSettings, duplicatesList, email);
 
         TemplateEntity templateEntity;
         try {

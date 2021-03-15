@@ -63,7 +63,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
-        assertEquals(2, resourceRepository.findAll().size());
+        assertEquals(4, resourceRepository.findAll().size());
     }
 
     @Test
@@ -100,14 +100,14 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
-        assertEquals(2, resourceRepository.findAll().size());
+        assertEquals(4, resourceRepository.findAll().size());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("message").value("Template file got duplicates"))
-                .andExpect(jsonPath("$.duplicates[*].type", containsInAnyOrder("DATA_COLLECTION", "TEMPLATE", "IMAGE", "IMAGE")))
+                .andExpect(jsonPath("$.duplicates[*].type", containsInAnyOrder("DATA_COLLECTION", "TEMPLATE", "IMAGE", "IMAGE", "STYLESHEET", "STYLESHEET")))
                 .andExpect(jsonPath("$.duplicates[*].name", hasItems("Standard", "dito_asset_725fcd2b-fefd-47f1-a0d1-d278c4066251", "dito_asset_d088bac7-c994-4b3d-88a2-e092a5a6d339")));
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
@@ -116,13 +116,13 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("message").value("Template file got duplicates"))
-                .andExpect(jsonPath("$.duplicates[*].type", containsInAnyOrder("TEMPLATE", "IMAGE", "IMAGE")))
-                .andExpect(jsonPath("$.duplicates[*].name", containsInAnyOrder("Standard", "dito_asset_725fcd2b-fefd-47f1-a0d1-d278c4066251", "dito_asset_d088bac7-c994-4b3d-88a2-e092a5a6d339")));
+                .andExpect(jsonPath("$.duplicates[*].type", containsInAnyOrder("TEMPLATE", "IMAGE", "IMAGE", "STYLESHEET", "STYLESHEET")))
+                .andExpect(jsonPath("$.duplicates[*].name", containsInAnyOrder("Standard", "dito_asset_725fcd2b-fefd-47f1-a0d1-d278c4066251", "dito_asset_d088bac7-c994-4b3d-88a2-e092a5a6d339", "valign", "valign-moz")));
 
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
-        assertEquals(2, resourceRepository.findAll().size());
+        assertEquals(4, resourceRepository.findAll().size());
 
     }
 
@@ -142,7 +142,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
-        assertEquals(2, resourceRepository.findAll().size());
+        assertEquals(4, resourceRepository.findAll().size());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
                 .file(ditoFile)
@@ -152,12 +152,12 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("name").value("Standard"))
                 .andExpect(jsonPath("dataCollection").isNotEmpty())
                 .andExpect(jsonPath("comment").value("Import template"))
-                .andExpect(jsonPath("version").value(3));
+                .andExpect(jsonPath("version").value(5));
 
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(4, dataSampleRepository.findAll().size());
-        assertEquals(4, resourceRepository.findAll().size());
+        assertEquals(6, resourceRepository.findAll().size());
 
     }
 
@@ -179,7 +179,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, templateRepository.findAll().size());
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
-        assertEquals(2, resourceRepository.findAll().size());
+        assertEquals(4, resourceRepository.findAll().size());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
                 .file(ditoFile)
@@ -193,7 +193,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(2, templateRepository.findAll().size());
         assertEquals(2, dataCollectionRepository.findAll().size());
         assertEquals(4, dataSampleRepository.findAll().size());
-        assertEquals(4, resourceRepository.findAll().size());
+        assertEquals(8, resourceRepository.findAll().size());
 
         templateImportSettings.forEach(setting -> {
             if (SettingType.TEMPLATE.equals(setting.getType()))
@@ -213,7 +213,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(2, templateRepository.findAll().size());
         assertEquals(3, dataCollectionRepository.findAll().size());
         assertEquals(6, dataSampleRepository.findAll().size());
-        assertEquals(6, resourceRepository.findAll().size());
+        assertEquals(12, resourceRepository.findAll().size());
     }
 
     @Test

@@ -23,5 +23,15 @@
     "name":"dito_asset_d088bac7-c994-4b3d-88a2-e092a5a6d339",
     "type":"IMAGE",
     "new_version": false
+  },
+  {
+    "name":"valign",
+    "type":"STYLESHEET",
+    "new_version": true
+  },
+  {
+    "name":"valign-moz",
+    "type":"STYLESHEET",
+    "new_version": true
   }
 ]
