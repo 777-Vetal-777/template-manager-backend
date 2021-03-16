@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RoleController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/roles";
+    String ROLE_USER_SEARCH =  "/user-search";
 
     String ROLE_PATH_VARIABLE = "name";
     String ROLE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + ROLE_PATH_VARIABLE + "}";
@@ -66,6 +67,11 @@ public interface RoleController {
     ResponseEntity<Page<RoleDTO>> list(Pageable pageable, @ParameterObject RoleFilter roleFilter,
             @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
 
+    @GetMapping(ROLE_USER_SEARCH)
+    @PreAuthorize("hasAuthority('E3_US13_SECURITY_ROLES_TABLE')")
+    @Operation(summary = "Get role list by search of users", description = "Get role list by search of users",
+    security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Page<RoleDTO>> list(Pageable pageable,@Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
 
     @DeleteMapping(ROLE_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAuthority('E3_US17_DELETE_SECURITY_ROLE')")

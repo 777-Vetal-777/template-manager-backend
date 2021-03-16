@@ -43,6 +43,11 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
     }
 
     @Override
+    public ResponseEntity<Page<RoleDTO>> list(final Pageable pageable, final String searchParam) {
+        return new ResponseEntity<>(roleMapper.mapRoleModels(roleService.getRolesByUserSearch(pageable, searchParam)), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Page<RoleDTO>> list(final Pageable pageable,
                                               final RoleFilter roleFilter,
                                               final String searchParam) {

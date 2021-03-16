@@ -118,6 +118,12 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
+    public Page<RoleModel> getRolesByUserSearch(final Pageable pageable, final String search) {
+        final String searchParam = getStringFromFilter(search);
+        return roleRepository.getRoles(pageable, searchParam);
+    }
+
+    @Override
     public Page<RoleWithUsersModel> list(final Pageable pageable, final RoleFilter roleFilter, final String searchParam) {
         log.info("Get list roles by roleFilter: {} and searchParam: {} was started", roleFilter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
