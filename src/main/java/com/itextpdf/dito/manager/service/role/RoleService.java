@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.filter.role.RoleFilter;
 
 import java.util.List;
 
+import com.itextpdf.dito.manager.filter.role.RoleUserFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.model.role.RoleModel;
 import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
@@ -34,7 +35,7 @@ public interface RoleService {
 
     Page<RoleWithUsersModel> list(Pageable pageable, RoleFilter filter, String searchParam);
 
-    Page<RoleModel> getRolesByUserSearch(Pageable pageable, String search);
+    Page<RoleModel> getRolesByUserSearch(Pageable pageable, RoleUserFilter filter,  String search);
 
     RoleEntity update(String roleName, RoleEntity updatedRole, List<String> permissions);
 

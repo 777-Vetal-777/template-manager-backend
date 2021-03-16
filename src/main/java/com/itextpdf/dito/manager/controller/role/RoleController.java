@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.filter.role.RoleUserFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -71,7 +72,8 @@ public interface RoleController {
     @PreAuthorize("hasAuthority('E3_US13_SECURITY_ROLES_TABLE')")
     @Operation(summary = "Get role list by search of users", description = "Get role list by search of users",
     security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    ResponseEntity<Page<RoleDTO>> list(Pageable pageable,@Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
+    ResponseEntity<Page<RoleDTO>> list(Pageable pageable, @ParameterObject RoleUserFilter roleFilter,
+                                       @Parameter(description = "role name, role type, user name or permission name search string") @RequestParam(name = "search", required = false) String searchParam);
 
     @DeleteMapping(ROLE_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAuthority('E3_US17_DELETE_SECURITY_ROLE')")

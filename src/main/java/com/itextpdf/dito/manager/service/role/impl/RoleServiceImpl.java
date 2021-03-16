@@ -16,6 +16,7 @@ import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleExcept
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
+import com.itextpdf.dito.manager.filter.role.RoleUserFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.model.role.RoleModel;
 import com.itextpdf.dito.manager.model.role.RolePermissionsModel;
@@ -35,11 +36,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Component
@@ -118,9 +119,17 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleModel> getRolesByUserSearch(final Pageable pageable, final String search) {
+    public Page<RoleModel> getRolesByUserSearch(final Pageable pageable, RoleUserFilter filter, final String search) {
+        final String email = getStringFromFilter(filter.getEmail());
+        final String firstName = getStringFromFilter(filter.getFirstName());
+        final String lastName = getStringFromFilter(filter.getLastName());
+        final Boolean active = getBooleanMultiselectFromFilter(filter.getActive());
+        final String searchRoleName = getStringFromFilter(filter.getRoleName());
         final String searchParam = getStringFromFilter(search);
-        return roleRepository.getRoles(pageable, searchParam);
+
+        return StringUtils.isEmpty(searchParam)
+                ? roleRepository.getRolesFilter(pageable, email, firstName, lastName, searchRoleName, active)
+                : roleRepository.getRolesSearch(pageable,email, firstName, lastName, active, searchRoleName, searchParam);
     }
 
     @Override

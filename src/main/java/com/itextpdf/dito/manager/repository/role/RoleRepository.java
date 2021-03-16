@@ -134,11 +134,39 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     List<RolePermissionsModel> getPermissions(@Param("listId") List<Long> listId);
 
     @Query("select role.name as roleName, role.type as type, role.id as id, role.master as master from RoleEntity role "
-            + "join role.users user "
-            + "where (LOWER(user.email) like CONCAT('%',:search,'%') "
+            + " left join role.users user "
+            + "where "
+            +"(:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
+            + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
+            + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
+            + "and (:roleName='' or LOWER(role.name) like CONCAT('%',:roleName,'%'))"
+            + "and (:active=null or user.active IS :active) group by role.id")
+    Page<RoleModel> getRolesFilter(Pageable pageable,
+                                   @Param("email") @Nullable String email,
+                                   @Param("firstName") @Nullable String firstName,
+                                   @Param("lastName") @Nullable String lastName,
+                                   @Param("roleName") @Nullable String searchRoleName,
+                                   @Param("active") @Nullable Boolean active);
+
+
+    @Query("select role.name as roleName, role.type as type, role.id as id, role.master as master from RoleEntity role "
+            + "left join role.users user "
+            + "where "
+            +"(:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
+            + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
+            + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
+            + "and (:active=null or user.active IS :active) "
+            + "and (:roleName='' or LOWER(role.name) like CONCAT('%',:roleName,'%'))"
+            + "and (LOWER(user.email) like CONCAT('%',:search,'%') "
             + "or LOWER(role.name) like CONCAT('%',:search,'%') "
             + "or (LOWER(role.name) = 'global_administrator' and 'global administrator' like CONCAT('%',:search,'%')) "
             + "or (LOWER(role.name) = 'template_designer' and 'template designer' like CONCAT('%',:search,'%')) "
             + "or LOWER(CONCAT(user.firstName, ' ',  user.lastName)) like CONCAT('%',:search,'%')) group by role.id")
-    Page<RoleModel> getRoles(Pageable pageable, @Param("search") String search);
+    Page<RoleModel> getRolesSearch(Pageable pageable,
+                                   @Param("email") @Nullable String email,
+                                   @Param("firstName") @Nullable String firstName,
+                                   @Param("lastName") @Nullable String lastName,
+                                   @Param("active") @Nullable Boolean active,
+                                   @Param("roleName") @Nullable String searchRoleName,
+                                   @Param("search") String searchParam);
 }
