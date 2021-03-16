@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration.editor.controller.data;
 import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 
+import com.itextpdf.dito.manager.integration.editor.dto.DataCollectionDescriptor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,6 +30,7 @@ public interface DataManagementController {
     String DATA_SAMPLE_URL = "data/{sample-id}";
     String DATA_SAMPLE_DESCRIPTOR_URL = "data/{sample-id}/descriptor";
     String COLLECTION_DATA_SAMPLES_URL = "/collection/{collection-id}";
+    String COLLECTION_DESCRIPTOR_URL = "/collection/{collection-id}/descriptor";
 
     @GetMapping(value = DATA_SAMPLE_DESCRIPTOR_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "returns JSON descriptor of data sample", summary = "Get a dataSample by its ID ",
@@ -76,4 +78,13 @@ public interface DataManagementController {
     @ApiResponse(responseCode = "404", description = "DataSample doesn't exist", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     List<DataSampleDescriptor> getDataSamplesByCollectionId(@PathVariable("collection-id") String collectionId);
+
+    @GetMapping(value = COLLECTION_DESCRIPTOR_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "returns JSON descriptor of data collection", summary = "Get a dataCollection by its ID ",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DataCollectionDescriptor.class)))
+    @ApiResponse(responseCode = "404", description = "Data Collection not found by id", content = @Content)
+    @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
+    DataCollectionDescriptor getDataCollectionById(@PathVariable("collection-id") String collectionId);
+
 }

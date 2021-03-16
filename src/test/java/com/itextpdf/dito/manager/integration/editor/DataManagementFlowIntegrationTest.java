@@ -193,4 +193,39 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		assertNotNull(result.getResponse());
 	}
 
+	@Test
+	void shouldReturnDataCollectionDescriptor() throws Exception {
+		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, DATACOLLECTION_BASE64_ENCODED_NAME)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("id").value(DATACOLLECTION_BASE64_ENCODED_NAME))
+				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
+				.andReturn();
+
+		assertNotNull(result.getResponse());
+	}
+
+	@Test
+	void shouldReturnNotFoundDataCollection() throws Exception {
+		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, NOT_EXISTED_SAMPLE)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound())
+				.andReturn();
+
+		assertNotNull(result.getResponse());
+	}
+
+	@Test
+	void shouldReturnBadRequestForDataCollection() throws Exception {
+		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, "b")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		assertNotNull(result.getResponse());
+	}
+
 }
