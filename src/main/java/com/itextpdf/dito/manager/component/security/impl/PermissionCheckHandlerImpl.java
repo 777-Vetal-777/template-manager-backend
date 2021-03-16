@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.component.security.impl;
 
 
 import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
@@ -18,10 +19,7 @@ import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,18 +33,18 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
             "E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION", "E6_US38_DELETE_DATA_COLLECTION", "E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE",
             "E7_US47_EDIT_SAMPLE_METADATA", "E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE", "E7_US50_DELETE_DATA_SAMPLE");
 
-    private final Map<TemplateTypeEnum, List<String>> allowedTemplatePermissions = Map.of(
-            TemplateTypeEnum.FOOTER, Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.HEADER, Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.STANDARD, Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.COMPOSITION, Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA")
+    private final Map<TemplateTypeEnum, Set<String>> allowedTemplatePermissions = Map.of(
+            TemplateTypeEnum.FOOTER, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
+            TemplateTypeEnum.HEADER, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
+            TemplateTypeEnum.STANDARD, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
+            TemplateTypeEnum.COMPOSITION, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA")
     );
 
 
-    private final Map<ResourceTypeEnum, List<String>> allowedResourcePermissions = Map.of(
-            ResourceTypeEnum.IMAGE, Arrays.asList("E8_US66_DELETE_RESOURCE_IMAGE", "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE", "E8_US55_EDIT_RESOURCE_METADATA_IMAGE", "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE"),
-            ResourceTypeEnum.FONT, Arrays.asList("E8_US66_1_DELETE_RESOURCE_FONT", "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT", "E8_US58_EDIT_RESOURCE_METADATA_FONT", "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT"),
-            ResourceTypeEnum.STYLESHEET, Arrays.asList("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET", "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET", "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET")
+    private final Map<ResourceTypeEnum, Set<String>> allowedResourcePermissions = Map.of(
+            ResourceTypeEnum.IMAGE, Set.of("E8_US66_DELETE_RESOURCE_IMAGE", "E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE", "E8_US55_EDIT_RESOURCE_METADATA_IMAGE", "E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE"),
+            ResourceTypeEnum.FONT, Set.of("E8_US66_1_DELETE_RESOURCE_FONT", "E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT", "E8_US58_EDIT_RESOURCE_METADATA_FONT", "E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT"),
+            ResourceTypeEnum.STYLESHEET, Set.of("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET", "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET", "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET")
     );
 
     public PermissionCheckHandlerImpl(final UserService userService) {
@@ -61,7 +59,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedResourcePermissions.get(resourceModel.getType()));
         } else {
-            permissions.addAll(new ArrayList<>(getPermissions(resourceModel, userEntity)));
+            permissions.addAll(getPermissions(resourceModel, userEntity));
         }
         return permissions;
     }
@@ -72,7 +70,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
 
         if (isUserAdmin(userNames)) {
-            allowedResourcePermissions.get(resourceEntity.getType());
+            permissions.addAll(allowedResourcePermissions.get(resourceEntity.getType()));
         } else {
             permissions.addAll(getPermissions(resourceEntity, userEntity));
         }
@@ -105,7 +103,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedTemplatePermissions.get(templateModel.getType()));
         } else {
-            permissions.addAll(new ArrayList<>(getPermissions(templateModel, userEntity)));
+            permissions.addAll(getPermissions(templateModel, userEntity));
         }
         return permissions;
     }
@@ -117,7 +115,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedTemplatePermissions.get(templateEntity.getType()));
         } else {
-            permissions.addAll(new ArrayList<>(getPermissions(templateEntity, userEntity)));
+            permissions.addAll(getPermissions(templateEntity, userEntity));
         }
         return permissions;
     }
@@ -127,11 +125,12 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> userRoles = userEntity.getRoles();
         final Set<RoleEntity> resourceRoles = resourceEntity.getAppliedRoles();
         final Set<RoleEntity> sameRoles = getSameRoles(userRoles, resourceRoles);
+        final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissions(userRoles, resourceRoles));
+            permissions.addAll(getAllPermissions(userRoles, resourceRoles, differentRoles, resourceEntity.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
-            final List<String> entityPermissions = allowedResourcePermissions.get(resourceEntity.getType());
+            final Set<String> entityPermissions = allowedResourcePermissions.get(resourceEntity.getType());
             permissions = entityPermissions.stream().filter(userPermissions::contains).collect(Collectors.toSet());
         }
         return permissions;
@@ -142,11 +141,12 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> userRoles = userEntity.getRoles();
         final Set<RoleDTO> resourceRoles = resourceModel.getAppliedRoles();
         final Set<RoleEntity> sameRoles = getSameRolesDto(userRoles, resourceRoles);
+        final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissionsWithDto(userRoles, resourceRoles));
+            permissions.addAll(getAllPermissionsWithDto(userRoles, resourceRoles, differentRoles, resourceModel.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
-            final List<String> entityPermissions = allowedResourcePermissions.get(resourceModel.getType());
+            final Set<String> entityPermissions = allowedResourcePermissions.get(resourceModel.getType());
             permissions = entityPermissions.stream().filter(userPermissions::contains).collect(Collectors.toSet());
         }
         return permissions;
@@ -157,8 +157,9 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> userRoles = userEntity.getRoles();
         final Set<RoleEntity> dataCollectionRoles = dataCollectionEntity.getAppliedRoles();
         final Set<RoleEntity> sameRoles = getSameRoles(userRoles, dataCollectionRoles);
+        final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissions(userRoles, dataCollectionRoles));
+            permissions.addAll(getAllPermissions(userRoles, dataCollectionRoles, differentRoles, dataCollectionEntity.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
             permissions = dataCollectionPermissions.stream().filter(userPermissions::contains).collect(Collectors.toSet());
@@ -171,8 +172,9 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> userRoles = userEntity.getRoles();
         final Set<RoleDTO> dataCollectionRoles = dataCollectionModel.getAppliedRoles();
         final Set<RoleEntity> sameRoles = getSameRolesDto(userRoles, dataCollectionRoles);
+        final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissionsWithDto(userRoles, dataCollectionRoles));
+            permissions.addAll(getAllPermissionsWithDto(userRoles, dataCollectionRoles, differentRoles, dataCollectionModel.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
             permissions = dataCollectionPermissions.stream().filter(userPermissions::contains).collect(Collectors.toSet());
@@ -185,8 +187,10 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> userRoles = userEntity.getRoles();
         final Set<RoleEntity> templateRoles = templateEntity.getAppliedRoles();
         final Set<RoleEntity> sameRoles = getSameRoles(userRoles, templateRoles);
+        final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
+
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissions(userRoles, templateRoles));
+            permissions.addAll(getAllPermissions(userRoles, templateRoles,differentRoles, templateEntity.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
             permissions = allowedTemplatePermissions.get(templateEntity.getType()).stream().filter(userPermissions::contains).collect(Collectors.toSet());
@@ -199,8 +203,9 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> userRoles = userEntity.getRoles();
         final Set<RoleDTO> templateRoles = templateModel.getAppliedRoles();
         final Set<RoleEntity> sameRoles = getSameRolesDto(userRoles, templateRoles);
+        final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissionsWithDto(userRoles, templateRoles));
+            permissions.addAll(getAllPermissionsWithDto(userRoles, templateRoles, differentRoles, templateModel.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
             permissions = allowedTemplatePermissions.get(templateModel.getType()).stream().filter(userPermissions::contains).collect(Collectors.toSet());
@@ -242,7 +247,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         return userPermissions;
     }
 
-    private Set<String> getAllPermissions(final Set<RoleEntity> userRoles, final Set<RoleEntity> entityRoles) {
+    private Set<String> getAllPermissions(final Set<RoleEntity> userRoles, final Set<RoleEntity> entityRoles, final Set<RoleEntity> differentRoles, String type) {
         final Set<String> permissions = new HashSet<>();
         for (final RoleEntity userRole : userRoles) {
             for (final RoleEntity entityRole : entityRoles) {
@@ -253,10 +258,20 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
                 }
             }
         }
+        final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
+        for (final RoleEntity differentRole : differentRoles) {
+            for (final PermissionEntity permissionEntity : differentRole.getPermissions()) {
+                for (final String permission : allowedPermissions) {
+                    if (permissionEntity.getName().equals(permission)) {
+                        permissions.add(permission);
+                    }
+                }
+            }
+        }
         return permissions;
     }
 
-    private Set<String> getAllPermissionsWithDto(final Set<RoleEntity> userRoles, final Set<RoleDTO> entityRoles) {
+    private Set<String> getAllPermissionsWithDto(final Set<RoleEntity> userRoles, final Set<RoleDTO> entityRoles, final Set<RoleEntity> differentRoles, final String type) {
         final Set<String> permissions = new HashSet<>();
         for (final RoleEntity roleEntity : userRoles) {
             for (final RoleDTO entityRole : entityRoles) {
@@ -267,10 +282,44 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
                 }
             }
         }
+        final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
+        for(final RoleEntity differentRole:differentRoles){
+            for(final PermissionEntity permissionEntity:differentRole.getPermissions()){
+                for(final String permission:allowedPermissions){
+                    if(permissionEntity.getName().equals(permission)){
+                        permissions.add(permission);
+                    }
+                }
+            }
+        }
         return permissions;
     }
 
     private boolean isUserAdmin(final Set<String> userRoleNames) {
         return userRoleNames.contains("GLOBAL_ADMINISTRATOR") || userRoleNames.contains("ADMINISTRATOR");
     }
+
+    private Set<String> getAllowedPermissionsByType(final String type) {
+        final Set<String> permissions = new HashSet<>();
+        if (ResourceTypeEnum.IMAGE.toString().equals(type) || ResourceTypeEnum.FONT.toString().equals(type) || ResourceTypeEnum.STYLESHEET.toString().equals(type)) {
+            permissions.addAll(allowedResourcePermissions.get(ResourceTypeEnum.valueOf(type)));
+        }
+        if (TemplateTypeEnum.FOOTER.toString().equals(type) || TemplateTypeEnum.COMPOSITION.toString().equals(type)
+                || TemplateTypeEnum.HEADER.toString().equals(type) || TemplateTypeEnum.STANDARD.toString().equals(type)) {
+            permissions.addAll(allowedTemplatePermissions.get(ResourceTypeEnum.valueOf(type)));
+        }
+        if (DataCollectionType.JSON.toString().equals(type)) {
+            permissions.addAll(dataCollectionPermissions);
+        }
+        return permissions;
+    }
+
+    private Set<RoleEntity> getDifferentRoles(final Set<RoleEntity> userRoles, final Set<RoleEntity> sameRoles){
+        final Set<RoleEntity> differentRoles = new HashSet<>(userRoles);
+        differentRoles.removeIf(roleEntity -> {
+            return sameRoles.stream().anyMatch(sameRole -> sameRole.getName().equals(roleEntity.getName())); });
+
+        return differentRoles;
+    }
+
 }

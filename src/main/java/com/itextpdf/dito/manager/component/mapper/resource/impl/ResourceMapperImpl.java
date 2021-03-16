@@ -35,12 +35,12 @@ public class ResourceMapperImpl implements ResourceMapper {
     private static final Logger log = LogManager.getLogger(ResourceMapperImpl.class);
     private final RoleMapper roleMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    @Autowired
     private PermissionCheckHandler permissionHandler;
 
 
-    public ResourceMapperImpl(final RoleMapper roleMapper) {
+    public ResourceMapperImpl(final RoleMapper roleMapper, final PermissionCheckHandler permissionHandler) {
         this.roleMapper = roleMapper;
+        this.permissionHandler = permissionHandler;
     }
 
     @Override
