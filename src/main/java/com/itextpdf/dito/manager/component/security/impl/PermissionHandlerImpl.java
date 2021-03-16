@@ -2,9 +2,7 @@ package com.itextpdf.dito.manager.component.security.impl;
 
 import com.google.common.base.Predicates;
 import com.itextpdf.dito.manager.component.security.PermissionHandler;
-import com.itextpdf.dito.manager.dto.permission.PermissionDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.PermissionEntity;
 import com.itextpdf.dito.manager.entity.RoleEntity;
@@ -16,8 +14,6 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
-import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
-import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
