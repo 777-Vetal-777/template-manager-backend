@@ -37,7 +37,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
             TemplateTypeEnum.FOOTER, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
             TemplateTypeEnum.HEADER, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
             TemplateTypeEnum.STANDARD, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.COMPOSITION, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA")
+            TemplateTypeEnum.COMPOSITION, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED", "E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA")
     );
 
 
@@ -306,7 +306,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         }
         if (TemplateTypeEnum.FOOTER.toString().equals(type) || TemplateTypeEnum.COMPOSITION.toString().equals(type)
                 || TemplateTypeEnum.HEADER.toString().equals(type) || TemplateTypeEnum.STANDARD.toString().equals(type)) {
-            permissions.addAll(allowedTemplatePermissions.get(ResourceTypeEnum.valueOf(type)));
+            permissions.addAll(allowedTemplatePermissions.get(TemplateTypeEnum.valueOf(type)));
         }
         if (DataCollectionType.JSON.toString().equals(type)) {
             permissions.addAll(dataCollectionPermissions);
