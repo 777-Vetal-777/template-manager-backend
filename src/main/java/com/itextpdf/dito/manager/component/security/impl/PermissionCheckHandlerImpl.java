@@ -29,15 +29,22 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
 
     private UserService userService;
 
+    private final String deleteStandardTemplatePermission = "E9_US126_DELETE_TEMPLATE_STANDARD";
+    private final String editStandardTemplatePermission = "E9_US75_EDIT_TEMPLATE_METADATA_STANDARD";
+    private final String createNewVersionOfTemplateStandardPermission = "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD";
+    private final String rollBackStandardTemplatePermission = "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE";
+    private final String previewStandardTemplatePermission = "E9_US81_PREVIEW_TEMPLATE_STANDARD";
+    private final String exportTemplate = "E9_US24_EXPORT_TEMPLATE_DATA";
+
     private final Set<String> dataCollectionPermissions = Set.of("E6_US34_EDIT_DATA_COLLECTION_METADATA", "E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON",
             "E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION", "E6_US38_DELETE_DATA_COLLECTION", "E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE",
             "E7_US47_EDIT_SAMPLE_METADATA", "E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE", "E7_US50_DELETE_DATA_SAMPLE");
 
     private final Map<TemplateTypeEnum, Set<String>> allowedTemplatePermissions = Map.of(
-            TemplateTypeEnum.FOOTER, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.HEADER, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.STANDARD, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA"),
-            TemplateTypeEnum.COMPOSITION, Set.of("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD", "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED", "E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE", "E9_US81_PREVIEW_TEMPLATE_STANDARD", "E9_US24_EXPORT_TEMPLATE_DATA")
+            TemplateTypeEnum.FOOTER, Set.of(editStandardTemplatePermission, createNewVersionOfTemplateStandardPermission, rollBackStandardTemplatePermission, previewStandardTemplatePermission, exportTemplate),
+            TemplateTypeEnum.HEADER, Set.of(editStandardTemplatePermission, createNewVersionOfTemplateStandardPermission, rollBackStandardTemplatePermission, previewStandardTemplatePermission, exportTemplate),
+            TemplateTypeEnum.STANDARD, Set.of(editStandardTemplatePermission, createNewVersionOfTemplateStandardPermission, rollBackStandardTemplatePermission, previewStandardTemplatePermission, exportTemplate),
+            TemplateTypeEnum.COMPOSITION, Set.of(editStandardTemplatePermission, "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED", "E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE", previewStandardTemplatePermission, exportTemplate)
     );
 
 
@@ -47,9 +54,12 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
             ResourceTypeEnum.STYLESHEET, Set.of("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET", "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET", "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET")
     );
 
-    private final String templateDeleteCompositionPermission = "E9_US127_DELETE_TEMPLATE_COMPOSITION";
-    private final String templateDeleteStandardPermission = "E9_US126_DELETE_TEMPLATE_STANDARD";
-
+    private final Map<TemplateTypeEnum, String> templateDeletePermission = Map.of(
+            TemplateTypeEnum.FOOTER, deleteStandardTemplatePermission,
+            TemplateTypeEnum.HEADER, deleteStandardTemplatePermission,
+            TemplateTypeEnum.STANDARD, deleteStandardTemplatePermission,
+            TemplateTypeEnum.COMPOSITION, "E9_US127_DELETE_TEMPLATE_COMPOSITION"
+    );
     public PermissionCheckHandlerImpl(final UserService userService) {
         this.userService = userService;
     }
@@ -105,11 +115,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedTemplatePermissions.get(templateModel.getType()));
-            if (templateModel.getType().equals(TemplateTypeEnum.COMPOSITION)) {
-                permissions.add(templateDeleteCompositionPermission);
-            } else {
-                permissions.add(templateDeleteStandardPermission);
-            }
+           permissions.add(templateDeletePermission.get(templateModel.getType()));
         } else {
             permissions.addAll(getPermissions(templateModel, userEntity));
         }
@@ -122,11 +128,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedTemplatePermissions.get(templateEntity.getType()));
-            if (templateEntity.getType().equals(TemplateTypeEnum.COMPOSITION)) {
-                permissions.add(templateDeleteCompositionPermission);
-            } else {
-                permissions.add(templateDeleteStandardPermission);
-            }
+            permissions.add(templateDeletePermission.get(templateEntity.getType()));
         } else {
             permissions.addAll(getPermissions(templateEntity, userEntity));
         }
@@ -231,11 +233,8 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
     private Set<String> addTemplateDeletePermissions(final Set<RoleEntity> userRoles, final Set<String> permissions, final TemplateTypeEnum typeEnum) {
         for (final RoleEntity roleEntity : userRoles) {
             for (final PermissionEntity permissionEntity : roleEntity.getPermissions()) {
-                if (TemplateTypeEnum.COMPOSITION.equals(typeEnum) && permissionEntity.getName().equals(templateDeleteCompositionPermission)) {
-                    permissions.add(templateDeleteCompositionPermission);
-                }
-                if (!TemplateTypeEnum.COMPOSITION.equals(typeEnum) && permissionEntity.getName().equals(templateDeleteStandardPermission)) {
-                    permissions.add(templateDeleteStandardPermission);
+                if (permissionEntity.getName().equals(templateDeletePermission.get(typeEnum))) {
+                    permissions.add(templateDeletePermission.get(typeEnum));
                 }
             }
         }
