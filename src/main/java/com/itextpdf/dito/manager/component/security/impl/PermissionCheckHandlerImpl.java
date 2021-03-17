@@ -290,11 +290,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
         for (final RoleEntity differentRole : differentRoles) {
             for (final PermissionEntity permissionEntity : differentRole.getPermissions()) {
-                for (final String permission : allowedPermissions) {
-                    if (permissionEntity.getName().equals(permission)) {
-                        permissions.add(permission);
-                    }
-                }
+                addPermissionIfEquals(allowedPermissions, permissions, permissionEntity);
             }
         }
         return permissions;
@@ -314,11 +310,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
         for (final RoleEntity differentRole : differentRoles) {
             for (final PermissionEntity permissionEntity : differentRole.getPermissions()) {
-                for (final String permission : allowedPermissions) {
-                    if (permissionEntity.getName().equals(permission)) {
-                        permissions.add(permission);
-                    }
-                }
+                addPermissionIfEquals(allowedPermissions, permissions, permissionEntity);
             }
         }
         return permissions;
@@ -350,6 +342,14 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         });
 
         return differentRoles;
+    }
+
+    private void addPermissionIfEquals(final Set<String> allowedPermissions, final Set<String> permissions, final PermissionEntity permissionEntity) {
+        for (final String permission : allowedPermissions) {
+            if (permissionEntity.getName().equals(permission)) {
+                permissions.add(permission);
+            }
+        }
     }
 
 }
