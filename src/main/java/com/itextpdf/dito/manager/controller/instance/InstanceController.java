@@ -104,7 +104,7 @@ public interface InstanceController {
     @Operation(summary = "Update instance", description = "Update instance's name or socket.",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Instance updated successfully.")
-    ResponseEntity<InstanceDTO> update(@Parameter(description = "Instance name to update.")@PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name,
+    ResponseEntity<InstanceDTO> update(@Parameter(description = "Encoded with base64 instance name") @PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name,
             @RequestBody InstanceUpdateRequestDTO instanceUpdateRequestDTO);
 
 }
