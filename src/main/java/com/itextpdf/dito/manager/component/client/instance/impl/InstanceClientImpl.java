@@ -43,8 +43,8 @@ public class InstanceClientImpl implements InstanceClient {
 
     private final WebClient webClient;
 
-    public InstanceClientImpl() {
-        webClient = WebClient.create();
+    public InstanceClientImpl(final WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override

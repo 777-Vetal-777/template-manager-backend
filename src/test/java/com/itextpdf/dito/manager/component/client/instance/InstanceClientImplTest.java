@@ -1,13 +1,14 @@
 package com.itextpdf.dito.manager.component.client.instance;
 
+import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImpl;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,7 +44,7 @@ public class InstanceClientImplTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+    @MockBean
     private WebClient webClientMock;
 
     @SuppressWarnings("rawtypes")
@@ -57,6 +58,9 @@ public class InstanceClientImplTest {
     @MockBean
     private WebClient.ResponseSpec responseSpecMock;
 
+    @InjectMocks
+    private InstanceClientImpl instanceClient;
+
     @AfterEach
     public void cleanUp() {
         instanceRepository.deleteAll();
@@ -67,7 +71,6 @@ public class InstanceClientImplTest {
     public void shouldSendPingInstance() throws Exception {
         final InstanceRegisterResponseDTO post = new InstanceRegisterResponseDTO();
         post.setToken("randToken");
-
         when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
         when(requestHeadersUriSpecMock.uri(anyString())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
