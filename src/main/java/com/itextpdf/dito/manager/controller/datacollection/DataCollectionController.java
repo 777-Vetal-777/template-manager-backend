@@ -47,7 +47,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RequestMapping(DataCollectionController.BASE_NAME)
-@Tag(name = "data collection", description = "data collection API")
+@Tag(name = "data-collection", description = "data collection API")
 public interface DataCollectionController {
     String MAJOR_VERSION = "/v1";
     String BASE_NAME = MAJOR_VERSION + "/datacollections";
