@@ -280,11 +280,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
         for (final RoleEntity userRole : userRoles) {
             for (final RoleEntity entityRole : entityRoles) {
-                if (userRole.getName().equals(entityRole.getName())) {
-                    for (final PermissionEntity permissionEntity : entityRole.getPermissions()) {
-                        permissions.add(permissionEntity.getName());
-                    }
-                }
+                addPermissionsIfEqualsRoles(entityRole, userRole, permissions);
             }
         }
         final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
@@ -300,11 +296,7 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
         for (final RoleEntity roleEntity : userRoles) {
             for (final RoleDTO entityRole : entityRoles) {
-                if (roleEntity.getName().equals(entityRole.getName())) {
-                    for (final PermissionDTO permissionEntity : entityRole.getPermissions()) {
-                        permissions.add(permissionEntity.getName());
-                    }
-                }
+                addPermissionsIfEqualsRolesDto(entityRole, roleEntity, permissions);
             }
         }
         final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
@@ -348,6 +340,22 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         for (final String permission : allowedPermissions) {
             if (permissionEntity.getName().equals(permission)) {
                 permissions.add(permission);
+            }
+        }
+    }
+
+    private void addPermissionsIfEqualsRoles(final RoleEntity entityRole, final RoleEntity userRole, final Set<String> permissions){
+        if (userRole.getName().equals(entityRole.getName())) {
+            for (final PermissionEntity permissionEntity : entityRole.getPermissions()) {
+                permissions.add(permissionEntity.getName());
+            }
+        }
+    }
+
+    private void addPermissionsIfEqualsRolesDto(final RoleDTO entityRole, final RoleEntity userRole, final Set<String> permissions){
+        if (userRole.getName().equals(entityRole.getName())) {
+            for (final PermissionDTO permissionDTO : entityRole.getPermissions()) {
+                permissions.add(permissionDTO.getName());
             }
         }
     }
