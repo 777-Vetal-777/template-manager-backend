@@ -1,18 +1,25 @@
 package com.itextpdf.dito.manager.integration.editor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -27,13 +34,9 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractR
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.integration.editor.controller.resource.ResourceManagementController;
-import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
-import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 
-import javax.imageio.ImageIO;
-
-public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
+class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	private static final String IMAGE_NAME = "test-image";
 	private static final String IMAGE_TYPE = "IMAGE";
@@ -47,19 +50,17 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 	@Autowired
 	private ResourceRepository resourceRepository;
 	@Autowired
-	private ResourceFileRepository resourceFileRepository;
+	private ObjectMapper objectMapper;
 	@Autowired
-	private ResourceLogRepository resourceLogRepository;
-	
+	private ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
+
 	@AfterEach
 	public void clearDb() {
-		resourceLogRepository.deleteAll();
-		resourceFileRepository.deleteAll();
 		resourceRepository.deleteAll();
 	}
 
 	@Test
-	public void resourceAddUpdateTest() throws Exception {
+	void resourceAddUpdateTest() throws Exception {
 		// CREATE
 		final ResourceLeafDescriptor descriptor=  new ImageDescriptor(BASE64_RESOURCE_ID);
 		descriptor.setDisplayName(IMAGE_NAME);
@@ -109,7 +110,7 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 	}
 	
 	@Test
-	public void test_success_createAndGet() throws Exception {
+	void test_success_createAndGet() throws Exception {
 		final URI uri = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode().toUri();
 		// Create resource
 		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
@@ -136,8 +137,9 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.encode().toUri();
 		mockMvc.perform(get(integratedResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_OCTET_STREAM))
-				.andExpect(status().isOk());
+				.accept(MediaType.ALL))
+				.andExpect(status().isOk())
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, "image/png"));
 
 		// Get Integrated Resource By workspace Id
 		final URI integratedWorkspaceResourceUri = UriComponentsBuilder
@@ -158,5 +160,69 @@ public class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTe
 				.andExpect(status().isOk()).andReturn();
 		assertNotNull(result.getResponse());
 		
+	}
+
+	@Test
+	void testCreateFontAndGet() throws Exception {
+		final String fileName = "font.ttf";
+		final MockMultipartFile fontFilePartRegular = new MockMultipartFile("regular", fileName,	"text/plain",  readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+		final MockMultipartFile fontFilePartBold = new MockMultipartFile("bold", fileName,	"text/plain",  readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+		final MockMultipartFile fontFilePartItalic = new MockMultipartFile("italic", fileName,	"text/plain",  readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+		final MockMultipartFile fontFilePartBoldItalic = new MockMultipartFile("bold_italic", fileName,	"text/plain",  readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
+		final MockMultipartFile fontTypePart = new MockMultipartFile("type", "type", "text/plain", ResourceTypeEnum.FONT.toString().getBytes());
+		final MockMultipartFile namePart = new MockMultipartFile("name", "name", "text/plain", "font".getBytes());
+
+
+		final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
+				.file(fontFilePartRegular)
+				.file(fontFilePartBold)
+				.file(fontFilePartBoldItalic)
+				.file(fontFilePartItalic)
+				.file(namePart)
+				.file(fontTypePart)
+				.contentType(MediaType.MULTIPART_FORM_DATA))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		final ResourceDTO resourceDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ResourceDTO.class);
+		assertEquals(ResourceTypeEnum.FONT, resourceDTO.getType());
+		final String resourceId = resourceLeafDescriptorMapper.encodeId(resourceDTO.getName(), resourceDTO.getType(), "BOLD");
+
+		mockMvc.perform(get(ResourceManagementController.RESOURCE_URL, resourceId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.ALL))
+				.andExpect(status().isOk())
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, "font/ttf"));
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"style.css, src/test/resources/test-data/resources/text-css.css, STYLESHEET, text/css; charset=utf-8",
+			"image.png, src/test/resources/test-data/resources/random.png, IMAGE, image/png",
+			"svg.svg, src/test/resources/test-data/resources/random.svg, IMAGE, image/svg+xml",
+			"svg.png, src/test/resources/test-data/resources/random.svg, IMAGE, application/octet-stream"
+	})
+	void testCreateResourceAndGetExpectedContentType(final String fileName, final String filePath, final ResourceTypeEnum type, final String expected) throws Exception {
+		final MockMultipartFile filePart = new MockMultipartFile("resource", fileName,	"text/plain",  readFileBytes(filePath));
+		final MockMultipartFile typePart = new MockMultipartFile("type", "type", "text/plain", type.toString().getBytes());
+		final MockMultipartFile namePart = new MockMultipartFile("name", "name", "text/plain", "resource".getBytes());
+
+		final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
+				.file(filePart)
+				.file(namePart)
+				.file(typePart)
+				.contentType(MediaType.MULTIPART_FORM_DATA))
+				.andExpect(status().is2xxSuccessful())
+				.andReturn();
+
+		final ResourceDTO resourceDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ResourceDTO.class);
+		assertNotNull(resourceDTO.getType());
+		final String resourceId = resourceLeafDescriptorMapper.encodeId(resourceDTO.getName(), resourceDTO.getType(), null);
+
+		mockMvc.perform(get(ResourceManagementController.RESOURCE_URL, resourceId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.ALL))
+				.andExpect(status().isOk())
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, expected));
 	}
 }

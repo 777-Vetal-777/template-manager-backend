@@ -13,7 +13,6 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
-import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -63,7 +62,7 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     @Autowired
     private DataCollectionService dataCollectionService;
     @Autowired
-    Encoder encoder;
+    private Encoder encoder;
 
     private String templateName;
     private String roleName;

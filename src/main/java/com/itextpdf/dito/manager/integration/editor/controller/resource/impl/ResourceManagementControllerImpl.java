@@ -4,12 +4,17 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceL
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
+import com.itextpdf.dito.manager.integration.editor.component.resource.ResponseHeadersUpdater;
 import com.itextpdf.dito.manager.integration.editor.controller.resource.ResourceManagementController;
 import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
@@ -21,20 +26,28 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     private static final Logger log = LogManager.getLogger(ResourceManagementControllerImpl.class);
     private final ResourceManagementService resourceManagementService;
     private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
+    private final ResponseHeadersUpdater responseHeadersUpdater;
 
     public ResourceManagementControllerImpl(final ResourceManagementService resourceManagementService,
-                                            final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper) {
+                                            final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper,
+                                            final ResponseHeadersUpdater responseHeadersUpdater) {
         this.resourceManagementService = resourceManagementService;
         this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
+        this.responseHeadersUpdater = responseHeadersUpdater;
     }
 
     @Override
-    public byte[] getResourceDirectoryContentById(final String resourceId) {
+    public ResponseEntity<byte[]> getResourceDirectoryContentById(final String resourceId) {
         final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
         log.info("Request to get resource file by resourceId id {}.", resourceIdDTO);
-        byte[] result = resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName());
+        final ResourceFileEntity resourceFileEntity = resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName());
+        final byte[] result = resourceFileEntity.getFile();
+
+        final HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeadersUpdater.updateHeaders(resourceFileEntity, resourceIdDTO.getType(), responseHeaders);
+
         log.info("Response to get resource file by resourceId id {} processed.", resourceIdDTO);
-        return result;
+        return new ResponseEntity<>(result, responseHeaders, HttpStatus.OK);
     }
 
     @Override

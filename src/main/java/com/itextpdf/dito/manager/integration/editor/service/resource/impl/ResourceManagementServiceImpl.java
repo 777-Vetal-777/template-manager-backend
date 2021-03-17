@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.integration.editor.service.resource.impl;
 
-import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.ImageDescriptor;
-import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.StylesheetDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
@@ -26,9 +24,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
         this.resourceService = resourceService;
     }
 
-
     @Override
-    public byte[] get(final String name, final ResourceTypeEnum type, final String subName) {
+    public ResourceFileEntity get(final String name, final ResourceTypeEnum type, final String subName) {
         log.info("Get file by resource name: {} and type: {} and subName: {} was started", name, type, subName);
         // subName - it's a name of font for that realization
 		final ResourceEntity resourceEntity = resourceService.get(name, type);
@@ -39,8 +36,9 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 		} else {
 			resourceFileEntity = resourceEntity.getResourceFiles().stream().findFirst();
 		}
+        final ResourceFileEntity fileEntity = resourceFileEntity.orElseThrow();
         log.info("Get file by resource name: {} and type: {} and subName: {} was finished successfully", name, type, subName);
-        return resourceFileEntity.get().getFile();
+        return fileEntity;
     }
 
     @Override

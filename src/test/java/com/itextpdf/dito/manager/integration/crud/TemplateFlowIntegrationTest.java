@@ -108,7 +108,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private TemplateService templateService;
     @Autowired
-    Encoder encoder;
+    private Encoder encoder;
 
     @AfterEach
     public void clearDb() {
