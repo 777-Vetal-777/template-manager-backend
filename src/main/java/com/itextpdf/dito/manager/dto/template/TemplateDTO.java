@@ -21,7 +21,6 @@ public class TemplateDTO {
     private Date createdOn;
     private String createdBy;
     private String comment;
-    private Set<RoleDTO> appliedRoles;
     private Set<String> permissions;
 
     public Set<String> getPermissions() {
@@ -102,14 +101,6 @@ public class TemplateDTO {
 
     public void setDataCollection(String dataCollection) {
         this.dataCollection = dataCollection;
-    }
-
-    public Set<RoleDTO> getAppliedRoles() {
-        return appliedRoles;
-    }
-
-    public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
-        this.appliedRoles = appliedRoles;
     }
 
     @Override

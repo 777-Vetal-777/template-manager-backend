@@ -58,7 +58,6 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
                 .append(entity.getAuthor().getLastName())
                 .toString());
         dto.setDescription(entity.getDescription());
-        dto.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         dto.setPermissions(permissionHandler.getPermissionsByDataCollection(entity, email));
         log.info("Convert dataCollection: {}  to dto was finished successfully", entity.getId());
         return dto;

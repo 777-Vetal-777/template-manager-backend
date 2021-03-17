@@ -95,7 +95,6 @@ public class TemplateMapperImpl implements TemplateMapper {
             final DataCollectionFileEntity dataCollectionFileEntity = latestFile.getDataCollectionFile();
             result.setDataCollection(Objects.nonNull(dataCollectionFileEntity) ? dataCollectionFileEntity.getDataCollection().getName() : null);
         }
-        result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         result.setPermissions(permissionHandler.getPermissionsByTemplate(entity, email));
         log.info("Fill templateDto with template: {} and templateDto: {} was started", entity.getId(), result);
         return result;
@@ -128,7 +127,6 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setDataCollection(model.getDataCollection());
         result.setCreatedOn(model.getCreatedOn());
         result.setLastUpdate(model.getLastUpdate());
-        result.setAppliedRoles(model.getAppliedRoles());
         result.setPermissions(permissionHandler.getPermissionsByTemplate(model, email));
         return result;
     }
@@ -173,7 +171,6 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setDataCollection(Objects.nonNull(dataCollectionFileEntity)
                 ? dataCollectionFileEntity.getDataCollection().getName()
                 : null);
-        result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         final UserEntity blockedUser = entity.getBlockedBy();
         if (blockedUser != null) {
             result.setBlocked(true);

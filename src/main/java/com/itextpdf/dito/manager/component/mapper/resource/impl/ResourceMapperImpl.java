@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
-import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
@@ -81,7 +80,6 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
 
-        result.setAppliedRoles(roleMapper.map(entity.getAppliedRoles()));
         result.setPermissions(permissionHandler.getPermissionsByResource(entity, email));
         log.info("Convert resource:{} to resource dto was finished successfully", entity.getId());
         return result;
@@ -106,7 +104,6 @@ public class ResourceMapperImpl implements ResourceMapper {
     @Override
     public ResourceDTO mapModel(final ResourceModelWithRoles model, final String email) {
         final ResourceDTO resourceDTO = new ResourceDTO();
-        resourceDTO.setAppliedRoles(model.getAppliedRoles());
         resourceDTO.setMetadataUrls(map(model.getMetadataUrls()));
         resourceDTO.setName(model.getName());
         resourceDTO.setComment(model.getComment());

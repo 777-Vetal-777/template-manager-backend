@@ -23,7 +23,6 @@ public class TemplateMetadataDTO{
     private Long version;
     private Boolean blocked;
     private String blockedBy;
-    private Set<RoleDTO> appliedRoles;
     private List<TemplateDeployedVersionDTO> deployedVersions;
     private Set<String> permissions;
 
@@ -42,10 +41,6 @@ public class TemplateMetadataDTO{
     public void setType(TemplateTypeEnum type) {
         this.type = type;
     }
-
-    public Set<RoleDTO> getAppliedRoles() { return appliedRoles; }
-
-    public void setAppliedRoles(Set<RoleDTO> appliedRoles) { this.appliedRoles = appliedRoles; }
 
     public Long getVersion() {
         return version;

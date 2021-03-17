@@ -18,7 +18,6 @@ public class ResourceDTO {
     private Long version;
     private List<FileMetaInfoDTO> metadataUrls;
     private Boolean deployed;
-    private Set<RoleDTO> appliedRoles;
     private Set<String> permissions;
 
     public Set<String> getPermissions() {
@@ -115,14 +114,6 @@ public class ResourceDTO {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public Set<RoleDTO> getAppliedRoles() {
-        return appliedRoles;
-    }
-
-    public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
-        this.appliedRoles = appliedRoles;
     }
 
 }

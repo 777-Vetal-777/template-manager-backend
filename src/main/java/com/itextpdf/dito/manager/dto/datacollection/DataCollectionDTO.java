@@ -18,8 +18,6 @@ public class DataCollectionDTO {
     private String comment;
     private Long version;
     private String attachment;
-
-    private Set<RoleDTO> appliedRoles;
     private Set<String> permissions;
 
     public Long getVersion() {
@@ -100,14 +98,6 @@ public class DataCollectionDTO {
 
     public void setAttachment(String attachment) {
         this.attachment = attachment;
-    }
-
-    public Set<RoleDTO> getAppliedRoles() {
-        return appliedRoles;
-    }
-
-    public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
-        this.appliedRoles = appliedRoles;
     }
 
     public String getCreatedBy() {
