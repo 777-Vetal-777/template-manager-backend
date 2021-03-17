@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud.permissions;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
@@ -12,6 +13,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -60,6 +62,8 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     private PermissionRepository permissionRepository;
     @Autowired
     private DataCollectionService dataCollectionService;
+    @Autowired
+    Encoder encoder;
 
     private String templateName;
     private String roleName;
@@ -126,7 +130,6 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     }
 
     @Test
-    @Disabled
     void testApplyRole() throws Exception {
         //check that requests done well
         final TemplateUpdateRequestDTO templateUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-update-request.json"), TemplateUpdateRequestDTO.class);
@@ -201,8 +204,6 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result.getResponse());
-
-
     }
 
     private void performCreateTemplateRequest(final String pathname) throws Exception {
@@ -212,6 +213,16 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+
+        // UPDATE to fix DTM-2445 issue
+        final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json", readFileBytes("src/test/resources/test-data/templates/template-with-height.html"));
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, encoder.encode(request.getName()))
+                .file(newData)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
     }
 
 

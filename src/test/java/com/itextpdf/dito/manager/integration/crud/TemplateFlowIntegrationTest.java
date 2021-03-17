@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.controller.user.UserController;
@@ -17,6 +18,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
@@ -105,6 +107,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private UserRepository userRepository;
     @Autowired
     private TemplateService templateService;
+    @Autowired
+    Encoder encoder;
 
     @AfterEach
     public void clearDb() {
@@ -204,7 +208,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/some-template")));
-
     }
 
     @Test
@@ -305,16 +308,26 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
     private TemplateCreateRequestDTO performCreateTemplateRequest(final String pathname) throws Exception {
         final TemplateCreateRequestDTO request = objectMapper.readValue(new File(pathname), TemplateCreateRequestDTO.class);
+
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+
+        // UPDATE to fix DTM-2445 issue
+        final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json", readFileBytes("src/test/resources/test-data/templates/template-with-height.html"));
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, encoder.encode(request.getName()))
+                .file(newData)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
         return request;
     }
 
     @Test
-    @Disabled
     void testCreateCompositionTemplateWithoutDataCollection() throws Exception {
         dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
@@ -388,7 +401,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void testCreateCompositionTemplateWithDataCollection() throws Exception {
         dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 
@@ -516,7 +528,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         return stageEntity;
     }
 
-    @Disabled
     @Test
     void shouldCreateAndExportCompositionTemplateWithAllResources() throws Exception {
         final String userEmail = "admin@email.com";
@@ -542,12 +553,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         //Create new version
         final MockMultipartFile file = new MockMultipartFile("data", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/templates/template-update-request-data.html")));
         mockMvc.perform(MockMvcRequestBuilders.multipart(TEMPLATE_URL, encodeTemplatePartString)
-                .file(file)
-                .with(request -> {
-                    request.setMethod("PUT");
-                    return request;
-                })
-                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .file(file))
                 .andExpect(status().isOk());
 
         //Create composite template
@@ -620,7 +626,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
     
     @Test
-    @Disabled
     void shouldThrowTemplateCannotBeBlockedException() throws Exception {
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
@@ -628,8 +633,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer2.json");
 
         final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition.json"), TemplateCreateRequestDTO.class);
-        request.getTemplateParts().removeIf(part -> "some-footer-template".equals(part.getName()));
-        request.getTemplateParts().removeIf(part -> "some-template-with-data-collection".equals(part.getName()));
+        request.getTemplateParts().removeIf(part -> "some-footer-template".equals(part.getName()) || "some-template-with-data-collection".equals(part.getName()));
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
