@@ -17,12 +17,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -75,6 +77,8 @@ public class InstanceClientImplTest {
         when(requestHeadersUriSpecMock.uri(anyString())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<InstanceRegisterResponseDTO>>notNull())).thenReturn(Mono.just(post));
+        final MvcResult result = mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.INSTANCE_STATUS_ENDPOINT, ENCODED_SOCKET_EXAMPLE)).andExpect(status().isOk()).andReturn();
+        assertNotNull(result.getResponse());
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.INSTANCE_STATUS_ENDPOINT, ENCODED_SOCKET_EXAMPLE)).andExpect(status().isOk());
     }
 }
