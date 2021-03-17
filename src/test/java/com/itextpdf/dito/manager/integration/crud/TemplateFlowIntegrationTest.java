@@ -173,7 +173,6 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         list.add("name");
         filter.setName(list); 
         final Pageable pageable = PageRequest.of(0, 8);
-        templateService.getRoles(pageable, request.getName(), filter);
 
         assertFalse(templateService.getAll().isEmpty());
         

@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType;
 import com.itextpdf.dito.manager.dto.dependency.DependencyType;
@@ -32,16 +33,19 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
     private static final Logger log = LogManager.getLogger(TemplateDependencyServiceImpl.class);
     private final TemplateService templateService;
     private final TemplateRepository templateRepository;
+    private final Encoder encoder;
 
-    public TemplateDependencyServiceImpl(final TemplateService templateService, final TemplateRepository templateRepository) {
+    public TemplateDependencyServiceImpl(final TemplateService templateService, final TemplateRepository templateRepository,
+                                         final Encoder encoder) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
+        this.encoder = encoder;
     }
 
     @Override
     public Page<DependencyModel> list(final Pageable pageable, final String name, final DependencyFilter filter, final String search) {
         log.info("Get list template dependencies by name: {} and filter: {} and search: {} was started", name, filter, search);
-        final String templateName = decodeBase64(name);
+        final String templateName = encoder.decode(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
         final String directionType = getDirectionAsString(filter.getDirectionType());
@@ -60,7 +64,7 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
     @Override
     public List<DependencyModel> list(final String name) {
         log.info("Get list template dependencies by name: {} was started", name);
-        final String templateName = decodeBase64(name);
+        final String templateName = encoder.decode(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
         final List<DependencyModel> dependencyModels = templateRepository.getTemplateHardRelations(templateEntity.getId());
         log.info("Get list template dependencies by name: {} was finished successfully", name);

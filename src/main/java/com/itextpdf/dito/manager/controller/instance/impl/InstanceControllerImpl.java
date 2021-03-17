@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.controller.instance.impl;
 
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
@@ -25,15 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class InstanceControllerImpl extends AbstractController implements InstanceController {
-    private InstanceService instanceService;
-    private InstanceMapper instanceMapper;
-    private InstanceClient instanceClient;
     private static final Logger log = LogManager.getLogger(InstanceControllerImpl.class);
+    private final InstanceService instanceService;
+    private final InstanceMapper instanceMapper;
+    private final InstanceClient instanceClient;
+    private final Encoder encoder;
 
-    public InstanceControllerImpl(final InstanceService instanceService, final InstanceClient instanceClient, final InstanceMapper instanceMapper) {
+    public InstanceControllerImpl(final InstanceService instanceService, final InstanceClient instanceClient,
+                                  final InstanceMapper instanceMapper, final Encoder encoder) {
         this.instanceService = instanceService;
         this.instanceMapper = instanceMapper;
         this.instanceClient = instanceClient;
+        this.encoder = encoder;
     }
 
     @Override
@@ -51,7 +55,7 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     @Override
     public ResponseEntity<Void> ping(final String socket) {
         log.info("Get instance status by socket: {} was started", socket);
-        instanceClient.ping(decodeBase64(socket));
+        instanceClient.ping(encoder.decode(socket));
         log.info("Get instance status by socket: {} was finished successfully", socket);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -59,7 +63,7 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     @Override
     public ResponseEntity<Void> forget(final String name) {
         log.info("Disconnect instance by name: {} was started", name);
-        instanceService.forget(decodeBase64(name));
+        instanceService.forget(encoder.decode(name));
         log.info("Disconnect instance by name: {} was finished successfully", name);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -86,7 +90,7 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     public ResponseEntity<InstanceDTO> update(final String name, @Valid final InstanceUpdateRequestDTO instanceUpdateRequestDTO) {
         log.info("Update instance by name: {} and instanceUpdateRequestDTO: {} was started", name, instanceUpdateRequestDTO);
         final InstanceEntity instanceEntity = instanceService
-                .update(decodeBase64(name), instanceMapper.map(instanceUpdateRequestDTO));
+                .update(encoder.decode(name), instanceMapper.map(instanceUpdateRequestDTO));
         log.info("Update instance by name: {} and instanceUpdateRequestDTO: {} was finished successfully", name, instanceUpdateRequestDTO);
         return new ResponseEntity<>(instanceMapper.map(instanceEntity), HttpStatus.OK);
     }

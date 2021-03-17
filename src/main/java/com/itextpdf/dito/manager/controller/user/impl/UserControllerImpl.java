@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.user.impl;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.component.mapper.user.UserMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.user.UserController;
@@ -38,11 +39,14 @@ public class UserControllerImpl extends AbstractController implements UserContro
     private final UserService userService;
     private final UserMapper userMapper;
     private final AuthenticationService authenticationService;
+    private final Encoder encoder;
 
-    public UserControllerImpl(final UserService userService, final UserMapper userMapper, final AuthenticationService authenticationService) {
+    public UserControllerImpl(final UserService userService, final UserMapper userMapper,
+                              final AuthenticationService authenticationService, final Encoder encoder) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.authenticationService = authenticationService;
+        this.encoder = encoder;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<UserDTO> update(final String userName, @Valid final UserUpdateRequestDTO userUpdateRequestDTO) {
         log.info("Update user by name: {} and  with params: {} was started", userName, userUpdateRequestDTO);
-        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), decodeBase64(userName)));
+        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), encoder.decode(userName)));
         log.info("Update user by name: {} and  with params: {} was finished successfully", userName, userUpdateRequestDTO);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -67,7 +71,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO, final Principal principal) {
         log.info("Update password by userName: {} was started", userName);
         final UserEntity adminEntity = userService.findByEmail(principal.getName());
-        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), decodeBase64(userName), adminEntity);
+        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), encoder.decode(userName), adminEntity);
         log.info("Update password by userName: {} was finished successfully", userName);
         return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
@@ -75,7 +79,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<UserDTO> get(final String userName, final Principal principal) {
         log.info("Get info about user by email: {} was started", userName);
-        final UserDTO user = userMapper.map(userService.findByEmail(decodeBase64(userName)));
+        final UserDTO user = userMapper.map(userService.findByEmail(encoder.decode(userName)));
         log.info("Get info about user by email: {} was finished successfully", userName);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

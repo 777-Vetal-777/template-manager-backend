@@ -1,7 +1,7 @@
 package com.itextpdf.dito.manager.exception.workspace;
 
 /**
- * Will be removed in the future releases.
+ * Will be removed in the future releases after the multiple workspaces support will be implemented
  * @deprecated
  */
 @Deprecated(since = "0.0.1")

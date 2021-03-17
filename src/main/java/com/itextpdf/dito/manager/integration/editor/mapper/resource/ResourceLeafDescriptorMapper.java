@@ -16,4 +16,7 @@ public interface ResourceLeafDescriptorMapper {
     ResourceIdDTO map(String id);
 
     String encodeId(String name, ResourceTypeEnum resourceTypeEnum, String subName);
+
+    ResourceIdDTO deserialize(String json);
+
 }

@@ -103,7 +103,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
 
     @Override
     public DataCollectionFileEntity getByTemplateName(final String name) {
-        return templateService.get(name).getLatestFile().getDataCollectionFile();//TODO chance to get NPE
+        return templateService.get(name).getLatestFile().getDataCollectionFile();
     }
 
 }

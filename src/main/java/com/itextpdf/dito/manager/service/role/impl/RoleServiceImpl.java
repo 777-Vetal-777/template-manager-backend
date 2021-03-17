@@ -14,10 +14,8 @@ import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.role.RoleUserFilter;
-import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.model.role.RoleModel;
 import com.itextpdf.dito.manager.model.role.RolePermissionsModel;
 import com.itextpdf.dito.manager.model.role.RoleUsersModel;
@@ -77,31 +75,6 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> getSlaveRolesByResource(final Pageable pageable, final RoleFilter roleFilter, final ResourceEntity resource) {
-        log.info("Get slave roles by resource: {} and filter: {} was started", resource, roleFilter);
-        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-
-        final String name = getStringFromFilter(roleFilter.getName());
-        final List<RoleTypeEnum> roleTypeEnums = roleFilter.getType();
-
-        final Pageable pageWithSort = updateSort(pageable);
-        final Page<RoleEntity> roleEntities = roleRepository.findAllByResourcesAndMasterFalse(pageWithSort, resource, name, roleTypeEnums);
-        log.info("Get slave roles by resource: {} and filter: {} was finished successfully", resource, roleFilter);
-        return roleEntities;
-    }
-
-    @Override
-    public Page<RoleEntity> getSlaveRolesByDataCollection(final Pageable pageable, final DataCollectionPermissionFilter filter, final DataCollectionEntity dataCollection) {
-        log.info("Get slave roles by dataCollection: {} and filter: {} was started", dataCollection, filter);
-        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String name = filter.getName() != null ? filter.getName().get(0) : null;
-        final Pageable pageWithSort = updateSort(pageable);
-        final Page<RoleEntity> roleEntities = roleRepository.findAllByDataCollectionsAndMasterFalse(pageWithSort, dataCollection, name);
-        log.info("Get slave roles by dataCollection: {} and filter: {} was finished successfully", dataCollection, filter);
-        return roleEntities;
-    }
-
-    @Override
     public RoleEntity create(final String name, final List<String> permissions, final Boolean master) {
         log.info("Create role with name: {} and permissions: {} and master: {} was started", name, permissions, master);
         checkSystemRole(name);
@@ -145,7 +118,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         final Page<RoleModel> roleModels = StringUtils.isEmpty(searchParam)
                 ? roleRepository.filterModel(pageWithSort, name, roleTypeEnums)
                 : roleRepository.searchModel(pageWithSort, name, roleTypeEnums, searchParam.toLowerCase());
-        final List<Long> listId = roleModels.stream().map(role -> role.getId()).collect(Collectors.toList());
+        final List<Long> listId = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
         final List<RoleUsersModel> users = roleRepository.getUsers(listId);
         final List<RolePermissionsModel> permissions = roleRepository.getPermissions(listId);
         final Map<Long, List<RolePermissionsModel>> mapPermissions = permissions.stream().collect(Collectors.groupingBy(RolePermissionsModel::getId));
@@ -172,7 +145,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     private Page<RoleWithUsersModel> addListUsers(final Map<Long, List<RoleUsersModel>> mapUsers, final Map<Long, List<RolePermissionsModel>> mapPermissions,
                                                   final Page<RoleWithUsersModel> roleModels) {
         for (final RoleWithUsersModel role : roleModels) {
-            final List<String> list = mapUsers.get(role.getId()).stream().map(roleUsersModel -> roleUsersModel.getUserEmail()).collect(Collectors.toList());
+            final List<String> list = mapUsers.get(role.getId()).stream().map(RoleUsersModel::getUserEmail).collect(Collectors.toList());
             role.setUsersEmails(list);
             getPermissions(mapPermissions, role);
         }
@@ -235,25 +208,13 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     }
 
     @Override
-    public Page<RoleEntity> getSlaveRolesByTemplate(final Pageable pageable, final TemplatePermissionFilter filter, final TemplateEntity templateEntity) {
-        log.info("Get slave roles by template with filter: {} and template: {} was started", filter, templateEntity);
-        //TODO: method is not used in project. Should be it removed later?
-        throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
-        final String name = getStringFromFilter(filter.getName().get(0));
-        final Pageable pageWithSort = updateSort(pageable);
-        final Page<RoleEntity> roleEntities = roleRepository.findAllByTemplatesAndMasterFalse(pageWithSort, templateEntity, name);
-        log.info("Get slave roles by template with filter: {} and template: {} was finished successfully", filter, templateEntity);
-        return roleEntities;
-    }
-
-    @Override
     public void delete(final RoleEntity roleEntity) {
         roleRepository.delete(roleEntity);
     }
 
     @Override
     protected List<String> getSupportedSortFields() {
-        return roleRepository.SUPPORTED_SORT_FIELDS;
+        return RoleRepository.SUPPORTED_SORT_FIELDS;
     }
 
     private RoleEntity setPermissions(final RoleEntity role, List<String> permissionsName) {

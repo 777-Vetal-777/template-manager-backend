@@ -4,6 +4,7 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescrip
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateCommitDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
@@ -22,16 +23,19 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     private static final Logger log = LogManager.getLogger(TemplateManagementControllerImpl.class);
     private final TemplateManagementService templateManagementService;
     private final TemplateDescriptorMapper templateDescriptorMapper;
+    private final Encoder encoder;
 
     public TemplateManagementControllerImpl(final TemplateManagementService templateManagementService,
-            final TemplateDescriptorMapper templateDescriptorMapper) {
+                                            final TemplateDescriptorMapper templateDescriptorMapper,
+                                            final Encoder encoder) {
         this.templateManagementService = templateManagementService;
         this.templateDescriptorMapper = templateDescriptorMapper;
+        this.encoder = encoder;
     }
 
     @Override
     public TemplateDescriptor getDescriptor(final String templateId) {
-        final String decodedTemplateId = decodeBase64(templateId);
+        final String decodedTemplateId = encoder.decode(templateId);
         log.info("Request to get descriptor by template id {}.", decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
         return templateDescriptorMapper.map(templateEntity);
@@ -39,7 +43,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public byte[] get(final String templateId) {
-        final String decodedTemplateId = decodeBase64(templateId);
+        final String decodedTemplateId = encoder.decode(templateId);
         log.info("Request to get template file by template id {}.", decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
         log.info("Response on get template file by template id {} successfully processed.", decodedTemplateId);
@@ -59,7 +63,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
             final TemplateCommitDescriptor commit,
             final byte[] data) {
         final String email = principal.getName();
-        final String id = decodeBase64(templateId);
+        final String id = encoder.decode(templateId);
         log.info("Request to create new version of template with id {} received.", id);
         final String newName = descriptor != null ? descriptor.getName() : null;
         final String commitMessage = commit != null ? commit.getMessage() : null;
@@ -81,7 +85,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
 
     @Override
     public TemplateDescriptor delete(final String templateId) {
-        final String decodedTemplateId = decodeBase64(templateId);
+        final String decodedTemplateId = encoder.decode(templateId);
         log.info("Request to delete template with id {} received.",decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.delete(decodedTemplateId);
         log.info("Responce to delete template with id {} successfully processed.",decodedTemplateId);

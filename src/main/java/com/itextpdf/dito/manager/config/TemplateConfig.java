@@ -1,19 +1,19 @@
 package com.itextpdf.dito.manager.config;
 
-import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
+import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
+import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
-import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.sdk.core.preprocess.asset.TemplateAssetRetriever;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,14 +24,17 @@ public class TemplateConfig {
 
     private final ResourceRepository resourceRepository;
     private final TemplateRepository templateRepository;
-    private final ResourceMapper resourceMapper;
+    private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
+    private final Encoder encoder;
 
     public TemplateConfig(final ResourceRepository resourceRepository,
-            TemplateRepository templateRepository,
-            ResourceMapper resourceMapper) {
+                          final TemplateRepository templateRepository,
+                          final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper,
+                          final Encoder encoder) {
         this.resourceRepository = resourceRepository;
         this.templateRepository = templateRepository;
-        this.resourceMapper = resourceMapper;
+        this.encoder = encoder;
+        this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
     }
 
     /**
@@ -63,7 +66,7 @@ public class TemplateConfig {
             @Override
             public InputStream getResourceAsStream(final String resourceId) {
                 final String decodedId = getIdFromTag(resourceId);
-                final ResourceIdDTO resourceIdDTO = resourceMapper.deserialize(decodedId);
+                final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.deserialize(decodedId);
                 final ResourceEntity resourceEntity = resourceRepository
                         .findByNameAndType(resourceIdDTO.getName(), resourceIdDTO.getType())
                         .orElseThrow(() -> new ResourceNotFoundException(resourceIdDTO.getName()));
@@ -77,9 +80,8 @@ public class TemplateConfig {
         };
     }
 
-    @NotNull
     private String getIdFromTag(final String resourceId) {
         final String cuttedId = StringUtils.substringAfter(resourceId, DITO_ASSET_TAG);
-        return resourceMapper.decode(cuttedId);
+        return encoder.decode(cuttedId);
     }
 }

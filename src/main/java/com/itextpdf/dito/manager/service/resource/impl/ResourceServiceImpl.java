@@ -24,7 +24,6 @@ import com.itextpdf.dito.manager.exception.resource.ResourceHasDependenciesExcep
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
-import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -292,16 +291,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     }
 
     @Override
-    public Page<RoleEntity> getRoles(final Pageable pageable, final String resourceName, final ResourceTypeEnum type,
-                                     final RoleFilter roleFilter) {
-        log.info("Ger resource roles by resourceName: {} and type: {} and filter: {} was started", resourceName, type, roleFilter);
-        final ResourceEntity resourceEntity = getResource(resourceName, type);
-        final Page<RoleEntity> roleEntities = roleService.getSlaveRolesByResource(pageable, roleFilter, resourceEntity);
-        log.info("Ger resource roles by resourceName: {} and type: {} and filter: {} was finished successfully", resourceName, type, roleFilter);
-        return roleEntities;
-    }
-
-    @Override
     public Page<ResourceModelWithRoles> list(final Pageable pageable, final ResourceFilter filter, final String searchParam) {
         log.info("Get list resources by filter: {} and searchParam: {} was started", filter, searchParam);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
@@ -326,12 +315,11 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                 ? resourceRepository.getResourceModelFilter(pageWithSort, name, resourceTypes,
                 comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate)
                 : resourceRepository.getResourceModelSearch(pageWithSort, name, resourceTypes, comment, modifiedBy, modifiedOnStartDate, modifiedOnEndDate, searchParam.toLowerCase());
-        final List<Long> listId = resources.stream().map(resource -> resource.getId()).collect(Collectors.toList());
+        final List<Long> listId = resources.stream().map(ResourceModel::getId).collect(Collectors.toList());
         final List<ResourceRoleModel> roles = resourceRepository.getRoles(listId);
         final List<MetaInfoModel> listMetaInfo = resourceRepository.getMetaInfo(listId);
         final Map<Long, List<MetaInfoModel>> map = listMetaInfo.stream().collect(Collectors.groupingBy(MetaInfoModel::getResourceId));
-        final Page<ResourceModelWithRoles> page = addMetaInfo(getListResourceWithRoles(roles, resources), map);
-        return page;
+        return addMetaInfo(getListResourceWithRoles(roles, resources), map);
     }
 
     private Page<ResourceModelWithRoles> addMetaInfo(final Page<ResourceModelWithRoles> page, final Map<Long, List<MetaInfoModel>> map) {

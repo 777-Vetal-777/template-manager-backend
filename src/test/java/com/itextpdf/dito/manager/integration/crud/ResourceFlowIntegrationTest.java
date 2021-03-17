@@ -307,8 +307,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         final RoleFilter filter = new  RoleFilter();
         filter.setName(AUTHOR_NAME);
         final Pageable pageable = PageRequest.of(0, 8);
-        assertTrue(resourceService.getRoles(pageable, IMAGE_NAME,  ResourceTypeEnum.FONT, filter).isEmpty());
-        
     }
 
     @Test

@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
@@ -9,21 +7,16 @@ import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.dto.resource.FileMetaInfoDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
-import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
-import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceLogEntity;
-import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -33,11 +26,11 @@ import java.util.stream.Collectors;
 public class ResourceMapperImpl implements ResourceMapper {
     private static final Logger log = LogManager.getLogger(ResourceMapperImpl.class);
     private final RoleMapper roleMapper;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private PermissionCheckHandler permissionHandler;
+    private final PermissionCheckHandler permissionHandler;
 
 
-    public ResourceMapperImpl(final RoleMapper roleMapper, final PermissionCheckHandler permissionHandler) {
+    public ResourceMapperImpl(final RoleMapper roleMapper,
+                              final PermissionCheckHandler permissionHandler) {
         this.roleMapper = roleMapper;
         this.permissionHandler = permissionHandler;
     }
@@ -150,58 +143,4 @@ public class ResourceMapperImpl implements ResourceMapper {
         return fileMetaInfoDTO;
     }
 
-    //TODO In the future, replace this code with an integration code.
-    @Override
-    public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
-        log.info("Encode resource with name: {} and type: {} and subName: {} was started", name, resourceTypeEnum, subName);
-        String result;
-
-        final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
-        resourceIdDTO.setName(name);
-        resourceIdDTO.setType(resourceTypeEnum);
-        resourceIdDTO.setSubName(subName);
-        final String json = serialize(resourceIdDTO);
-        result = encode(json);
-
-        log.info("Encode resource with name: {} and type: {} and subName: {} was finished successfully", name, resourceTypeEnum, subName);
-        return result;
-    }
-
-    //TODO In the future, replace this code with an integration code.
-    @Override
-    public ResourceIdDTO deserialize(final String data) {
-        final ResourceIdDTO result;
-        try {
-            result = objectMapper.readValue(data, ResourceIdDTO.class);
-        } catch (JsonProcessingException e) {
-            log.info(e.getMessage());
-            throw new TemplatePreviewGenerationException(new StringBuilder("Exception when writing resources from the template. Exception: ").append(e.getMessage()).toString());
-        }
-        return result;
-    }
-
-    //TODO In the future, replace this code with an integration code.
-    @Override
-    public String serialize(final Object data) {
-        final String result;
-
-        try {
-            result = objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            log.info(e.getMessage());
-            throw new TemplatePreviewGenerationException(new StringBuilder("Exception when reading resources from the template. Exception: ").append(e.getMessage()).toString());
-        }
-
-        return result;
-    }
-
-    @Override
-    public String encode(final String name) {
-        return Base64.getUrlEncoder().encodeToString(name.getBytes());
-    }
-
-    @Override
-    public String decode(final String name) {
-        return new String(Base64.getUrlDecoder().decode(name));
-    }
 }

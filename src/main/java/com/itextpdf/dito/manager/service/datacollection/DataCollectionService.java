@@ -1,11 +1,9 @@
 package com.itextpdf.dito.manager.service.datacollection;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
-import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +28,6 @@ public interface DataCollectionService {
     void delete(String name, String userEmail);
 
     DataCollectionEntity update(String name, DataCollectionEntity entity, String userEmail);
-
-    Page<RoleEntity> getRoles(Pageable pageable, String name, DataCollectionPermissionFilter filter);
 
     DataCollectionEntity applyRole(String resourceName, String roleName, List<String> permissions);
 

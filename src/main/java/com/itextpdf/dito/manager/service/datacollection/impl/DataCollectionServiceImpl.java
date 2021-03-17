@@ -24,7 +24,6 @@ import com.itextpdf.dito.manager.exception.datacollection.InvalidDataCollectionE
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionFilter;
-import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -206,7 +205,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final Page<DataCollectionModel> dataCollectionModels = StringUtils.isEmpty(searchParam)
                 ? dataCollectionRepository.filter(pageWithSort, name, modifiedOnStartDate, modifiedOnEndDate, modifiedBy, types)
                 : dataCollectionRepository.search(pageWithSort, name, modifiedOnStartDate, modifiedOnEndDate, modifiedBy, types, searchParam.toLowerCase());
-        final List<Long> listId = dataCollectionModels.stream().map(data -> data.getId()).collect(Collectors.toList());
+        final List<Long> listId = dataCollectionModels.stream().map(DataCollectionModel::getId).collect(Collectors.toList());
         final List<DataCollectionRoleModel> roleModels = dataCollectionRepository.getListRoleWithPermissions(listId);
         return getListDataDataCollectionsWithRoles(roleModels, dataCollectionModels);
     }
@@ -362,15 +361,6 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         logDataCollectionUpdate(savedCollection, currentUser);
         log.info("Update dataCollection by dataCollectionName: {} and params: {} was finished successfully", name, updatedEntity);
         return savedCollection;
-    }
-
-    @Override
-    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final DataCollectionPermissionFilter filter) {
-        log.info("Get dataCollection roles by name: {} and filter: {} was started", name, filter);
-        final DataCollectionEntity dataCollectionEntity = findByName(name);
-        final Page<RoleEntity> roleEntities = roleService.getSlaveRolesByDataCollection(pageable, filter, dataCollectionEntity);
-        log.info("Get dataCollection roles by name: {} and filter: {} was finished successfully", name, filter);
-        return roleEntities;
     }
 
     @Override

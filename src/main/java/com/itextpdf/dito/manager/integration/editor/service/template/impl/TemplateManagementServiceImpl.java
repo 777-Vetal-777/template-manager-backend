@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.integration.editor.service.template.impl;
 
-import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
-import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
@@ -9,6 +8,8 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.integration.InconsistencyException;
+import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
+import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
@@ -36,24 +37,27 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     private final TemplateAssetRetriever resourceAssetRetriever;
     private final TemplateAssetRetriever templateAssetRetriever;
     private final TemplateRepository templateRepository;
-    private final ResourceMapper resourceMapper;
+    private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
     private final ResourceService resourceService;
     private final TemplateLoader templateLoader;
+    private final Encoder encoder;
 
     public TemplateManagementServiceImpl(final TemplateService templateService,
                                          final TemplateAssetRetriever resourceAssetRetriever,
                                          final TemplateAssetRetriever templateAssetRetriever,
                                          final TemplateRepository templateRepository,
-                                         final ResourceMapper resourceMapper,
                                          final ResourceService resourceService,
-                                         final TemplateLoader templateLoader) {
+                                         final TemplateLoader templateLoader,
+                                         final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper,
+                                         final Encoder encoder) {
         this.templateService = templateService;
         this.resourceAssetRetriever = resourceAssetRetriever;
         this.templateAssetRetriever = templateAssetRetriever;
-        this.resourceMapper = resourceMapper;
         this.resourceService = resourceService;
         this.templateRepository = templateRepository;
         this.templateLoader = templateLoader;
+        this.encoder = encoder;
+        this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
     }
 
     @Override
@@ -120,8 +124,8 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
         try {
             final List<TemplateDependency> dependencies = retriever.getDependencies(new ByteArrayInputStream(data));
             for (final TemplateDependency td : dependencies) {
-                final String decodedUrl = resourceMapper.decode(td.getUri().toString().replace("dito-asset://", ""));
-                final ResourceIdDTO dto = resourceMapper.deserialize(decodedUrl);
+                final String decodedUrl = encoder.decode(td.getUri().toString().replace("dito-asset://", ""));
+                final ResourceIdDTO dto = resourceLeafDescriptorMapper.deserialize(decodedUrl);
                 final ResourceEntity resourceEntity = resourceService.get(dto.getName(), dto.getType());
                 if (Objects.equals(ResourceTypeEnum.STYLESHEET, dto.getType())) {
                     final Set<ResourceFileEntity> styleSheetEntitySet = provideConsistency(resourceEntity.getLatestFile().get(0).getFile());

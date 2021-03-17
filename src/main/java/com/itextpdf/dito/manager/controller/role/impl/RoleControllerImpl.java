@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.role.impl;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.role.RoleController;
@@ -27,11 +28,14 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
     private static final Logger log = LogManager.getLogger(RoleControllerImpl.class);
     private final RoleService roleService;
     private final RoleMapper roleMapper;
+    private final Encoder encoder;
 
     public RoleControllerImpl(final RoleService roleService,
-                              final RoleMapper roleMapper) {
+                              final RoleMapper roleMapper,
+                              final Encoder encoder) {
         this.roleService = roleService;
         this.roleMapper = roleMapper;
+        this.encoder = encoder;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
                                           @Valid final RoleUpdateRequestDTO roleUpdateRequestDTO) {
         log.info("Update role by name: {} and params: {} was started", name, roleUpdateRequestDTO);
         final RoleEntity roleEntity = roleMapper.map(roleUpdateRequestDTO);
-        final RoleEntity updatedRole = roleService.update(decodeBase64(name), roleEntity, roleUpdateRequestDTO.getPermissions());
+        final RoleEntity updatedRole = roleService.update(encoder.decode(name), roleEntity, roleUpdateRequestDTO.getPermissions());
         log.info("Update role by name: {} and params: {} was finished successfully", name, roleUpdateRequestDTO);
         return new ResponseEntity<>(
                 roleMapper.map(updatedRole),
@@ -73,7 +77,7 @@ public class RoleControllerImpl extends AbstractController implements RoleContro
     @Override
     public ResponseEntity<Void> delete(final String name) {
         log.info("Delete role by name: {} was started", name);
-        roleService.deleteMasterRole(decodeBase64(name));
+        roleService.deleteMasterRole(encoder.decode(name));
         log.info("Delete role by name: {} was finished successfully", name);
         return new ResponseEntity<>(HttpStatus.OK);
     }

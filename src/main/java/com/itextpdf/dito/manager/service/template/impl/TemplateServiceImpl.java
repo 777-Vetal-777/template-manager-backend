@@ -26,11 +26,6 @@ import com.itextpdf.dito.manager.exception.template.TemplateInvalidNameException
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
-import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
-import com.itextpdf.dito.manager.model.datacollection.DataCollectionModel;
-import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
-import com.itextpdf.dito.manager.model.datacollection.DataCollectionRoleModel;
-import com.itextpdf.dito.manager.model.resource.ResourceRoleModel;
 import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.TemplateRoleModel;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
@@ -238,7 +233,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                 : templateRepository
                 .search(pageWithSort, name, modifiedBy, types, dataCollectionName, editedOnStartDate,
                         editedOnEndDate, searchParam.toLowerCase());
-        final List<Long> listId = templateEntities.stream().map(template -> template.getId()).collect(Collectors.toList());
+        final List<Long> listId = templateEntities.stream().map(TemplateModel::getId).collect(Collectors.toList());
         final List<TemplateRoleModel> roles = templateRepository.getRoles(listId);
         final Page<TemplateModelWithRoles> templateModelWithRoles = getListTemplatesWithRoles(roles, templateEntities);
         log.info("Get all templates by filter: {} and search: {} was finished successfully", templateFilter, searchParam);
@@ -538,12 +533,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         fileEntity.getInstance().addAll(developerStageInstances);
         return fileEntity;
-    }
-
-    @Override
-    public Page<RoleEntity> getRoles(final Pageable pageable, final String name, final TemplatePermissionFilter filter) {
-        final TemplateEntity templateEntity = findByName(name);
-        return roleService.getSlaveRolesByTemplate(pageable, filter, templateEntity);
     }
 
     @Override

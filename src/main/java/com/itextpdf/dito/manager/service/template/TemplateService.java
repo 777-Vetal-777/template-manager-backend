@@ -1,19 +1,16 @@
 package com.itextpdf.dito.manager.service.template;
 
-import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
-import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.itextpdf.dito.manager.model.template.TemplateModel;
 
 import java.util.List;
 
@@ -47,8 +44,6 @@ public interface TemplateService {
     TemplateEntity createNewVersionAsCopy(TemplateFileEntity fileEntityToCopy, UserEntity userEntity, String comment);
 
     TemplateEntity rollbackTemplate(TemplateEntity existingTemplateEntity, TemplateFileEntity templateVersionToBeRevertedTo, UserEntity userEntity);
-
-    Page<RoleEntity> getRoles(Pageable pageable, String name, TemplatePermissionFilter filter);
 
     TemplateEntity applyRole(String templateName, String roleName, List<String> permissions, String email);
 

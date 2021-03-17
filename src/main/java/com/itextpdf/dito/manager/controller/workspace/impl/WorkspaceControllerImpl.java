@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.workspace.impl;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.component.mapper.license.LicenseMapper;
 import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -35,18 +36,21 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     private final WorkspaceMapper workspaceMapper;
     private final LicenseService licenseService;
     private final LicenseMapper licenseMapper;
+    private final Encoder encoder;
 
     public WorkspaceControllerImpl(final WorkspaceService workspaceService, final WorkspaceMapper workspaceMapper,
-                                   final LicenseService licenseService, final LicenseMapper licenseMapper) {
+                                   final LicenseService licenseService, final LicenseMapper licenseMapper,
+                                   final Encoder encoder) {
         this.workspaceService = workspaceService;
         this.workspaceMapper = workspaceMapper;
         this.licenseService = licenseService;
         this.licenseMapper = licenseMapper;
+        this.encoder = encoder;
     }
 
     @Override
     public ResponseEntity<Boolean> checkIsWorkspaceWithNameExist(final String name) {
-        return new ResponseEntity<>(workspaceService.checkIsWorkspaceWithNameExist(decodeBase64(name)), HttpStatus.OK);
+        return new ResponseEntity<>(workspaceService.checkIsWorkspaceWithNameExist(encoder.decode(name)), HttpStatus.OK);
     }
 
     @Override
@@ -55,7 +59,6 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
         return new ResponseEntity<>(isLicenseValid, HttpStatus.OK);
     }
 
-    //TODO Remove the workspace parameter after support for multiple workspaces is implemented.
     @Override
     public ResponseEntity<WorkspaceDTO> create(final String name, final String timezone, final String language, final String adjustForDaylight, final String mainDevelopInstance, final MultipartFile license, final Principal principal) {
         final Map<String, String> params = new HashMap<>();
@@ -68,7 +71,6 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
                 throw new WorkspaceHasBlankParameterException(keyName);
             }
         });
-        //TODO FIX String as boolean, find solution to improve. Request part support only string
         final boolean adjustForDayLight = !Objects.isNull(adjustForDaylight);
         final WorkspaceEntity workspaceEntity = workspaceMapper.map(name, language, timezone, adjustForDayLight);
         final byte[] licenseFile = getBytesFromMultipart(license);
@@ -84,26 +86,26 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<WorkspaceDTO> get(final String name) {
-        return new ResponseEntity<>(workspaceMapper.map(workspaceService.get(decodeBase64(name))), HttpStatus.OK);
+        return new ResponseEntity<>(workspaceMapper.map(workspaceService.get(encoder.decode(name))), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<WorkspaceDTO> update(final String name, final WorkspaceDTO workspaceDTO) {
         WorkspaceEntity workspaceEntity = workspaceMapper.map(workspaceDTO);
-        return new ResponseEntity<>(workspaceMapper.map(workspaceService.update(decodeBase64(name), workspaceEntity)),
+        return new ResponseEntity<>(workspaceMapper.map(workspaceService.update(encoder.decode(name), workspaceEntity)),
                 HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<PromotionPathDTO> getPromotionPath(final String workspaceName) {
-        final PromotionPathEntity promotionPathEntity = workspaceService.getPromotionPath(decodeBase64(workspaceName));
+        final PromotionPathEntity promotionPathEntity = workspaceService.getPromotionPath(encoder.decode(workspaceName));
         final PromotionPathDTO promotionPathDTO = workspaceMapper.map(promotionPathEntity);
         return new ResponseEntity<>(promotionPathDTO, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<PromotionPathDTO> updatePromotionPath(final String workspaceName, final PromotionPathDTO promotionPathDTO) {
-        final PromotionPathEntity promotionPathEntity = workspaceService.updatePromotionPath(decodeBase64(workspaceName), workspaceMapper.map(promotionPathDTO));
+        final PromotionPathEntity promotionPathEntity = workspaceService.updatePromotionPath(encoder.decode(workspaceName), workspaceMapper.map(promotionPathDTO));
         final PromotionPathDTO result = workspaceMapper.map(promotionPathEntity);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -111,13 +113,13 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<List<String>> getStageNames(final String workspaceName) {
-        final List<String> stageNames = workspaceService.getStageNames(decodeBase64(workspaceName));
+        final List<String> stageNames = workspaceService.getStageNames(encoder.decode(workspaceName));
         return new ResponseEntity<>(stageNames, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<LicenseDTO> uploadLicense(final String workspaceName, final MultipartFile multipartFile, final Principal principal) {
-        final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
+        final WorkspaceEntity workspaceEntity = workspaceService.get(encoder.decode(workspaceName));
         final byte[] data = getBytesFromMultipart(multipartFile);
         final String fileName = multipartFile.getOriginalFilename();
         return new ResponseEntity<>(licenseMapper.map(licenseService.uploadLicense(workspaceEntity, data, fileName)),
@@ -126,7 +128,7 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
 
     @Override
     public ResponseEntity<LicenseDTO> getLicense(final String workspaceName, final Principal principal) {
-        final WorkspaceEntity workspaceEntity = workspaceService.get(decodeBase64(workspaceName));
+        final WorkspaceEntity workspaceEntity = workspaceService.get(encoder.decode(workspaceName));
         return new ResponseEntity<>(licenseMapper.map(licenseService.getWorkspaceLicense(workspaceEntity)),
                 HttpStatus.OK);
     }

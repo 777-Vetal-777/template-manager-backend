@@ -226,8 +226,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         list.add("name");
         filter.setName(list); 
         final Pageable pageable = PageRequest.of(0, 8);
-        assertTrue(dataCollectionService.getRoles(pageable, NAME, filter).isEmpty());
-        
+
         //UPDATE by name
         final String newCollectionName = "new collectionName";
 
@@ -272,7 +271,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(type)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest());
-        assertTrue(!dataCollectionRepository.existsByName(NAME));
+        assertFalse(dataCollectionRepository.existsByName(NAME));
     }
 
     @Test
@@ -317,7 +316,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
-        assertTrue(!dataCollectionRepository.existsByName(notExistingCollectionName));
+        assertFalse(dataCollectionRepository.existsByName(notExistingCollectionName));
     }
     
     @Test

@@ -54,7 +54,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Override
     public WorkspaceEntity create(final WorkspaceEntity workspace, final byte[] data, final String fileName, final String author, final String defaultDevelopInstance) {
         log.info("Create workspace: {} by author: {} was started", workspace, author);
-        // TODO: 'if' block below will be removed in the future. Added in order to provide singular workspace support.
         if (!workspaceRepository.findAll().isEmpty()) {
             throw new OnlyOneWorkspaceAllowedException();
         }
@@ -122,7 +121,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.getStageNames(workspaceName);
     }
 
-    //TODO When support for multiple workspaces is implemented, it will be necessary to check the user's workspaces, Not all.
     @Override
     public Boolean checkIsWorkspaceWithNameExist(final String workspaceName) {
         return workspaceRepository.existsByName(workspaceName);
@@ -147,7 +145,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
         filledStageEntity.setName(thinStageEntity.getName());
         filledStageEntity.setPromotionPath(promotionPathEntity);
-        filledStageEntity.setSequenceOrder(Integer.valueOf(i));
+        filledStageEntity.setSequenceOrder(i);
         for (final InstanceEntity thinInstanceEntity : thinStageEntity.getInstances()) {
             filledStageEntity.addInstance(instanceService.get(thinInstanceEntity.getName()));
         }
@@ -169,7 +167,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private PromotionPathEntity buildDefaultPromotionPath(final InstanceEntity instanceEntity) {
         final StageEntity stageEntity = new StageEntity();
         stageEntity.setName("Development");
-        stageEntity.setSequenceOrder(Integer.valueOf(0));
+        stageEntity.setSequenceOrder(0);
         stageEntity.addInstance(instanceEntity);
 
         final PromotionPathEntity promotionPathEntity = new PromotionPathEntity();

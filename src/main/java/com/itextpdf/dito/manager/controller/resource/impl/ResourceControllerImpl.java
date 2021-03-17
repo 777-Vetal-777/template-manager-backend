@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.controller.resource.impl;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.component.mapper.dependency.DependencyMapper;
 import com.itextpdf.dito.manager.component.mapper.file.FileVersionMapper;
 import com.itextpdf.dito.manager.component.mapper.permission.PermissionMapper;
@@ -69,6 +70,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final PermissionMapper permissionMapper;
     private final FileVersionMapper fileVersionMapper;
     private final Map<ResourceTypeEnum, Long> sizeLimit = new EnumMap<>(ResourceTypeEnum.class);
+    private final Encoder encoder;
 
     public ResourceControllerImpl(
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
@@ -82,7 +84,8 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final ResourcePermissionService resourcePermissionService,
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
-            final FileVersionMapper fileVersionMapper) {
+            final FileVersionMapper fileVersionMapper,
+            final Encoder encoder) {
         this.supportedExtensions.put(IMAGE, supportedPictureExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.FONT, supportedFontExtensions);
@@ -95,6 +98,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourcePermissionService = resourcePermissionService;
         this.permissionMapper = permissionMapper;
         this.fileVersionMapper = fileVersionMapper;
+        this.encoder = encoder;
     }
 
     @Override
@@ -129,7 +133,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<Page<FileVersionDTO>> getVersions(final Principal principal, final Pageable pageable,
                                                             final String encodedName, final String type, final VersionFilter filter, final String searchParam) {
-        final String decodedName = decodeBase64(encodedName);
+        final String decodedName = encoder.decode(encodedName);
         log.info("Get resource versions by resourceName: {} and resourceType: {} and filter: {} was started", decodedName, type, filter);
         final Page<FileVersionDTO> versionsDTOs = fileVersionMapper.map(resourceVersionsService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
@@ -159,7 +163,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<Page<DependencyDTO>> list(final Pageable pageable, final String resource, final String type,
                                                     final String searchParam, final DependencyFilter filter) {
         log.info("Get list dependencies by resourceName: {} and type: {} and searchParam: {} and filter: {} was started", resource, type, searchParam, filter);
-        final String decodedName = decodeBase64(resource);
+        final String decodedName = encoder.decode(resource);
         final Page<DependencyDTO> dependencyDTOs = dependencyMapper.map(resourceDependencyService
                 .list(pageable, decodedName, parseResourceTypeFromPath(type), filter, searchParam));
         log.info("Get list dependencies by resourceName: {} and type: {} and searchParam: {} and filter: {} was finished successfully", resource, type, searchParam, filter);
@@ -169,7 +173,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<List<DependencyDTO>> list(final String name, final String type) {
         log.info("Get list dependencies by resourceName: {} and type: {} was started", name, type);
-        final String decodedName = decodeBase64(name);
+        final String decodedName = encoder.decode(name);
         final ResourceTypeEnum typeEnum = parseResourceTypeFromPath(type);
         final List<DependencyDTO> dependencyDTOs = dependencyMapper
                 .map(resourceDependencyService.list(decodedName, typeEnum));
@@ -190,7 +194,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<ResourceDTO> get(final String name, final String type, final Principal principal) {
         log.info("Get resource by name: {} and type: {} was started", name, type);
-        final ResourceEntity entity = resourceService.get(decodeBase64(name), parseResourceTypeFromPath(type));
+        final ResourceEntity entity = resourceService.get(encoder.decode(name), parseResourceTypeFromPath(type));
         log.info("Get resource by name: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(resourceMapper.map(entity, principal.getName()), HttpStatus.OK);
     }
@@ -218,7 +222,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
                                               final Principal principal) {
         log.info("Update resource by name: {} and updateRequestDTO: {} was started", name, updateRequestDTO);
         final ResourceEntity entity = resourceService
-                .update(decodeBase64(name), resourceMapper.map(updateRequestDTO), principal.getName());
+                .update(encoder.decode(name), resourceMapper.map(updateRequestDTO), principal.getName());
         final ResourceDTO dto = resourceMapper.map(entity, principal.getName());
         log.info("Update resource by name: {} and updateRequestDTO: {} was finished successfully", name, updateRequestDTO);
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -229,7 +233,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
                                                  @Valid final ApplyRoleRequestDTO applyRoleRequestDTO, final Principal principal) {
         log.info("Apply role by resourceName: {} and type: {} and applyRoleRequestDTO: {} was started", name, type, applyRoleRequestDTO);
         final ResourceEntity resourceEntity = resourceService
-                .applyRole(decodeBase64(name), parseResourceTypeFromPath(type),
+                .applyRole(encoder.decode(name), parseResourceTypeFromPath(type),
                         applyRoleRequestDTO.getRoleName(),
                         applyRoleRequestDTO.getPermissions());
         log.info("Apply role by resourceName: {} and type: {} and applyRoleRequestDTO: {} was finished successfully", name, type, applyRoleRequestDTO);
@@ -241,7 +245,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
                                                                 final String type, final ResourcePermissionFilter filter, final String search) {
         log.info("Get roles by resourceName: {} and type: {} and filter: {} and searchParam: {} was started", name, type, filter, search);
         final Page<ResourcePermissionModel> resourcePermissions = resourcePermissionService
-                .getRoles(pageable, decodeBase64(name), parseResourceTypeFromPath(type), filter, search);
+                .getRoles(pageable, encoder.decode(name), parseResourceTypeFromPath(type), filter, search);
         log.info("Get roles by resourceName: {} and type: {} and filter: {} and searchParam: {} was finished successfully", name, type, filter, search);
         return new ResponseEntity<>(permissionMapper.mapResourcePermissions(resourcePermissions), HttpStatus.OK);
     }
@@ -251,7 +255,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
                                                   final String roleName, final Principal principal) {
         log.info("Delete role by resourceName: {} and type: {} and roleName: {} was started", name, type, roleName);
         final ResourceEntity resourceEntity = resourceService
-                .detachRole(decodeBase64(name), parseResourceTypeFromPath(type), decodeBase64(roleName));
+                .detachRole(encoder.decode(name), parseResourceTypeFromPath(type), encoder.decode(roleName));
         log.info("Delete role by resourceName: {} and type: {} and roleName: {} was finished", name, type, roleName);
         return new ResponseEntity<>(resourceMapper.map(resourceEntity, principal.getName()), HttpStatus.OK);
     }
@@ -259,15 +263,15 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     @Override
     public ResponseEntity<Void> delete(final Principal principal, final String name, final String type) {
         log.info("Delete resource by resourceName: {} and type: {} was started", name, type);
-        resourceService.delete(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName());
+        resourceService.delete(encoder.decode(name), parseResourceTypeFromPath(type), principal.getName());
         log.info("Delete resource by resourceName: {} and type: {} was finished successfully", name, type);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ResourceDTO> rollbackVersion(final Principal principal, final String name, final String type, final Long version) {
-        log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was started", decodeBase64(name), type, version);
-        final ResourceEntity rollBackEntity = resourceVersionsService.rollbackVersion(decodeBase64(name), parseResourceTypeFromPath(type), principal.getName(), version);
+        log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was started", name, type, version);
+        final ResourceEntity rollBackEntity = resourceVersionsService.rollbackVersion(encoder.decode(name), parseResourceTypeFromPath(type), principal.getName(), version);
         log.info("Rollback resource to selected version by name: {} and type: {} and version: {} was finished successfully", name, type, version);
         return new ResponseEntity<>(resourceMapper.map(rollBackEntity, principal.getName()), HttpStatus.OK);
     }
