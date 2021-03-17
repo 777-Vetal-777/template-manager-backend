@@ -47,6 +47,9 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
             ResourceTypeEnum.STYLESHEET, Set.of("E8_US66_2_DELETE_RESOURCE_STYLESHEET", "E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET", "E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET", "E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET")
     );
 
+    private final String templateDeleteCompositionPermission = "E9_US127_DELETE_TEMPLATE_COMPOSITION";
+    private final String templateDeleteStandardPermission = "E9_US126_DELETE_TEMPLATE_STANDARD";
+
     public PermissionCheckHandlerImpl(final UserService userService) {
         this.userService = userService;
     }
@@ -102,6 +105,11 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedTemplatePermissions.get(templateModel.getType()));
+            if (templateModel.getType().equals(TemplateTypeEnum.COMPOSITION)) {
+                permissions.add(templateDeleteCompositionPermission);
+            } else {
+                permissions.add(templateDeleteStandardPermission);
+            }
         } else {
             permissions.addAll(getPermissions(templateModel, userEntity));
         }
@@ -114,6 +122,11 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<String> permissions = new HashSet<>();
         if (isUserAdmin(userNames)) {
             permissions.addAll(allowedTemplatePermissions.get(templateEntity.getType()));
+            if (templateEntity.getType().equals(TemplateTypeEnum.COMPOSITION)) {
+                permissions.add(templateDeleteCompositionPermission);
+            } else {
+                permissions.add(templateDeleteStandardPermission);
+            }
         } else {
             permissions.addAll(getPermissions(templateEntity, userEntity));
         }
@@ -190,11 +203,12 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         final Set<RoleEntity> differentRoles = getDifferentRoles(userRoles, sameRoles);
 
         if (!sameRoles.isEmpty()) {
-            permissions.addAll(getAllPermissions(userRoles, templateRoles,differentRoles, templateEntity.getType().toString()));
+            permissions.addAll(getAllPermissions(userRoles, templateRoles, differentRoles, templateEntity.getType().toString()));
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
             permissions = allowedTemplatePermissions.get(templateEntity.getType()).stream().filter(userPermissions::contains).collect(Collectors.toSet());
         }
+        addTemplateDeletePermissions(userRoles, permissions, templateEntity.getType());
         return permissions;
     }
 
@@ -209,6 +223,21 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         } else {
             final Set<String> userPermissions = getAllPermissionsByUserRoles(userRoles);
             permissions = allowedTemplatePermissions.get(templateModel.getType()).stream().filter(userPermissions::contains).collect(Collectors.toSet());
+        }
+        addTemplateDeletePermissions(userRoles, permissions, templateModel.getType());
+        return permissions;
+    }
+
+    private Set<String> addTemplateDeletePermissions(final Set<RoleEntity> userRoles, final Set<String> permissions, final TemplateTypeEnum typeEnum) {
+        for (final RoleEntity roleEntity : userRoles) {
+            for (final PermissionEntity permissionEntity : roleEntity.getPermissions()) {
+                if (TemplateTypeEnum.COMPOSITION.equals(typeEnum) && permissionEntity.getName().equals(templateDeleteCompositionPermission)) {
+                    permissions.add(templateDeleteCompositionPermission);
+                }
+                if (!TemplateTypeEnum.COMPOSITION.equals(typeEnum) && permissionEntity.getName().equals(templateDeleteStandardPermission)) {
+                    permissions.add(templateDeleteStandardPermission);
+                }
+            }
         }
         return permissions;
     }
@@ -283,10 +312,10 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
             }
         }
         final Set<String> allowedPermissions = getAllowedPermissionsByType(type);
-        for(final RoleEntity differentRole:differentRoles){
-            for(final PermissionEntity permissionEntity:differentRole.getPermissions()){
-                for(final String permission:allowedPermissions){
-                    if(permissionEntity.getName().equals(permission)){
+        for (final RoleEntity differentRole : differentRoles) {
+            for (final PermissionEntity permissionEntity : differentRole.getPermissions()) {
+                for (final String permission : allowedPermissions) {
+                    if (permissionEntity.getName().equals(permission)) {
                         permissions.add(permission);
                     }
                 }
@@ -314,10 +343,11 @@ public class PermissionCheckHandlerImpl implements PermissionCheckHandler {
         return permissions;
     }
 
-    private Set<RoleEntity> getDifferentRoles(final Set<RoleEntity> userRoles, final Set<RoleEntity> sameRoles){
+    private Set<RoleEntity> getDifferentRoles(final Set<RoleEntity> userRoles, final Set<RoleEntity> sameRoles) {
         final Set<RoleEntity> differentRoles = new HashSet<>(userRoles);
         differentRoles.removeIf(roleEntity -> {
-            return sameRoles.stream().anyMatch(sameRole -> sameRole.getName().equals(roleEntity.getName())); });
+            return sameRoles.stream().anyMatch(sameRole -> sameRole.getName().equals(roleEntity.getName()));
+        });
 
         return differentRoles;
     }
