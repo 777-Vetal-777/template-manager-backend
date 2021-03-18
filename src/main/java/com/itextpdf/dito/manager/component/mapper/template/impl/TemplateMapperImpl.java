@@ -3,7 +3,6 @@ package com.itextpdf.dito.manager.component.mapper.template.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.mapper.template.TemplateMapper;
 import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
 import com.itextpdf.dito.manager.dto.template.TemplateDTO;
@@ -30,11 +29,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import com.itextpdf.dito.manager.model.template.TemplateModel;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -44,13 +41,11 @@ import java.util.stream.Collectors;
 
 @Component
 public class TemplateMapperImpl implements TemplateMapper {
-    private final RoleMapper roleMapper;
     private final ObjectMapper objectMapper;
     private static final Logger log = LogManager.getLogger(TemplateMapperImpl.class);
     private PermissionCheckHandler permissionHandler;
 
-    public TemplateMapperImpl(final RoleMapper roleMapper, final ObjectMapper objectMapper, final PermissionCheckHandler permissionHandler) {
-        this.roleMapper = roleMapper;
+    public TemplateMapperImpl(final ObjectMapper objectMapper, final PermissionCheckHandler permissionHandler) {
         this.objectMapper = objectMapper;
         this.permissionHandler = permissionHandler;
     }
@@ -84,9 +79,9 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setCreatedOn(firstTemplateLog.getDate());
             result.setComment(lastTemplateLog.getComment());
         }
-        final Collection<TemplateFileEntity> files = entity.getFiles();
+        final List<TemplateFileEntity> files = entity.getFiles();
         if (Objects.nonNull(files) && !files.isEmpty()) {
-            final TemplateFileEntity fileEntity = files.stream().findFirst().get();
+            final TemplateFileEntity fileEntity = files.get(0);
             result.setVersion(fileEntity.getVersion());
             result.setComment(fileEntity.getComment());
         }
@@ -139,9 +134,9 @@ public class TemplateMapperImpl implements TemplateMapper {
         result.setType(entity.getType());
         final List<TemplateFileEntity> templateFiles = entity.getFiles();
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
-        final Collection<TemplateFileEntity> files = entity.getFiles();
+        final List<TemplateFileEntity> files = entity.getFiles();
         if (Objects.nonNull(files) && !files.isEmpty()) {
-            final TemplateFileEntity fileEntity = files.stream().findFirst().get();
+            final TemplateFileEntity fileEntity = files.get(0);
             result.setVersion(fileEntity.getVersion());
             result.setDeployedVersions(files.stream()
                     .map(this::map)
@@ -176,7 +171,7 @@ public class TemplateMapperImpl implements TemplateMapper {
             result.setBlocked(true);
             result.setBlockedBy(new StringBuilder().append(blockedUser.getFirstName()).append(" ").append(blockedUser.getLastName()).toString());
         }
-        result.setDeployedVersions(getDeployedVersions(entity));
+        result.setDeployedVersions(mapToDeployedVersions(entity));
         result.setPermissions(permissionHandler.getPermissionsByTemplate(entity, email));
         log.info("Convert template: {} to templateMetadataDTO was finished successfully", entity);
         return result;
@@ -255,7 +250,8 @@ public class TemplateMapperImpl implements TemplateMapper {
         return templateDeployedVersionDTO;
     }
 
-    private List<TemplateDeployedVersionDTO> getDeployedVersions(final TemplateEntity templateEntity) {
+    @Override
+    public List<TemplateDeployedVersionDTO> mapToDeployedVersions(final TemplateEntity templateEntity) {
         final List<StageEntity> stagesOnPromotionPath = Optional.ofNullable(templateEntity.getLatestFile().getStage())
                 .map(StageEntity::getPromotionPath)
                 .map(PromotionPathEntity::getStages)

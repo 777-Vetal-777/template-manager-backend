@@ -253,7 +253,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "404", description = "Template version not found."),
             @ApiResponse(responseCode = "403", description = "Template already blocked")
     })
-    ResponseEntity<TemplateDeployedVersionDTO> promote(
+    ResponseEntity<List<TemplateDeployedVersionDTO>> promote(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String name,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 
@@ -276,7 +276,7 @@ public interface TemplateController {
             @ApiResponse(responseCode = "200", description = "Template version undeployed successfully."),
             @ApiResponse(responseCode = "404", description = "Template version not found.")
     })
-    ResponseEntity<TemplateDeployedVersionDTO> undeploy(
+    ResponseEntity<List<TemplateDeployedVersionDTO>> undeploy(
             @Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
             @Parameter(description = "Template version number", required = true) @PathVariable(TEMPLATE_VERSION_PATH_VARIABLE) Long templateVersion);
 

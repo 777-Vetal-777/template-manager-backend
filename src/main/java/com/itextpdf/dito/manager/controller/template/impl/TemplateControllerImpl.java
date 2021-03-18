@@ -282,19 +282,19 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<TemplateDeployedVersionDTO> promote(final String name, final Long version) {
+    public ResponseEntity<List<TemplateDeployedVersionDTO>> promote(final String name, final Long version) {
         log.info("Promote template version to next stage by name: {} was started", name);
         final TemplateFileEntity promotedVersion = templateDeploymentService.promote(encoder.decode(name), version);
         log.info("Promote template version to next stage by name: {} was finished successfully", name);
-        return new ResponseEntity<>(templateMapper.map(promotedVersion), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToDeployedVersions(promotedVersion.getTemplate()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<TemplateDeployedVersionDTO> undeploy(final String name, final Long version) {
+    public ResponseEntity<List<TemplateDeployedVersionDTO>> undeploy(final String name, final Long version) {
         log.info("Undeploy template version from promotion path by name: {} and version: {} was started", name, version);
         final TemplateFileEntity undeployedVersion = templateDeploymentService.undeploy(encoder.decode(name), version);
         log.info("Undeploy template version from promotion path by name: {} and version: {} was finished successfully", name, version);
-        return new ResponseEntity<>(templateMapper.map(undeployedVersion), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.mapToDeployedVersions(undeployedVersion.getTemplate()), HttpStatus.OK);
     }
 
     @Override

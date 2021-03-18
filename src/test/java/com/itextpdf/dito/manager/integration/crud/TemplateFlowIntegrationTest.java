@@ -69,6 +69,7 @@ import static com.itextpdf.dito.manager.controller.template.TemplateController.T
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController.TEMPLATE_URL;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -185,16 +186,18 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         //Promote
         mockMvc.perform(put(TemplateController.BASE_NAME + TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("version").value("2"))
-                .andExpect(jsonPath("stageName").value("STAGE"))
-                .andExpect(jsonPath("deployed").value("true"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].version", contains(2, 1)))
+                .andExpect(jsonPath("$[*].stageName", contains("STAGE", "DEV")))
+                .andExpect(jsonPath("$[*].deployed", contains(true, false)));
 
         //Undeploy
         mockMvc.perform(put(TemplateController.BASE_NAME + TEMPLATE_UNDEPLOY_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("version").value("2"))
-                .andExpect(jsonPath("stageName").value("DEV"))
-                .andExpect(jsonPath("deployed").value("false"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].version", containsInAnyOrder(2, null)))
+                .andExpect(jsonPath("$[*].stageName", containsInAnyOrder("STAGE", "DEV")))
+                .andExpect(jsonPath("$[*].deployed", contains(false, false)));
 
         //Rollback version
         mockMvc.perform(post(TemplateController.BASE_NAME + TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
