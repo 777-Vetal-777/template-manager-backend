@@ -135,8 +135,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     @Query("select role.name as roleName, role.type as type, role.id as id, role.master as master from RoleEntity role "
             + " left join role.users user "
-            + "where "
-            +"(:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
+            + "where role.master = true "
+            + "and (:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
             + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
             + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
             + "and (:roleName='' or LOWER(role.name) like CONCAT('%',:roleName,'%'))"
@@ -151,8 +151,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     @Query("select role.name as roleName, role.type as type, role.id as id, role.master as master from RoleEntity role "
             + "left join role.users user "
-            + "where "
-            +"(:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
+            + "where role.master = true "
+            +"and (:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
             + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
             + "and (:lastName='' or LOWER(user.lastName) like CONCAT('%',:lastName,'%')) "
             + "and (:active=null or user.active IS :active) "
