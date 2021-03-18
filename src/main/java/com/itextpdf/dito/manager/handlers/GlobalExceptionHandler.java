@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTy
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.mail.MailingException;
 import com.itextpdf.dito.manager.exception.sort.UnsupportedSortFieldException;
+import com.itextpdf.dito.manager.exception.template.AbstractResourceInvalidNameException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,8 +27,13 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     }
 
     @ExceptionHandler(AbstractResourceAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDTO> resourceAlreadyExistsExceptionHandler(final AbstractResourceAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponseDTO> abstractResourceAlreadyExistsExceptionHandler(final AbstractResourceAlreadyExistsException ex) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AbstractResourceInvalidNameException.class)
+    public ResponseEntity<ErrorResponseDTO> abstractResourceInvalidNameExceptionHandler(final AbstractResourceInvalidNameException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleLogEntity;
+import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
@@ -71,6 +72,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
                                    final String sample, final String comment, final String email) {
         log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was started",
                 dataCollectionEntity, name, fileName, sample, comment, email);
+        throwExceptionIfNameNotMatchesPattern(name, AliasConstants.DATA_SAMPLE);
         if (Boolean.TRUE.equals(dataSampleRepository.existsByName(name))) {
             throw new DataSampleAlreadyExistsException(name);
         }
@@ -264,11 +266,12 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
     @Override
     @Transactional
     public DataSampleEntity update(final String name, final DataSampleEntity updatedEntity, final String userEmail) {
+        final String newName = updatedEntity.getName();
+        throwExceptionIfNameNotMatchesPattern(name, AliasConstants.DATA_SAMPLE);
         final DataSampleEntity existingEntity = dataSampleRepository.findByName(name)
                 .orElseThrow(() -> new DataSampleNotFoundException(name));
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
-        final String newName = updatedEntity.getName();
         if (!name.equals(newName) && Boolean.TRUE.equals(dataSampleRepository.existsByName(newName))) {
             throw new DataSampleAlreadyExistsException(newName);
         }

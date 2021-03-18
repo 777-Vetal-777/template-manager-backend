@@ -15,6 +15,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
+import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
@@ -22,10 +23,10 @@ import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsExcepti
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
-import com.itextpdf.dito.manager.exception.template.TemplateInvalidNameException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
+import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.TemplateRoleModel;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
@@ -63,7 +64,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,7 +86,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateFilePartService templateFilePartService;
     private final TemplateRefreshLinksService refreshLinksService;
-    private static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{0,199}";
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -138,7 +137,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                  final String dataCollectionName, final String email, final byte[] data, final List<TemplatePartModel> templateParts) {
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was started",
                 templateName, templateTypeEnum, dataCollectionName, email, templateParts);
-        throwExceptionIfTemplateNameIsInvalid(templateName);
+        throwExceptionIfNameNotMatchesPattern(templateName, AliasConstants.TEMPLATE);
         throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         final TemplateEntity templateEntity = new TemplateEntity();
@@ -360,6 +359,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final UserEntity userEntity = userService.findActiveUserByEmail(userEmail);
 
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
+            throwExceptionIfNameNotMatchesPattern(updatedTemplateEntity.getName(), AliasConstants.TEMPLATE);
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
             refreshLinksService.updateTemplateLinksInTemplates(existingTemplate, updatedTemplateEntity.getName());
             existingTemplate.setName(updatedTemplateEntity.getName());
@@ -642,12 +642,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private void throwExceptionIfTemplateNameAlreadyIsRegistered(final String templateName) {
         if (templateRepository.findByName(templateName).isPresent()) {
             throw new TemplateAlreadyExistsException(templateName);
-        }
-    }
-
-    private void throwExceptionIfTemplateNameIsInvalid(final String templateName) {
-        if (!Pattern.matches(TEMPLATE_NAME_REGEX, templateName)) {
-            throw new TemplateInvalidNameException(templateName);
         }
     }
 

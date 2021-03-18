@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
+import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionRoleModel;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionModel;
@@ -103,6 +104,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     @Override
     public DataCollectionEntity create(final String name, final DataCollectionType type, final byte[] data, final String fileName, final String email) {
         log.info("Create dataCollection with name: {} and type: {} and fileName: {} and email: {} was started", name, type, fileName, email);
+        throwExceptionIfNameNotMatchesPattern(name, AliasConstants.DATA_COLLECTION);
         if (dataCollectionRepository.existsByName(name)) {
             throw new DataCollectionAlreadyExistsException(name);
         }
@@ -346,11 +348,12 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
                                        final DataCollectionEntity updatedEntity,
                                        final String userEmail) {
         log.info("Update dataCollection by dataCollectionName: {} and params: {} was started", name, updatedEntity);
+        final String newName = updatedEntity.getName();
+        throwExceptionIfNameNotMatchesPattern(newName, AliasConstants.DATA_COLLECTION);
         final DataCollectionEntity existingEntity = findByName(name);
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
         existingEntity.setType(updatedEntity.getType());
-        final String newName = updatedEntity.getName();
         if (!name.equals(newName) && dataCollectionRepository.existsByName(newName)) {
             throw new DataCollectionAlreadyExistsException(newName);
         }

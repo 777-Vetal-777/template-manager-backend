@@ -12,7 +12,6 @@ import com.itextpdf.dito.manager.exception.template.TemplateImportProjectExcepti
 import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import com.itextpdf.dito.manager.exception.template.TemplateProjectGenerationException;
 import com.itextpdf.dito.manager.exception.template.TemplateVersionNotFoundException;
-import com.itextpdf.dito.manager.exception.template.TemplateInvalidNameException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +59,6 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(TemplateProjectGenerationException.class)
     public ResponseEntity<ErrorResponseDTO> templateProjectGenerationExceptionHandler(final TemplateProjectGenerationException ex) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    @ExceptionHandler(TemplateInvalidNameException.class)
-    public ResponseEntity<ErrorResponseDTO> templateInvalidNameExceptionHandler(final TemplateInvalidNameException ex) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TemplateImportProjectException.class)

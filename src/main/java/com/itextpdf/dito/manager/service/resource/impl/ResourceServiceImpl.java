@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.service.resource.impl;
 
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
+import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.resource.ResourceFontCannotBeRenamedException;
 import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModel;
@@ -102,6 +103,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                                         final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
         log.info("Create resource(Font) by email: {} and resourceName: {} and type: {} and fonts: {} was started", email, resourceName, type, fonts);
         throwExceptionIfResourceExists(resourceName, type);
+        throwExceptionIfNameNotMatchesPattern(resourceName, AliasConstants.RESOURCE);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final ContentValidator contentValidator = contentValidators.get(type);
@@ -131,6 +133,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     public ResourceEntity create(final String name, final ResourceTypeEnum type, final byte[] data,
                                  final String fileName, final String email) {
         log.info("Create resource with name: {}, type: {}, data: {}, fileName: {} and email: {} was started", name, type, data, fileName, email);
+        throwExceptionIfNameNotMatchesPattern(name, AliasConstants.RESOURCE);
         final boolean resourceExists = resourceRepository.existsByNameEqualsAndTypeEquals(name, type);
         if (resourceExists) {
             throw new ResourceAlreadyExistsException(name);
@@ -221,6 +224,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     @Transactional(rollbackOn = Exception.class)
     public ResourceEntity update(final String name, final ResourceEntity entity, final String mail) {
         log.info("Update resource by name: {} and new resource: {} and email: {} was started", name, entity, mail);
+        throwExceptionIfNameNotMatchesPattern(entity.getName(), AliasConstants.RESOURCE);
         final ResourceEntity existingResource = getResource(name, entity.getType());
         final UserEntity userEntity = userService.findActiveUserByEmail(mail);
 

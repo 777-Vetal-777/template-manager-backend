@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.RoleTypeEnum;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
 import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
@@ -77,6 +78,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     @Override
     public RoleEntity create(final String name, final List<String> permissions, final Boolean master) {
         log.info("Create role with name: {} and permissions: {} and master: {} was started", name, permissions, master);
+        throwExceptionIfNameNotMatchesPattern(name, AliasConstants.ROLE);
         checkSystemRole(name);
         if (roleRepository.countByNameAndMasterTrue(name) > 0) {
             throw new RoleAlreadyExistsException(name);

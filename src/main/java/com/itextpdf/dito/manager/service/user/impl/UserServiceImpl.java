@@ -12,6 +12,7 @@ import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 import com.itextpdf.dito.manager.exception.user.PasswordNotSpecifiedByAdminException;
 import com.itextpdf.dito.manager.exception.user.UserAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.user.UserInvalidNameException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.filter.user.UserFilter;
@@ -40,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
@@ -48,6 +50,8 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 @Service
 public class UserServiceImpl extends AbstractService implements UserService {
     private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
+
+    protected static final String USER_NAME_REGEX = "[a-zA-Z][a-zA-Z]{0,199}";
 
     private static final String ACTIVE = "active";
 
@@ -87,6 +91,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public UserEntity create(final UserEntity userEntity, final List<String> roles, final UserEntity currentUser) {
         log.info("Create userEntity: {} with roles: {} by user:{} was started", userEntity.getEmail(), roles, currentUser.getEmail());
+        throwExceptionIfFirstNameOrLastNameNotMatchesPattern(userEntity.getFirstName(), userEntity.getLastName());
         if (userRepository.findByEmailAndActiveTrue(userEntity.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException(userEntity.getEmail());
         }
@@ -236,11 +241,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
             case REMOVE:
                 for (final UserEntity userEntity : userEntities) {
                     final Set<RoleEntity> userRoles = userEntity.getRoles();
-					final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
-							.collect(Collectors.toList());
-					final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
-							.collect(Collectors.toList());
-					userRolesId.removeAll(roleEntitiesId);
+                    final List<Long> userRolesId = userRoles.stream().map(RoleEntity::getId)
+                            .collect(Collectors.toList());
+                    final List<Long> roleEntitiesId = roleEntities.stream().map(RoleEntity::getId)
+                            .collect(Collectors.toList());
+                    userRolesId.removeAll(roleEntitiesId);
                     if (userRolesId.isEmpty()) {
                         throw new UnableToDeleteSingularRoleException();
                     }
@@ -366,5 +371,14 @@ public class UserServiceImpl extends AbstractService implements UserService {
         Instant instant = new Date().toInstant();
         instant = instant.truncatedTo(ChronoUnit.SECONDS);
         return Date.from(instant);
+    }
+
+    private void throwExceptionIfFirstNameOrLastNameNotMatchesPattern(final String firstName, final String lastName) {
+        if (!Pattern.matches(USER_NAME_REGEX, firstName)) {
+            throw new UserInvalidNameException(firstName);
+        }
+        if (!Pattern.matches(USER_NAME_REGEX, lastName)) {
+            throw new UserInvalidNameException(lastName);
+        }
     }
 }
