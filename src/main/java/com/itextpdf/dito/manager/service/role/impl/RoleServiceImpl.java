@@ -36,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -303,7 +304,8 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
                     })
                     .collect(Collectors.toList()));
         } else {
-            newSort = Sort.by("type").descending().and(Sort.by("name").ascending());
+            newSort = Sort.by(Arrays.asList(new Sort.Order(Sort.Direction.DESC, "type").ignoreCase(),
+                    new Sort.Order(Sort.Direction.ASC, "name").ignoreCase()));
         }
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
     }
