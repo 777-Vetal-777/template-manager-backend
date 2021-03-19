@@ -214,15 +214,6 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        // UPDATE to fix DTM-2445 issue
-        final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json", readFileBytes("src/test/resources/test-data/templates/template-with-height.html"));
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, encoder.encode(request.getName()))
-                .file(newData)
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
     }
 
 
