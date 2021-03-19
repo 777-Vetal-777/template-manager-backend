@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.resource;
 
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.FontTypeEnum;
@@ -38,5 +39,5 @@ public interface ResourceService {
 
     ResourceEntity getResource(String name, ResourceTypeEnum type);
 
-    byte[] getFile(String uuid);
+    ResourceFileEntity getFile(String uuid);
 }

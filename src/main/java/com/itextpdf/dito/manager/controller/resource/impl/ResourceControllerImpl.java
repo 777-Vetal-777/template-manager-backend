@@ -17,6 +17,7 @@ import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.resource.FontTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.exception.resource.IncorrectResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.NoSuchResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupportedException;
@@ -24,6 +25,7 @@ import com.itextpdf.dito.manager.exception.resource.ResourceFileSizeExceedLimitE
 import com.itextpdf.dito.manager.filter.resource.ResourceFilter;
 import com.itextpdf.dito.manager.filter.resource.ResourcePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
+import com.itextpdf.dito.manager.integration.editor.component.resource.ResponseHeadersUpdater;
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.model.resource.ResourcePermissionModel;
 import com.itextpdf.dito.manager.service.resource.ResourceDependencyService;
@@ -37,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,6 +74,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     private final FileVersionMapper fileVersionMapper;
     private final Map<ResourceTypeEnum, Long> sizeLimit = new EnumMap<>(ResourceTypeEnum.class);
     private final Encoder encoder;
+    private final ResponseHeadersUpdater responseHeadersUpdater;
 
     public ResourceControllerImpl(
             @Value("${resources.pictures.extensions.supported}") final List<String> supportedPictureExtensions,
@@ -85,6 +89,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
             final PermissionMapper permissionMapper,
             final DependencyMapper dependencyMapper,
             final FileVersionMapper fileVersionMapper,
+            final ResponseHeadersUpdater responseHeadersUpdater,
             final Encoder encoder) {
         this.supportedExtensions.put(IMAGE, supportedPictureExtensions);
         this.supportedExtensions.put(ResourceTypeEnum.STYLESHEET, supportedStylesheetExtensions);
@@ -98,15 +103,18 @@ public class ResourceControllerImpl extends AbstractController implements Resour
         this.resourcePermissionService = resourcePermissionService;
         this.permissionMapper = permissionMapper;
         this.fileVersionMapper = fileVersionMapper;
+        this.responseHeadersUpdater = responseHeadersUpdater;
         this.encoder = encoder;
     }
 
     @Override
     public ResponseEntity<byte[]> getFile(final String uuid) {
         log.info("Get the file using uuid: {} was started ", uuid);
-        byte[] file = resourceService.getFile(uuid);
+        final ResourceFileEntity file = resourceService.getFile(uuid);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        responseHeadersUpdater.updateHeaders(file, IMAGE, httpHeaders);
         log.info("Get the file using uuid: {} was finished successfully", uuid);
-        return new ResponseEntity<>(file, HttpStatus.OK);
+        return new ResponseEntity<>(file.getFile(), httpHeaders, HttpStatus.OK);
     }
 
     @Override

@@ -483,10 +483,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
 
     @Override
-    public byte[] getFile(final String uuid) {
+    public ResourceFileEntity getFile(final String uuid) {
         final ResourceFileEntity file = resourceFileRepository.findFirstByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException(uuid));
-        return file.getFile();
+        return file;
     }
 
     @Override
