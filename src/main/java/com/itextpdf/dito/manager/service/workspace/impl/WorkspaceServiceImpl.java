@@ -126,6 +126,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return workspaceRepository.existsByName(workspaceName);
     }
 
+    @Override
+    public WorkspaceEntity getByUuid(final String uuid) {
+        return workspaceRepository.findFirstByUuid(uuid).orElseThrow(WorkspaceNotFoundException::new);
+    }
+
     private List<StageEntity> fillStages(final List<StageEntity> thinStageEntities, final PromotionPathEntity promotionPathEntity) {
         final List<StageEntity> filledStageEntities = new ArrayList<>();
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="001-add-uuid-column-to-workspace-table" author="Sergey_Nemets">
+        <addColumn tableName="workspace">
+            <column name="uuid" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="002-set-value-to-uuid-column-at-workspace-table" author="Sergey_Nemets">
+        <update tableName="workspace">
+            <column name="uuid" value="a9a31966-4b18-4cdc-92ac-57d6b7c3777c"/>
+        </update>
+    </changeSet>
+
+    <changeSet id="003-add-not-null-and-unique-constraint-to-uuid-column-at-workspace-table" author="Sergey_Nemets">
+        <addNotNullConstraint tableName="workspace" columnName="uuid" constraintName="workspace_uuid_not_null_constraint" />
+        <addUniqueConstraint tableName="workspace" columnNames="uuid" constraintName="workspace_uuid_unique_constraint" />
+    </changeSet>
+
+</databaseChangeLog>

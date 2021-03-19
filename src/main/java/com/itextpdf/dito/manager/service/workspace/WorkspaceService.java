@@ -21,4 +21,6 @@ public interface WorkspaceService {
     List<String> getStageNames(String workspaceName);
 
     Boolean checkIsWorkspaceWithNameExist(String workspaceName);
+
+    WorkspaceEntity getByUuid(String uuid);
 }

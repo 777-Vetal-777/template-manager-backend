@@ -14,6 +14,7 @@ public class WorkspaceDTO {
     @Schema(example = "ENG")
     private String language;
     private Boolean adjustForDaylight;
+    private String uuid;
 
     public Boolean getAdjustForDaylight() {
         return adjustForDaylight;
@@ -45,6 +46,14 @@ public class WorkspaceDTO {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override

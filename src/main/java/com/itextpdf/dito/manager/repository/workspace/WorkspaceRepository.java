@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 public interface WorkspaceRepository extends JpaRepository<WorkspaceEntity, Long> {
     Optional<WorkspaceEntity> findByName(String name);
 
+    Optional<WorkspaceEntity> findFirstByUuid(String uuid);
+
     boolean existsByName(String name);
 
     @Query(value = "select distinct stage.name from WorkspaceEntity workspace " +

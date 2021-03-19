@@ -62,6 +62,7 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
         result.setLanguage(entity.getLanguage());
         result.setTimezone(entity.getTimezone());
         result.setAdjustForDaylight(entity.getAdjustForDaylight());
+        result.setUuid(entity.getUuid());
         log.info("Convert workspace: {} to workspaceDto was finished successfully", entity.getId());
         return result;
     }

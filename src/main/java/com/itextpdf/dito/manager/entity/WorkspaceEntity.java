@@ -8,8 +8,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.util.UUID;
 
 @Entity
 @Table(name = "workspace")
@@ -21,13 +23,20 @@ public class WorkspaceEntity {
     private String name;
     private String language;
     private String timezone;
+    @Column(name = "uuid")
+    private String uuid;
     @Column(name = "adjust_for_daylight", insertable = false)
     private Boolean adjustForDaylight;
     @OneToOne(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true)
     private PromotionPathEntity promotionPath;
     @OneToOne(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private LicenseEntity licenseEntity;
-    
+
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
     public void setPromotionPath(PromotionPathEntity promotionPath) {
         if (this.promotionPath != null) {
             this.promotionPath.setWorkspace(null);
@@ -87,6 +96,10 @@ public class WorkspaceEntity {
 	public void setLicenseEntity(LicenseEntity licenseEntity) {
 		this.licenseEntity = licenseEntity;
 	}
+
+    public String getUuid() {
+        return uuid;
+    }
 
     @Override
     public String toString() {
