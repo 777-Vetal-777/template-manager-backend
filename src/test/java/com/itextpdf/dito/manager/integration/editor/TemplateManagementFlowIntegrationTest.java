@@ -14,6 +14,7 @@ import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,22 +54,13 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	@Autowired
 	private DataCollectionRepository dataCollectionRepository;
 	@Autowired
-	private WorkspaceRepository workspaceRepository;
-	@Autowired
-	private InstanceRepository instanceRepository;
-	@Autowired
-	private StageRepository stageRepository;
-	@Autowired
 	private TemplateLoader templateLoader;
 
-	@BeforeEach
+	@AfterEach
 	void clearDb() {
 		templateRepository.deleteAll();
 		templateFileRepository.deleteAll();
 		dataCollectionRepository.deleteAll();
-		workspaceRepository.deleteAll();
-		instanceRepository.deleteAll();
-		stageRepository.deleteAll();
 	}
 	
 	@Test
@@ -216,11 +208,9 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		final MvcResult result = mockMvc.perform(delete(integrationTemplateUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("message").value("Lowest stage has not met development stage requirements"))
+				.andExpect(status().isOk())
 				.andReturn();
 		assertNotNull(result.getResponse());
-
 	}
 
 	@Test
