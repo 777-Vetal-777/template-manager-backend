@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.handlers;
 
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.resource.ForbiddenOperationException;
+import com.itextpdf.dito.manager.exception.resource.IncorrectResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.InvalidResourceContentException;
 import com.itextpdf.dito.manager.exception.resource.PermissionIsNotAllowedForResourceTypeException;
 import com.itextpdf.dito.manager.exception.resource.ResourceExtensionNotSupportedException;
@@ -59,6 +60,11 @@ public class ResourceExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(ResourceHasDependenciesException.class)
     public ResponseEntity<ErrorResponseDTO> resourceHasDependenciesExceptionHandler(
             final ResourceHasDependenciesException ex) {
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IncorrectResourceTypeException.class)
+    public ResponseEntity<ErrorResponseDTO> incorrectResourceTypeExceptionHandler(final IncorrectResourceTypeException ex){
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.CONFLICT);
     }
 

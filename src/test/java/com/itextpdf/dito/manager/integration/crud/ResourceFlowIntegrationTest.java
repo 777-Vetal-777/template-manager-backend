@@ -132,6 +132,29 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturnIncorrectResourceType() throws Exception{
+        final URI createResourceURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode()
+                .toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(createResourceURI)
+                .file(IMAGE_FILE_PART)
+                .file(NAME_PART)
+                .file(FONT_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA)).andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturnNoSuchResourceType() throws Exception {
+        final String badStyle = "BadStyle";
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                badStyle, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                badStyle, Base64.getEncoder().encodeToString(badStyle.getBytes())))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void shouldCreateFontAndReturnFileByUUID() throws Exception {
         final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME + FONTS_ENDPOINT).build().encode().toUri();
         mockMvc.perform(MockMvcRequestBuilders.multipart(createFontURI)
