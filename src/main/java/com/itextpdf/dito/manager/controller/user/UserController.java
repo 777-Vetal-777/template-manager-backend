@@ -59,6 +59,7 @@ public interface UserController {
     String UPDATE_USERS_ROLES_ENDPOINT = "/roles";
     String FORGOT_PASSWORD = "/forgot-password";
     String RESET_PASSWORD = "/reset-password";
+    String LOCKED_USERS = "/locked";
 
     @PostMapping
     @PreAuthorize("hasAuthority('E3_US10_CREATE_NEW_USER')")
@@ -188,4 +189,11 @@ public interface UserController {
             @ApiResponse(responseCode = "409", description = "Token is not valid", content = @Content)
     })
     ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO);
+
+    @GetMapping(LOCKED_USERS)
+    @PreAuthorize("hasAnyAuthority('E3_US_9_USERS_TABLE')")
+    @Operation(summary = "Locked users exist", description = "Check if there are any locked users",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    ResponseEntity<Boolean> lockedUsersExist();
+
 }

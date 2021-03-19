@@ -39,15 +39,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static com.itextpdf.dito.manager.controller.user.UserController.CHANGE_PASSWORD;
-import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER;
-import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_CHANGE_PASSWORD_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.user.UserController.CURRENT_USER_INFO_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.user.UserController.FORGOT_PASSWORD;
-import static com.itextpdf.dito.manager.controller.user.UserController.RESET_PASSWORD;
-import static com.itextpdf.dito.manager.controller.user.UserController.UPDATE_USERS_ROLES_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.user.UserController.USERS_ACTIVATION_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.user.UserController.USER_UPDATE_PASSWORD_ENDPOINT;
+import static com.itextpdf.dito.manager.controller.user.UserController.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -262,6 +254,10 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testUnblockUser() throws Exception {
         user1.setLocked(Boolean.TRUE);
+
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME + LOCKED_USERS))
+                .andExpect(status().isOk()).andReturn();
+        assertFalse(Boolean.parseBoolean(result.getResponse().getContentAsString()));
 
         FailedLoginAttemptEntity failedLoginAttemptEntity = new FailedLoginAttemptEntity();
         failedLoginAttemptEntity.setUser(user1);
@@ -478,5 +474,12 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
+    }
+
+    @Test
+    public void testLockedUsers() throws Exception{
+        final MvcResult result = mockMvc.perform(get(UserController.BASE_NAME + LOCKED_USERS))
+                .andExpect(status().isOk()).andReturn();
+        assertFalse(Boolean.parseBoolean(result.getResponse().getContentAsString()));
     }
 }

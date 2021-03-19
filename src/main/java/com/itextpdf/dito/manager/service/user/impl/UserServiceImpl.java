@@ -345,6 +345,11 @@ public class UserServiceImpl extends AbstractService implements UserService {
         userRepository.save(userEntity);
     }
 
+    @Override
+    public boolean lockedUsersExist() {
+        return userRepository.countOfLockedUsers() > 0;
+    }
+
     private void checkNewPasswordSameAsOld(final String newPassword, final String oldPasswords) {
         if (encoder.matches(newPassword, oldPasswords)) {
             throw new NewPasswordTheSameAsOldPasswordException();

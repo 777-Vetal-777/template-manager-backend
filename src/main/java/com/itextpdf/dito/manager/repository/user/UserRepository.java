@@ -68,6 +68,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             + "and r.name = :roleName ")
     int countOfUserWithOnlyOneRole(String roleName);
 
+    @Query(value = "select count(u) from UserEntity u "
+            + "where u.active is true and u.locked is true")
+    int countOfLockedUsers();
+
     Optional<UserEntity> findByEmailAndActiveTrue(String email);
 
     Optional<UserEntity> findByEmail(String email);

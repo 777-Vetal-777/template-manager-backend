@@ -108,7 +108,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> updateCurrentUser(@Valid final UserUpdateRequestDTO userUpdateRequestDTO,
-            Principal principal) {
+                                                     Principal principal) {
         final UserDTO user = userMapper
                 .map(userService.updateUser(userMapper.map(userUpdateRequestDTO), principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
@@ -128,7 +128,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<AuthenticationDTO> updatePassword(final @Valid PasswordChangeRequestDTO passwordChangeRequestDTO,
                                                             final Principal principal) {
-        final UserEntity userEntity= userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
+        final UserEntity userEntity = userService.updatePassword(passwordChangeRequestDTO.getOldPassword(),
                 passwordChangeRequestDTO.getNewPassword(),
                 principal.getName());
         final AuthenticationDTO newTokenDto = authenticationService.authenticate(userEntity.getEmail(), passwordChangeRequestDTO.getNewPassword());
@@ -165,5 +165,10 @@ public class UserControllerImpl extends AbstractController implements UserContro
         userService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getPassword());
         log.info("Reset password by token: {} was finished successfully", resetPasswordDTO.getToken());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    public ResponseEntity<Boolean> lockedUsersExist() {
+        return new ResponseEntity<>(userService.lockedUsersExist(), HttpStatus.OK);
     }
 }
