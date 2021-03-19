@@ -66,9 +66,8 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     public void promoteOnDefaultStage(final TemplateFileEntity templateFileEntity) {
         log.info("Promote on default stage template: {} was started ", templateFileEntity);
         final boolean isDefaultStage = true;
-        for (final InstanceEntity instanceEntity : templateFileEntity.getInstance()) {
-            promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
-        }
+        final InstanceEntity defaultInstance = getDefaultInstance();
+        promoteTemplateToInstance(defaultInstance, templateFileEntity, isDefaultStage);
         log.info("Promote on default stage template: {} was finished successfully ", templateFileEntity);
     }
 
@@ -95,6 +94,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final Optional<TemplateFileEntity> previousStageTemplateVersion = templateFileRepository.findByStageAndTemplate(nextStage, templateEntity);
         if (previousStageTemplateVersion.isPresent()) {
             final TemplateFileEntity previouslyDeployedTemplateVersion = previousStageTemplateVersion.get();
+            promoteOnDefaultStage(previouslyDeployedTemplateVersion);
             previouslyDeployedTemplateVersion.setStage(getDefaultStage());
             previouslyDeployedTemplateVersion.setDeployed(false);
             templateFileRepository.save(previouslyDeployedTemplateVersion);
