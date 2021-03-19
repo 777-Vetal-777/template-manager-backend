@@ -140,6 +140,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(NAME_PART)
                 .file(FONT_TYPE_PART)
                 .contentType(MediaType.MULTIPART_FORM_DATA)).andExpect(status().isConflict());
+        assertTrue(resourceRepository.findAll().isEmpty());
     }
 
     @Test
@@ -152,6 +153,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
                 badStyle, Base64.getEncoder().encodeToString(badStyle.getBytes())))
                 .andExpect(status().isNotFound());
+        assertTrue(resourceRepository.findAll().isEmpty());
     }
 
     @Test
