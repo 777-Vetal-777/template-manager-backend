@@ -20,7 +20,7 @@ import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
-import com.itextpdf.dito.manager.service.template.TemplateProjectGenerator;
+import com.itextpdf.dito.manager.service.template.TemplateFileProjectGenerator;
 import com.itextpdf.dito.manager.util.TemplateDeploymentUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -37,20 +37,20 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     private static final Logger log = LogManager.getLogger(TemplateDeploymentServiceImpl.class);
     private final TemplateMapper templateMapper;
     private final TemplateFileRepository templateFileRepository;
-    private final TemplateProjectGenerator templateProjectGenerator;
+    private final TemplateFileProjectGenerator templateFileProjectGenerator;
     private final TemplateRepository templateRepository;
     private final StageRepository stageRepository;
     private final InstanceClient instanceClient;
 
     public TemplateDeploymentServiceImpl(final TemplateMapper templateMapper,
                                          final TemplateFileRepository templateFileRepository,
-                                         final TemplateProjectGenerator templateProjectGenerator,
+                                         final TemplateFileProjectGenerator templateFileProjectGenerator,
                                          final TemplateRepository templateRepository,
                                          final StageRepository stageRepository,
                                          final InstanceClient instanceClient) {
         this.templateMapper = templateMapper;
         this.templateFileRepository = templateFileRepository;
-        this.templateProjectGenerator = templateProjectGenerator;
+        this.templateFileProjectGenerator = templateFileProjectGenerator;
         this.templateRepository = templateRepository;
         this.stageRepository = stageRepository;
         this.instanceClient = instanceClient;
@@ -163,11 +163,10 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
 
     @Override
     public void promoteTemplateToInstance(final InstanceEntity instanceEntity, final TemplateFileEntity templateFileEntity, final boolean isDefaultInstance) {
-        final TemplateEntity templateEntity = templateFileEntity.getTemplate();
         final String instanceSocket = instanceEntity.getSocket();
         final String instanceRegisterToken = instanceEntity.getRegisterToken();
         final TemplateDescriptorDTO templateDescriptorDTO = templateMapper.mapToDescriptor(templateFileEntity, isDefaultInstance);
-        final File templateProjectFile = templateProjectGenerator.generateZippedProjectByTemplate(templateEntity, (DataSampleFileEntity) null);
+        final File templateProjectFile = templateFileProjectGenerator.generateZippedProjectByTemplate(templateFileEntity, (DataSampleFileEntity) null, true);
         promoteTemplateToInstance(instanceRegisterToken, instanceSocket, templateDescriptorDTO, templateProjectFile);
         FileUtils.deleteQuietly(templateProjectFile);
     }
