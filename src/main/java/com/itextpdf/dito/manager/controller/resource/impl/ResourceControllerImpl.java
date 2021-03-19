@@ -111,7 +111,7 @@ public class ResourceControllerImpl extends AbstractController implements Resour
     public ResponseEntity<byte[]> getFile(final String uuid) {
         log.info("Get the file using uuid: {} was started ", uuid);
         final ResourceFileEntity file = resourceService.getFile(uuid);
-        HttpHeaders httpHeaders = new HttpHeaders();
+        final HttpHeaders httpHeaders = new HttpHeaders();
         responseHeadersUpdater.updateHeaders(file, IMAGE, httpHeaders);
         log.info("Get the file using uuid: {} was finished successfully", uuid);
         return new ResponseEntity<>(file.getFile(), httpHeaders, HttpStatus.OK);
