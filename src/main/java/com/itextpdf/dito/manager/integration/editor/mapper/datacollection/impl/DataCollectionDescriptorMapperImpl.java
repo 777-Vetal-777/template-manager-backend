@@ -19,7 +19,7 @@ public class DataCollectionDescriptorMapperImpl implements DataCollectionDescrip
     public DataCollectionDescriptor map(final DataCollectionEntity entity) {
         final DataCollectionDescriptor descriptor = new DataCollectionDescriptor();
         descriptor.setDisplayName(entity.getName());
-        descriptor.setType(descriptor.getType());
+        descriptor.setType(entity.getType().toString());
         descriptor.setId(encoder.encode(entity.getName()));
         return descriptor;
     }
