@@ -10,7 +10,6 @@
           <name>BSD License</name>
           <url>http://www.antlr.org/license.html</url>
           <distribution>repo</distribution>
-          <file>bsd license - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -23,7 +22,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://aws.amazon.com/apache2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - apache2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -36,7 +34,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://aws.amazon.com/apache2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - apache2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -49,7 +46,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://aws.amazon.com/apache2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - apache2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -62,7 +58,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://aws.amazon.com/apache2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - apache2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -75,7 +70,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -88,7 +82,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -101,7 +94,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -114,7 +106,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -127,7 +118,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -140,7 +130,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -153,7 +142,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -166,7 +154,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -179,7 +166,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -192,7 +178,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -204,7 +189,6 @@
         <license>
           <name>Apache 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -217,7 +201,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -230,7 +213,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -243,7 +225,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -256,7 +237,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -269,7 +249,6 @@
           <name>Unicode/ICU License</name>
           <url>https://raw.githubusercontent.com/unicode-org/icu/master/icu4c/LICENSE</url>
           <distribution>repo</distribution>
-          <file>unicode_icu license - license.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -281,7 +260,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -293,7 +271,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -305,7 +282,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -317,7 +293,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -345,7 +320,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -357,7 +331,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -369,7 +342,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -381,7 +353,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -393,7 +364,6 @@
         <license>
           <name>GNU Affero General Public License v3</name>
           <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
-          <file>gnu affero general public license v3 - agpl-3.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -405,7 +375,6 @@
         <license>
           <name>Proprietary License</name>
           <url>https://itextpdf.com/itext7/pdfcalligraph</url>
-          <file>proprietary license - pdfcalligraph.html</file>
         </license>
       </licenses>
     </dependency>
@@ -418,7 +387,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -431,7 +399,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -444,7 +411,6 @@
           <name>EDL 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -457,7 +423,6 @@
           <name>Eclipse Distribution License - v 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -470,7 +435,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -483,7 +447,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -496,7 +459,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -509,7 +471,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -522,7 +483,6 @@
           <name>The MIT License (MIT)</name>
           <url>http://opensource.org/licenses/MIT</url>
           <distribution>repo</distribution>
-          <file>the mit license (mit) - mit.html</file>
         </license>
       </licenses>
     </dependency>
@@ -535,7 +495,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -548,7 +507,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -560,7 +518,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -572,7 +529,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -584,7 +540,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -596,7 +551,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -608,7 +562,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -620,7 +573,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -632,7 +584,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -644,7 +595,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -656,7 +606,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -668,7 +617,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -680,7 +628,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -692,7 +639,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -705,7 +651,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -718,7 +663,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -731,7 +675,6 @@
           <name>BSD New</name>
           <url>http://opensource.org/licenses/BSD-3-Clause</url>
           <distribution>repo</distribution>
-          <file>bsd new - bsd-3-clause.html</file>
         </license>
       </licenses>
     </dependency>
@@ -744,7 +687,6 @@
           <name>BSD New</name>
           <url>http://opensource.org/licenses/BSD-3-Clause</url>
           <distribution>repo</distribution>
-          <file>bsd new - bsd-3-clause.html</file>
         </license>
       </licenses>
     </dependency>
@@ -757,7 +699,6 @@
           <name>BSD New</name>
           <url>http://opensource.org/licenses/BSD-3-Clause</url>
           <distribution>repo</distribution>
-          <file>bsd new - bsd-3-clause.html</file>
         </license>
       </licenses>
     </dependency>
@@ -770,7 +711,6 @@
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
           <distribution>repo</distribution>
-          <file>apache license 2.0 - license-2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -783,7 +723,6 @@
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
           <distribution>repo</distribution>
-          <file>apache license 2.0 - license-2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -796,7 +735,6 @@
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
           <distribution>repo</distribution>
-          <file>apache license 2.0 - license-2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -809,7 +747,6 @@
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
           <distribution>repo</distribution>
-          <file>apache license 2.0 - license-2.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -822,7 +759,6 @@
           <name>EDL 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -835,13 +771,11 @@
           <name>EPL 2.0</name>
           <url>http://www.eclipse.org/legal/epl-2.0</url>
           <distribution>repo</distribution>
-          <file>epl 2.0 - epl-2.0.html</file>
         </license>
         <license>
           <name>GPL2 w/ CPE</name>
           <url>https://www.gnu.org/software/classpath/license.html</url>
           <distribution>repo</distribution>
-          <file>gpl2 w_ cpe - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -854,14 +788,12 @@
           <name>Eclipse Public License v. 2.0</name>
           <url>http://www.eclipse.org/legal/epl-2.0</url>
           <distribution>repo</distribution>
-          <file>epl 2.0 - epl-2.0.html</file>
           <comments>Standard Eclipse Licence</comments>
         </license>
         <license>
           <name>Eclipse Distribution License v. 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
           <comments>Standard Eclipse Distribution License</comments>
         </license>
       </licenses>
@@ -875,13 +807,11 @@
           <name>EPL 2.0</name>
           <url>http://www.eclipse.org/legal/epl-2.0</url>
           <distribution>repo</distribution>
-          <file>epl 2.0 - epl-2.0.html</file>
         </license>
         <license>
           <name>GPL2 w/ CPE</name>
           <url>https://www.gnu.org/software/classpath/license.html</url>
           <distribution>repo</distribution>
-          <file>gpl2 w_ cpe - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -893,7 +823,6 @@
         <license>
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -906,13 +835,11 @@
           <name>EPL 2.0</name>
           <url>http://www.eclipse.org/legal/epl-2.0</url>
           <distribution>repo</distribution>
-          <file>epl 2.0 - epl-2.0.html</file>
         </license>
         <license>
           <name>GPL2 w/ CPE</name>
           <url>https://www.gnu.org/software/classpath/license.html</url>
           <distribution>repo</distribution>
-          <file>gpl2 w_ cpe - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -925,7 +852,6 @@
           <name>Eclipse Distribution License - v 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -950,7 +876,6 @@
           <name>CDDL/GPLv2+CE</name>
           <url>https://github.com/javaee/activation/blob/master/LICENSE.txt</url>
           <distribution>repo</distribution>
-          <file>cddl_gplv2+ce - license.html</file>
           <comments>CDDL or GPL version 2 plus the Classpath Exception</comments>
         </license>
       </licenses>
@@ -964,14 +889,12 @@
           <name>CDDL</name>
           <url>http://www.sun.com/cddl</url>
           <distribution>repo</distribution>
-          <file>cddl - cddl.html</file>
           <comments>A business-friendly OSS license</comments>
         </license>
         <license>
           <name>GPLv2+CE</name>
           <url>https://glassfish.java.net/public/CDDL+GPL_1_1.html</url>
           <distribution>repo</distribution>
-          <file>gplv2+ce - cddl+gpl_1_1.html</file>
           <comments>GPL version 2 plus the Classpath Exception</comments>
         </license>
       </licenses>
@@ -985,13 +908,11 @@
           <name>CDDL 1.1</name>
           <url>https://oss.oracle.com/licenses/CDDL+GPL-1.1</url>
           <distribution>repo</distribution>
-          <file>cddl 1.1 - cddl+gpl-1.1.txt</file>
         </license>
         <license>
           <name>GPL2 w/ CPE</name>
           <url>https://oss.oracle.com/licenses/CDDL+GPL-1.1</url>
           <distribution>repo</distribution>
-          <file>cddl 1.1 - cddl+gpl-1.1.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1004,7 +925,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1017,7 +937,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
           <comments>A business-friendly OSS license</comments>
         </license>
       </licenses>
@@ -1031,7 +950,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
           <comments>All files under Apache 2</comments>
         </license>
       </licenses>
@@ -1045,7 +963,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
           <comments>All files under Apache 2</comments>
         </license>
       </licenses>
@@ -1059,7 +976,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1072,7 +988,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1085,7 +1000,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1098,7 +1012,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1111,7 +1024,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1124,7 +1036,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1137,7 +1048,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1150,7 +1060,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1163,7 +1072,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1176,7 +1084,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1189,7 +1096,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1202,7 +1108,6 @@
           <name>Eclipse Public License - v 1.0</name>
           <url>http://www.eclipse.org/legal/epl-v10.html</url>
           <distribution>repo</distribution>
-          <file>eclipse public license - v 1.0 - epl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1215,7 +1120,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1228,7 +1132,6 @@
           <name>Bouncy Castle Licence</name>
           <url>http://www.bouncycastle.org/licence.html</url>
           <distribution>repo</distribution>
-          <file>bouncy castle licence - licence.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1241,7 +1144,6 @@
           <name>Bouncy Castle Licence</name>
           <url>http://www.bouncycastle.org/licence.html</url>
           <distribution>repo</distribution>
-          <file>bouncy castle licence - licence.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1254,7 +1156,6 @@
           <name>The MIT License</name>
           <url>http://opensource.org/licenses/MIT</url>
           <distribution>repo</distribution>
-          <file>the mit license (mit) - mit.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1266,7 +1167,6 @@
         <license>
           <name>BSD 3-clause New License</name>
           <url>https://github.com/dom4j/dom4j/blob/master/LICENSE</url>
-          <file>bsd 3-clause new license - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1279,13 +1179,11 @@
           <name>EPL 2.0</name>
           <url>http://www.eclipse.org/legal/epl-2.0</url>
           <distribution>repo</distribution>
-          <file>epl 2.0 - epl-2.0.html</file>
         </license>
         <license>
           <name>GPL2 w/ CPE</name>
           <url>https://www.gnu.org/software/classpath/license.html</url>
           <distribution>repo</distribution>
-          <file>gpl2 w_ cpe - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1298,7 +1196,6 @@
           <name>Eclipse Distribution License - v 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1311,7 +1208,6 @@
           <name>Eclipse Distribution License - v 1.0</name>
           <url>http://www.eclipse.org/org/documents/edl-v10.php</url>
           <distribution>repo</distribution>
-          <file>edl 1.0 - edl-v10.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1323,14 +1219,12 @@
         <license>
           <name>Public Domain, per Creative Commons CC0</name>
           <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
-          <file>cc0 - 1.0.html</file>
           <comments>* This code was Written by Gil Tene of Azul Systems, and released to the
                 * public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/</comments>
         </license>
         <license>
           <name>BSD-2-Clause</name>
           <url>https://opensource.org/licenses/BSD-2-Clause</url>
-          <file>bsd-2-clause - bsd-2-clause.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1343,7 +1237,6 @@
           <name>GNU Library General Public License v2.1 or later</name>
           <url>http://www.opensource.org/licenses/LGPL-2.1</url>
           <distribution>repo</distribution>
-          <file>gnu library general public license v2.1 or later - lgpl-2.1.html</file>
           <comments>See discussion at http://hibernate.org/community/license/ for more details.</comments>
         </license>
       </licenses>
@@ -1357,7 +1250,6 @@
           <name>GNU Library General Public License v2.1 or later</name>
           <url>http://www.opensource.org/licenses/LGPL-2.1</url>
           <distribution>repo</distribution>
-          <file>gnu library general public license v2.1 or later - lgpl-2.1.html</file>
           <comments>See discussion at http://hibernate.org/community/license/ for more details.</comments>
         </license>
       </licenses>
@@ -1370,7 +1262,6 @@
         <license>
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1382,17 +1273,14 @@
         <license>
           <name>MPL 1.1</name>
           <url>http://www.mozilla.org/MPL/MPL-1.1.html</url>
-          <file>mpl 1.1 - mpl-1.1.html</file>
         </license>
         <license>
           <name>LGPL 2.1</name>
           <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
-          <file>lgpl 2.1 - lgpl-2.1.html</file>
         </license>
         <license>
           <name>Apache License 2.0</name>
           <url>http://www.apache.org/licenses/</url>
-          <file>apache license 2.0 - licenses.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1405,7 +1293,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1418,7 +1305,6 @@
           <name>Apache License, version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1431,7 +1317,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
           <comments>A business-friendly OSS license</comments>
         </license>
       </licenses>
@@ -1444,7 +1329,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1456,7 +1340,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1468,7 +1351,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1480,7 +1362,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1501,7 +1382,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1514,7 +1394,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1527,7 +1406,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1539,7 +1417,6 @@
         <license>
           <name>Public Domain, per Creative Commons CC0</name>
           <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
-          <file>cc0 - 1.0.html</file>
           <comments>* This code was Written by Gil Tene of Azul Systems, and released to the
                 * public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/</comments>
         </license>
@@ -1553,7 +1430,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1565,7 +1441,6 @@
         <license>
           <name>BSD</name>
           <url>http://asm.objectweb.org/license.html</url>
-          <file>bsd - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1578,7 +1453,6 @@
           <name>BSD-2-Clause</name>
           <url>https://jdbc.postgresql.org/about/license.html</url>
           <distribution>repo</distribution>
-          <file>bsd-2-clause - license.html</file>
           <comments>BSD-2-Clause, copyright PostgreSQL Global Development Group</comments>
         </license>
       </licenses>
@@ -1592,7 +1466,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1605,7 +1478,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1618,7 +1490,6 @@
           <name>CC0</name>
           <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
           <distribution>repo</distribution>
-          <file>cc0 - 1.0.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1631,7 +1502,6 @@
           <name>MIT License</name>
           <url>http://www.opensource.org/licenses/mit-license.php</url>
           <distribution>repo</distribution>
-          <file>mit license - mit-license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1644,7 +1514,6 @@
           <name>MIT License</name>
           <url>http://www.opensource.org/licenses/mit-license.php</url>
           <distribution>repo</distribution>
-          <file>mit license - mit-license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -1656,7 +1525,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1668,7 +1536,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1680,7 +1547,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1692,7 +1558,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1704,7 +1569,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1717,7 +1581,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1730,7 +1593,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1743,7 +1605,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1756,7 +1617,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1769,7 +1629,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1782,7 +1641,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1795,7 +1653,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1808,7 +1665,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1821,7 +1677,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1834,7 +1689,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1847,7 +1701,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1860,7 +1713,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1873,7 +1725,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1886,7 +1737,6 @@
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1898,7 +1748,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1910,7 +1759,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1922,7 +1770,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1934,7 +1781,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1946,7 +1792,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1958,7 +1803,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1970,7 +1814,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1982,7 +1825,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -1994,7 +1836,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2006,7 +1847,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2018,7 +1858,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2030,7 +1869,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2042,7 +1880,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2054,7 +1891,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2066,7 +1902,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2078,7 +1913,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2090,7 +1924,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2102,7 +1935,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
           <comments>Copyright 2008-2020 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
@@ -2128,7 +1960,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
           <comments>Copyright 2008-2020 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
@@ -2154,7 +1985,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
           <comments>Copyright 2008-2020 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
@@ -2180,7 +2010,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
           <comments>Copyright 2011-2020 the original author or authors.
 
 				Licensed under the Apache License, Version 2.0 (the "License");
@@ -2206,7 +2035,6 @@
         <license>
           <name>Apache License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
           <comments>Copyright 2010 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
@@ -2233,7 +2061,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2246,7 +2073,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2259,7 +2085,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>apache license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2272,7 +2097,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2285,7 +2109,6 @@
           <name>The Apache Software License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2297,7 +2120,6 @@
         <license>
           <name>The W3C Software License</name>
           <url>http://www.w3.org/Consortium/Legal/copyright-software-19980720</url>
-          <file>the w3c software license - copyright-software-19980720.html</file>
         </license>
       </licenses>
     </dependency>
@@ -2310,7 +2132,6 @@
           <name>Apache 2.0</name>
           <url>https://github.com/swagger-api/swagger-ui</url>
           <distribution>repo</distribution>
-          <file>apache 2.0 - swagger-ui.html</file>
         </license>
       </licenses>
     </dependency>
@@ -2323,7 +2144,6 @@
           <name>MIT</name>
           <url>https://github.com/webjars/webjars-locator-core/blob/master/LICENSE.md</url>
           <distribution>repo</distribution>
-          <file>mit - license.html</file>
         </license>
       </licenses>
     </dependency>
@@ -2336,7 +2156,6 @@
           <name>Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>
@@ -2348,7 +2167,6 @@
         <license>
           <name>The Apache License, Version 2.0</name>
           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <file>the apache software license, version 2.0 - license-2.0.txt</file>
         </license>
       </licenses>
     </dependency>

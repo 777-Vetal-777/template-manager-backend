@@ -389,6 +389,9 @@
                             <excludedGroups>com.itextpdf.dito</excludedGroups>
                             <sortByGroupIdAndArtifactId>true</sortByGroupIdAndArtifactId>
                             <licensesOutputFile>${license.report.path}</licensesOutputFile>
+                            <!-- Avoid download license texts and adding <file> entries to the report.
+                                 This speeds up the build and increases stability in case of connection problems. -->
+                            <offline>true</offline>
                         </configuration>
                     </plugin>
                 </plugins>
