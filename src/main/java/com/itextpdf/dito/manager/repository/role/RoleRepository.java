@@ -134,7 +134,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     List<RolePermissionsModel> getPermissions(@Param("listId") List<Long> listId);
 
     @Query("select role.name as roleName, role.type as type, role.id as id, role.master as master from RoleEntity role "
-            + " left join role.users user "
+            + "join role.users user "
             + "where role.master = true "
             + "and (:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
             + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
@@ -150,7 +150,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
 
     @Query("select role.name as roleName, role.type as type, role.id as id, role.master as master from RoleEntity role "
-            + "left join role.users user "
+            + "join role.users user "
             + "where role.master = true "
             +"and (:email='' or LOWER(user.email) like CONCAT('%',:email,'%')) "
             + "and (:firstName='' or LOWER(user.firstName) like CONCAT('%',:firstName,'%')) "
