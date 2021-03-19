@@ -11,6 +11,7 @@ import com.itextpdf.dito.sdk.core.process.template.TemplateSubTreeProcessor;
 import com.itextpdf.dito.sdk.internal.core.template.parser.impl.jsoup.JsoupDocument;
 import com.itextpdf.dito.sdk.internal.core.template.parser.impl.jsoup.JsoupTemplateParser;
 import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Element;
+import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Node;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -33,7 +34,7 @@ public class EmbeddedStylesheetImportServiceImpl implements EmbeddedStylesheetIm
                                  final Map<String, TemplateImportNameModel> settings,
                                  final DuplicatesList duplicatesList,
                                  final String email) throws IOException {
-        final TemplateSubTreeProcessor<StyleTagRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new StyleTagProcessor<>(styleSheetPreprocessorService)));
+        final TemplateSubTreeProcessor<Node, StyleTagRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new StyleTagProcessor<>(styleSheetPreprocessorService)));
 
         final StyleTagRenamingContext context = new StyleTagRenamingContext(fileName, settings, duplicatesList, email);
 

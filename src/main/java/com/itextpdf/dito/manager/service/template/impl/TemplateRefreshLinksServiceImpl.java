@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
-import com.google.common.base.Charsets;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
@@ -28,9 +27,11 @@ import com.itextpdf.dito.sdk.core.process.template.node.NodeStyleAttributeConten
 import com.itextpdf.dito.sdk.core.process.template.node.StyleTagContentProcessor;
 import com.itextpdf.dito.sdk.internal.core.template.parser.impl.jsoup.JsoupDocument;
 import com.itextpdf.dito.sdk.internal.core.template.parser.impl.jsoup.JsoupTemplateParser;
+import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Node;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +61,7 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
             final String newId = resourceLeafDescriptorMapper.encodeId(newName, existingResource.getType(), null);
             final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
             final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = templateFileLinkRenamingContext.getRenamingUrlProcessor();
-            TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor;
+            TemplateSubTreeProcessor<Node, TemplateFileLinkRenamingContext> processor;
             if (existingResource.getType() == ResourceTypeEnum.IMAGE) {
                 processor = new TemplateSubTreeProcessor<>(
                         Arrays.asList(
@@ -111,19 +112,19 @@ public class TemplateRefreshLinksServiceImpl implements TemplateRefreshLinksServ
             final String newId = templateDescriptorMapper.encodeToBase64(newName);
             final TemplateFileLinkRenamingContext templateFileLinkRenamingContext = new TemplateFileLinkRenamingContext(oldId, newId);
             final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = templateFileLinkRenamingContext.getRenamingUrlProcessor();
-            final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new FragmentLinkProcessor<>(renamingUrlProcessor)));
+            final TemplateSubTreeProcessor<Node, TemplateFileLinkRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new FragmentLinkProcessor<>(renamingUrlProcessor)));
             updateOldLinksInFiles(nestedTemplates, oldId, newId, processor);
             templateFileRepository.saveAll(nestedTemplates);
         }
     }
 
-    private void updateOldLinksInFiles(final List<TemplateFileEntity> templateFiles, final String oldId, final String newId, final TemplateSubTreeProcessor<TemplateFileLinkRenamingContext> processor) {
+    private void updateOldLinksInFiles(final List<TemplateFileEntity> templateFiles, final String oldId, final String newId, final TemplateSubTreeProcessor<Node, TemplateFileLinkRenamingContext> processor) {
         templateFiles.forEach(file -> {
             try {
                 final JsoupDocument template = JsoupTemplateParser.parse(new ByteArrayInputStream(file.getData()), null, "");
                 final MutableItemProcessingResult result = processor.process(template, new TemplateFileLinkRenamingContext(oldId, newId));
                 if (result.isModified()) {
-                    file.setData(template.outerHtml().getBytes(Charsets.UTF_8));
+                    file.setData(template.outerHtml().getBytes(StandardCharsets.UTF_8));
                 }
             } catch (Exception exception) {
                 throw new TemplateUpdatingOutdatedLinkException();
