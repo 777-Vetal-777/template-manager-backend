@@ -228,7 +228,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         final Pageable pageable = PageRequest.of(0, 8);
 
         //UPDATE by name
-        final String newCollectionName = "new collectionName";
+        final String newCollectionName = "new_collectionName";
 
         final String encodedCollectionName = Base64.getEncoder().encodeToString(NAME.getBytes());
         final DataCollectionUpdateRequestDTO collectionUpdateRequestDTO = new DataCollectionUpdateRequestDTO();
@@ -236,7 +236,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         collectionUpdateRequestDTO.setName(newCollectionName);
         collectionUpdateRequestDTO.setDescription("new description");
 
-        mockMvc.perform(patch(DataCollectionController.BASE_NAME + "/" + encodedCollectionName)
+        mockMvc.perform(patch(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_WITH_PATH_VARIABLE, encodedCollectionName)
                 .content(objectMapper.writeValueAsString(collectionUpdateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
