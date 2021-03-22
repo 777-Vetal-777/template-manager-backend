@@ -11,6 +11,7 @@ import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.instance.DefaultInstanceException;
+import com.itextpdf.dito.manager.exception.instance.deployment.SdkInstanceException;
 import com.itextpdf.dito.manager.exception.stage.NoNextStageOnPromotionPathException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,10 +68,39 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     @Override
     public void promoteOnDefaultStage(final TemplateFileEntity templateFileEntity) {
         log.info("Promote on default stage template: {} was started ", templateFileEntity);
-        final boolean isDefaultStage = true;
         final InstanceEntity defaultInstance = getDefaultInstance();
-        promoteTemplateToInstance(defaultInstance, templateFileEntity, isDefaultStage);
+        promoteOnDefaultStage(templateFileEntity, Collections.singleton(defaultInstance));
         log.info("Promote on default stage template: {} was finished successfully ", templateFileEntity);
+    }
+
+    private void promoteOnDefaultStage(final TemplateFileEntity templateFileEntity,
+                                       final Collection<InstanceEntity> instances) {
+        final boolean isDefaultStage = true;
+        for (final InstanceEntity instanceEntity : instances) {
+            promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
+        }
+        promoteLatestVersionOnDefaultStage(templateFileEntity.getTemplate(), instances);
+    }
+
+    private void promoteLatestVersionOnDefaultStage(final TemplateEntity templateEntity,
+                                                    final Collection<InstanceEntity> instances) {
+        final TemplateFileEntity templateFileEntity = getLatestUndeployed(templateEntity);
+
+        if (templateFileEntity != null) {
+            final boolean isDefaultStage = false;
+            for (final InstanceEntity instanceEntity : instances) {
+                try {
+                    removeTemplateFromInstance(instanceEntity.getRegisterToken(), instanceEntity.getSocket(), templateFileEntity, false);
+                } catch (SdkInstanceException ignored) {
+                    //if an undeploy failed (possible no deploy was performed before) we will ignore the exception. If the instance is unavailable we'll got exception on next step
+                }
+                promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
+            }
+        }
+    }
+
+    private TemplateFileEntity getLatestUndeployed(final TemplateEntity templateEntity) {
+        return templateFileRepository.findFirstByTemplate_IdAndDeployedOrderByVersionDesc(templateEntity.getId(), false).orElse(null);
     }
 
     /**
@@ -115,7 +147,6 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     @Override
     public TemplateFileEntity undeploy(final String templateName, final Long version) {
         log.info("Undeploy template version by name: {} and version: {} was started", templateName, version);
-        final boolean isDefaultStage = true;
         final TemplateEntity templateEntity = getTemplateByName(templateName);
         final TemplateFileEntity templateFileEntity = getTemplateFileEntityByVersion(version, templateEntity);
         final StageEntity defaultStageEntity = getDefaultStage();
@@ -128,9 +159,7 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
             final String instanceRegisterToken = instance.getRegisterToken();
             removeTemplateFromInstance(instanceRegisterToken, instanceSocket, templateFileEntity);
         }
-        for (final InstanceEntity instanceEntity : defaultStageEntity.getInstances()) {
-            promoteTemplateToInstance(instanceEntity, templateFileEntity, isDefaultStage);
-        }
+        promoteOnDefaultStage(templateFileEntity, defaultStageEntity.getInstances());
         templateFileEntity.setDeployed(false);
         templateFileEntity.setStage(defaultStageEntity);
         final TemplateFileEntity savedTemplateFileEntity = templateFileRepository.save(templateFileEntity);
@@ -148,6 +177,9 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         log.info("Remove all versions from default stage: {} was started", templateVersions);
         final InstanceEntity defaultInstance = getDefaultInstance();
         templateVersions.forEach(templateVersion -> removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersion));
+        if (!templateVersions.isEmpty()) {
+            removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersions.get(0), false);
+        }
         log.info("Remove all versions from default stage: {} was finished successfully", templateVersions);
     }
 
@@ -181,7 +213,14 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
     private TemplateDeploymentDTO removeTemplateFromInstance(final String instanceRegisterToken,
                                                              final String instanceSocket,
                                                              final TemplateFileEntity templateFileEntity) {
-        final String templateAlias = isOnDefaultStage(templateFileEntity)
+        return removeTemplateFromInstance(instanceRegisterToken, instanceSocket, templateFileEntity, isOnDefaultStage(templateFileEntity));
+    }
+
+    private TemplateDeploymentDTO removeTemplateFromInstance(final String instanceRegisterToken,
+                                                             final String instanceSocket,
+                                                             final TemplateFileEntity templateFileEntity,
+                                                             final boolean isDefault) {
+        final String templateAlias = isDefault
                 ? TemplateDeploymentUtils.getTemplateAliasForDefaultInstance(templateFileEntity)
                 : templateFileEntity.getTemplate().getName();
         return instanceClient.removeTemplateFromInstance(instanceRegisterToken, instanceSocket, templateAlias);

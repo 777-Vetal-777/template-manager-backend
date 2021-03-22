@@ -26,10 +26,7 @@ public class WorkspaceManagementControllerImpl extends AbstractController implem
     @Override
     public WorkspaceInfoDescriptor fetch(final String workspaceId) {
         log.info("Request to get workspace descriptor by workspace id {}.", workspaceId);
-        final WorkspaceEntity entity = workspaceService.getAll().get(0);
-        //TODO: uncomment the strings below after fix the integration between editor and front-end (DTM-2507)
-        //final String decodedWorkspaceId = decodeBase64(workspaceId);
-        //final WorkspaceEntity entity = workspaceService.get(decodedWorkspaceId);
+        final WorkspaceEntity entity = workspaceService.getByUuid(workspaceId);
         final WorkspaceInfoDescriptor workspaceInfoDescriptor = workspaceInfoDescriptorMapper.map(entity);
         log.info("Request to get workspace descriptor by workspace id {} finished successfully.", workspaceId);
         return workspaceInfoDescriptor;

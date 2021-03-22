@@ -77,4 +77,6 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
             + "join parts.part part "
             + "where part.id = :id")
     List<TemplateEntity> getTemplateCompositionsByTemplateFileId(@Param("id") Long templateFileId);
+
+    Optional<TemplateFileEntity> findFirstByTemplate_IdAndDeployedOrderByVersionDesc(Long id, Boolean isDeployed);
 }
