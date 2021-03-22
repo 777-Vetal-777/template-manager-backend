@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
+import com.itextpdf.dito.manager.component.retriever.RetrieverBuilder;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
@@ -41,13 +42,12 @@ public class TemplateFileProjectGeneratorImpl implements TemplateFileProjectGene
     private static final Logger log = LogManager.getLogger(TemplateFileProjectGeneratorImpl.class);
 
     private final DataSampleRepository dataSampleRepository;
-    private final ExtendedProjectPreprocessor extendedProjectPreprocessor;
+    private final RetrieverBuilder retrieverBuilder;
 
     public TemplateFileProjectGeneratorImpl(final DataSampleRepository dataSampleRepository,
-                                        final TemplateAssetRetriever resourceAssetRetriever,
-                                        final TemplateAssetRetriever templateAssetRetriever) {
+                                            final RetrieverBuilder retrieverBuilder) {
         this.dataSampleRepository = dataSampleRepository;
-        this.extendedProjectPreprocessor = new ExtendedProjectPreprocessor(resourceAssetRetriever, templateAssetRetriever);
+        this.retrieverBuilder = retrieverBuilder;
     }
 
     @Override
@@ -96,6 +96,9 @@ public class TemplateFileProjectGeneratorImpl implements TemplateFileProjectGene
             final File zippedProject = generateZipByTemplate(templateFileEntity, dataSampleFileEntities);
 
             try {
+                final TemplateAssetRetriever resourceAssetRetriever = retrieverBuilder.buildResourceAssetRetriever(templateFileEntity);
+                final TemplateAssetRetriever templateAssetRetriever = retrieverBuilder.buildTemplateAssetRetriever(templateFileEntity);
+                final ExtendedProjectPreprocessor extendedProjectPreprocessor = new ExtendedProjectPreprocessor(resourceAssetRetriever, templateAssetRetriever);
                 extendedProjectPreprocessor.toCanonicalTemplateProject(zippedProject, projectFolder);
             } finally {
                 deleteQuietly(zippedProject);

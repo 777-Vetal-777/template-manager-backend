@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.itextpdf.dito.manager.util.TemplateImportUtils.readStreamable;
+import static com.itextpdf.dito.manager.util.TemplateUtils.readStreamable;
 
 @Service
 public class DataCollectionImportServiceImpl implements DataCollectionImportService {

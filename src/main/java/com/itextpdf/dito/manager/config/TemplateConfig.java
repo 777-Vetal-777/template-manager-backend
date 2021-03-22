@@ -17,10 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.itextpdf.dito.manager.util.TemplateUtils.DITO_ASSET_TAG;
+
 @Configuration
 public class TemplateConfig {
-
-    private static final String DITO_ASSET_TAG = "dito-asset://";
 
     private final ResourceRepository resourceRepository;
     private final TemplateRepository templateRepository;

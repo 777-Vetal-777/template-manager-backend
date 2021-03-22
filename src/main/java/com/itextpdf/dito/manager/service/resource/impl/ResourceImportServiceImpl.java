@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.itextpdf.dito.manager.util.TemplateImportUtils.readStreamable;
+import static com.itextpdf.dito.manager.util.TemplateUtils.readStreamable;
 
 @Service
 public class ResourceImportServiceImpl implements ResourceImportService {

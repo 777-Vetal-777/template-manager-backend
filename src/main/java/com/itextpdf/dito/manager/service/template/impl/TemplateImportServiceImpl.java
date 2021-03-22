@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.itextpdf.dito.manager.util.TemplateImportUtils.readStreamable;
+import static com.itextpdf.dito.manager.util.TemplateUtils.readStreamable;
 
 @Service
 public class TemplateImportServiceImpl implements TemplateImportService {
