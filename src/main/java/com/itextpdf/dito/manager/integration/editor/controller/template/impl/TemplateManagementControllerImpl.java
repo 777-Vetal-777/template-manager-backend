@@ -1,8 +1,8 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template.impl;
 
+import com.itextpdf.dito.editor.server.common.core.descriptor.ExternalTemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateCommitDescriptor;
-import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
 import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.AbstractController;
@@ -34,7 +34,7 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public TemplateDescriptor getDescriptor(final String templateId) {
+    public ExternalTemplateDescriptor getDescriptor(final String templateId) {
         final String decodedTemplateId = encoder.decode(templateId);
         log.info("Request to get descriptor by template id {}.", decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.get(decodedTemplateId);
@@ -51,31 +51,31 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public List<TemplateDescriptor> getAllDescriptors(final String workspaceId) {
+    public List<ExternalTemplateDescriptor> getAllDescriptors(final String workspaceId) {
         log.info("Request to get all descriptors by workspace id {}.", workspaceId);
         // At now we support only single workspace, that's why all templates will be returned.
         return templateDescriptorMapper.map(templateManagementService.getAll());
     }
 
     @Override
-    public TemplateDescriptor update(final Principal principal, final String templateId,
-            final TemplateUpdateDescriptor descriptor,
-            final TemplateCommitDescriptor commit,
-            final byte[] data) {
+    public ExternalTemplateDescriptor update(final Principal principal, final String templateId,
+                                             final TemplateUpdateDescriptor descriptor,
+                                             final TemplateCommitDescriptor commit,
+                                             final byte[] data) {
         final String email = principal.getName();
         final String id = encoder.decode(templateId);
         log.info("Request to create new version of template with id {} received.", id);
         final String newName = descriptor != null ? descriptor.getName() : null;
         final String commitMessage = commit != null ? commit.getMessage() : null;
         final TemplateEntity templateEntity = templateManagementService.createNewVersion(id, data, email, newName, commitMessage);
-        log.info("Response to create new version of template with id {} processed.",id);
+        log.info("Response to create new version of template with id {} processed.", id);
         return templateDescriptorMapper.map(templateEntity);
     }
 
     @Override
-    public TemplateDescriptor add(final Principal principal, final String workspaceId,
-            @Valid final TemplateAddDescriptor descriptor,
-            final byte[] data) {
+    public ExternalTemplateDescriptor add(final Principal principal, final String workspaceId,
+                                          @Valid final TemplateAddDescriptor descriptor,
+                                          final byte[] data) {
         log.info("Request to create new template with name {} received.", descriptor.getName());
         final String email = principal.getName();
         final TemplateEntity templateEntity = templateManagementService.create(descriptor.getName(), data, null, email);
@@ -84,11 +84,11 @@ public class TemplateManagementControllerImpl extends AbstractController impleme
     }
 
     @Override
-    public TemplateDescriptor delete(final String templateId) {
+    public ExternalTemplateDescriptor delete(final String templateId) {
         final String decodedTemplateId = encoder.decode(templateId);
-        log.info("Request to delete template with id {} received.",decodedTemplateId);
+        log.info("Request to delete template with id {} received.", decodedTemplateId);
         final TemplateEntity templateEntity = templateManagementService.delete(decodedTemplateId);
-        log.info("Responce to delete template with id {} successfully processed.",decodedTemplateId);
+        log.info("Responce to delete template with id {} successfully processed.", decodedTemplateId);
         return templateDescriptorMapper.map(templateEntity);
     }
 }

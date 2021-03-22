@@ -13,7 +13,7 @@ public interface InstanceClient {
 
     void unregister(String instanceSocket, String token);
 
-    TemplateDeploymentDTO promoteTemplateToInstance(String instanceRegisterToken, String instanceSocket, TemplateDescriptorDTO descriptorDTO,File templateProject);
+    TemplateDeploymentDTO promoteTemplateToInstance(String instanceRegisterToken, String instanceSocket, TemplateDescriptorDTO descriptorDTO, File templateProject);
 
     TemplateDeploymentDTO removeTemplateFromInstance(String instanceRegisterToken, String instanceSocket, String templateAlias);
 

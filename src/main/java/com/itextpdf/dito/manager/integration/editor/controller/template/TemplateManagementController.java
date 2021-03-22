@@ -1,8 +1,8 @@
 package com.itextpdf.dito.manager.integration.editor.controller.template;
 
+import com.itextpdf.dito.editor.server.common.core.descriptor.ExternalTemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateCommitDescriptor;
-import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateUpdateDescriptor;
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,10 +36,10 @@ public interface TemplateManagementController {
     @Operation(summary = "Create template", description = "creates new template, returns descriptor of template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", description = "Template created", content = {
-            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateDescriptor.class))
+            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExternalTemplateDescriptor.class))
     })
     @ApiResponse(responseCode = "400", description = "data and/or descriptor have wrong format", content = @Content)
-    TemplateDescriptor add(Principal principal,
+    ExternalTemplateDescriptor add(Principal principal,
                            @PathVariable("workspace-id") String workspaceId,
                            @Parameter(description = "descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateAddDescriptor.class))) @RequestPart TemplateAddDescriptor descriptor,
                            @Parameter(description = "template content stream", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)) @RequestPart byte[] data);
@@ -55,25 +55,25 @@ public interface TemplateManagementController {
     @GetMapping(value = TEMPLATE_DESCRIPTOR_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Fetch template descriptor", description = "returns JSON descriptor of template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateDescriptor.class)))
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExternalTemplateDescriptor.class)))
     @ApiResponse(responseCode = "404", description = "Template not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
-    TemplateDescriptor getDescriptor(@PathVariable("template-id") String templateId);
+    ExternalTemplateDescriptor getDescriptor(@PathVariable("template-id") String templateId);
 
     @GetMapping(value = TEMPLATE_LIST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Fetch template descriptor list", description = "returns JSON list of template descriptors",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TemplateDescriptor.class))))
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = ExternalTemplateDescriptor.class))))
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null workspace id is passed", content = @Content)
-    List<TemplateDescriptor> getAllDescriptors(@PathVariable("workspace-id") String workspaceId);
+    List<ExternalTemplateDescriptor> getAllDescriptors(@PathVariable("workspace-id") String workspaceId);
 
     @PostMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "update template", description = "updates existing template, returns descriptor of template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateDescriptor.class)))
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExternalTemplateDescriptor.class)))
     @ApiResponse(responseCode = "404", description = "Template not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
-    TemplateDescriptor update(Principal principal,
+    ExternalTemplateDescriptor update(Principal principal,
                               @PathVariable("template-id") String templateId,
                               @Parameter(description = "update descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateUpdateDescriptor.class))) @RequestPart(required = false) TemplateUpdateDescriptor descriptor,
                               @Parameter(description = "commit descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateCommitDescriptor.class))) @RequestPart(required = false) TemplateCommitDescriptor commit,
@@ -83,8 +83,8 @@ public interface TemplateManagementController {
     @DeleteMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "delete template", description = "deletes template, returns descriptor of deleted template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateDescriptor.class)))
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExternalTemplateDescriptor.class)))
     @ApiResponse(responseCode = "404", description = "Template not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
-    TemplateDescriptor delete(@PathVariable("template-id") String templateId);
+    ExternalTemplateDescriptor delete(@PathVariable("template-id") String templateId);
 }

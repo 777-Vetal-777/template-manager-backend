@@ -185,7 +185,7 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(TEMPLATE_ID))
 				.andExpect(jsonPath("$[0].displayName").value(TEMPLATE_NAME))
-				.andExpect(jsonPath("$[0].type").value("outputTemplate"));
+				.andExpect(jsonPath("$[0].fragmentType").value("STANDARD"));
 		
 		final URI integrationTemplateUri = UriComponentsBuilder.fromUriString("/templates/" + TEMPLATE_ID)
 				.build().encode().toUri();
@@ -203,7 +203,7 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("id").value(TEMPLATE_ID))
 				.andExpect(jsonPath("displayName").value(TEMPLATE_NAME))
-				.andExpect(jsonPath("type").value("outputTemplate"));
+				.andExpect(jsonPath("fragmentType").value("STANDARD"));
 
 		final MvcResult result = mockMvc.perform(delete(integrationTemplateUri)
 				.contentType(MediaType.APPLICATION_JSON)
