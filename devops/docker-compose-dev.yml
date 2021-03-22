@@ -31,6 +31,7 @@ services:
       - DITO_MANAGER_SENTRY_ENVIRONMENT
       - DITO_MANAGER_DEFAULT_ADMIN_EMAIL
       - DITO_MANAGER_DEFAULT_ADMIN_PASSWORD
+      - DITO_MANAGER_SMTP_FROM
     depends_on:
       - db
     ports:
