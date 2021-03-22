@@ -14,6 +14,7 @@ spring:
     password:
     front-redirect: 123
     privacy-information: 123
+    from:
     properties:
       mail:
         smtp:

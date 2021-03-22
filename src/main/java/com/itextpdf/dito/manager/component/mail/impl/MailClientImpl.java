@@ -43,6 +43,7 @@ public class MailClientImpl implements MailClient {
     private static final String MAIL_RESET_PASSWORD_SUBJECT = "DITO reset password";
     private final String frontURL;
     private final String privacyInformationUrl;
+    private final String mailFrom;
 
     public MailClientImpl(@Value("${spring.mail.host}") final String host,
                           @Value("${spring.mail.port}") final Integer port,
@@ -51,7 +52,8 @@ public class MailClientImpl implements MailClient {
                           @Value("${spring.mail.properties.mail.smtp.auth}") final Boolean auth,
                           @Value("${spring.mail.properties.mail.smtp.starttls.enable}") final Boolean tls,
                           @Value("${spring.mail.front-redirect}") final String frontUrl,
-                          @Value("${spring.mail.privacy-information}") final String privacyInformation) {
+                          @Value("${spring.mail.privacy-information}") final String privacyInformation,
+                          @Value("${spring.mail.from}") final String mailFrom) {
         this.host = host;
         this.port = port;
         this.username = username;
@@ -60,6 +62,7 @@ public class MailClientImpl implements MailClient {
         this.tls = tls;
         this.frontURL = frontUrl;
         this.privacyInformationUrl = privacyInformation;
+        this.mailFrom = mailFrom;
     }
 
     @PostConstruct
@@ -75,7 +78,7 @@ public class MailClientImpl implements MailClient {
         log.info("Send registration message for user: {} was started", savedUser);
         final String mailBody = generateRegistrationHtml(savedUser, password, currentUser);
         try {
-            send(username, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
+            send(mailFrom, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
             log.info("Send registration message for user: {} was finished successfully", savedUser);
         } catch (Exception ex) {
             throw new MailingException(ex.getMessage(), ex);
@@ -86,7 +89,7 @@ public class MailClientImpl implements MailClient {
     public void sendPasswordsWasUpdatedByAdminMessage(final UserEntity savedUser, final String password, final UserEntity admin) {
         final String mailBody = generatePasswordUpdatedByAdminHtml(savedUser, admin, password);
         try {
-            send(username, savedUser.getEmail(), MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT, mailBody);
+            send(mailFrom, savedUser.getEmail(), MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT, mailBody);
         } catch (Exception ex) {
             throw new MailingException(ex.getMessage(), ex);
         }
@@ -97,7 +100,7 @@ public class MailClientImpl implements MailClient {
         log.info("Sen reset password for user: {} was started", userEntity);
         final String mailBody = generateResetPasswordHtml(userEntity, token);
         try {
-            send(username, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
+            send(mailFrom, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
             log.info("Sen reset password for user: {} was finished successfully", userEntity);
         } catch (Exception e) {
             log.info(e.getMessage());

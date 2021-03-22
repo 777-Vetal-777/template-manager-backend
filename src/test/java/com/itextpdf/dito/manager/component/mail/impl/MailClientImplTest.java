@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 
 class MailClientImplTest {
 
-    private final MailClientImpl mailClient = new MailClientImpl("localhost", 505, "test", "12345", false, false, "localhost:8080", "localhost:8080");
+    private final MailClientImpl mailClient = new MailClientImpl("localhost", 505, "test", "12345", false, false, "localhost:8080", "localhost:8080", "mailsender@example.com");
 
     private UserEntity userEntity;
 
