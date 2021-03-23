@@ -176,8 +176,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         templateFileEntity.getInstance().addAll(developerStageInstances);
 
-        templateDeploymentService.promoteOnDefaultStage(templateFileEntity);
         final TemplateEntity savedTemplateEntity = templateRepository.save(templateEntity);
+        templateDeploymentService.promoteOnDefaultStage(savedTemplateEntity.getLatestFile());
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was finished successfully",
                 templateName, templateTypeEnum, dataCollectionName, email, templateParts);
         return savedTemplateEntity;

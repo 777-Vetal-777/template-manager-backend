@@ -161,10 +161,10 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
             final String instanceRegisterToken = instance.getRegisterToken();
             removeTemplateFromInstance(instanceRegisterToken, instanceSocket, templateFileEntity);
         }
-        promoteOnDefaultStage(templateFileEntity, defaultStageEntity.getInstances());
         templateFileEntity.setDeployed(false);
         templateFileEntity.setStage(defaultStageEntity);
         final TemplateFileEntity savedTemplateFileEntity = templateFileRepository.save(templateFileEntity);
+        promoteOnDefaultStage(savedTemplateFileEntity, defaultStageEntity.getInstances());
         log.info("Undeploy template version by name: {} and version: {} was finished successfully", templateName, version);
         return savedTemplateFileEntity;
     }
@@ -180,7 +180,11 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         final InstanceEntity defaultInstance = getDefaultInstance();
         templateVersions.forEach(templateVersion -> removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersion));
         if (!templateVersions.isEmpty()) {
-            removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersions.get(0), false);
+            try {
+                removeTemplateFromInstance(defaultInstance.getRegisterToken(), defaultInstance.getSocket(), templateVersions.get(0), false);
+            } catch (SdkInstanceException ex) {
+                log.warn("Cannot remove template from instance: {}", ex.getMessage());
+            }
         }
         log.info("Remove all versions from default stage: {} was finished successfully", templateVersions);
     }
