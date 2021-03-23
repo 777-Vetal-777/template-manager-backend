@@ -19,7 +19,7 @@ spring:
     password: ${DITO_MANAGER_SMTP_PASSWORD}
     front-redirect: ${DITO_MANAGER_FRONTEND_APP_BASE_URL}
     privacy-information: ${DITO_MANAGER_PRIVACY_INFORMATION_APP_URL:https://itextpdf.com/en/how-buy/legal/privacy-policy}
-    from: ${DITO_MANAGER_SMTP_FROM}
+    from: ${DITO_MANAGER_SMTP_FROM:${DITO_MANAGER_SMTP_USERNAME}}
     properties:
       mail:
         smtp:
