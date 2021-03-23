@@ -134,6 +134,8 @@ public class TemplateDeploymentServiceImpl implements TemplateDeploymentService 
         templateFileEntity.setDeployed(true);
         templateFileEntity.setStage(nextStage);
         final TemplateFileEntity savedTemplateFileEntity = templateFileRepository.save(templateFileEntity);
+        final InstanceEntity defaultInstance = getDefaultInstance();
+        promoteLatestVersionOnDefaultStage(templateEntity, Collections.singleton(defaultInstance));
         log.info("Promote template version to next stage by name: {} and version: {} was finished successfully", templateName, version);
         return savedTemplateFileEntity;
     }
