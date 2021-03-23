@@ -267,7 +267,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
     @Transactional
     public DataSampleEntity update(final String name, final DataSampleEntity updatedEntity, final String userEmail) {
         final String newName = updatedEntity.getName();
-        throwExceptionIfNameNotMatchesPattern(name, AliasConstants.DATA_SAMPLE);
+        throwExceptionIfNameNotMatchesPattern(newName, AliasConstants.DATA_SAMPLE);
         final DataSampleEntity existingEntity = dataSampleRepository.findByName(name)
                 .orElseThrow(() -> new DataSampleNotFoundException(name));
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);

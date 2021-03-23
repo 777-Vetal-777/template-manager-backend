@@ -78,7 +78,7 @@ public class MailClientImpl implements MailClient {
             send(username, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
             log.info("Send registration message for user: {} was finished successfully", savedUser);
         } catch (Exception ex) {
-            throw new MailingException(ex.getMessage());
+            throw new MailingException(ex.getMessage(), ex);
         }
     }
 
@@ -88,7 +88,7 @@ public class MailClientImpl implements MailClient {
         try {
             send(username, savedUser.getEmail(), MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT, mailBody);
         } catch (Exception ex) {
-            throw new MailingException(ex.getMessage());
+            throw new MailingException(ex.getMessage(), ex);
         }
     }
 
@@ -101,7 +101,7 @@ public class MailClientImpl implements MailClient {
             log.info("Sen reset password for user: {} was finished successfully", userEntity);
         } catch (Exception e) {
             log.info(e.getMessage());
-            throw new MailingException(e.getMessage());
+            throw new MailingException(e.getMessage(), e);
         }
     }
 
