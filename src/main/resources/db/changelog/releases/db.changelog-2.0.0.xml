@@ -22,4 +22,12 @@
         <addUniqueConstraint tableName="workspace" columnNames="uuid" constraintName="workspace_uuid_unique_constraint" />
     </changeSet>
 
+    <changeSet id="004-modify-name-data-type-for-data-collection-table" author="Sergey_Nemets">
+        <modifyDataType tableName="data_collection" columnName="name" newDataType="varchar(255)" />
+    </changeSet>
+
+    <changeSet id="005-modify-name-data-type-for-data-sample-table" author="Sergey_Nemets">
+        <modifyDataType tableName="data_sample" columnName="name" newDataType="varchar(255)" />
+    </changeSet>
+
 </databaseChangeLog>
