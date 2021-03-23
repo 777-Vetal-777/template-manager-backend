@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.user.InvalidPasswordException;
 import com.itextpdf.dito.manager.exception.user.NewPasswordTheSameAsOldPasswordException;
 import com.itextpdf.dito.manager.exception.user.PasswordNotSpecifiedByAdminException;
+import com.itextpdf.dito.manager.exception.user.UserInvalidNameException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,5 +40,10 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(PasswordNotSpecifiedByAdminException.class)
     public ResponseEntity<ErrorResponseDTO> passwordNotSpecifiedByAdminExceptionHandler(final PasswordNotSpecifiedByAdminException ex) {
         return buildErrorResponse(ex, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserInvalidNameException.class)
+    public ResponseEntity<ErrorResponseDTO> userInvalidNameExceptionHandler(final UserInvalidNameException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
     }
 }
