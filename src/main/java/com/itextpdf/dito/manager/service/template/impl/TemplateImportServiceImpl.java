@@ -11,11 +11,11 @@ import com.itextpdf.dito.manager.dto.template.setting.SettingType;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateImportHasDuplicateNamesException;
 import com.itextpdf.dito.manager.exception.template.TemplateImportProjectException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
-import com.itextpdf.dito.manager.exception.template.TemplatePreviewGenerationException;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.model.template.duplicates.DuplicatesList;
 import com.itextpdf.dito.manager.model.template.duplicates.impl.DuplicatesListImpl;
@@ -101,7 +101,7 @@ public class TemplateImportServiceImpl implements TemplateImportService {
                     TemplateEntity entity;
                     try {
                         entity = importTemplateEntity(fileName, templateElement, dataCollection, templateSettings.get(templateElement.getTemplateName()), stylesheetsSettings, duplicatesList, email);
-                    } catch (TemplatePreviewGenerationException e) {
+                    } catch (ResourceNotFoundException e) {
                         log.warn("Could not provide consistency for imported template: {}", e.getMessage());
                         entity = null;
                     } catch (TemplateAlreadyExistsException e) {

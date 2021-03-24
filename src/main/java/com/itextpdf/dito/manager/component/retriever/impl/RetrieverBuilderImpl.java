@@ -69,11 +69,14 @@ public class RetrieverBuilderImpl implements RetrieverBuilder {
             public InputStream getResourceAsStream(final String resourceId) {
                 final String decodedId = getIdFromTag(resourceId);
                 final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.deserialize(decodedId);
+                if (resourceIdDTO == null) {
+                    throw new ResourceNotFoundException(resourceId);
+                }
                 final ResourceFileEntity fileEntity = templateFileEntity.getResourceFiles().stream()
                         .filter(file -> Objects.equals(file.getResource().getName(), resourceIdDTO.getName()))
                         .filter(file -> Objects.equals(file.getResource().getType(), resourceIdDTO.getType()))
                         .filter(file -> isFontTypeEquals(file, resourceIdDTO.getSubName())).findFirst()
-                        .orElse(getDefaultResourceFileEntity(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName()));
+                        .orElseGet(() -> getDefaultResourceFileEntity(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName()));
                 return new ByteArrayInputStream(fileEntity.getFile());
             }
 

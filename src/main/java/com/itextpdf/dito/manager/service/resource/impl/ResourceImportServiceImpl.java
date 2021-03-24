@@ -19,11 +19,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.itextpdf.dito.manager.util.TemplateUtils.DITO_ASSET_TAG;
 import static com.itextpdf.dito.manager.util.TemplateUtils.readStreamable;
 
 @Service
 public class ResourceImportServiceImpl implements ResourceImportService {
 
+    private  static final String DITO_ASSET_UNKNOWN_RESOURCE = "dito-asset://unknown_resource";
     private final ResourceService resourceService;
     private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
     private final ResourceRepository resourceRepository;
@@ -77,18 +79,18 @@ public class ResourceImportServiceImpl implements ResourceImportService {
                 final byte[] data = readStreamable(resourceUriGeneratorContext.getModifiedContent());
                 type = getContentType(data);
                 if (type == null) {
-                    resourceUri = "dito-asset://unknown_resource";
+                    resourceUri = DITO_ASSET_UNKNOWN_RESOURCE;
                 } else {
                     final String name = resourceUriGeneratorContext.getOriginalPath().getFileName().toString();
                     final String additionalName = new StringBuilder(namePattern).append("(").append(resourceId.incrementAndGet()).append(")").toString();
                     ResourceEntity resourceEntity = importResource(data, type, name, additionalName, email, settings.get(SettingType.valueOf(type.toString())).get(name));
-                    resourceUri = "dito-asset://".concat(resourceLeafDescriptorMapper.encodeId(resourceEntity.getName(), resourceEntity.getType(), null));
+                    resourceUri = DITO_ASSET_TAG.concat(resourceLeafDescriptorMapper.encodeId(resourceEntity.getName(), resourceEntity.getType(), null));
                 }
             } catch (ResourceAlreadyExistsException e) {
                 if (type != null) {
                     duplicatesList.putToDuplicates(SettingType.valueOf(type.toString()), resourceUriGeneratorContext.getOriginalPath().getFileName().toString());
                 }
-                resourceUri = "dito-asset://unknown_resource";
+                resourceUri = DITO_ASSET_UNKNOWN_RESOURCE;
             } catch (IOException e) {
                 resourceUri = null;
             }
