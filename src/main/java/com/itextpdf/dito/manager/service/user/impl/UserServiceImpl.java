@@ -90,7 +90,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserEntity create(final UserEntity userEntity, final List<String> roles, final UserEntity currentUser) {
+    public UserEntity create(final UserEntity userEntity, final List<String> roles, final UserEntity currentUser, final String frontURL) {
         log.info("Create userEntity: {} with roles: {} by user:{} was started", userEntity.getEmail(), roles, currentUser.getEmail());
         throwExceptionIfFirstNameOrLastNameNotMatchesPattern(userEntity.getFirstName(), userEntity.getLastName());
         if (userRepository.findByEmailAndActiveTrue(userEntity.getEmail()).isPresent()) {
@@ -109,7 +109,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         userEntity.setPasswordUpdatedByAdmin(true);
         UserEntity savedUser = userRepository.save(userEntity);
         if (mailClient != null) {
-            mailClient.sendRegistrationMessage(savedUser, password, currentUser);
+            mailClient.sendRegistrationMessage(savedUser, password, currentUser, frontURL);
         }
         log.info("Create userEntity: {} with roles: {} by user:{} was finished successfully", userEntity.getEmail(), roles, currentUser.getEmail());
         return savedUser;
@@ -183,7 +183,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public UserEntity updatePassword(final String newPassword, final String userEmail, final UserEntity admin) {
+    public UserEntity updatePassword(final String newPassword, final String userEmail, final UserEntity admin, final String frontURL) {
         log.info("Update password for user: {} was started by admin: {}", userEmail, admin);
         final UserEntity user = findActiveUserByEmail(userEmail);
         checkNewPasswordSameAsOld(newPassword, user.getPassword());
@@ -193,7 +193,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         user.setPasswordUpdatedByAdmin(true);
         final UserEntity savedUser = userRepository.save(user);
         if (mailClient != null) {
-            mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword, admin);
+            mailClient.sendPasswordsWasUpdatedByAdminMessage(savedUser, newPassword, admin, frontURL);
         }
         log.info("Update password for user: {} by admin: {} was finished successfully", userEmail, admin);
         return savedUser;
@@ -328,12 +328,12 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     @Override
-    public void forgotPassword(final String email) {
+    public void forgotPassword(final String email, final String frontURL) {
         log.info("Forgot password for email: {} was started", email);
         final Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         if (userEntity.isPresent() && mailClient != null) {
             final String token = tokenService.generateResetPasswordToken(userEntity.get());
-            mailClient.sendResetMessage(userEntity.get(), token);
+            mailClient.sendResetMessage(userEntity.get(), token, frontURL);
         }
         log.info("Forgot password for email: {} was finished successfully", email);
     }

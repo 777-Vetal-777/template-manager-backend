@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-    UserEntity create(UserEntity request, List<String> roles, UserEntity currentUser);
+    UserEntity create(UserEntity request, List<String> roles, UserEntity currentUser, String frontURL);
 
     UserEntity findActiveUserByEmail(String email);
 
@@ -28,7 +28,7 @@ public interface UserService {
 
     UserEntity updatePassword(String oldPassword, String newPassword, String userEmail);
 
-    UserEntity updatePassword(String newPassword, String userEmail, UserEntity admin);
+    UserEntity updatePassword(String newPassword, String userEmail, UserEntity admin, String frontURL);
 
     UserEntity updatePasswordSpecifiedByAdmin(String newPassword, String email);
 
@@ -37,7 +37,7 @@ public interface UserService {
 
     Integer calculateCountOfUsersWithOnlyOneRole(String roleName);
 
-    void forgotPassword(String email);
+    void forgotPassword(String email, String frontURL);
 
     void resetPassword(String token, String password);
 

@@ -23,6 +23,7 @@ import com.itextpdf.dito.manager.service.user.UserService;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.logging.log4j.LogManager;
@@ -50,11 +51,12 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO, Principal principal) {
+    public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO, final HttpServletRequest request, final Principal principal) {
+        final String frontURL = getFrontURL(request);
         log.info("Create user with params: {} was started", userCreateRequestDTO);
         final UserEntity currentUser = userService.findActiveUserByEmail(principal.getName());
         final UserEntity user = userService
-                .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles(), currentUser);
+                .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles(), currentUser, frontURL);
         log.info("Create user with params: {} was finished successfully", userCreateRequestDTO);
         return new ResponseEntity<>(userMapper.map(user), HttpStatus.CREATED);
     }
@@ -68,10 +70,11 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO, final Principal principal) {
+    public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO, final HttpServletRequest request, final Principal principal) {
+        final String frontURL = getFrontURL(request);
         log.info("Update password by userName: {} was started", userName);
         final UserEntity adminEntity = userService.findByEmail(principal.getName());
-        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), encoder.decode(userName), adminEntity);
+        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), encoder.decode(userName), adminEntity, frontURL);
         log.info("Update password by userName: {} was finished successfully", userName);
         return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
@@ -101,7 +104,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<UserDTO> currentUser(Principal principal) {
+    public ResponseEntity<UserDTO> currentUser(final Principal principal) {
         UserDTO user = userMapper.map(userService.findActiveUserByEmail(principal.getName()));
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -152,9 +155,10 @@ public class UserControllerImpl extends AbstractController implements UserContro
     }
 
     @Override
-    public ResponseEntity<Void> forgotPassword(final @Valid EmailDTO emailDTO) {
+    public ResponseEntity<Void> forgotPassword(final @Valid EmailDTO emailDTO, final HttpServletRequest request) {
+        final String frontURL = getFrontURL(request);
         log.info("Forgot password by email: {} was started", emailDTO.getEmail());
-        userService.forgotPassword(emailDTO.getEmail());
+        userService.forgotPassword(emailDTO.getEmail(), frontURL);
         log.info("Forgot password by email: {} was finished successfully", emailDTO.getEmail());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -170,5 +174,17 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<Boolean> lockedUsersExist() {
         return new ResponseEntity<>(userService.lockedUsersExist(), HttpStatus.OK);
+    }
+
+    private String getFrontURL(final HttpServletRequest request) {
+        log.info("Get front url by host: " + request.getHeader("X-Forwarded-Host") + "and port: " + request.getHeader("X-Forwarded-Port") + " was started");
+        String url = null;
+        final String host = request.getHeader("X-Forwarded-Host");
+        final String port = request.getHeader("X-Forwarded-Port");
+        if (host != null && port != null) {
+            url = host.concat(":").concat(port);
+        }
+        log.info("Get front url: " + url + " was finished successfully");
+        return url;
     }
 }

@@ -41,7 +41,6 @@ public class MailClientImpl implements MailClient {
     private static final String MAIL_SUBJECT = "DITO registration";
     private static final String MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT = "DITO password was updated by admin";
     private static final String MAIL_RESET_PASSWORD_SUBJECT = "DITO reset password";
-    private final String frontURL;
     private final String privacyInformationUrl;
     private final String mailFrom;
 
@@ -51,7 +50,6 @@ public class MailClientImpl implements MailClient {
                           @Value("${spring.mail.password}") final String password,
                           @Value("${spring.mail.properties.mail.smtp.auth}") final Boolean auth,
                           @Value("${spring.mail.properties.mail.smtp.starttls.enable}") final Boolean tls,
-                          @Value("${spring.mail.front-redirect}") final String frontUrl,
                           @Value("${spring.mail.privacy-information}") final String privacyInformation,
                           @Value("${spring.mail.from}") final String mailFrom) {
         this.host = host;
@@ -60,7 +58,6 @@ public class MailClientImpl implements MailClient {
         this.password = password;
         this.auth = auth;
         this.tls = tls;
-        this.frontURL = frontUrl;
         this.privacyInformationUrl = privacyInformation;
         this.mailFrom = mailFrom;
     }
@@ -74,9 +71,9 @@ public class MailClientImpl implements MailClient {
     }
 
     @Override
-    public void sendRegistrationMessage(final UserEntity savedUser, final String password, final UserEntity currentUser) {
+    public void sendRegistrationMessage(final UserEntity savedUser, final String password, final UserEntity currentUser, final String frontURL) {
         log.info("Send registration message for user: {} was started", savedUser);
-        final String mailBody = generateRegistrationHtml(savedUser, password, currentUser);
+        final String mailBody = generateRegistrationHtml(savedUser, password, currentUser, frontURL);
         try {
             send(mailFrom, savedUser.getEmail(), MAIL_SUBJECT, mailBody);
             log.info("Send registration message for user: {} was finished successfully", savedUser);
@@ -86,8 +83,8 @@ public class MailClientImpl implements MailClient {
     }
 
     @Override
-    public void sendPasswordsWasUpdatedByAdminMessage(final UserEntity savedUser, final String password, final UserEntity admin) {
-        final String mailBody = generatePasswordUpdatedByAdminHtml(savedUser, admin, password);
+    public void sendPasswordsWasUpdatedByAdminMessage(final UserEntity savedUser, final String password, final UserEntity admin, final String frontURL) {
+        final String mailBody = generatePasswordUpdatedByAdminHtml(savedUser, admin, password, frontURL);
         try {
             send(mailFrom, savedUser.getEmail(), MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT, mailBody);
         } catch (Exception ex) {
@@ -96,9 +93,9 @@ public class MailClientImpl implements MailClient {
     }
 
     @Override
-    public void sendResetMessage(final UserEntity userEntity, final String token) {
+    public void sendResetMessage(final UserEntity userEntity, final String token, final String frontURL) {
         log.info("Sen reset password for user: {} was started", userEntity);
-        final String mailBody = generateResetPasswordHtml(userEntity, token);
+        final String mailBody = generateResetPasswordHtml(userEntity, token, frontURL);
         try {
             send(mailFrom, userEntity.getEmail(), MAIL_RESET_PASSWORD_SUBJECT, mailBody);
             log.info("Sen reset password for user: {} was finished successfully", userEntity);
@@ -108,7 +105,7 @@ public class MailClientImpl implements MailClient {
         }
     }
 
-    private String generateResetPasswordHtml(final UserEntity userEntity, final String token) {
+    private String generateResetPasswordHtml(final UserEntity userEntity, final String token, final String frontURL) {
         log.info("Generate reset password html for user: {} was started", userEntity);
         final List<String> list = readFile("templates/resetPasswordEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
@@ -122,7 +119,7 @@ public class MailClientImpl implements MailClient {
         return stringBuilder.toString();
     }
 
-    private String generatePasswordUpdatedByAdminHtml(final UserEntity userEntity, final UserEntity admin, final String password) {
+    private String generatePasswordUpdatedByAdminHtml(final UserEntity userEntity, final UserEntity admin, final String password, final String frontURL) {
         final List<String> list = readFile("templates/passwordUpdatedByAdminEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
         list.set(29, String.format(list.get(29), admin.getFirstName() + " "+ admin.getLastName()));
@@ -139,7 +136,7 @@ public class MailClientImpl implements MailClient {
         return stringBuilder.toString();
     }
 
-    private String generateRegistrationHtml(final UserEntity userEntity, final String password, final UserEntity currentUser) {
+    private String generateRegistrationHtml(final UserEntity userEntity, final String password, final UserEntity currentUser, final String frontURL) {
         log.info("Generate registration html for user: {} was started", userEntity);
         final List<String> list = readFile("templates/registrationEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));

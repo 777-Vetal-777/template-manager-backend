@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration.crud;
 
 import com.itextpdf.dito.manager.component.mail.MailClient;
 import com.itextpdf.dito.manager.controller.user.UserController;
+import com.itextpdf.dito.manager.controller.user.impl.UserControllerImpl;
 import com.itextpdf.dito.manager.dto.token.reset.ResetPasswordDTO;
 import com.itextpdf.dito.manager.dto.user.EmailDTO;
 import com.itextpdf.dito.manager.dto.user.UserDTO;
@@ -34,10 +35,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static com.itextpdf.dito.manager.controller.user.UserController.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,9 +49,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -323,13 +329,13 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         emailDTO.setEmail(user2.getEmail());
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<UserEntity> captor2 = ArgumentCaptor.forClass(UserEntity.class);
-        doNothing().when(mailClient).sendResetMessage(captor2.capture(), captor.capture());
+        doNothing().when(mailClient).sendResetMessage(captor2.capture(), captor.capture(), any());
         mockMvc.perform(patch(UserController.BASE_NAME + FORGOT_PASSWORD)
                 .content(objectMapper.writeValueAsString(emailDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-        verify(mailClient, times(1)).sendResetMessage(captor2.capture(), captor.capture());
+        verify(mailClient, times(1)).sendResetMessage(captor2.capture(), captor.capture(), any());
         assertNotNull(captor2.getValue());
 
         final UserEntity userEntity = userRepository.findByEmail(user2.getEmail()).get();
@@ -445,13 +451,13 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
         emailDTO.setEmail(user1.getEmail());
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<UserEntity> captor2 = ArgumentCaptor.forClass(UserEntity.class);
-        doNothing().when(mailClient).sendResetMessage(captor2.capture(), captor.capture());
+        doNothing().when(mailClient).sendResetMessage(captor2.capture(), captor.capture(), any());
         mockMvc.perform(patch(UserController.BASE_NAME + FORGOT_PASSWORD)
                 .content(objectMapper.writeValueAsString(emailDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-        verify(mailClient, times(1)).sendResetMessage(captor2.capture(), captor.capture());
+        verify(mailClient, times(1)).sendResetMessage(captor2.capture(), captor.capture(), any());
         assertNotNull(captor2.getValue());
 
         final ResetPasswordDTO request = new ResetPasswordDTO();

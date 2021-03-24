@@ -65,7 +65,7 @@ public class EntityRolesUnitTest {
         user.setRoles(Set.of(masterRole));
         user.setActive(Boolean.TRUE);
 
-        userService.create(user, Collections.singletonList(masterRole.getName()), user);
+        userService.create(user, Collections.singletonList(masterRole.getName()), user, "localhost:8080");
     }
 
     @AfterEach

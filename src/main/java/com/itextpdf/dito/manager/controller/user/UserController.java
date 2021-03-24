@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
@@ -70,7 +72,7 @@ public interface UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid input or user already exists", content = @Content),
     })
-    ResponseEntity<UserDTO> create(@RequestBody UserCreateRequestDTO userCreateRequestDTO, Principal principal);
+    ResponseEntity<UserDTO> create(@RequestBody UserCreateRequestDTO userCreateRequestDTO, HttpServletRequest request, Principal principal);
 
     @GetMapping(USER_NAME_ENDPOINT_WITH_PATH_VARIABLE)
     @PreAuthorize("hasAuthority('E3_US128_USER_DETAILS_PAGE')")
@@ -101,7 +103,7 @@ public interface UserController {
             @ApiResponse(responseCode = "400", description = "New password is same as old password", content = @Content),
     })
     ResponseEntity<UserDTO> updatePassword(@Parameter(name = USER_NAME_PATH_VARIABLE, description = "Encoded with base64 username", required = true) @PathVariable(USER_NAME_PATH_VARIABLE) String userName,
-            @Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, Principal principal);
+            @Valid @RequestBody UpdatePasswordRequestDTO updatePasswordRequestDTO, HttpServletRequest request,  Principal principal);
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('E3_US_9_USERS_TABLE', 'E2_US6_SETTINGS_PANEL')")
@@ -179,7 +181,7 @@ public interface UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Successfully sent link to email", content = @Content)
     })
-    ResponseEntity<Void> forgotPassword(@RequestBody EmailDTO emailDTO);
+    ResponseEntity<Void> forgotPassword(@RequestBody EmailDTO emailDTO, HttpServletRequest req);
 
     @PatchMapping(RESET_PASSWORD)
     @Operation(summary = "Reset user`s password", description = "Reset user`s password",

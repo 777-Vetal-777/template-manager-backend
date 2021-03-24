@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 
 class MailClientImplTest {
 
-    private final MailClientImpl mailClient = new MailClientImpl("localhost", 505, "test", "12345", false, false, "localhost:8080", "localhost:8080", "mailsender@example.com");
+    private final MailClientImpl mailClient = new MailClientImpl("localhost", 505, "test", "12345", false, false, "localhost:8080", "mailsender@example.com");
 
     private UserEntity userEntity;
 
@@ -30,7 +30,7 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        Assertions.assertDoesNotThrow(()-> mailClient.sendRegistrationMessage(userEntity, "12345", userEntity));
+        Assertions.assertDoesNotThrow(()-> mailClient.sendRegistrationMessage(userEntity, "12345", userEntity, ""));
     }
 
     @Test
@@ -38,7 +38,7 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        Assertions.assertDoesNotThrow(()-> mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345", userEntity));
+        Assertions.assertDoesNotThrow(()-> mailClient.sendPasswordsWasUpdatedByAdminMessage(userEntity, "12345", userEntity, "localhost:8080"));
     }
 
     @Test
@@ -46,6 +46,6 @@ class MailClientImplTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         ReflectionTestUtils.setField(mailClient, "client", mailSender);
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        Assertions.assertDoesNotThrow(()-> mailClient.sendResetMessage(userEntity, "12345"));
+        Assertions.assertDoesNotThrow(()-> mailClient.sendResetMessage(userEntity, "12345", "localhost:8080"));
     }
 }
