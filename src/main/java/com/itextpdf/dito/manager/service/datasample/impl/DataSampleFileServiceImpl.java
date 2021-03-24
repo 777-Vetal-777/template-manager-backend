@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsForNativeFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromLong;
@@ -42,7 +43,7 @@ public class DataSampleFileServiceImpl extends AbstractService implements DataSa
         final String version = getStringFromLong(filter.getVersion());
         final String createdBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
-        final String stageName = getStringFromFilter(filter.getStage());
+        final List<String> stageName = getListLowerStringsForNativeFromFilter(filter.getStage());
 
         Date createdOnStartDate = null;
         Date createdOnEndDate = null;

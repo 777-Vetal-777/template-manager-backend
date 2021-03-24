@@ -30,7 +30,7 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
     String FILTER_CONDITION = "(:version is null or file.version=:version) "
             + "and (:modifiedBy='' or LOWER(CONCAT(file.author.firstName, ' ',file.author.lastName)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.modifiedOn between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (:stage='' or LOWER(file.stage.name) like CONCAT('%',:stage,'%')) "
+            + "and (COALESCE(:stages) is null or LOWER(file.stage.name) in (:stages)) "
             + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%')) ";
 
     String SEARCH_CONDITION = "(CAST(file.version as string) like CONCAT('%',:search,'%') "
@@ -50,7 +50,7 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
                                   @Param("comment") @Nullable String comment,
-                                  @Param("stage") @Nullable String stageName);
+                                  @Param("stages") @Nullable List<String> stageName);
 
     @Query(value = SELECT_CLAUSE + FILTER_CONDITION + " and " + SEARCH_CONDITION)
     Page<FileVersionModel> search(Pageable pageable,
@@ -60,7 +60,7 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
                                   @Param("comment") @Nullable String comment,
-                                  @Param("stage") @Nullable String stageName,
+                                  @Param("stages") @Nullable List<String> stageName,
                                   @Param("search") @Nullable String search);
 
     Optional<TemplateFileEntity> findByVersionAndTemplate(Long version, TemplateEntity templateEntity);

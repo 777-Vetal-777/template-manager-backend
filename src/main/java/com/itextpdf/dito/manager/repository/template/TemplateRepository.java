@@ -106,8 +106,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     String FILTER_DEPENDENCIES = " where ((:depend='' or LOWER(name) like CONCAT('%',:depend,'%')) " +
             " and (:version = 0 or version=:version) " +
             " and (:directionType='' or LOWER(directionType) like LOWER(CONCAT('%',:directionType,'%')))" +
-            " and (COALESCE(:stages) is null or stage in (:stages)) " +
-            " and (COALESCE(:dependencyTypes) is null or dependencyType in (:dependencyTypes)))";
+            " and (COALESCE(:stages) is null or LOWER(stage) in (:stages)) " +
+            " and (COALESCE(:dependencyTypes) is null or LOWER(dependencyType) in (:dependencyTypes)))";
 
     String SEARCH_DEPENDENCIES = " and ( LOWER(name) like CONCAT('%',:search,'%') " +
             " or LOWER(directionType) like CONCAT('%',:search,'%')" +

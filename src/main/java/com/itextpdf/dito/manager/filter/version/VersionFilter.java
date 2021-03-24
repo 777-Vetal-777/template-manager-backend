@@ -7,7 +7,7 @@ public class VersionFilter {
     private String modifiedBy;
     private List<String> modifiedOn;
     private String comment;
-    private String stage;
+    private List<String> stage;
 
     public Long getVersion() {
         return version;
@@ -41,11 +41,11 @@ public class VersionFilter {
         this.comment = comment;
     }
 
-    public String getStage() {
+    public List<String> getStage() {
         return stage;
     }
 
-    public void setStage(String stage) {
+    public void setStage(List<String> stage) {
         this.stage = stage;
     }
 

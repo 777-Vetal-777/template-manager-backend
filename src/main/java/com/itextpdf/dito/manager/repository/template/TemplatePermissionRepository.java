@@ -46,7 +46,7 @@ public interface TemplatePermissionRepository extends JpaRepository<TemplateEnti
             + " group by r.name) as rolesTable "
             + "where ";
 
-    String FILTER_CONDITION = "(COALESCE(:role_name) is null or CAST(name as text) in (:role_name))"
+    String FILTER_CONDITION = "(COALESCE(:role_name) is null or LOWER(CAST(name as text)) in (:role_name))"
             + "  and (:edit_template='' or :edit_template=E9_US75_EDIT_TEMPLATE_METADATA_STANDARD) "
             + "  and (:new_version_template_standard='' or :new_version_template_standard=E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD) "
             + "  and (:rollback_template_standard='' or :rollback_template_standard=E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE) "

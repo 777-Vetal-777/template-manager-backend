@@ -36,7 +36,7 @@ public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEn
             "and (:createdBy='' or  LOWER(CONCAT(author.first_name, ' ',author.last_name)) like CONCAT('%',:createdBy,'%')) " +
             "and (cast(:startDate as date) is null or file.created_on between cast(:startDate as date) and cast(:endDate as date)) " +
             "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%')) " +
-            "and (:stage='' or LOWER(stages.name) like CONCAT('%',:stage,'%')) ";
+            "and (COALESCE(:stages) is null or LOWER(stages.name) in (:stages)) ";
 
     String SEARCH_CONDITION = "and ( CAST(file.version as text) like CONCAT('%',:search,'%') " +
             "or LOWER(file.comment) like CONCAT('%',:search,'%') " +
@@ -53,7 +53,7 @@ public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEn
                                   @Param("createdBy") @Nullable String createdBy,
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
-                                  @Param("stage") @Nullable String stage,
+                                  @Param("stages") @Nullable List<String> stage,
                                   @Param("comment") @Nullable String comment);
 
     @Query(value = SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION + GROUP_BY_VERSION, nativeQuery = true)
@@ -63,7 +63,7 @@ public interface DataSampleFileRepository extends JpaRepository<DataSampleFileEn
                                   @Param("createdBy") @Nullable String createdBy,
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
-                                  @Param("stage") @Nullable String stage,
+                                  @Param("stages") @Nullable List<String> stage,
                                   @Param("comment") @Nullable String comment,
                                   @Param("search") @Nullable String search);
 }

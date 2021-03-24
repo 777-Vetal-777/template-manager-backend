@@ -39,7 +39,7 @@ public class TemplatePermissionServiceImpl extends AbstractService implements Te
         log.info("Get roles by templateName: {} and filter: {} and search was started", name, filter, search);
         throwExceptionIfSortedFieldIsNotSupported(pageable.getSort());
 
-        final List<String> roleNameFilter = FilterUtils.getListStringsFromFilter(filter.getName());
+        final List<String> roleNameFilter = FilterUtils.getListLowerStringsForNativeFromFilter(filter.getName());
         final String editTemplateMetadataFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getEditTemplateMetadata());
         final String createNewTemplateVersionStandardFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getCreateNewTemplateVersionStandard());
         final String rollbackVersionStandardFilter = FilterUtils.getStringFromMultiselectBooleanFilter(filter.getRollbackVersionStandard());

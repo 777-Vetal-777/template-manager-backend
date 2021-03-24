@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
 @Service
@@ -123,7 +124,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         final String email = getStringFromFilter(userFilter.getEmail());
         final String firstName = getStringFromFilter(userFilter.getFirstName());
         final String lastName = getStringFromFilter(userFilter.getLastName());
-        final List<String> securityRoles = userFilter.getRoles();
+        final List<String> securityRoles = getListLowerStringsFromFilter(userFilter.getRoles());
         final Boolean active = getBooleanMultiselectFromFilter(userFilter.getActive());
 
         final Page<UserEntity> userEntities = StringUtils.isEmpty(searchParam)

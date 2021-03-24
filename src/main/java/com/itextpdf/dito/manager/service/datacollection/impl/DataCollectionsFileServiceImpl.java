@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -54,7 +55,7 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
         final Long version = getLongFromFilter(filter.getVersion());
         final String createdBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
-        final String stageName = getStringFromFilter(filter.getStage());
+        final List<String> stageName = getListLowerStringsFromFilter(filter.getStage());
 
         Date createdOnStartDate = null;
         Date createdOnEndDate = null;

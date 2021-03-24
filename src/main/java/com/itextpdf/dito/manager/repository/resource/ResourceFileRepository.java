@@ -45,8 +45,8 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     String FILTER_CONDITION = " (:version = '' or file.version = CAST(:version as bigint)) "
             + "and (:modifiedBy='' or LOWER(CONCAT(users.first_name, ' ',users.last_name)) like CONCAT('%',:modifiedBy,'%')) "
             + "and (cast(:startDate as date) is null or file.modified_on between cast(:startDate as date) and cast(:endDate as date)) "
-            + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%'))"
-            + "and (:stage='' or LOWER(stage.name) like CONCAT('%',:stage,'%')) ";
+            + "and (:comment='' or LOWER(file.comment) like CONCAT('%',:comment,'%')) "
+            + "and (COALESCE(:stages) is null or LOWER(stage.name) in (:stages)) ";
 
     String GROUP_BY_VERSION = "group by file.version";
 
@@ -72,7 +72,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
 
     String FILTER_CONDITION_DEPENDENCY = " where (:depend = '' or LOWER(name) like CONCAT('%', :depend, '%'))" +
             " and (:version = 0 or version = :version)" +
-            " and (COALESCE(:stages) is null or stage in (:stages)) ";
+            " and (COALESCE(:stages) is null or LOWER(stage) in (:stages)) ";
 
     String SEARCH_CONDITION_DEPENDENCY = " and ((LOWER(name) like CONCAT('%', :search, '%')" +
             " or CAST(version as VARCHAR(10)) like CONCAT('%', :search, '%')" +
@@ -87,7 +87,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
                                   @Param("comment") @Nullable String comment,
-                                  @Param("stage") @Nullable String stageName);
+                                  @Param("stages") @Nullable List<String> stageName);
 
     @Query(value = SELECT_CLAUSE + FILTER_CONDITION + SEARCH_CONDITION + GROUP_BY_VERSION, nativeQuery = true)
     Page<FileVersionModel> search(Pageable pageable,
@@ -97,7 +97,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
                                   @Param("startDate") @Nullable @Temporal Date startDate,
                                   @Param("endDate") @Nullable @Temporal Date endDate,
                                   @Param("comment") @Nullable String comment,
-                                  @Param("stage") @Nullable String stageName,
+                                  @Param("stages") @Nullable List<String> stageName,
                                   @Param("search") @Nullable String search);
 
     @Query(value = SELECT_CLAUSE_DEPENDENCY + FILTER_CONDITION_DEPENDENCY, nativeQuery = true)

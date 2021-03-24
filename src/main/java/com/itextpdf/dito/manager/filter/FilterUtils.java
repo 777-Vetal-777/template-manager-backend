@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class FilterUtils {
 
@@ -27,7 +28,19 @@ public final class FilterUtils {
                 : value.toLowerCase();
     }
 
-    public static List<String> getListStringsFromFilter(final List<String> values){
+    public static List<String> getListLowerStringsFromFilter(final List<String> values) {
+        return StringUtils.isEmpty(values)
+                ?  null
+                : values.stream().map(String::toLowerCase).collect(Collectors.toList());
+    }
+
+    public static List<String> getListLowerStringsForNativeFromFilter(final List<String> values) {
+        return StringUtils.isEmpty(values)
+                ? new ArrayList<>()
+                : values.stream().map(String::toLowerCase).collect(Collectors.toList());
+    }
+
+    public static List<String> getListStringsFromFilter(final List<String> values) {
         return Objects.isNull(values)
                 ? new ArrayList<>()
                 : values;

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsForNativeFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getListStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -47,10 +48,10 @@ public class TemplateDependencyServiceImpl extends AbstractController implements
         log.info("Get list template dependencies by name: {} and filter: {} and search: {} was started", name, filter, search);
         final String templateName = encoder.decode(name);
         final TemplateEntity templateEntity = templateService.get(templateName);
-        final List<String> dependencyTypes = getDependencyAsString(filter.getDependencyType());
+        final List<String> dependencyTypes = getListLowerStringsForNativeFromFilter(getDependencyAsString(filter.getDependencyType()));
         final String directionType = getDirectionAsString(filter.getDirectionType());
         final String depend = getStringFromFilter(filter.getName());
-        final List<String> stages = getListStringsFromFilter(filter.getStage());
+        final List<String> stages = getListLowerStringsForNativeFromFilter(filter.getStage());
         final Long version = getLongFromFilter(filter.getVersion());
         final Pageable pageWithSort = updateSort(pageable);
 

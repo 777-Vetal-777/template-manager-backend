@@ -27,6 +27,7 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
             + "and ((COALESCE(:stages) is not null and LOWER(stage.name) in (:stages)) or (COALESCE(:stages) is null or (LOWER(stage.name) in (:stages))))"
             + "and (cast(:startDate as date) is null or i.createdOn between cast(:startDate as date) and cast(:endDate as date)) "
             + "and (:createdBy='' or LOWER(CONCAT(i.createdBy.firstName, ' ', i.createdBy.lastName)) like CONCAT('%',:createdBy,'%')))";
+
     String SEARCH_CONDITION = "(LOWER(i.name) like CONCAT('%',:search,'%') "
             + " or LOWER(i.socket) like CONCAT('%',:search,'%') "
             + " or LOWER(i.stage.name) like CONCAT('%',:search,'%') "

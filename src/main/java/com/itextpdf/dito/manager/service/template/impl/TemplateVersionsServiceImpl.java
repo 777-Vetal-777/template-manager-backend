@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -53,7 +54,7 @@ public class TemplateVersionsServiceImpl extends AbstractService implements Temp
         final Long version = filter.getVersion();
         final String modifiedBy = getStringFromFilter(filter.getModifiedBy());
         final String comment = getStringFromFilter(filter.getComment());
-        final String stageName = getStringFromFilter(filter.getStage());
+        final List<String> stageName = getListLowerStringsFromFilter(filter.getStage());
 
         Date modifiedOnStartDate = null;
         Date modifiedOnEndDate = null;

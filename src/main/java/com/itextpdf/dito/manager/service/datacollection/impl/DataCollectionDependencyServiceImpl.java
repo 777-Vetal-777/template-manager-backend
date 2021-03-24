@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -50,7 +51,7 @@ public class DataCollectionDependencyServiceImpl extends AbstractService impleme
         final Pageable pageWithSort = updateSort(pageable);
         final Long version = getLongFromFilter(filter.getVersion());
         final String depend = getStringFromFilter(filter.getName());
-        final List<String> stages = filter.getStage();
+        final List<String> stages = getListLowerStringsFromFilter(filter.getStage());
         final List<String> directionType = filter.getDirectionType() != null ? filter.getDirectionType().stream().map(d -> d.toString().toLowerCase()).collect(Collectors.toList()) : Collections.emptyList();
         final boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
         if (Objects.isNull(filter.getDependencyType()) || filter.getDependencyType().contains(DependencyType.TEMPLATE)) {

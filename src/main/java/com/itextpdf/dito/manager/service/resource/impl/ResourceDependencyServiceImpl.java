@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.HARD;
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsForNativeFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getListStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getLongFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
@@ -56,7 +57,7 @@ public class ResourceDependencyServiceImpl extends AbstractService implements Re
             final ResourceEntity resourceEntity = resourceService.getResource(name, type);
             final Long version = getLongFromFilter(filter.getVersion());
             final String depend = getStringFromFilter(filter.getName());
-            final List<String> stages = getListStringsFromFilter(filter.getStage());
+            final List<String> stages = getListLowerStringsForNativeFromFilter(filter.getStage());
             final boolean isSearchEmpty = StringUtils.isEmpty(searchParam);
             final Pageable pageWithSort = updateSort(pageable);
 

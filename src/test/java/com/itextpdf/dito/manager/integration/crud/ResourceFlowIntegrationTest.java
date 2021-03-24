@@ -3,14 +3,18 @@ package com.itextpdf.dito.manager.integration.crud;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
+import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.StageEntity;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
@@ -19,11 +23,14 @@ import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceFileRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceLogRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
+import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 
+import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +45,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.File;
 import java.net.URI;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -111,7 +120,14 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private InstanceRepository instanceRepository;
     @Autowired
-    ResourceService resourceService;
+    private ResourceService resourceService;
+    @Autowired
+    private StageRepository stageRepository;
+    @Autowired
+    private TemplateService templateService;
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
 
     @AfterEach
     void tearDown() {
@@ -604,7 +620,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         }
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
+                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())).param("stage", "DEV"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("content").value(hasSize(6)))
@@ -635,16 +651,17 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                     .file(IMAGE_TYPE_PART).file(getUpdateTemplateBooleanPart(true))
                     .contentType(MediaType.MULTIPART_FORM_DATA));
         }
+       addStage();
         final MvcResult result = mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())).param("stage", "DEV"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
-                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2, 3, 4, 5, 6, 7)))
+                .andExpect(jsonPath("$.content[0].version").value(7))
                 .andExpect(jsonPath("$.content[0].modifiedBy").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].modifiedOn").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
-                .andExpect(jsonPath("$.content[0].stage").isEmpty())
+                .andExpect(jsonPath("$.content[0].stage").isNotEmpty())
                 .andReturn();
         assertNotNull(result.getResponse());
     }
@@ -858,4 +875,27 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
        
     }
 
+    private void addStage(){
+        StageEntity stageEntity = stageRepository.findDefaultStage().get();
+        DataCollectionEntity dataCollectionEntity = dataCollectionService.create("ABC", DataCollectionType.JSON, "{}".getBytes(),"abc", "admin@email.com");
+        TemplateEntity templateEntity = templateService.create("ABC", TemplateTypeEnum.HEADER, "ABC", "admin@email.com");
+
+        ResourceEntity resourceEntity = resourceRepository.findByNameAndType("test-image", ResourceTypeEnum.IMAGE).get();
+        Collection<ResourceFileEntity> files2 = resourceEntity.getResourceFiles();
+        for(ResourceFileEntity resourceFileEntity:files2){
+            resourceFileEntity.setStage(stageEntity);
+            resourceFileRepository.save(resourceFileEntity);
+        }
+        List<ResourceFileEntity> files = resourceEntity.getLatestFile();
+        for(ResourceFileEntity resourceFileEntity:files){
+            resourceFileEntity.setStage(stageEntity);
+            resourceFileRepository.save(resourceFileEntity);
+        }
+
+        TemplateFileEntity templateFileEntity = templateEntity.getLatestFile();
+        templateFileEntity.setStage(stageEntity);
+        templateFileEntity.setResourceFiles(new HashSet<>(files));
+        templateFileRepository.save(templateFileEntity);
+
+    }
 }

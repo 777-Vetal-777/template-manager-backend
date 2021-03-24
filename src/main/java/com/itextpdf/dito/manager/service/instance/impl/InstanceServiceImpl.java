@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
+import static com.itextpdf.dito.manager.filter.FilterUtils.getListLowerStringsFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 
@@ -108,10 +109,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final String name = getStringFromFilter(instanceFilter.getName());
         final String socket = getStringFromFilter(instanceFilter.getSocket());
         final String createdBy = getStringFromFilter(instanceFilter.getCreatedBy());
-        final List<String> stagesFromFilter = instanceFilter.getStage();
-        final List<String> stages = !CollectionUtils.isEmpty(stagesFromFilter)
-                ? stagesFromFilter.stream().map(String::toLowerCase).collect(Collectors.toList())
-                : null;
+        final List<String> stages = getListLowerStringsFromFilter(instanceFilter.getStage());
         Date createdOnStartDate = null;
         Date createdOnEndDate = null;
         final List<String> createdOnDateRange = instanceFilter.getCreatedOn();
