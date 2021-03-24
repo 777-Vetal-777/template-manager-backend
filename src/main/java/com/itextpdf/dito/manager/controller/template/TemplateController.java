@@ -98,7 +98,8 @@ public interface TemplateController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))}),
-            @ApiResponse(responseCode = "400", description = "Invalid input or template already exists", content = @Content)})
+            @ApiResponse(responseCode = "400", description = "Invalid input or template already exists", content = @Content),
+            @ApiResponse(responseCode = "422", description = "Template can be created but cannot be promoted.")})
     ResponseEntity<TemplateDTO> create(@RequestBody TemplateCreateRequestDTO templateCreateRequestDTO,
                                        Principal principal);
 

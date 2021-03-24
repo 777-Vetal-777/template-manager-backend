@@ -18,10 +18,12 @@ import com.itextpdf.dito.manager.entity.template.TemplateLogEntity;
 import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
+import com.itextpdf.dito.manager.exception.instance.deployment.SdkInstanceException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
+import com.itextpdf.dito.manager.exception.template.TemplateCannotBePromotedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
@@ -177,7 +179,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         templateFileEntity.getInstance().addAll(developerStageInstances);
 
         final TemplateEntity savedTemplateEntity = templateRepository.save(templateEntity);
-        templateDeploymentService.promoteOnDefaultStage(savedTemplateEntity.getLatestFile());
+        try{
+            templateDeploymentService.promoteOnDefaultStage(templateFileEntity);
+        } catch (SdkInstanceException exception){
+            throw new TemplateCannotBePromotedException(templateName);
+        }
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was finished successfully",
                 templateName, templateTypeEnum, dataCollectionName, email, templateParts);
         return savedTemplateEntity;

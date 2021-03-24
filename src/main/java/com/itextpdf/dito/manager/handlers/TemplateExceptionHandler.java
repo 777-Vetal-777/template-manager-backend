@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.error.TemplateImportErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.template.TemplateBlockedByOtherUserException;
 import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedException;
+import com.itextpdf.dito.manager.exception.template.TemplateCannotBePromotedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeploymentException;
 import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureException;
@@ -69,6 +70,11 @@ public class TemplateExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(TemplateImportHasDuplicateNamesException.class)
     public ResponseEntity<TemplateImportErrorResponseDTO> templateImportHasDuplicateNamesExceptionHandler(final TemplateImportHasDuplicateNamesException ex) {
         return new ResponseEntity<>(new TemplateImportErrorResponseDTO(ex.getMessage(), ex.getDuplicates()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(TemplateCannotBePromotedException.class)
+    public ResponseEntity<ErrorResponseDTO> templateCannotBePromotedExceptionHandler(final  TemplateCannotBePromotedException ex){
+        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
 
