@@ -8,14 +8,10 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
-import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
-import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
-import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -193,7 +189,7 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk())
-				.andExpect(content().string(containsString("<meta data-dito-template-type=\"output\" />")));
+				.andExpect(content().string(containsString("<body data-dito-element=\"subform\">")));
 	
 		final URI integrationTemplateDescriptorUri = UriComponentsBuilder.fromUriString("/templates/" + TEMPLATE_ID+"/descriptor")
 				.build().encode().toUri();
