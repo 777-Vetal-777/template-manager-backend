@@ -103,7 +103,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
                                         final ResourceTypeEnum type, final Map<FontTypeEnum, MultipartFile> fonts) {
         log.info("Create resource(Font) by email: {} and resourceName: {} and type: {} and fonts: {} was started", email, resourceName, type, fonts);
         throwExceptionIfResourceExists(resourceName, type);
-        throwExceptionIfNameNotMatchesPattern(resourceName, AliasConstants.RESOURCE);
         final UserEntity userEntity = userService.findActiveUserByEmail(email);
 
         final ContentValidator contentValidator = contentValidators.get(type);
@@ -375,51 +374,51 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     private List<PermissionDTO> createListPermissions(final ResourceRoleModel role) {
         final List<PermissionDTO> list = new ArrayList<>();
-        if (role.getE8_US55_EDIT_RESOURCE_METADATA_IMAGE()) {
+        if (Boolean.TRUE.equals(role.getE8_US55_EDIT_RESOURCE_METADATA_IMAGE())) {
             final PermissionDTO permissionDTO = createPermission("E8_US55_EDIT_RESOURCE_METADATA_IMAGE");
             list.add(permissionDTO);
         }
-        if (role.getE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE()) {
+        if (Boolean.TRUE.equals(role.getE8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE())) {
             final PermissionDTO permissionDTO = createPermission("E8_US62_CREATE_NEW_VERSION_OF_RESOURCE_IMAGE");
             list.add(permissionDTO);
         }
-        if (role.getE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE()) {
+        if (Boolean.TRUE.equals(role.getE8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE())) {
             final PermissionDTO permissionDTO = createPermission("E8_US65_ROLL_BACK_OF_THE_RESOURCE_IMAGE");
             list.add(permissionDTO);
         }
-        if (role.getE8_US66_DELETE_RESOURCE_IMAGE()) {
+        if (Boolean.TRUE.equals(role.getE8_US66_DELETE_RESOURCE_IMAGE())) {
             final PermissionDTO permissionDTO = createPermission("E8_US66_DELETE_RESOURCE_IMAGE");
             list.add(permissionDTO);
         }
-        if (role.getE8_US66_1_DELETE_RESOURCE_FONT()) {
+        if (Boolean.TRUE.equals(role.getE8_US66_1_DELETE_RESOURCE_FONT())) {
             final PermissionDTO permissionDTO = createPermission("E8_US66_1_DELETE_RESOURCE_FONT");
             list.add(permissionDTO);
         }
-        if (role.getE8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT()) {
+        if (Boolean.TRUE.equals(role.getE8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT())) {
             final PermissionDTO permissionDTO = createPermission("E8_US62_1_CREATE_NEW_VERSION_OF_RESOURCE_FONT");
             list.add(permissionDTO);
         }
-        if (role.getE8_US58_EDIT_RESOURCE_METADATA_FONT()) {
+        if (Boolean.TRUE.equals(role.getE8_US58_EDIT_RESOURCE_METADATA_FONT())) {
             final PermissionDTO permissionDTO = createPermission("E8_US58_EDIT_RESOURCE_METADATA_FONT");
             list.add(permissionDTO);
         }
-        if (role.getE8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT()) {
+        if (Boolean.TRUE.equals(role.getE8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT())) {
             final PermissionDTO permissionDTO = createPermission("E8_US65_1_ROLL_BACK_OF_THE_RESOURCE_FONT");
             list.add(permissionDTO);
         }
-        if (role.getE8_US66_2_DELETE_RESOURCE_STYLESHEET()) {
+        if (Boolean.TRUE.equals(role.getE8_US66_2_DELETE_RESOURCE_STYLESHEET())) {
             final PermissionDTO permissionDTO = createPermission("E8_US66_2_DELETE_RESOURCE_STYLESHEET");
             list.add(permissionDTO);
         }
-        if (role.getE8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET()) {
+        if (Boolean.TRUE.equals(role.getE8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET())) {
             final PermissionDTO permissionDTO = createPermission("E8_US63_CREATE_NEW_VERSION_OF_RESOURCE_STYLESHEET");
             list.add(permissionDTO);
         }
-        if (role.getE8_US61_EDIT_RESOURCE_METADATA_STYLESHEET()) {
+        if (Boolean.TRUE.equals(role.getE8_US61_EDIT_RESOURCE_METADATA_STYLESHEET())) {
             final PermissionDTO permissionDTO = createPermission("E8_US61_EDIT_RESOURCE_METADATA_STYLESHEET");
             list.add(permissionDTO);
         }
-        if (role.getE8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET()) {
+        if (Boolean.TRUE.equals(role.getE8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET())) {
             final PermissionDTO permissionDTO = createPermission("E8_US65_2_ROLL_BACK_OF_THE_RESOURCE_STYLESHEET");
             list.add(permissionDTO);
         }
@@ -484,9 +483,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
     @Override
     public ResourceFileEntity getFile(final String uuid) {
-        final ResourceFileEntity file = resourceFileRepository.findFirstByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundException(uuid));
-        return file;
+        return resourceFileRepository.findFirstByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException(uuid));
     }
 
     @Override
