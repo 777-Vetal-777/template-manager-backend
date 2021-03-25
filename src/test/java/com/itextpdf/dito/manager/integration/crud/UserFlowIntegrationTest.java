@@ -73,7 +73,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     private String password2;
 
     @BeforeEach
-    public void setup() {
+    public void setUp() {
         password2 = "password2";
         password1 = "password1";
         RoleEntity role = roleRepository.findByNameAndMasterTrue("GLOBAL_ADMINISTRATOR").orElseThrow();
@@ -100,7 +100,7 @@ public class UserFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @AfterEach
-    public void teardown() {
+    public void tearDown() {
         failedLoginRepository.deleteAll();
         user1.setRoles(Collections.emptySet());
         user2.setRoles(Collections.emptySet());

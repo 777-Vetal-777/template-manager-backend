@@ -84,13 +84,15 @@ class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationTest imp
                 .param("type", "STANDARD"))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].name", is(request.getName())));
+        mockMvc.perform(get(TemplateController.BASE_NAME)
+                .param("modifiedOn", "01/01/1970"))
+                .andExpect(status().isBadRequest());
         final MvcResult result =
                 mockMvc.perform(get(TemplateController.BASE_NAME)
                         .param("dataCollection", request.getDataCollectionName()))
                         .andExpect(jsonPath("$.content", hasSize(1)))
                         .andExpect(jsonPath("$.content[0].name", is(request.getName())))
                         .andReturn();
-
         assertNotNull(result.getResponse());
     }
 

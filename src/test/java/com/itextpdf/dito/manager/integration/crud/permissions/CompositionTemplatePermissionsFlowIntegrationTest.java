@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.permission.PermissionRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
@@ -21,7 +22,6 @@ import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -33,7 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +61,8 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     private PermissionRepository permissionRepository;
     @Autowired
     private DataCollectionService dataCollectionService;
+    @Autowired
+    private DataCollectionRepository dataCollectionRepository;
     @Autowired
     private Encoder encoder;
 
@@ -116,7 +118,7 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
         userRepository.save(user2);
         
         final TemplateEntity templateEntity = templateRepository.findByName(templateName).get();
-        templateEntity.setAppliedRoles(new HashSet<>(Arrays.asList(savedRole)));
+        templateEntity.setAppliedRoles(new HashSet<>(Collections.singletonList(savedRole)));
         templateRepository.saveAndFlush(templateEntity);
     }
 
@@ -124,6 +126,7 @@ public class CompositionTemplatePermissionsFlowIntegrationTest extends AbstractI
     void destroy() throws Exception {
         templateFileRepository.deleteAll();
         templateRepository.deleteAll();
+        dataCollectionRepository.deleteAll();
         userRepository.findByEmail(CUSTOM_USER_EMAIL).ifPresent(userRepository::delete);
         roleRepository.findByNameAndMasterTrue(roleName).ifPresent(roleRepository::delete);
     }

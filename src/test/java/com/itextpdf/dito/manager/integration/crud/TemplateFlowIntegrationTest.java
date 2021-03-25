@@ -18,7 +18,6 @@ import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
-import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
@@ -28,10 +27,10 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
+import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -110,6 +109,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private TemplateService templateService;
     @Autowired
     private Encoder encoder;
+    @Autowired
+    private TemplateLoader templateLoader;
 
     @AfterEach
     public void clearDb() {
@@ -210,6 +211,20 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/some-template")));
+    }
+
+    @Test
+    void shouldReturnDataCollectionNotFoundException() throws Exception {
+        TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        request.setDataCollectionName("data-collection");
+        final MvcResult mvcResult = mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("message").isNotEmpty())
+                .andReturn();
+        assertNotNull(mvcResult.getResponse());
     }
 
     @Test
@@ -470,6 +485,27 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2)))
                 .andExpect(jsonPath("$.content[*].comment", containsInAnyOrder(null, "test comment")));
 
+        //update standard template... should update dependent composition too
+        final MockMultipartFile file = new MockMultipartFile("template", "template.html", "text/plain", templateLoader.load());
+        final MockMultipartFile description = new MockMultipartFile("description", "description", "text/plain", "test description".getBytes());
+        final MockMultipartFile standardTemplateNameMultipartFile = new MockMultipartFile("name", "name", "text/plain", "some-template".getBytes());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT)
+                .file(file)
+                .file(standardTemplateNameMultipartFile)
+                .file(description)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("version").value("2"))
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty());
+
+        //get versions
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[*].version", containsInAnyOrder(1, 2, 3)))
+                .andExpect(jsonPath("$.content[*].comment", containsInAnyOrder(null, "test comment", "some-template was updated to version 2")));
+
         final List<TemplateFileEntity> files = new ArrayList<>();
         files.add(templateRepository.findByName("some-template").get().getLatestFile());
         files.add(templateRepository.findByName("some-header-template").get().getLatestFile());
@@ -499,6 +535,10 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF));
+
+        //we cannot delete standard template having outbound dependencies
+        mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encoder.encode("some-template")))
+                .andExpect(status().isConflict());
 
         //delete
         final MvcResult result = mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
@@ -603,6 +643,9 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         final UserEntity anotherUserEntity = optionalAnotherUser.get();
         templateEntity.setBlockedBy(optionalAnotherUser.get());
         templateRepository.save(templateEntity);
+
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
+                .andExpect(status().isForbidden());
 
         mockMvc.perform(patch(TemplateController.BASE_NAME + TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE, encTemplateName))
                 .andExpect(status().isForbidden());

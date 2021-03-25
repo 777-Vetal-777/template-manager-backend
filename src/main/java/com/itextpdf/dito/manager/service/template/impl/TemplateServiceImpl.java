@@ -278,31 +278,31 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
     private List<PermissionDTO> createListPermissions(final TemplateRoleModel role) {
         final List<PermissionDTO> list = new ArrayList<>();
-        if (role.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD()) {
+        if (Boolean.TRUE.equals(role.getE9_US75_EDIT_TEMPLATE_METADATA_STANDARD())) {
             final PermissionDTO permissionDTO = createPermission("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD");
             list.add(permissionDTO);
         }
-        if (role.getE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD()) {
+        if (Boolean.TRUE.equals(role.getE9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD())) {
             final PermissionDTO permissionDTO = createPermission("E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD");
             list.add(permissionDTO);
         }
-        if (role.getE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE()) {
+        if (Boolean.TRUE.equals(role.getE9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE())) {
             final PermissionDTO permissionDTO = createPermission("E9_US80_ROLLBACK_OF_THE_STANDARD_TEMPLATE");
             list.add(permissionDTO);
         }
-        if (role.getE9_US81_PREVIEW_TEMPLATE_STANDARD()) {
+        if (Boolean.TRUE.equals(role.getE9_US81_PREVIEW_TEMPLATE_STANDARD())) {
             final PermissionDTO permissionDTO = createPermission("E9_US81_PREVIEW_TEMPLATE_STANDARD");
             list.add(permissionDTO);
         }
-        if (role.getE9_US24_EXPORT_TEMPLATE_DATA()) {
+        if (Boolean.TRUE.equals(role.getE9_US24_EXPORT_TEMPLATE_DATA())) {
             final PermissionDTO permissionDTO = createPermission("E9_US24_EXPORT_TEMPLATE_DATA");
             list.add(permissionDTO);
         }
-        if (role.getE9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE()) {
+        if (Boolean.TRUE.equals(role.getE9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE())) {
             final PermissionDTO permissionDTO = createPermission("E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE");
             list.add(permissionDTO);
         }
-        if (role.getE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED()) {
+        if (Boolean.TRUE.equals(role.getE9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED())) {
             final PermissionDTO permissionDTO = createPermission("E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED");
             list.add(permissionDTO);
         }
@@ -521,14 +521,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         fileEntity.setModifiedOn(new Date());
         fileEntity.setDataCollectionFile(dataCollectionFileEntity);
         fileEntity.getResourceFiles().addAll(resourceFileEntities);
-        if (templateFilePartEntities != null) {
-            fileEntity.getParts().addAll(templateFilePartEntities.stream().map(part -> templateFilePartService.updateComposition(part, fileEntity)).collect(Collectors.toList()));
-        }
-        if (data != null) {
-            fileEntity.setData(data);
-        } else {
-            fileEntity.setData(templateLoader.load());
-        }
+        Optional.ofNullable(templateFilePartEntities).ifPresent(filePartEntities -> fileEntity.getParts().addAll(filePartEntities.stream().map(part -> templateFilePartService.updateComposition(part, fileEntity)).collect(Collectors.toList())));
+        fileEntity.setData(Optional.ofNullable(data).orElseGet(templateLoader::load));
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         fileEntity.getInstance().addAll(developerStageInstances);
         return fileEntity;

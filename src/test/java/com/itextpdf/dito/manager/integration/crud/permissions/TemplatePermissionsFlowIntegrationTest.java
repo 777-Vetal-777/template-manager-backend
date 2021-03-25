@@ -158,12 +158,24 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
                 .with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD)))
                 .andExpect(status().isForbidden());
 
+        //repeat reducing role and check that is going well
+        mockMvc.perform(post(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
+                .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
         //delete custom role
         final MvcResult result = mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME,
                 encodeStringToBase64(templateName), encodeStringToBase64(roleName)))
                 .andExpect(status().isOk())
                 .andReturn();
         assertNotNull(result.getResponse());
+
+        //repeating delete returns an error
+        mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE_AND_ROLE_NAME,
+                encodeStringToBase64(templateName), encodeStringToBase64(roleName)))
+                .andExpect(status().isNotFound());
 
     }
 
