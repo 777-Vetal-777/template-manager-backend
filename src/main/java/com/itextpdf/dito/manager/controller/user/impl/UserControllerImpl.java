@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,8 +53,8 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO, final HttpServletRequest request, final Principal principal) {
-        final String frontURL = getFrontURL(request);
         log.info("Create user with params: {} was started", userCreateRequestDTO);
+        final String frontURL = request.getHeader(HttpHeaders.ORIGIN);
         final UserEntity currentUser = userService.findActiveUserByEmail(principal.getName());
         final UserEntity user = userService
                 .create(userMapper.map(userCreateRequestDTO), userCreateRequestDTO.getRoles(), currentUser, frontURL);
@@ -71,8 +72,8 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO, final HttpServletRequest request, final Principal principal) {
-        final String frontURL = getFrontURL(request);
         log.info("Update password by userName: {} was started", userName);
+        final String frontURL = request.getHeader(HttpHeaders.ORIGIN);
         final UserEntity adminEntity = userService.findByEmail(principal.getName());
         final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), encoder.decode(userName), adminEntity, frontURL);
         log.info("Update password by userName: {} was finished successfully", userName);
@@ -156,8 +157,8 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<Void> forgotPassword(final @Valid EmailDTO emailDTO, final HttpServletRequest request) {
-        final String frontURL = getFrontURL(request);
         log.info("Forgot password by email: {} was started", emailDTO.getEmail());
+        final String frontURL = request.getHeader(HttpHeaders.ORIGIN);
         userService.forgotPassword(emailDTO.getEmail(), frontURL);
         log.info("Forgot password by email: {} was finished successfully", emailDTO.getEmail());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -176,15 +177,4 @@ public class UserControllerImpl extends AbstractController implements UserContro
         return new ResponseEntity<>(userService.lockedUsersExist(), HttpStatus.OK);
     }
 
-    private String getFrontURL(final HttpServletRequest request) {
-        log.info("Get front url by host: " + request.getHeader("X-Forwarded-Host") + "and port: " + request.getHeader("X-Forwarded-Port") + " was started");
-        String url = null;
-        final String host = request.getHeader("X-Forwarded-Host");
-        final String port = request.getHeader("X-Forwarded-Port");
-        if (host != null && port != null) {
-            url = host.concat(":").concat(port);
-        }
-        log.info("Get front url: " + url + " was finished successfully");
-        return url;
-    }
 }
