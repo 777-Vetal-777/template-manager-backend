@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -215,6 +216,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportTemplateWithDifferentTypesOfResources() throws Exception {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-different-resource-types.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-different-resource-types.dito"));
 
