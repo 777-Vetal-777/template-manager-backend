@@ -54,7 +54,7 @@ public class DataSampleEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(" +
-            "SELECT log.id " +
+            "SELECT max(log.id) " +
             "FROM {h-schema}data_sample_log log " +
             "WHERE log.data_sample_id = id and log.date=(" +
             "select max(logLatest.date) from {h-schema}data_sample_log logLatest where logLatest.data_sample_id = id)" +

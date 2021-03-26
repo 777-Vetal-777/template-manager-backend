@@ -29,7 +29,7 @@ public interface DataCollectionService {
 
     DataCollectionEntity update(String name, DataCollectionEntity entity, String userEmail);
 
-    DataCollectionEntity applyRole(String resourceName, String roleName, List<String> permissions);
+    DataCollectionEntity applyRole(String dataCollectionName, String roleName, List<String> permissions);
 
     DataCollectionEntity detachRole(String name, String roleName);
 

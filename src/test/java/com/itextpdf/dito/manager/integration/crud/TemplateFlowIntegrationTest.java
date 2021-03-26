@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
+import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
@@ -22,6 +23,7 @@ import com.itextpdf.dito.manager.repository.datacollections.DataCollectionReposi
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
+import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -31,12 +33,14 @@ import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -48,12 +52,16 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -72,10 +80,12 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -87,6 +97,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
+    public static final String CUSTOM_USER_EMAIL = "templatePermissionUser@email.com";
+    public static final String CUSTOM_USER_PASSWORD = "password2";
+
     @Autowired
     private TemplateRepository templateRepository;
     @Autowired
@@ -111,6 +124,8 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private Encoder encoder;
     @Autowired
     private TemplateLoader templateLoader;
+    @Autowired
+    private RoleRepository roleRepository;
 
     @AfterEach
     public void clearDb() {
@@ -119,6 +134,23 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         resourceRepository.deleteAll();
         dataSampleRepository.deleteAll();
         dataCollectionRepository.deleteAll();
+        userRepository.findByEmail(CUSTOM_USER_EMAIL).ifPresent(userRepository::delete);
+    }
+
+    @BeforeEach
+    public void initDb(){
+        final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue("TEMPLATE_DESIGNER").get();
+        UserEntity user2 = new UserEntity();
+        user2.setEmail(CUSTOM_USER_EMAIL);
+        user2.setFirstName("Geoffrey");
+        user2.setLastName("Grant");
+        user2.setPassword(CUSTOM_USER_PASSWORD);
+        user2.setRoles(Set.of(roleEntity));
+        user2.setActive(Boolean.TRUE);
+        user2.setPasswordUpdatedByAdmin(Boolean.FALSE);
+
+        userRepository.save(user2);
+
     }
 
     @Test
@@ -161,28 +193,28 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //get sortable versions
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_VERSION_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
-        		.param("search", "name")
-        		.param("sort", "stage")
-        		.param("sort", "modifiedBy")
-        		.param("modifiedOn", "10/02/2021")
-        		.param("modifiedOn", "10/02/2021")
-        		.param("sort", "comment"))
+                .param("search", "name")
+                .param("sort", "stage")
+                .param("sort", "modifiedBy")
+                .param("modifiedOn", "10/02/2021")
+                .param("modifiedOn", "10/02/2021")
+                .param("sort", "comment"))
                 .andExpect(status().isOk());
-        
+
         //get roles
         final TemplatePermissionFilter filter = new TemplatePermissionFilter();
         final List<String> list = new ArrayList<>();
         list.add("name");
-        filter.setName(list); 
+        filter.setName(list);
         final Pageable pageable = PageRequest.of(0, 8);
 
         assertFalse(templateService.getAll().isEmpty());
-        
+
         final TemplateListFilter templateListFilter = new TemplateListFilter();
         assertFalse(templateService.getAll(templateListFilter).isEmpty());
-        
+
         assertTrue(templateService.getAllParts(request.getName()).isEmpty());
-        
+
         final Long currentVersion = 2L;
         //Promote
         mockMvc.perform(put(TemplateController.BASE_NAME + TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, currentVersion))
@@ -257,9 +289,9 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //get dependencies
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)
-        	.param("sort", "name")
-        	.param("stage", "STAGE"))          
-        	.andExpect(status().isOk());
+                .param("sort", "name")
+                .param("stage", "STAGE"))
+                .andExpect(status().isOk());
 
         //get preview
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_PREVIEW_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
@@ -660,7 +692,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         userRepository.deleteById(anotherUserEntity.getId());
         assertFalse(userRepository.findByEmail(anotherUserEntity.getEmail()).isPresent());
     }
-    
+
     @Test
     void shouldThrowTemplateCannotBeBlockedException() throws Exception {
         performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request.json");
@@ -693,6 +725,35 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
         assertEquals(0, templateRepository.findAll().size());
+    }
+
+    @Test
+    void shouldReturnListOfPermissions() throws Exception {
+
+        TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        assertTrue(templateRepository.findByName(request.getName()).isPresent());
+
+        final TemplateEntity templateEntity = templateRepository.findByName(request.getName()).get();
+        templateService.applyRole(templateEntity.getName(), "TEMPLATE_DESIGNER", Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD"), "admin@email.com");
+
+
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(request.getName().getBytes()))
+                .accept(MediaType.APPLICATION_JSON).with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
+                Stream.of("E9_US74_VIEW_TEMPLATE_METADATA_STANDARD", "E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD")
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList()))))
+                .andExpect(jsonPath("name").isNotEmpty())
+                .andExpect(jsonPath("createdBy").isNotEmpty())
+                .andExpect(jsonPath("createdOn").isNotEmpty())
+                .andExpect(jsonPath("modifiedBy").isNotEmpty())
+                .andExpect(jsonPath("modifiedOn").isNotEmpty())
+                .andExpect(jsonPath("description").isEmpty())
+                .andExpect(jsonPath("$.permissions", hasSize(2)));
     }
 
     private void generateStageEntity(final List<TemplateFileEntity> files) {

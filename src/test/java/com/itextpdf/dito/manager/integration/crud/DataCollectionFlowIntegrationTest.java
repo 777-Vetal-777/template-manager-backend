@@ -5,18 +5,23 @@ import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.RoleEntity;
+import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.filter.datacollection.DataCollectionPermissionFilter;
-import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
+import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
+import com.itextpdf.dito.manager.repository.user.UserRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 
+import com.itextpdf.dito.manager.service.user.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -30,11 +35,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.VERSIONS_ENDPOINT;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,6 +61,9 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
 
     private static final String NAME = "test-data-collection";
     private static final String TYPE = "JSON";
+    public static final String CUSTOM_USER_EMAIL = "dataCollectionPermissionUser@email.com";
+    public static final String CUSTOM_USER_PASSWORD = "password2";
+
     @Autowired
     private DataCollectionRepository dataCollectionRepository;
     @Autowired
@@ -59,11 +72,34 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     private TemplateRepository templateRepository;
     @Autowired
     private DataCollectionService dataCollectionService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private UserService userService;
 
     @AfterEach
     public void clearDb() {
         templateRepository.deleteAll();
         dataCollectionRepository.deleteAll();
+        userRepository.findByEmail(CUSTOM_USER_EMAIL).ifPresent(userRepository::delete);
+    }
+
+    @BeforeEach
+    public void initDb(){
+        final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue("TEMPLATE_DESIGNER").get();
+        UserEntity user2 = new UserEntity();
+        user2.setEmail(CUSTOM_USER_EMAIL);
+        user2.setFirstName("Geoffrey");
+        user2.setLastName("Grant");
+        user2.setPassword(CUSTOM_USER_PASSWORD);
+        user2.setRoles(Set.of(roleEntity));
+        user2.setActive(Boolean.TRUE);
+        user2.setPasswordUpdatedByAdmin(Boolean.FALSE);
+
+        userRepository.save(user2);
+
     }
 
     @Test
@@ -148,12 +184,12 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("createdOn").isNotEmpty());
 
         //ROLLBACK VERSION failure
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE ,encodeStringToBase64(NAME), 100L))
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(NAME), 100L))
                 .andExpect(status().isNotFound());
 
         //ROLLBACK VERSION success
         final Long currentVersion = 2L;
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE ,encodeStringToBase64(NAME), currentVersion))
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(NAME), currentVersion))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value(NAME))
                 .andExpect(jsonPath("version").value(3))
@@ -199,7 +235,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile name2 = new MockMultipartFile("name2", "name2", "text/plain", NAME.getBytes());
         mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
                 .file(multipartFile2)
-                .file(name2 )
+                .file(name2)
                 .file(type)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest());
@@ -213,18 +249,18 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
 
         //Get List
         mockMvc.perform(
-                get(DataCollectionController.BASE_NAME +"/search")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-            	.param("modifiedOn", "10/02/2021")
-        		.param("modifiedOn", "10/02/2021"))
+                get(DataCollectionController.BASE_NAME + "/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .param("modifiedOn", "10/02/2021")
+                        .param("modifiedOn", "10/02/2021"))
                 .andExpect(status().isOk());
-        
+
         //get roles
-        final DataCollectionPermissionFilter filter = new  DataCollectionPermissionFilter();
+        final DataCollectionPermissionFilter filter = new DataCollectionPermissionFilter();
         final List<String> list = new ArrayList<>();
         list.add("name");
-        filter.setName(list); 
+        filter.setName(list);
         final Pageable pageable = PageRequest.of(0, 8);
 
         //UPDATE by name
@@ -318,10 +354,41 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isNotFound());
         assertFalse(dataCollectionRepository.existsByName(notExistingCollectionName));
     }
-    
+
     @Test
     void testNoTemplateByDataCollectionException() {
-    	assertThrows(TemplateNotFoundException.class,()->dataCollectionService.getByTemplateName("not-existing-template"));
+        assertThrows(TemplateNotFoundException.class, () -> dataCollectionService.getByTemplateName("not-existing-template"));
     }
-    
+
+    @Test
+    void shouldReturnPermissionsTable() throws Exception {
+        //CREATE DATA COLLECTION
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
+                "{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", "JSON".getBytes());
+        final URI uri = UriComponentsBuilder.fromUriString(DataCollectionController.BASE_NAME).build().encode().toUri();
+        mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("name").value(NAME));
+
+        final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(NAME).get();
+        dataCollectionService.applyRole(dataCollectionEntity.getName(), "TEMPLATE_DESIGNER", Arrays.asList("E6_US34_EDIT_DATA_COLLECTION_METADATA"));
+
+        //GET by name
+        mockMvc.perform(
+                get(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(NAME.getBytes()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON).with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
+                        Stream.of("E6_US33_VIEW_DATA_COLLECTION_METADATA", "E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU")
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList()))))
+                .andExpect(jsonPath("$.permissions", hasSize(1)))
+                .andExpect(status().isOk());
+
+    }
 }
