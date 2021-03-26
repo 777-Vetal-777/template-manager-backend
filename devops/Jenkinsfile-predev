@@ -1,0 +1,112 @@
+currentBuild.description = "${params.BRANCH}"
+pipeline {
+    options {
+        buildDiscarder(
+            logRotator(
+                artifactDaysToKeepStr: "",
+                artifactNumToKeepStr: "",
+                daysToKeepStr: "",
+                numToKeepStr: "5"
+            )
+        )
+        disableConcurrentBuilds()
+    }
+    environment{
+        projectName = "dtm-backend"
+        dbName = "dtm-database"
+        registryHost = "https://nexus-docker.andersenlab.dev"
+        REGISTRY = "nexus-docker.andersenlab.dev"
+        registryCredentials = "nexus_andersen"
+        hostIP="10.10.15.137"
+        WORKING_ENV = "dev"
+        dockerCredentials="docker-predev-itext"
+        SCM_URL="https://git.itextsupport.com/scm/dito/template-manager-backend.git"
+        ENV_FILE = "itext_env_predev"
+        MVN_CONFIG_FILE = "itext_mvn_conf"
+        MVN_SONAR_CONFIG_FILE = "itext_mvn_sonar_conf"
+    }
+    agent{
+        label "master"
+    }
+    stages { 
+        stage("Build docker image"){
+            steps{
+                script {
+                    env.RELEASE_VER = sh(script: 'python3 -c "import xml.etree.ElementTree as ET; tree = ET.parse(\'pom.xml\'); print(tree.getroot()[4].text)"', returnStdout: true).trim()
+                    dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
+                    withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'MVN_FILE')]){
+                        sh "cp \${MVN_FILE}  ./settings.xml"
+                            sh """mkdir -p ./target/site/jacoco/
+                            docker build --target builder -t myapp:build -f devops/Dockerfile_dev ./
+                            docker create --name myapp-build myapp:build
+                            docker cp myapp-build:/src/target/site/jacoco/jacoco.xml ./
+                            docker cp myapp-build:/src/target/template-manager.jar ./
+                            docker rm myapp-build || true
+                            docker rmi myapp:build || true
+                            """
+                        dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_dev ./" )
+                    }
+                }
+            }
+        }
+        stage('Sonarqube analysis') {
+            steps {
+                catchError {
+                    script {
+                        withSonarQubeEnv('SonarQube_8.3') {
+                            withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
+                                sh 'mvn -s ${MVN_SONAR_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.coverage.jacoco.xmlReportPaths=jacoco.xml -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                            }
+                        }
+                    }
+                }
+            echo currentBuild.result
+            }
+        }
+        stage("Deploy image to nexus"){
+            steps{
+                script{
+                    docker.withRegistry(registryHost, registryCredentials){
+                        dockerImage.push()
+                        dockerImage.push('latest')
+                        dockerImageDB.push()
+                        dockerImageDB.push('latest')
+                    }
+                }
+            }
+        }
+        stage("Remove unused docker image"){
+            steps{
+                sh """
+                docker rmi -f ${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
+                docker rmi -f ${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
+                docker rmi -f ${REGISTRY}/${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
+                docker rmi -f ${REGISTRY}/${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER} >/dev/null 2>&1 || true
+                """
+            }
+        }
+        stage("Deploy docker image to host"){
+            steps{
+                script{
+                    docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
+                        docker.withRegistry(registryHost,registryCredentials){
+                            withCredentials([file(credentialsId: ENV_FILE, variable: 'FILE')]){
+                                sh "docker-compose --env-file ${FILE} --file ${WORKSPACE}/devops/docker-compose-dev.yml up --force-recreate -d"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+            post {
+        always {
+            cleanWs() 
+        }
+        failure {
+            mail to: 'a.bykau@andersenlab.com,s.nemets@andersenlab.com',
+            subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+            body: "Something is wrong with ${env.BUILD_URL}"
+        }
+    }
+}
