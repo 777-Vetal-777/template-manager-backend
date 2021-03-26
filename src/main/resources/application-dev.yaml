@@ -23,9 +23,9 @@ spring:
     properties:
       mail:
         smtp:
-          auth: true
+          auth: ${DITO_MANAGER_SMTP_AUTH:true}
           starttls:
-            enable: true
+            enable: ${DITO_MANAGER_SMTP_TLS_ENABLE:true}
 
 logging:
   level:

@@ -28,6 +28,9 @@ pipeline {
     agent{
         label "master"
     }
+    parameters {
+        string(name: 'TESTS', defaultValue: 'test', description: '"test" to Passing or "skip" to Skipping tests')
+    }
     stages { 
         stage("Build docker image"){
             steps{
@@ -36,6 +39,7 @@ pipeline {
                     dockerImageDB = docker.build("${dbName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_db ./")
                     withCredentials([file(credentialsId: MVN_CONFIG_FILE, variable: 'MVN_FILE')]){
                         sh "cp \${MVN_FILE}  ./settings.xml"
+                        if (env.TESTS == 'test'){
                             sh """mkdir -p ./target/site/jacoco/
                             docker build --target builder -t myapp:build -f devops/Dockerfile ./
                             docker create --name myapp-build myapp:build
@@ -44,7 +48,11 @@ pipeline {
                             docker rm myapp-build || true
                             docker rmi myapp:build || true
                             """
-                        dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile ./" )
+                            dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "-f ${WORKSPACE}/devops/Dockerfile_dev ./")
+                        } else {
+                            echo 'Tests have skipped'
+                            dockerImage = docker.build("${projectName}-${WORKING_ENV}:${RELEASE_VER}-${BUILD_NUMBER}", "--build-arg SKIP_TESTS=true -f ${WORKSPACE}/devops/Dockerfile_dev ./")
+                        }
                     }
                 }
             }
@@ -53,10 +61,14 @@ pipeline {
             steps {
                 catchError {
                     script {
-                        withSonarQubeEnv('SonarQube_8.3') {
-                            withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
-                                sh 'mvn -s ${MVN_SONAR_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.coverage.jacoco.xmlReportPaths=jacoco.xml -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                        if (env.TESTS == 'test'){
+                            withSonarQubeEnv('SonarQube_8.3') {
+                                withCredentials([file(credentialsId: MVN_SONAR_CONFIG_FILE, variable: 'MVN_SONAR_FILE')]){           
+                                    sh 'mvn -s ${MVN_SONAR_FILE} sonar:sonar -Dsonar.projectKey=iText-DTM-Backend -Dsonar.coverage.jacoco.xmlReportPaths=jacoco.xml -Dsonar.projectName=iText-DTM-Backend -Dsonar.java.binaries=${WORKSPACE}/src/main -Dsonar.java.test.binaries=${WORKSPACE}/src/test'
+                                }
                             }
+                        } else {
+                            echo 'Tests have skipped'
                         }
                     }
                 }

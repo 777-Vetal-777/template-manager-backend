@@ -38,6 +38,6 @@ spring:
     properties:
       mail:
         smtp:
-          auth: ${DITO_MANAGER_SMTP_AUTH}
+          auth: ${DITO_MANAGER_SMTP_AUTH:true}
           starttls:
-            enable: ${DITO_MANAGER_SMTP_TLS_ENABLE}
+            enable: ${DITO_MANAGER_SMTP_TLS_ENABLE:true}

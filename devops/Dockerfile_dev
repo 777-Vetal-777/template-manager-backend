@@ -2,7 +2,8 @@ FROM maven:3.6.3-openjdk-11 as builder
 COPY ./settings.xml /root/.m2/
 COPY . /src
 WORKDIR /src
-RUN mvn clean install
+ARG SKIP_TESTS=false
+RUN mvn clean install -DskipTests=${SKIP_TESTS}
 
 FROM adoptopenjdk/openjdk11:jdk-11.0.9.1_1-alpine
 COPY --from=builder /src/target/template-manager*.jar template-manager.jar
