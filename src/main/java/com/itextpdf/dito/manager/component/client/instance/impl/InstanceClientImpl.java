@@ -20,6 +20,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -28,14 +29,13 @@ import java.time.Duration;
 
 @Component
 public class InstanceClientImpl implements InstanceClient {
-
-    private static final Logger log = LogManager.getLogger(InstanceClientImpl.class);
-
     //uri for validating iText SDK application status
     private static final String INSTANCE_API_STATUS_URL = "/api/status";
     private static final String INSTANCE_REGISTER_ENDPOINT = "/api/admin/register";
     private static final String INSTANCE_UNREGISTER_ENDPOINT = "/api/admin/unregister";
     private static final String INSTANCE_DEPLOYMENT_ENDPOINT = "/api/deployments";
+
+    private static final Logger log = LogManager.getLogger(InstanceClientImpl.class);
 
     private static final String WORKSPACE_ALIAS = "Template Manager";
 
@@ -52,9 +52,10 @@ public class InstanceClientImpl implements InstanceClient {
         if (StringUtils.isEmpty(socket)) {
             throw new IllegalArgumentException("Instance's socket must be presented.");
         }
-        final String instanceStatusUrl = new StringBuilder().append(socket).append(INSTANCE_API_STATUS_URL).toString();
+        final String instanceStatusUrl = new StringBuilder(socket).append(INSTANCE_API_STATUS_URL).toString();
         try {
-            webClient.get()
+            webClient
+                    .get()
                     .uri(instanceStatusUrl)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -71,25 +72,20 @@ public class InstanceClientImpl implements InstanceClient {
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
         instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
         try {
-            final Mono<InstanceRegisterResponseDTO> response = WebClient.create()
+            final Mono<InstanceRegisterResponseDTO> response = webClient
                     .post()
                     .uri(instanceRegisterUrl)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-					.headers(h -> {
-						if (!StringUtils.isEmpty(customHeaderName)) {
-							h.add(customHeaderName, customHeaderValue);
-						}
-					})
+                    .headers(h -> {
+                        if (!StringUtils.isEmpty(customHeaderName)) {
+                            h.add(customHeaderName, customHeaderValue);
+                        }
+                    })
                     .bodyValue(instanceRegisterRequestDTO)
                     .retrieve()
-                    .onStatus(HttpStatus::isError, clientResponse -> {
-                        final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
-                        return errorMessage.flatMap(message -> {
-                            log.warn(message.getMessage());
-                            final String errorText = "Failed to register API instance: ";
-                            throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
-                        });
-                    })
+                    .onStatus(HttpStatus::isError, clientResponse ->
+                            processInstanceError(clientResponse, instanceSocket, "Failed to register API instance: ")
+                    )
                     .bodyToMono(InstanceRegisterResponseDTO.class);
             return response.block();
         } catch (IllegalArgumentException e) {
@@ -102,21 +98,16 @@ public class InstanceClientImpl implements InstanceClient {
         final String instanceUnregisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_UNREGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
         instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
-        final Mono<Void> response = WebClient.create()
+        final Mono<Void> response = webClient
                 .post()
                 .uri(instanceUnregisterUrl)
                 .headers(h -> h.setBearerAuth(instanceToken))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(instanceRegisterRequestDTO)
                 .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse -> {
-                    final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
-                    return errorMessage.flatMap(message -> {
-                        log.warn(message.getMessage());
-                        final String errorText = "Failed to unregister API instance: ";
-                        throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
-                    });
-                })
+                .onStatus(HttpStatus::isError, clientResponse ->
+                        processInstanceError(clientResponse, instanceSocket, "Failed to unregister API instance: ")
+                )
                 .bodyToMono(Void.class);
         response.block();
     }
@@ -129,21 +120,16 @@ public class InstanceClientImpl implements InstanceClient {
         final String forceDeployParam = "?forceReplace=true";
         final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT).append(forceDeployParam).toString();
-        final Mono<TemplateDeploymentDTO> response = WebClient.create()
+        final Mono<TemplateDeploymentDTO> response = webClient
                 .post()
                 .uri(instanceDeploymentUrl)
                 .headers(h -> h.setBearerAuth(instanceRegisterToken))
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(fromFile(descriptorDTO, templateProject)))
                 .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse -> {
-                    final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
-                    return errorMessage.flatMap(message -> {
-                        log.warn(message.getMessage());
-                        final String errorText = "Failed to promote template to API instance: ";
-                        throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
-                    });
-                })
+                .onStatus(HttpStatus::isError, clientResponse ->
+                        processInstanceError(clientResponse, instanceSocket, "Failed to promote template to API instance: ")
+                )
                 .bodyToMono(TemplateDeploymentDTO.class);
         return response.block();
     }
@@ -157,21 +143,26 @@ public class InstanceClientImpl implements InstanceClient {
                 .append("/")
                 .append(templateAlias)
                 .toString();
-        final Mono<TemplateDeploymentDTO> response = WebClient.create()
+        final Mono<TemplateDeploymentDTO> response = webClient
                 .delete()
                 .uri(instanceDeploymentUrl)
                 .headers(h -> h.setBearerAuth(instanceRegisterToken))
                 .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse -> {
-                    final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
-                    return errorMessage.flatMap(message -> {
-                        log.warn(message.getMessage());
-                        final String errorText = "Failed to un-deploy template from API instance: ";
-                        throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
-                    });
-                })
+                .onStatus(HttpStatus::isError, clientResponse ->
+                        processInstanceError(clientResponse, instanceSocket, "Failed to un-deploy template from API instance: ")
+                )
                 .bodyToMono(TemplateDeploymentDTO.class);
         return response.block();
+    }
+
+    Mono<? extends Throwable> processInstanceError(final ClientResponse clientResponse,
+                                                   final String instanceSocket,
+                                                   final String errorText) {
+        final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
+        return errorMessage.flatMap(message -> {
+            log.warn(message.getMessage());
+            throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
+        });
     }
 
     private MultiValueMap<String, HttpEntity<?>> fromFile(final TemplateDescriptorDTO templateDescriptorDTO,
