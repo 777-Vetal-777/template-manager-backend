@@ -28,7 +28,7 @@
         <itext.editor-api.version>2.0.0</itext.editor-api.version>
         <sentry.version>1.7.30</sentry.version>
         <ph-css.version>0.9.29</ph-css.version>
-        <io.netty.version>4.1.60.Final</io.netty.version>
+        <io.netty.version>4.1.59.Final</io.netty.version>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/*manager/dto/**/*,**/*manager/entity/**/*,**/*manager/exception/**/*,**/*manager/filter/**/*,**/TemplateManagerApplication.java</sonar.coverage.exclusions>
 
