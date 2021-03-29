@@ -40,6 +40,7 @@ public class InstanceClientImpl implements InstanceClient {
     private static final String WORKSPACE_ALIAS = "Template Manager";
 
     private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 5L;
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS);
 
     private final WebClient webClient;
 
@@ -59,7 +60,7 @@ public class InstanceClientImpl implements InstanceClient {
                     .uri(instanceStatusUrl)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .block(Duration.ofSeconds(INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS));
+                    .block(READ_TIMEOUT);
         } catch (Exception exception) {
             log.warn(exception);
             throw new NotReachableInstanceException(socket);
@@ -90,6 +91,8 @@ public class InstanceClientImpl implements InstanceClient {
             return response.block();
         } catch (IllegalArgumentException e) {
             throw new NotReachableInstanceException(instanceSocket);
+        } catch (RuntimeException e) {
+            throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
         }
     }
 
@@ -98,18 +101,22 @@ public class InstanceClientImpl implements InstanceClient {
         final String instanceUnregisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_UNREGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
         instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
-        final Mono<Void> response = webClient
-                .post()
-                .uri(instanceUnregisterUrl)
-                .headers(h -> h.setBearerAuth(instanceToken))
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(instanceRegisterRequestDTO)
-                .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse ->
-                        processInstanceError(clientResponse, instanceSocket, "Failed to unregister API instance: ")
-                )
-                .bodyToMono(Void.class);
-        response.block();
+        try {
+            final Mono<Void> response = webClient
+                    .post()
+                    .uri(instanceUnregisterUrl)
+                    .headers(h -> h.setBearerAuth(instanceToken))
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .bodyValue(instanceRegisterRequestDTO)
+                    .retrieve()
+                    .onStatus(HttpStatus::isError, clientResponse ->
+                            processInstanceError(clientResponse, instanceSocket, "Failed to unregister API instance: ")
+                    )
+                    .bodyToMono(Void.class);
+            response.block(READ_TIMEOUT);
+        } catch (RuntimeException e) {
+            throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
+        }
     }
 
     @Override
@@ -120,18 +127,22 @@ public class InstanceClientImpl implements InstanceClient {
         final String forceDeployParam = "?forceReplace=true";
         final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT).append(forceDeployParam).toString();
-        final Mono<TemplateDeploymentDTO> response = webClient
-                .post()
-                .uri(instanceDeploymentUrl)
-                .headers(h -> h.setBearerAuth(instanceRegisterToken))
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(fromFile(descriptorDTO, templateProject)))
-                .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse ->
-                        processInstanceError(clientResponse, instanceSocket, "Failed to promote template to API instance: ")
-                )
-                .bodyToMono(TemplateDeploymentDTO.class);
-        return response.block();
+        try {
+            final Mono<TemplateDeploymentDTO> response = webClient
+                    .post()
+                    .uri(instanceDeploymentUrl)
+                    .headers(h -> h.setBearerAuth(instanceRegisterToken))
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(BodyInserters.fromMultipartData(fromFile(descriptorDTO, templateProject)))
+                    .retrieve()
+                    .onStatus(HttpStatus::isError, clientResponse ->
+                            processInstanceError(clientResponse, instanceSocket, "Failed to promote template to API instance: ")
+                    )
+                    .bodyToMono(TemplateDeploymentDTO.class);
+            return response.block(READ_TIMEOUT);
+        } catch (RuntimeException e) {
+            throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
+        }
     }
 
     @Override
@@ -143,21 +154,25 @@ public class InstanceClientImpl implements InstanceClient {
                 .append("/")
                 .append(templateAlias)
                 .toString();
-        final Mono<TemplateDeploymentDTO> response = webClient
-                .delete()
-                .uri(instanceDeploymentUrl)
-                .headers(h -> h.setBearerAuth(instanceRegisterToken))
-                .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse ->
-                        processInstanceError(clientResponse, instanceSocket, "Failed to un-deploy template from API instance: ")
-                )
-                .bodyToMono(TemplateDeploymentDTO.class);
-        return response.block();
+        try {
+            final Mono<TemplateDeploymentDTO> response = webClient
+                    .delete()
+                    .uri(instanceDeploymentUrl)
+                    .headers(h -> h.setBearerAuth(instanceRegisterToken))
+                    .retrieve()
+                    .onStatus(HttpStatus::isError, clientResponse ->
+                            processInstanceError(clientResponse, instanceSocket, "Failed to un-deploy template from API instance: ")
+                    )
+                    .bodyToMono(TemplateDeploymentDTO.class);
+            return response.block(READ_TIMEOUT);
+        } catch (RuntimeException e) {
+            throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
+        }
     }
 
     Mono<Throwable> processInstanceError(final ClientResponse clientResponse,
-                                                   final String instanceSocket,
-                                                   final String errorText) {
+                                         final String instanceSocket,
+                                         final String errorText) {
         final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
         return errorMessage.flatMap(message -> {
             log.warn(message.getMessage());
