@@ -22,14 +22,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -183,18 +182,21 @@ class TemplateSearchAndFilterIntegrationTest extends AbstractIntegrationTest imp
     @Test
     void shouldReturnListOfPermissions() throws Exception {
         final TemplateEntity templateEntity = templateRepository.findByName("some-template").get();
-        templateService.applyRole(templateEntity.getName(), "TEMPLATE_DESIGNER", Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD"), "admin@email.com");
+        templateService.applyRole(templateEntity.getName(), "TEMPLATE_DESIGNER", Collections.singletonList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD"), "admin@email.com");
 
-        mockMvc.perform(get(TemplateController.BASE_NAME)
+        final MvcResult mvcResult = mockMvc.perform(get(TemplateController.BASE_NAME)
                 .param("type", "STANDARD")
                 .accept(MediaType.APPLICATION_JSON).with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
-                Stream.of("E9_US70_TEMPLATES_TABLE", "E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD")
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList()))))
+                        Stream.of("E9_US70_TEMPLATES_TABLE", "E9_US71_TEMPLATE_NAVIGATION_MENU_STANDARD")
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].name", is(request.getName())))
-                .andExpect(jsonPath("$.content[0].permissions", hasSize(2)));
+                .andExpect(jsonPath("$.content[0].permissions", hasSize(2)))
+                .andReturn();
+
+        assertNotNull(mvcResult.getResponse());
 
     }
 

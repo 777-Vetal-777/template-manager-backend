@@ -39,7 +39,7 @@ public class InstanceClientImpl implements InstanceClient {
 
     private static final String WORKSPACE_ALIAS = "Template Manager";
 
-    private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 1L;
+    private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 5L;
 
     private final WebClient webClient;
 
@@ -155,7 +155,7 @@ public class InstanceClientImpl implements InstanceClient {
         return response.block();
     }
 
-    Mono<? extends Throwable> processInstanceError(final ClientResponse clientResponse,
+    Mono<Throwable> processInstanceError(final ClientResponse clientResponse,
                                                    final String instanceSocket,
                                                    final String errorText) {
         final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);

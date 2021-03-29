@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
@@ -29,7 +30,6 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.workspace.WorkspaceRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
-
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -127,7 +126,8 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     private TemplateService templateService;
     @Autowired
     private DataCollectionService dataCollectionService;
-
+    @Autowired
+    private Encoder encoder;
 
     @AfterEach
     void tearDown() {
@@ -148,7 +148,37 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturnIncorrectResourceType() throws Exception{
+    void shouldNotCreateNewVersionWithInvalidContent() throws Exception {
+        //create resource
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(STYLESHEET_NAME, ResourceTypeEnum.STYLESHEET);
+        assertTrue(createdResource.isPresent());
+
+        //should not create new versions of resource
+        final MockMultipartFile wrongStyleSheetResource = new MockMultipartFile("resource", "any_name.css", "text/plain", ".h1 {{\n \tfont-style: Helvetica\n }".getBytes());
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT)
+                .file(wrongStyleSheetResource)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest());
+
+        //should successfully create new versions of resource
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT)
+                .file(STYLESHEET_FILE_PART)
+                .file(STYLESHEET_NAME_PART)
+                .file(STYLESHEET_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturnIncorrectResourceType() throws Exception {
         final URI createResourceURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode()
                 .toUri();
         mockMvc.perform(MockMvcRequestBuilders.multipart(createResourceURI)
@@ -163,11 +193,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     void shouldReturnNoSuchResourceType() throws Exception {
         final String badStyle = "BadStyle";
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                badStyle, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                badStyle, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                badStyle, Base64.getEncoder().encodeToString(badStyle.getBytes())))
+                badStyle, encoder.encode(badStyle)))
                 .andExpect(status().isNotFound());
         assertTrue(resourceRepository.findAll().isEmpty());
     }
@@ -250,12 +280,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //GET by name
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        FONTS, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isOk());
         //UPDATE by name
         ResourceUpdateRequestDTO resourceUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/fonts_update_metadata.json"), ResourceUpdateRequestDTO.class);
 
-        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()))
+        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, encoder.encode(IMAGE_NAME))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceUpdateRequestDTO)))
                 .andExpect(status().isConflict());
@@ -263,7 +293,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        FONTS, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isOk());
         assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
         assertTrue(Objects.isNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId)));
@@ -271,7 +301,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //DELETE byPICTURE_FILE_NAME name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        FONTS, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isNotFound());
     }
 
@@ -327,7 +357,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //GET RESOURCE DEPENDENCIES
         mockMvc.perform(
-                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, FONTS, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isOk())
                 .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$").value(hasSize(1)))
@@ -336,18 +366,12 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
                 .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
-        
+
         //ResponseEntity<Page<DependencyDTO>> list
-        mockMvc.perform(
-                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + "/pageable", FONTS, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()))
+        mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE + "/pageable", FONTS, encoder.encode(IMAGE_NAME))
                 .param("sort", "name")
-                .param("stage", "STAGE"))       
-        		.andExpect(status().isOk());
-        
-        //Roles test
-        final RoleFilter filter = new  RoleFilter();
-        filter.setName(AUTHOR_NAME);
-        final Pageable pageable = PageRequest.of(0, 8);
+                .param("stage", "STAGE"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -379,17 +403,17 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //GET by name
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        IMAGES, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isOk());
 
 
         //Rollback with not-existing version error
         final Long currentVersion = 1L;
-        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()), 100L))
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, encoder.encode(IMAGE_NAME), 100L))
                 .andExpect(status().isNotFound());
 
         //Rollback successfully
-        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes()), currentVersion))
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, encoder.encode(IMAGE_NAME), currentVersion))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("version").value("2"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
@@ -399,7 +423,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        IMAGES, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isOk());
 
         assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
@@ -408,7 +432,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //repeat DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                        IMAGES, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isNotFound());
     }
 
@@ -438,7 +462,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //GET by name and make sure the resource is not exists
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
+                        STYLESHEETS, encoder.encode(STYLESHEET_NAME)))
                 .andExpect(status().isNotFound());
 
         //Create
@@ -470,7 +494,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //GET by name
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
+                        STYLESHEETS, encoder.encode(STYLESHEET_NAME)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value(STYLESHEET_NAME))
                 .andExpect(jsonPath("type").value(STYLESHEET_TYPE))
@@ -480,11 +504,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //Rollback with not-existing version error
         final Long currentVersion = 1L;
-        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes()), 100L))
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, encoder.encode(STYLESHEET_NAME), 100L))
                 .andExpect(status().isNotFound());
 
         //Rollback successfully
-        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes()), currentVersion))
+        mockMvc.perform(post(ResourceController.BASE_NAME + ResourceController.RESOURCE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, encoder.encode(STYLESHEET_NAME), currentVersion))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("version").value("2"))
                 .andExpect(jsonPath("modifiedOn").isNotEmpty())
@@ -493,7 +517,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //UPDATE by name
         ResourceUpdateRequestDTO resourceUpdateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/resources/stylesheet_update_metadata.json"), ResourceUpdateRequestDTO.class);
 
-        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes()))
+        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, encoder.encode(STYLESHEET_NAME))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(resourceUpdateRequestDTO)))
                 .andExpect(status().isOk())
@@ -505,7 +529,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(resourceUpdateRequestDTO.getName().getBytes())))
+                        STYLESHEETS, encoder.encode(resourceUpdateRequestDTO.getName())))
                 .andExpect(status().isOk());
 
         assertTrue(Objects.isNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId)));
@@ -514,20 +538,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         //repeat DELETE by name
         mockMvc.perform(
                 delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(resourceUpdateRequestDTO.getName().getBytes())))
+                        STYLESHEETS, encoder.encode(resourceUpdateRequestDTO.getName())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void testGetDependenciesPageable() throws Exception {
-        final String encodedResourceName = Base64.getEncoder().encodeToString("resource-name".getBytes());
+        final String encodedResourceName = encoder.encode("resource-name");
         mockMvc.perform(get(ResourceController.BASE_NAME
-                        + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, encodedResourceName))
+                + ResourceController.RESOURCE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, encodedResourceName))
                 .andExpect(status().isNotFound());
 
         assertEquals(0, resourceRepository.findAll().size());
     }
-    
+
     @Test
     void shouldAllowCreateEmptyStylesheet() throws Exception {
         final MockMultipartFile EMPTY_FILE_PART = new MockMultipartFile("resource", "any_name.css", "text/plain", "".getBytes());
@@ -548,7 +572,6 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         Long createdResourceId = createdResourceEntity.get().getId();
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
         assertNotNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId));
-
     }
 
     @Test
@@ -612,6 +635,11 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         existingTemplate.getLatestFile().getResourceFiles().addAll(Collections.singleton(latestResourceFile));
         templateFileRepository.save(existingTemplate.getLatestFile());
 
+        //could not delete because of outbound dependencies
+        mockMvc.perform(delete(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE_AND_TYPE,
+                STYLESHEETS, encoder.encode(STYLESHEET_NAME)))
+                .andExpect(status().isConflict());
+
         //create new versions of resource
         for (int i = 0; i < AMOUNT_VERSIONS; i++) {
             mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + RESOURCE_VERSION_ENDPOINT).file(STYLESHEET_NAME_PART).file(STYLESHEET_FILE_PART)
@@ -620,7 +648,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         }
         mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())).param("stage", "DEV"))
+                        STYLESHEETS, encoder.encode(STYLESHEET_NAME)).param("stage", "DEV"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("content").value(hasSize(6)))
@@ -630,7 +658,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[0].comment").isEmpty())
                 .andExpect(jsonPath("$.content[0].stage").value("DEV"))
                 .andExpect(jsonPath("$.content[4].stage").value("DEV"));
-      
+
     }
 
     @Test
@@ -651,10 +679,10 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                     .file(IMAGE_TYPE_PART).file(getUpdateTemplateBooleanPart(true))
                     .contentType(MediaType.MULTIPART_FORM_DATA));
         }
-       addStage();
+        addStage();
         final MvcResult result = mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())).param("stage", "DEV"))
+                        IMAGES, encoder.encode(IMAGE_NAME)).param("stage", "DEV"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("empty").value(false))
                 .andExpect(jsonPath("$.content[0].version").value(7))
@@ -671,7 +699,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         final String notExistingResourceName = "unknown-resource";
         final MvcResult result = mockMvc.perform(
                 get(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT_WITH_PATH_VARIABLE,
-                        IMAGES, Base64.getEncoder().encodeToString(notExistingResourceName.getBytes())))
+                        IMAGES, encoder.encode(notExistingResourceName)))
                 .andExpect(status().isNotFound())
                 .andReturn();
         assertNotNull(result.getResponse());
@@ -778,7 +806,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //GET RESOURCE DEPENDENCIES
         mockMvc.perform(
-                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, Base64.getEncoder().encodeToString(IMAGE_NAME.getBytes())))
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, IMAGES, encoder.encode(IMAGE_NAME)))
                 .andExpect(status().isOk())
                 .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$").value(hasSize(1)))
@@ -857,7 +885,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
 
         //GET RESOURCE DEPENDENCIES
         mockMvc.perform(
-                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, Base64.getEncoder().encodeToString(STYLESHEET_NAME.getBytes())))
+                get(ResourceController.BASE_NAME + ResourceController.RESOURCE_DEPENDENCIES_ENDPOINT_WITH_PATH_VARIABLE, STYLESHEETS, encoder.encode(STYLESHEET_NAME)))
                 .andExpect(status().isOk())
                 .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$").value(hasSize(1)))
@@ -866,28 +894,28 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[0].dependencyType").value(TEMPLATE.toString()))
                 .andExpect(jsonPath("$[0].stage").isNotEmpty())
                 .andExpect(jsonPath("$[0].directionType").value(HARD.toString()));
-        
+
         //GET RESOURCES List
         mockMvc.perform(get(ResourceController.BASE_NAME)
-        		.param("modifiedOn", "10/02/2021")
-        		.param("modifiedOn", "10/02/2021"))        
-        		.andExpect(status().isOk());     
-       
+                .param("modifiedOn", "10/02/2021")
+                .param("modifiedOn", "10/02/2021"))
+                .andExpect(status().isOk());
+
     }
 
-    private void addStage(){
+    private void addStage() {
         StageEntity stageEntity = stageRepository.findDefaultStage().get();
-        DataCollectionEntity dataCollectionEntity = dataCollectionService.create("ABC", DataCollectionType.JSON, "{}".getBytes(),"abc", "admin@email.com");
+        DataCollectionEntity dataCollectionEntity = dataCollectionService.create("ABC", DataCollectionType.JSON, "{}".getBytes(), "abc", "admin@email.com");
         TemplateEntity templateEntity = templateService.create("ABC", TemplateTypeEnum.HEADER, "ABC", "admin@email.com");
 
         ResourceEntity resourceEntity = resourceRepository.findByNameAndType("test-image", ResourceTypeEnum.IMAGE).get();
         Collection<ResourceFileEntity> files2 = resourceEntity.getResourceFiles();
-        for(ResourceFileEntity resourceFileEntity:files2){
+        for (ResourceFileEntity resourceFileEntity : files2) {
             resourceFileEntity.setStage(stageEntity);
             resourceFileRepository.save(resourceFileEntity);
         }
         List<ResourceFileEntity> files = resourceEntity.getLatestFile();
-        for(ResourceFileEntity resourceFileEntity:files){
+        for (ResourceFileEntity resourceFileEntity : files) {
             resourceFileEntity.setStage(stageEntity);
             resourceFileRepository.save(resourceFileEntity);
         }

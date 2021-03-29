@@ -29,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -380,7 +381,7 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         dataCollectionService.applyRole(dataCollectionEntity.getName(), "TEMPLATE_DESIGNER", Arrays.asList("E6_US34_EDIT_DATA_COLLECTION_METADATA"));
 
         //GET by name
-        mockMvc.perform(
+        final MvcResult mvcResult = mockMvc.perform(
                 get(DataCollectionController.BASE_NAME + "/" + Base64.getEncoder().encodeToString(NAME.getBytes()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON).with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
@@ -388,7 +389,8 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList()))))
                 .andExpect(jsonPath("$.permissions", hasSize(1)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk()).andReturn();
 
+        assertNotNull(mvcResult.getResponse());
     }
 }

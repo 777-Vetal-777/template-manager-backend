@@ -83,7 +83,7 @@ public class InstanceClientImplTest {
         when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<InstanceRegisterResponseDTO>>notNull())).thenReturn(Mono.just(post));
 
         // when
-        instanceClient.ping(SOCKET_EXAMPLE);
+        assertDoesNotThrow(() -> {instanceClient.ping(SOCKET_EXAMPLE);});
 
         // then no errors occurred
     }
@@ -154,7 +154,7 @@ public class InstanceClientImplTest {
         when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<Void>>any())).thenReturn(Mono.empty());
 
         // when
-        instanceClient.unregister(SOCKET_EXAMPLE, "randToken");
+        assertDoesNotThrow(() -> instanceClient.unregister(SOCKET_EXAMPLE, "randToken"));
 
         // then no errors occurred
     }

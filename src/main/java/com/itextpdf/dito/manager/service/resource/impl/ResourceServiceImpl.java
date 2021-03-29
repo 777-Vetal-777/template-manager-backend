@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -199,8 +198,8 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
 
         final List<TemplateEntity> templateEntities = templateRepository
                 .findTemplatesByResourceId(existingResourceEntity.getId());
-        if (Objects.nonNull(templateEntities)) {
-            final String updatedDependenciesComment = new StringBuilder(updatedResourceEntity.getName()).append(" was updated to version ").append(fileEntity.getVersion().toString()).toString();
+        if (!templateEntities.isEmpty()) {
+            final String updatedDependenciesComment = new StringBuilder(updatedResourceEntity.getName()).append(" was updated to version ").append(fileEntity.getVersion()).toString();
             templateEntities.forEach(t -> {
                 final TemplateEntity extendedTemplateEntity = templateService
                         .createNewVersionAsCopy(t.getLatestFile(), userEntity, updatedDependenciesComment);

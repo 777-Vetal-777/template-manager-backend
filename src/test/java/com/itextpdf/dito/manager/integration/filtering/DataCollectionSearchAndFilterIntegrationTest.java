@@ -18,13 +18,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -137,16 +136,20 @@ public class DataCollectionSearchAndFilterIntegrationTest extends AbstractIntegr
     @Test
     void shouldReturnPermissionsTable() throws Exception {
         final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName("data-collection-search-test").get();
-        dataCollectionService.applyRole(dataCollectionEntity.getName(),"TEMPLATE_DESIGNER", Arrays.asList("E6_US34_EDIT_DATA_COLLECTION_METADATA"));
+        dataCollectionService.applyRole(dataCollectionEntity.getName(),"TEMPLATE_DESIGNER", Collections.singletonList("E6_US34_EDIT_DATA_COLLECTION_METADATA"));
 
-        mockMvc.perform(get(DataCollectionController.BASE_NAME)
+        final MvcResult mvcResult = mockMvc.perform(get(DataCollectionController.BASE_NAME)
                 .param("search", "data-COLLECTION-search-test")
                 .accept(MediaType.APPLICATION_JSON).with(user(CUSTOM_USER_EMAIL).password(CUSTOM_USER_PASSWORD).authorities(
-                Stream.of("E6_US30_TABLE_OF_DATA_COLLECTIONS", "E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU")
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList()))))
+                        Stream.of("E6_US30_TABLE_OF_DATA_COLLECTIONS", "E6_US31_DATA_COLLECTIONS_NAVIGATION_MENU")
+                                .map(SimpleGrantedAuthority::new)
+                                .collect(Collectors.toList()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].permissions", hasSize(1)));
+                .andExpect(jsonPath("$.content[0].permissions", hasSize(1)))
+                .andReturn();
+
+        assertNotNull(mvcResult.getResponse());
     }
+
 }
