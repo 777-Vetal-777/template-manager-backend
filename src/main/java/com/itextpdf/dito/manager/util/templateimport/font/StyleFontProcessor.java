@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.util.fontimport;
+package com.itextpdf.dito.manager.util.templateimport.font;
 
 import com.itextpdf.dito.sdk.core.process.MutableItemProcessingResult;
 import com.itextpdf.dito.sdk.core.process.ProjectMutableItemProcessor;
@@ -8,9 +8,9 @@ import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Node;
 import com.itextpdf.html2pdf.html.TagConstants;
 import org.springframework.util.StringUtils;
 
-import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.FONT_RESOURCE;
-import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.FONT_RESOURCE_URI;
-import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.STYLE_INTERNAL_NAME;
+import static com.itextpdf.dito.manager.util.templateimport.font.FontTagConstants.FONT_RESOURCE;
+import static com.itextpdf.dito.manager.util.templateimport.font.FontTagConstants.FONT_RESOURCE_URI;
+import static com.itextpdf.dito.manager.util.templateimport.font.FontTagConstants.STYLE_INTERNAL_NAME;
 
 public class StyleFontProcessor<C> implements NodeMutableProcessor<C> {
 

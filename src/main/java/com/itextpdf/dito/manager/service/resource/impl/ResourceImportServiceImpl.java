@@ -16,7 +16,9 @@ import com.itextpdf.dito.manager.service.resource.ResourceService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.itextpdf.dito.manager.util.TemplateUtils.DITO_ASSET_TAG;
@@ -81,14 +83,14 @@ public class ResourceImportServiceImpl implements ResourceImportService {
                 if (type == null) {
                     resourceUri = DITO_ASSET_UNKNOWN_RESOURCE;
                 } else {
-                    final String name = resourceUriGeneratorContext.getOriginalPath().getFileName().toString();
-                    final String additionalName = new StringBuilder(namePattern).append("(").append(resourceId.incrementAndGet()).append(")").toString();
+                    final String additionalName = getAdditionalName(namePattern, resourceId);
+                    final String name = Optional.ofNullable(resourceUriGeneratorContext.getOriginalPath()).map(Path::getFileName).map(Path::toString).orElse(additionalName);
                     ResourceEntity resourceEntity = importResource(data, type, name, additionalName, email, settings.get(SettingType.valueOf(type.toString())).get(name));
                     resourceUri = DITO_ASSET_TAG.concat(resourceLeafDescriptorMapper.encodeId(resourceEntity.getName(), resourceEntity.getType(), null));
                 }
             } catch (ResourceAlreadyExistsException e) {
                 if (type != null) {
-                    duplicatesList.putToDuplicates(SettingType.valueOf(type.toString()), resourceUriGeneratorContext.getOriginalPath().getFileName().toString());
+                    duplicatesList.putToDuplicates(SettingType.valueOf(type.toString()), Optional.ofNullable(resourceUriGeneratorContext.getOriginalPath()).map(Path::getFileName).map(Path::toString).orElseGet(() -> getAdditionalName(namePattern, resourceId)));
                 }
                 resourceUri = DITO_ASSET_UNKNOWN_RESOURCE;
             } catch (IOException e) {
@@ -97,6 +99,10 @@ public class ResourceImportServiceImpl implements ResourceImportService {
 
             return resourceUri;
         };
+    }
+
+    private String getAdditionalName(final String namePattern, final AtomicInteger resourceId) {
+        return new StringBuilder(namePattern).append("(").append(resourceId.incrementAndGet()).append(")").toString();
     }
 
     private ResourceTypeEnum getContentType(final byte[] data) {

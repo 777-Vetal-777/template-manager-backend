@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.util.fontimport;
+package com.itextpdf.dito.manager.util.templateimport.font;
 
 public final class FontTagConstants {
 

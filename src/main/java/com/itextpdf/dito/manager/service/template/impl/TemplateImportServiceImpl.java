@@ -1,9 +1,7 @@
 package com.itextpdf.dito.manager.service.template.impl;
 
 import com.itextpdf.dito.editor.server.common.elements.converter.DefaultFromLegacyProjectElementsConverter;
-import com.itextpdf.dito.editor.server.common.elements.converter.resources.DefaultToResourceElementsConverter;
-import com.itextpdf.dito.editor.server.common.elements.converter.samples.DefaultToDataSampleElementsConverter;
-import com.itextpdf.dito.editor.server.common.elements.converter.templates.DefaultToTemplateElementsConverter;
+import com.itextpdf.dito.editor.server.common.elements.converter.ProjectElementsConverterProperties;
 import com.itextpdf.dito.editor.server.common.elements.entity.ProjectElements;
 import com.itextpdf.dito.editor.server.common.elements.entity.TemplateElement;
 import com.itextpdf.dito.editor.server.common.elements.urigenerator.ResourceUriGenerator;
@@ -70,11 +68,11 @@ public class TemplateImportServiceImpl implements TemplateImportService {
             final DuplicatesList duplicatesList = new DuplicatesListImpl();
             final ResourceUriGenerator resourcesUriGenerator = resourceImportService.getResourceUriGenerator(fileName, email, settings, duplicatesList);
 
-            final ProjectElements projectElements = new DefaultFromLegacyProjectElementsConverter(
-                    new DefaultToDataSampleElementsConverter(),
-                    new DefaultToResourceElementsConverter(resourcesUriGenerator),
-                    new DefaultToTemplateElementsConverter()
-            ).convert(new ByteArrayInputStream(ditoData));
+            final ProjectElementsConverterProperties projectElementsConverterProperties = new ProjectElementsConverterProperties();
+            projectElementsConverterProperties.setEnableEmbeddedStylesConverting(true);
+            projectElementsConverterProperties.setResourceUriGenerator(resourcesUriGenerator);
+
+            final ProjectElements projectElements = new DefaultFromLegacyProjectElementsConverter(projectElementsConverterProperties).convert(new ByteArrayInputStream(ditoData));
 
             final DataCollectionEntity dataCollectionEntity = dataCollectionImportService.importDataCollectionAndSamples(fileName, projectElements.getDataSamples(), settings.get(SettingType.DATA_COLLECTION), duplicatesList, email);
 

@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.util.cssimport;
+package com.itextpdf.dito.manager.util.templateimport;
 
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
