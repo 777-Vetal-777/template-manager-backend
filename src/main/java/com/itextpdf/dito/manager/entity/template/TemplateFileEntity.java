@@ -18,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ public class TemplateFileEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @OrderBy("id")
     private List<TemplateFilePartEntity> parts = new ArrayList<>();
 
     @OneToMany(
