@@ -1,4 +1,4 @@
-package com.itextpdf.dito.manager.util.cssimport;
+package com.itextpdf.dito.manager.util.fontimport;
 
 import com.itextpdf.dito.sdk.core.process.MutableItemProcessingResult;
 import com.itextpdf.dito.sdk.core.process.ProjectMutableItemProcessor;
@@ -8,14 +8,16 @@ import com.itextpdf.dito.sdk.internal.core.template.parser.nodes.Node;
 import com.itextpdf.html2pdf.html.TagConstants;
 import org.springframework.util.StringUtils;
 
-import static com.itextpdf.html2pdf.html.AttributeConstants.HREF;
+import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.FONT_RESOURCE;
+import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.FONT_RESOURCE_URI;
+import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.STYLE_INTERNAL_NAME;
 
-public class StyleTagProcessor<C> implements NodeMutableProcessor<C> {
+public class StyleFontProcessor<C> implements NodeMutableProcessor<C> {
 
-    private final ProjectMutableItemProcessor<Element, C> cssStyleSheetPreprocessor;
+    private final ProjectMutableItemProcessor<Element, C> styleSheetPreprocessor;
 
-    public StyleTagProcessor(final ProjectMutableItemProcessor<Element, C> cssStyleSheetPreprocessor) {
-        this.cssStyleSheetPreprocessor = cssStyleSheetPreprocessor;
+    public StyleFontProcessor(final ProjectMutableItemProcessor<Element, C> styleSheetPreprocessor) {
+        this.styleSheetPreprocessor = styleSheetPreprocessor;
     }
 
     @Override
@@ -24,9 +26,9 @@ public class StyleTagProcessor<C> implements NodeMutableProcessor<C> {
         if (item instanceof Element) {
             Element element = (Element) item;
             if (TagConstants.STYLE.equals(element.tagName())
-                    && StringUtils.isEmpty(element.attr(StyleSheetTagConstants.STYLESHEET_INTERNAL_NAME))
-                    && (!StringUtils.isEmpty(element.attr(StyleSheetTagConstants.STYLESHEET_NAME)) || !StringUtils.isEmpty(element.attr(HREF)))) {
-                result.setModified(cssStyleSheetPreprocessor.process(element, context).isModified());
+                    && FONT_RESOURCE.equals(element.attr(STYLE_INTERNAL_NAME))
+                    && !StringUtils.isEmpty(element.attr(FONT_RESOURCE_URI))) {
+                result.setModified(styleSheetPreprocessor.process(element, context).isModified());
             }
         }
         return result.build();

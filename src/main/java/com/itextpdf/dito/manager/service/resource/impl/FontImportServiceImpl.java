@@ -3,9 +3,9 @@ package com.itextpdf.dito.manager.service.resource.impl;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
 import com.itextpdf.dito.manager.model.template.duplicates.DuplicatesList;
 import com.itextpdf.dito.manager.service.resource.EmbeddedResourceImportService;
-import com.itextpdf.dito.manager.util.cssimport.StyleSheetPreprocessorService;
-import com.itextpdf.dito.manager.util.cssimport.StyleTagProcessor;
 import com.itextpdf.dito.manager.util.cssimport.StyleTagRenamingContext;
+import com.itextpdf.dito.manager.util.fontimport.FontPreprocessorService;
+import com.itextpdf.dito.manager.util.fontimport.StyleFontProcessor;
 import com.itextpdf.dito.sdk.core.process.MutableItemProcessingResult;
 import com.itextpdf.dito.sdk.core.process.ProjectMutableItemProcessor;
 import com.itextpdf.dito.sdk.core.process.template.TemplateSubTreeProcessor;
@@ -23,11 +23,11 @@ import java.util.Collections;
 import java.util.Map;
 
 @Service
-public class EmbeddedStylesheetImportServiceImpl implements EmbeddedResourceImportService {
+public class FontImportServiceImpl implements EmbeddedResourceImportService {
 
     private final ProjectMutableItemProcessor<Element, StyleTagRenamingContext> styleSheetPreprocessorService;
 
-    public EmbeddedStylesheetImportServiceImpl(final @Qualifier(StyleSheetPreprocessorService.BEAN_ID) ProjectMutableItemProcessor<Element, StyleTagRenamingContext> styleSheetPreprocessorService) {
+    public FontImportServiceImpl(final @Qualifier(FontPreprocessorService.BEAN_ID) ProjectMutableItemProcessor<Element, StyleTagRenamingContext> styleSheetPreprocessorService) {
         this.styleSheetPreprocessorService = styleSheetPreprocessorService;
     }
 
@@ -36,7 +36,7 @@ public class EmbeddedStylesheetImportServiceImpl implements EmbeddedResourceImpo
                                  final Map<String, TemplateImportNameModel> settings,
                                  final DuplicatesList duplicatesList,
                                  final String email) throws IOException {
-        final TemplateSubTreeProcessor<Node, StyleTagRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new StyleTagProcessor<>(styleSheetPreprocessorService)));
+        final TemplateSubTreeProcessor<Node, StyleTagRenamingContext> processor = new TemplateSubTreeProcessor<>(Collections.singletonList(new StyleFontProcessor<>(styleSheetPreprocessorService)));
 
         final StyleTagRenamingContext context = new StyleTagRenamingContext(fileName, settings, duplicatesList, email);
 

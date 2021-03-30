@@ -23,8 +23,9 @@ import static com.itextpdf.html2pdf.html.AttributeConstants.REL;
 import static com.itextpdf.html2pdf.html.AttributeConstants.STYLESHEET;
 import static com.itextpdf.html2pdf.html.TagConstants.LINK;
 
-@Service
+@Service(StyleSheetPreprocessorService.BEAN_ID)
 public class StyleSheetPreprocessorService implements ProjectMutableItemProcessor<Element, StyleTagRenamingContext> {
+    public static final String BEAN_ID = "StyleSheetPreprocessorService";
 
     private final ResourceService resourceService;
     private final ResourceRepository resourceRepository;

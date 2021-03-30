@@ -21,7 +21,7 @@ import com.itextpdf.dito.manager.model.template.duplicates.DuplicatesList;
 import com.itextpdf.dito.manager.model.template.duplicates.impl.DuplicatesListImpl;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionImportService;
-import com.itextpdf.dito.manager.service.resource.EmbeddedStylesheetImportService;
+import com.itextpdf.dito.manager.service.resource.EmbeddedResourceImportService;
 import com.itextpdf.dito.manager.service.resource.ResourceImportService;
 import com.itextpdf.dito.manager.service.template.TemplateImportService;
 import org.apache.logging.log4j.LogManager;
@@ -46,18 +46,18 @@ public class TemplateImportServiceImpl implements TemplateImportService {
     private final TemplateManagementService templateManagementService;
     private final DataCollectionImportService dataCollectionImportService;
     private final ResourceImportService resourceImportService;
-    private final EmbeddedStylesheetImportService stylesheetImportService;
+    private final List<EmbeddedResourceImportService> embeddedResourceImportServices;
 
     public TemplateImportServiceImpl(final TemplateManagementService templateManagementService,
                                      final DataCollectionImportService dataCollectionImportService,
                                      final ResourceImportService resourceImportService,
                                      final TemplateRepository templateRepository,
-                                     final EmbeddedStylesheetImportService stylesheetImportService) {
+                                     final List<EmbeddedResourceImportService> embeddedResourceImportServices) {
         this.templateManagementService = templateManagementService;
         this.dataCollectionImportService = dataCollectionImportService;
         this.resourceImportService = resourceImportService;
         this.templateRepository = templateRepository;
-        this.stylesheetImportService = stylesheetImportService;
+        this.embeddedResourceImportServices = embeddedResourceImportServices;
     }
 
     @Override
@@ -125,7 +125,11 @@ public class TemplateImportServiceImpl implements TemplateImportService {
         final byte[] originalData = readStreamable(templateElement.getTemplateStream());
         final String dataCollection = Optional.ofNullable(dataCollectionEntity).map(DataCollectionEntity::getName).orElse(null);
 
-        final byte[] data = stylesheetImportService.importEmbedded(originalData, fileName, stylesheetsSettings, duplicatesList, email);
+        byte[] data = originalData;
+
+        for (EmbeddedResourceImportService embeddedResourceImportService: embeddedResourceImportServices) {
+            data = embeddedResourceImportService.importEmbedded(data, fileName, stylesheetsSettings, duplicatesList, email);
+        }
 
         TemplateEntity templateEntity;
         try {
