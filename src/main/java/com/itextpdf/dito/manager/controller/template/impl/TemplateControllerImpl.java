@@ -210,7 +210,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<byte[]> preview(final String templateName, final String dataSampleName) {
-        log.info("Get template preview by templateName: {} was started", templateName);
+        log.info("Get template preview by templateName: {} and dataSampleName: {} was started", templateName, dataSampleName);
         final String decodedTemplateName = encoder.decode(templateName);
         final ByteArrayOutputStream pdfStream = templatePreviewGenerator.generatePreview(decodedTemplateName, dataSampleName);
 
@@ -218,7 +218,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         headers.setContentType(MediaType.APPLICATION_PDF);
         final String filename = new StringBuilder().append(decodedTemplateName).append(".pdf").toString();
         headers.setContentDispositionFormData("attachment", filename);
-        log.info("Get template preview by templateName: {} was finished successfully", templateName);
+        log.info("Get template preview by templateName: {} and dataSampleName: {} was finished successfully", templateName, dataSampleName);
         return new ResponseEntity<>(pdfStream.toByteArray(), headers, HttpStatus.OK);
     }
 
