@@ -29,6 +29,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
 	String LEFT_JOIN_TEMPLATE_FILE_INSTANCE_ON_TEMPLATE_FILE_ID = " left join {h-schema}template_file_instance as tfi on tfi.template_file_id = templateFile.id";
 
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "modifiedOn");
+    List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
 
     String TEMPLATE_TABLE_SELECT_CLAUSE = "select template.name as templateName, template.id as id, template.type as type, data.name as dataCollection, CONCAT(firstAuthorLog.firstName,' ',firstAuthorLog.lastName) as createdBy, "
             + "template.firstLogRecord.date as createdOn, CONCAT(lastAuthorLog.firstName,' ',lastAuthorLog.lastName) as author, lastAuthorLog.firstName as authorFirstName, "

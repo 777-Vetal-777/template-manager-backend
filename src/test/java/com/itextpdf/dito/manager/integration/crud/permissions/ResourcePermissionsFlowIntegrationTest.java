@@ -18,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
@@ -39,6 +40,7 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
     private static final String TYPE = "IMAGE";
     private static final String IMAGES = "images";
     private static final String FILE_NAME = "any-permission-name.png";
+    private static final String NAME_ENCODED = Base64.getUrlEncoder().encodeToString(NAME.getBytes(StandardCharsets.UTF_8));
 
     private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "text/plain",
             NAME.getBytes());
@@ -88,6 +90,11 @@ public class ResourcePermissionsFlowIntegrationTest extends AbstractIntegrationT
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        //Get resource list
+        mockMvc.perform(get(ResourceController.BASE_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content[0].permissions").isNotEmpty());
 
         //Get permission
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_APPLIED_ROLES_ENDPOINT_WITH_RESOURCE_PATH_VARIABLE, IMAGES, encodedResourceName)

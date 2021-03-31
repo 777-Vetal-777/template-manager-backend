@@ -52,7 +52,7 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
 public class UserServiceImpl extends AbstractService implements UserService {
     private static final Logger log = LogManager.getLogger(UserServiceImpl.class);
 
-    protected static final String USER_NAME_REGEX = "[a-zA-Z][a-zA-Z]{0,199}";
+    protected static final String USER_NAME_REGEX = "[a-zA-Z\\s][a-zA-Z\\s]{0,199}";
 
     private static final String ACTIVE = "active";
 
@@ -79,6 +79,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     public UserEntity updateUser(final UserEntity userEntity, final String email) {
         log.info("Update user by email: {} with user: {} was started", email, userEntity);
+        throwExceptionIfFirstNameOrLastNameNotMatchesPattern(userEntity.getFirstName(), userEntity.getLastName());
         final UserEntity persistedUserEntity = findActiveUserByEmail(email);
         persistedUserEntity.setFirstName(userEntity.getFirstName());
         persistedUserEntity.setLastName(userEntity.getLastName());
@@ -363,7 +364,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     }
 
     private void checkUserPasswordIsSpecifiedByAdmin(final UserEntity userEntity) {
-        if (!userEntity.getPasswordUpdatedByAdmin()) {
+        if (!Boolean.TRUE.equals(userEntity.getPasswordUpdatedByAdmin())) {
             throw new PasswordNotSpecifiedByAdminException();
         }
     }

@@ -32,7 +32,6 @@ import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.hamcrest.Matcher;
-import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

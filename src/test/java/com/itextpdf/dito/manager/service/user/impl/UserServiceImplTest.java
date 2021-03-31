@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.user.impl;
 
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
+import com.itextpdf.dito.manager.exception.user.UserInvalidNameException;
 import com.itextpdf.dito.manager.exception.user.UserNotFoundOrNotActiveException;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -72,7 +73,7 @@ class UserServiceImplTest {
         when(userRepository.save(user)).thenReturn(user);
         UserEntity updateRequest = new UserEntity();
         String newFirstName = "myNewFirstName";
-        String newLastName = "myNewLastName";
+        String newLastName = "myNewLast Name";
         updateRequest.setFirstName(newFirstName);
         updateRequest.setLastName(newLastName);
 
@@ -83,11 +84,22 @@ class UserServiceImplTest {
     }
 
     @Test
+    void updateUser_WhenInCorrectRequestsIsSent_ThenExceptionIsThrown() {
+        UserEntity updateRequest = new UserEntity();
+        String newFirstName = "myNewFirstName";
+        String newLastName = "myNewLast_Name";
+        updateRequest.setFirstName(newFirstName);
+        updateRequest.setLastName(newLastName);
+
+        assertThrows(UserInvalidNameException.class, () -> userService.updateUser(updateRequest, user.getEmail()));
+    }
+
+    @Test
     void updateUser_WhenUserDoesNotExists_ThenExceptionIsThrown() {
         when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.empty());
         UserEntity updateRequest = new UserEntity();
-        updateRequest.setFirstName("");
-        updateRequest.setLastName("");
+        updateRequest.setFirstName("firstName");
+        updateRequest.setLastName("lastName");
 
         assertThrows(UserNotFoundOrNotActiveException.class,
                 () -> userService.updateUser(updateRequest, user.getEmail()));
