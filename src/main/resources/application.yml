@@ -42,6 +42,7 @@ spring:
       max-request-size: 100MB
 server:
   use-forward-headers: true
+  forward-headers-strategy: NATIVE
   servlet:
     context-path: /api
 
