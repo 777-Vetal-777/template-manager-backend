@@ -57,6 +57,8 @@ resources:
       supported: ttf
 
 template:
+  extensions:
+    supported: zip,dito
   unblock-scheduler:
     execution-delay-in-millis: 900000
     initial-delay-in-millis: 1000

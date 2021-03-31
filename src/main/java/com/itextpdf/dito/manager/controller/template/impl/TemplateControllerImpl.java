@@ -28,6 +28,7 @@ import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
+import com.itextpdf.dito.manager.exception.template.TemplateExtensionNotSupportedException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
@@ -47,6 +48,7 @@ import com.itextpdf.dito.manager.service.template.TemplateVersionsService;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -73,6 +75,7 @@ import static com.itextpdf.dito.sdk.core.pkg.PackageConstant.TEMPLATE_PACKAGE_EX
 @RestController
 public class TemplateControllerImpl extends AbstractController implements TemplateController {
     private static final Logger log = LogManager.getLogger(TemplateControllerImpl.class);
+    private final List<String> supportedExtensions;
     private final TemplateService templateService;
     private final TemplateMapper templateMapper;
     private final DependencyMapper dependencyMapper;
@@ -88,7 +91,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateImportService templateImportService;
     private final Encoder encoder;
 
-    public TemplateControllerImpl(final TemplateService templateService,
+    public TemplateControllerImpl(@Value("${template.extensions.supported}") final List<String> supportedExtensions,
+                                  final TemplateService templateService,
                                   final TemplateMapper templateMapper,
                                   final DependencyMapper dependencyMapper,
                                   final TemplateVersionsService templateVersionsService,
@@ -102,6 +106,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final WorkspaceMapper workspaceMapper,
                                   final TemplateImportService templateImportService,
                                   final Encoder encoder) {
+        this.supportedExtensions = supportedExtensions;
         this.templateService = templateService;
         this.templateMapper = templateMapper;
         this.dependencyMapper = dependencyMapper;
@@ -339,6 +344,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     @Override
     public ResponseEntity<TemplateDTO> importData(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
         log.info("Import template by fileName: {} was started", templateFile.getOriginalFilename());
+        checkFileExtensionIsSupported(templateFile);
         final byte[] data = getFileBytes(templateFile);
         final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
                 ? new EnumMap<>(SettingType.class)
@@ -348,5 +354,12 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).map(file -> file.replace(' ', '_')).orElse("unknown").concat("-import");
         log.info("Import template by fileName: {} was finished successfully", templateFile.getOriginalFilename());
         return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models), principal.getName()), HttpStatus.OK);
+    }
+
+    private void checkFileExtensionIsSupported(final MultipartFile resource) {
+        final String templateExtension = Optional.ofNullable(FilenameUtils.getExtension(resource.getOriginalFilename())).map(String::toLowerCase).orElse("");
+        if (!this.supportedExtensions.contains(templateExtension)) {
+            throw new TemplateExtensionNotSupportedException(templateExtension);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.model.template;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 

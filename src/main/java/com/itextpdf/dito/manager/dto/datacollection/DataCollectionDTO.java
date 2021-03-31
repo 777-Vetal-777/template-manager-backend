@@ -1,9 +1,6 @@
 package com.itextpdf.dito.manager.dto.datacollection;
 
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
-
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 public class DataCollectionDTO {

@@ -32,6 +32,7 @@ import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.hamcrest.Matcher;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,7 @@ import java.util.zip.ZipInputStream;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE;
@@ -80,7 +82,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,8 +96,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
+class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     public static final String CUSTOM_USER_EMAIL = "templatePermissionUser@email.com";
     public static final String CUSTOM_USER_PASSWORD = "password2";
 
@@ -128,7 +128,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private RoleRepository roleRepository;
 
     @AfterEach
-    public void clearDb() {
+    void clearDb() {
         templateRepository.deleteAll();
         templateFileRepository.deleteAll();
         resourceRepository.deleteAll();
@@ -138,7 +138,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @BeforeEach
-    public void initDb(){
+    void initDb(){
         final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue("TEMPLATE_DESIGNER").get();
         UserEntity user2 = new UserEntity();
         user2.setEmail(CUSTOM_USER_EMAIL);
@@ -154,8 +154,12 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateTemplateWithoutData() throws Exception {
+    void testCreateTemplateWithoutData() throws Exception {
         addStage();
+
+        mockMvc.perform(get(TemplateController.BASE_NAME).param("search", "name")).andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.content", hasSize(0)));
 
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
@@ -170,6 +174,9 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
+
+        mockMvc.perform(get(TemplateController.BASE_NAME)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)));
 
         //Create new version
         final MockMultipartFile file = new MockMultipartFile("template", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/resources/random.png")));
@@ -260,7 +267,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateTemplateWithData() throws Exception {
+    void testCreateTemplateWithData() throws Exception {
         final String userEmail = "admin@email.com";
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.create("data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", userEmail);
         dataSampleService.create(dataCollectionEntity, "ds1", "ds1.json", "{\"file\":\"file1.json\"}", "comment1", userEmail);
@@ -320,7 +327,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void createTemplate_WhenTemplateWithSameNameExists_ThenResponseIsBadRequest() throws Exception {
+    void createTemplate_WhenTemplateWithSameNameExists_ThenResponseIsBadRequest() throws Exception {
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
         mockMvc.perform(post(TemplateController.BASE_NAME)
                 .content(objectMapper.writeValueAsString(request))
@@ -338,7 +345,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetAll() throws Exception {
+    void testGetAll() throws Exception {
         final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -348,7 +355,7 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetAllTemplateTypes() throws Exception {
+    void testGetAllTemplateTypes() throws Exception {
         final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_TYPES_ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -438,6 +445,11 @@ public class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(zipMatch(hasItem("templates/composite-template")))
                 .andReturn();
         assertNotNull(result.getResponse());
+        // get template parts
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName)).andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[*].type", containsInAnyOrder("STANDARD", "HEADER", "FOOTER")));
+
     }
 
     @Test

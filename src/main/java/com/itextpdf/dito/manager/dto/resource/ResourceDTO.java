@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.dto.resource;
 
-import com.itextpdf.dito.manager.dto.role.RoleDTO;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;

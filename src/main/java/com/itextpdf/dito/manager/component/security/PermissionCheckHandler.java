@@ -7,7 +7,6 @@ import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRol
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
 import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 
-import java.util.List;
 import java.util.Set;
 
 public interface PermissionCheckHandler {

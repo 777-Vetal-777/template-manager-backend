@@ -1,9 +1,7 @@
 package com.itextpdf.dito.manager.component.mapper.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.mapper.datacollection.DataCollectionMapper;
-import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
-import com.itextpdf.dito.manager.component.security.PermissionHandler;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionDTO;
 import com.itextpdf.dito.manager.dto.datacollection.update.DataCollectionUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -24,13 +22,8 @@ import java.util.stream.Collectors;
 @Component
 public class DataCollectionMapperImpl implements DataCollectionMapper {
     private static final Logger log = LogManager.getLogger(DataCollectionMapperImpl.class);
-    private final RoleMapper roleMapper;
     @Autowired
     private PermissionCheckHandler permissionHandler;
-
-    public DataCollectionMapperImpl(final RoleMapper roleMapper) {
-        this.roleMapper = roleMapper;
-    }
 
     @Override
     public DataCollectionEntity map(DataCollectionUpdateRequestDTO dto) {

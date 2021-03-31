@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.integration.crud.permissions;
 
 import static com.itextpdf.dito.manager.controller.resource.ResourceController.FONTS_ENDPOINT;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -89,6 +90,16 @@ public class PermissionsFlowIntegrationTest extends AbstractIntegrationTest{
                 .andExpect(status().isOk());
         mockMvc.perform(delete(RoleController.BASE_NAME + "/" + encodeStringToBase64(roleName)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void test_getRolesByUserSearch() throws Exception {
+        mockMvc.perform(
+                get(RoleController.BASE_NAME))
+                .andExpect(jsonPath("content.[0].id").isNotEmpty())
+                .andExpect(jsonPath("content.[0].name").value("ADMINISTRATOR"))
+                .andExpect(jsonPath("content.[0].type").value("SYSTEM"))
+                .andExpect(jsonPath("content.[0].master").value(true));
     }
     
     

@@ -134,12 +134,12 @@ public class WorkspaceControllerImpl extends AbstractController implements Works
     }
 
     @Override
-    protected RuntimeException throwEmptyFileException() {
+    protected void throwEmptyFileException() {
         throw new EmptyLicenseFileException();
     }
 
     @Override
-    protected RuntimeException throwUnreadableFileException(final String fileName) {
+    protected void throwUnreadableFileException(final String fileName) {
         throw new UnreadableLicenseException(fileName);
     }
 }

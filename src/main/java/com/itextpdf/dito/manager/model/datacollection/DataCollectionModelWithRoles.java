@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.model.datacollection;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 

@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.component.mapper.resource.impl;
 
 import com.itextpdf.dito.manager.component.mapper.resource.ResourceMapper;
-import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.component.security.PermissionCheckHandler;
 import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModelWithRoles;
@@ -25,13 +24,10 @@ import java.util.stream.Collectors;
 @Component
 public class ResourceMapperImpl implements ResourceMapper {
     private static final Logger log = LogManager.getLogger(ResourceMapperImpl.class);
-    private final RoleMapper roleMapper;
     private final PermissionCheckHandler permissionHandler;
 
 
-    public ResourceMapperImpl(final RoleMapper roleMapper,
-                              final PermissionCheckHandler permissionHandler) {
-        this.roleMapper = roleMapper;
+    public ResourceMapperImpl(final PermissionCheckHandler permissionHandler) {
         this.permissionHandler = permissionHandler;
     }
 

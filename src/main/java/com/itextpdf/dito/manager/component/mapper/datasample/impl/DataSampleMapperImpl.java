@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -102,15 +101,15 @@ public class DataSampleMapperImpl implements DataSampleMapper {
     }
 
 	private Set<String> getAllKeys(final ObjectMapper mapper, final String jsonObject) throws JsonProcessingException {
-		final Map<String, Object> treeMap = mapper.readValue(jsonObject, Map.class);
+		final Map<Object, Object> treeMap = mapper.readValue(jsonObject, mapper.getTypeFactory().constructMapType(LinkedHashMap.class, Object.class, Object.class));
 		final Set<String> keys = new HashSet<>();
 		return findKeys("", treeMap, keys);
 	}
 
-	private Set<String> findKeys(final String prefix, final Map<String, Object> treeMap, final Set<String> keys) {
+	private Set<String> findKeys(final String prefix, final Map<Object, Object> treeMap, final Set<String> keys) {
 		treeMap.forEach((key, value) -> {
 			if (isClassMap(value.getClass())) {
-				final Map<String, Object> map = (LinkedHashMap) value;
+				final Map<Object, Object> map = (Map<Object, Object>) value;
 				final StringBuilder additionalPrefix = new StringBuilder(prefix);
 				additionalPrefix.append(key);
 				additionalPrefix.append("/");

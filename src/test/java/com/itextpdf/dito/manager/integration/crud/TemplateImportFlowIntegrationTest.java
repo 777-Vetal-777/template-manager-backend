@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -230,6 +232,20 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(1, dataCollectionRepository.findAll().size());
         assertEquals(2, dataSampleRepository.findAll().size());
         assertEquals(5, resourceRepository.findAll().size());
+    }
+
+    @Test
+    void shouldThrowExtensionIsNotSupportedException() throws Exception {
+        final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-different-resource-types.doti", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-different-resource-types.dito"));
+
+        final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+                .file(ditoFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        assertNotNull(mvcResult.getResponse());
+
     }
 
 }
