@@ -8,10 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
 public class FileVersionMapperImpl implements FileVersionMapper {
     private static final Logger log = LogManager.getLogger(FileVersionMapperImpl.class);
@@ -28,11 +24,6 @@ public class FileVersionMapperImpl implements FileVersionMapper {
         fileVersionDTO.setStage(entity.getStage());
         log.info("Convert {} to dto was finished successfully", entity);
         return fileVersionDTO;
-    }
-
-    @Override
-    public List<FileVersionDTO> map(final Collection<FileVersionModel> entity) {
-        return entity.stream().map(this::map).collect(Collectors.toList());
     }
 
     @Override

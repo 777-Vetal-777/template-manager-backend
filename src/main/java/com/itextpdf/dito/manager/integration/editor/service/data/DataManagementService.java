@@ -14,4 +14,6 @@ public interface DataManagementService {
     DataSampleEntity delete(String id);
 
     Collection<DataSampleEntity> getDataSamplesByCollectionId(String collectionId);
+
+    DataSampleEntity getDefaultDataSampleByCollectionId(Long collectionId);
 }

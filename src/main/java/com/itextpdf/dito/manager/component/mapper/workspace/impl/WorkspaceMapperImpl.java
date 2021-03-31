@@ -5,7 +5,6 @@ import com.itextpdf.dito.manager.component.mapper.workspace.WorkspaceMapper;
 import com.itextpdf.dito.manager.dto.promotionpath.PromotionPathDTO;
 import com.itextpdf.dito.manager.dto.stage.StageDTO;
 import com.itextpdf.dito.manager.dto.workspace.WorkspaceDTO;
-import com.itextpdf.dito.manager.dto.workspace.create.WorkspaceCreateRequestDTO;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.WorkspaceEntity;
@@ -24,20 +23,6 @@ public class WorkspaceMapperImpl implements WorkspaceMapper {
 
     public WorkspaceMapperImpl(final InstanceMapper instanceMapper) {
         this.instanceMapper = instanceMapper;
-    }
-
-    @Override
-    public WorkspaceEntity map(final WorkspaceCreateRequestDTO dto) {
-        log.info("Convert {} to entity was workspace was started", dto);
-        final WorkspaceEntity result = new WorkspaceEntity();
-
-        result.setLanguage(dto.getLanguage());
-        result.setName(dto.getName());
-        result.setTimezone(dto.getTimezone());
-        result.setAdjustForDaylight(dto.getAdjustForDaylight());
-        log.info("Convert {} to entity was workspace was finished successfully", dto);
-
-        return result;
     }
 
     @Override

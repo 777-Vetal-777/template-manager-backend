@@ -9,5 +9,7 @@ import java.util.List;
 public interface DataSampleDescriptorMapper {
     DataSampleDescriptor map(DataSampleEntity entity);
 
+    String mapToID(DataSampleEntity entity);
+
     List<DataSampleDescriptor> map(Collection<DataSampleEntity> entities);
 }

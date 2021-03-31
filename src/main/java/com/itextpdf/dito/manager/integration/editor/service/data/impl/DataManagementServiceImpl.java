@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,5 +53,10 @@ public class DataManagementServiceImpl implements DataManagementService {
     public Collection<DataSampleEntity> getDataSamplesByCollectionId(final String collectionId) {
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(collectionId);
         return dataCollectionEntity.getDataSamples();
+    }
+
+    @Override
+    public DataSampleEntity getDefaultDataSampleByCollectionId(Long collectionId) {
+        return dataSampleService.findDataSampleByCollectionId(collectionId).orElse(null);
     }
 }

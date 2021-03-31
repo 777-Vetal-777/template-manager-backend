@@ -43,7 +43,6 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	private static final String NOT_EXISTED_SAMPLE = "NotExistedSample";
 	private static final String EXISTED_SAMPLE = "name";
 
-
 	private static final String DATACOLLECTION_NAME = "data-collection-test";
 	private static final String DATACOLLECTION_BASE64_ENCODED_NAME = Base64.encode(DATACOLLECTION_NAME);
 	private static final String TYPE = "JSON";
@@ -84,13 +83,13 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		final URI uri = UriComponentsBuilder.fromUriString(DataManagementController.CREATE_DATA_SAMPLE_URL).build()
 				.encode().toUri();
 
-		final MockMultipartFile decriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
+		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
 				objectMapper.writeValueAsString(dataSampleDescriptor).getBytes());
 		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"data\"}".getBytes());
 
 		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
-				.file(decriptor)
+				.file(descriptor)
 				.file(data)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -112,9 +111,8 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 			}
 		});
 
-		
 		mockMvc.perform(builder
-				.file(decriptor)
+				.file(descriptor)
 				.file(newData)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
@@ -201,6 +199,38 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("id").value(DATACOLLECTION_BASE64_ENCODED_NAME))
 				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
+				.andExpect(jsonPath("defaultSampleId").isEmpty())
+				.andReturn();
+
+		assertNotNull(result.getResponse());
+	}
+
+	@Test
+	void shouldReturnDataCollectionDescriptorWithSampleId() throws Exception {
+		final String dataSampleId = Base64.encode(EXISTED_SAMPLE);
+		DataSampleDescriptor dataSampleDescriptor = new DataSampleDescriptor(dataSampleId);
+		dataSampleDescriptor.setDisplayName(EXISTED_SAMPLE);
+		List<String> idList = new ArrayList<>();
+		idList.add(Base64.encode(DATACOLLECTION_NAME));
+		dataSampleDescriptor.setCollectionIdList(idList);
+
+		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json", objectMapper.writeValueAsString(dataSampleDescriptor).getBytes());
+		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", "{\"file\":\"data\"}".getBytes());
+
+		mockMvc.perform(MockMvcRequestBuilders.multipart(DataManagementController.CREATE_DATA_SAMPLE_URL)
+				.file(descriptor)
+				.file(data)
+				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, DATACOLLECTION_BASE64_ENCODED_NAME)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("id").value(DATACOLLECTION_BASE64_ENCODED_NAME))
+				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
+				.andExpect(jsonPath("defaultSampleId").value(dataSampleId))
 				.andReturn();
 
 		assertNotNull(result.getResponse());

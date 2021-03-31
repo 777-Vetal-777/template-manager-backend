@@ -30,5 +30,7 @@ public interface DataSampleService {
 
     Optional<DataSampleEntity> findDataSampleByTemplateId(Long templateId);
 
+    Optional<DataSampleEntity> findDataSampleByCollectionId(Long dataCollectionId);
+
     List<DataSampleEntity> getListByTemplateName(String templateName);
 }

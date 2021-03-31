@@ -31,6 +31,7 @@ public interface DataManagementController {
     String DATA_SAMPLE_DESCRIPTOR_URL = "data/{sample-id}/descriptor";
     String COLLECTION_DATA_SAMPLES_URL = "/collection/{collection-id}";
     String COLLECTION_DESCRIPTOR_URL = "/collection/{collection-id}/descriptor";
+    String COLLECTION_DATA_STRUCTURE_URL = "/collection/{collection-id}/data";
 
     @GetMapping(value = DATA_SAMPLE_DESCRIPTOR_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "returns JSON descriptor of data sample", summary = "Get a dataSample by its ID ",
@@ -86,5 +87,11 @@ public interface DataManagementController {
     @ApiResponse(responseCode = "404", description = "Data Collection not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     DataCollectionDescriptor getDataCollectionById(@PathVariable("collection-id") String collectionId);
+
+    @GetMapping(COLLECTION_DATA_STRUCTURE_URL)
+    @Operation(description = "retrieve data collection data", summary = "Get the contents of a data collection using its personal identifier ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
+    @ApiResponse(responseCode = "404", description = "DataSample not found by id", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    byte[] fetchDataCollectionById(@PathVariable("collection-id") String dataCollectionId);
 
 }

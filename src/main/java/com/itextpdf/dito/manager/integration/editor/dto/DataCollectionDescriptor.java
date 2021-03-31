@@ -5,6 +5,7 @@ public class DataCollectionDescriptor {
     private String displayName;
     private String id;
     private String type;
+    private String defaultSampleId;
 
     public String getDisplayName() {
         return displayName;
@@ -28,5 +29,13 @@ public class DataCollectionDescriptor {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getDefaultSampleId() {
+        return defaultSampleId;
+    }
+
+    public void setDefaultSampleId(String defaultSampleId) {
+        this.defaultSampleId = defaultSampleId;
     }
 }

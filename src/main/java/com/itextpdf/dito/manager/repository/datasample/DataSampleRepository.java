@@ -82,6 +82,12 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
 
     @Query("select sample from DataSampleEntity sample "
             + "join sample.latestVersion latestFile "
+            + "join sample.dataCollection collection "
+            + "where collection.id =:dataCollectionId and sample.isDefault = true")
+    Optional<DataSampleEntity> findDataSampleByCollectionId(@Param("dataCollectionId") Long dataCollectionId);
+
+    @Query("select sample from DataSampleEntity sample "
+            + "join sample.latestVersion latestFile "
             + "left join sample.dataCollection collection "
             + "left join collection.latestVersion version "
             + "left join version.templateFiles templates "

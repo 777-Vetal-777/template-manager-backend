@@ -25,12 +25,18 @@ public class DataSampleDescriptorMapperImpl implements DataSampleDescriptorMappe
     public DataSampleDescriptor map(final DataSampleEntity entity) {
         final DataSampleDescriptor result;
         final String name = entity.getName();
-        final String encodedName = encoder.encode(name);
+        final String encodedName = mapToID(entity);
         result = new DataSampleDescriptor(encodedName);
         result.setDisplayName(name);
         result.setDataType(DataType.JSON);
         result.setCollectionIdList(Collections.singletonList(encoder.encode(entity.getDataCollection().getName())));
         return result;
+    }
+
+    @Override
+    public String mapToID(final DataSampleEntity entity) {
+        final String name = entity.getName();
+        return encoder.encode(name);
     }
 
     @Override

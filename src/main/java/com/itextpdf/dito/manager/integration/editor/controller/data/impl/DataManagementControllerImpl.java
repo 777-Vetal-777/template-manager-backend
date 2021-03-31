@@ -60,6 +60,15 @@ public class DataManagementControllerImpl extends AbstractController implements 
     }
 
     @Override
+    public byte[] fetchDataCollectionById(final String dataCollectionId) {
+        final String decodedDataCollectionId = encoder.decode(dataCollectionId);
+        log.info("Request to fetch content by data collection id {} received.", decodedDataCollectionId);
+        final DataCollectionEntity dataCollectionEntity = dataCollectionManagementService.get(decodedDataCollectionId);
+        log.info("Response on fetch collection by data collection id {} processed.", decodedDataCollectionId);
+        return dataCollectionEntity.getLatestVersion().getData();
+    }
+
+    @Override
     public DataSampleDescriptor createNewDataSampleVersion(final Principal principal, final String dataSampleId,
                                                            final DataSampleDescriptor descriptor,
                                                            final String data) {
@@ -110,7 +119,8 @@ public class DataManagementControllerImpl extends AbstractController implements 
         final String decodedDataCollectionId = encoder.decode(collectionId);
         log.info("Request to get collection by data collection id {} received.", decodedDataCollectionId);
         final DataCollectionEntity dataCollectionEntity = dataCollectionManagementService.get(decodedDataCollectionId);
+        final DataSampleEntity dataSampleEntity = dataManagementService.getDefaultDataSampleByCollectionId(dataCollectionEntity.getId());
         log.info("Response on get collection by data collection id {} processed.", decodedDataCollectionId);
-        return dataCollectionDescriptorMapper.map(dataCollectionEntity);
+        return dataCollectionDescriptorMapper.map(dataCollectionEntity, dataSampleEntity);
     }
 }

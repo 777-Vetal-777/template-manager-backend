@@ -70,11 +70,6 @@ public class DataCollectionMapperImpl implements DataCollectionMapper {
     }
 
     @Override
-    public Page<DataCollectionDTO> map(final Page<DataCollectionEntity> entities, final String email) {
-        return entities.map(dataCollectionEntity -> map(dataCollectionEntity, email));
-    }
-
-    @Override
     public List<DataCollectionDTO> map(final Collection<DataCollectionEntity> entities, final String email) {
         return entities.stream().map(dataCollectionEntity -> map(dataCollectionEntity, email)).collect(Collectors.toList());
     }

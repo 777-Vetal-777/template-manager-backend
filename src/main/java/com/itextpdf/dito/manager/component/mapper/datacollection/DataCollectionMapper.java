@@ -16,8 +16,6 @@ public interface DataCollectionMapper {
 
     DataCollectionDTO mapWithFile(final DataCollectionEntity entity, String email);
 
-    Page<DataCollectionDTO> map(Page<DataCollectionEntity> entities, String email);
-
     List<DataCollectionDTO> map(Collection<DataCollectionEntity> entities, String email);
 
     Page<DataCollectionDTO> mapModels(Page<DataCollectionModelWithRoles> entities, String email);

@@ -234,11 +234,6 @@ public class TemplateMapperImpl implements TemplateMapper {
     }
 
     @Override
-    public Page<TemplateDTO> map(final Page<TemplateEntity> entities, String email) {
-        return entities.map(templateEntity -> map(templateEntity, email));
-    }
-
-    @Override
     public TemplateDeployedVersionDTO map(final TemplateFileEntity templateFileEntity) {
         log.info("Convert templateFile: {} to TemplateDeployedVersionDTO was started", templateFileEntity.getId());
         final TemplateDeployedVersionDTO templateDeployedVersionDTO = new TemplateDeployedVersionDTO();

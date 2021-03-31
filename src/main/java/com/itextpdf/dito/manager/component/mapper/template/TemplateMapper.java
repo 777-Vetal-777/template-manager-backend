@@ -32,8 +32,6 @@ public interface TemplateMapper {
 
     TemplateWithSettingsDTO mapTemplateWithPart(TemplateEntity entity, String email);
 
-    Page<TemplateDTO> map(Page<TemplateEntity> entities, String email);
-
     TemplateDeployedVersionDTO map(TemplateFileEntity templateFileEntity);
 
     List<TemplateDeployedVersionDTO> mapToDeployedVersions(TemplateEntity templateEntity);

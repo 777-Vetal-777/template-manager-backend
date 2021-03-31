@@ -111,11 +111,6 @@ public class ResourceMapperImpl implements ResourceMapper {
         return resourceDTO;
     }
 
-    @Override
-    public Page<ResourceDTO> map(final Page<ResourceEntity> entities, final String email) {
-        return entities.map(resourceEntity -> map(resourceEntity, email));
-    }
-
     private List<FileMetaInfoDTO> map(final List<MetaInfoModel> models) {
         return models.stream().map(this::map).collect(Collectors.toList());
 

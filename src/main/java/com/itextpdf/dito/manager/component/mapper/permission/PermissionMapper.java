@@ -26,8 +26,6 @@ public interface PermissionMapper {
 
     Page<DataCollectionPermissionDTO> mapDataCollectionPermissions(Page<DataCollectionPermissionsModel> entities);
 
-    List<TemplatePermissionDTO> mapTemplatePermissions(List<TemplatePermissionsModel> entities);
-
     Page<TemplatePermissionDTO> mapTemplatePermissions(Page<TemplatePermissionsModel> entities);
 
     Page<ResourcePermissionDTO> mapResourcePermissions(Page<ResourcePermissionModel> entities);

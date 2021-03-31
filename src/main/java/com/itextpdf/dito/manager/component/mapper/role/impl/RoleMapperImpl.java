@@ -5,7 +5,6 @@ import com.itextpdf.dito.manager.component.mapper.role.RoleMapper;
 import com.itextpdf.dito.manager.dto.role.RoleDTO;
 import com.itextpdf.dito.manager.model.role.RoleModel;
 import com.itextpdf.dito.manager.model.role.RoleWithUsersModel;
-import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.role.update.RoleUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -26,13 +25,6 @@ public class RoleMapperImpl implements RoleMapper {
 
     public RoleMapperImpl(final PermissionMapper permissionMapper) {
         this.permissionMapper = permissionMapper;
-    }
-
-    @Override
-    public RoleEntity map(final RoleCreateRequestDTO dto) {
-        final RoleEntity entity = new RoleEntity();
-        entity.setName(dto.getName());
-        return entity;
     }
 
     @Override

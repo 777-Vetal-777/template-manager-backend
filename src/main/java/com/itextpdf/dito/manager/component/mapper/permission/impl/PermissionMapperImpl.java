@@ -66,11 +66,6 @@ public class PermissionMapperImpl implements PermissionMapper {
     }
 
     @Override
-    public List<TemplatePermissionDTO> mapTemplatePermissions(final List<TemplatePermissionsModel> entities) {
-        return entities.stream().map(this::mapTemplatePermission).collect(Collectors.toList());
-    }
-
-    @Override
     public Page<TemplatePermissionDTO> mapTemplatePermissions(final Page<TemplatePermissionsModel> entities) {
         return entities.map(this::mapTemplatePermission);
     }

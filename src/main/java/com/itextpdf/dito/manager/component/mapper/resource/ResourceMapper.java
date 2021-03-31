@@ -11,8 +11,6 @@ public interface ResourceMapper {
 
     ResourceEntity map(ResourceUpdateRequestDTO dto);
 
-    Page<ResourceDTO> map(Page<ResourceEntity> entities, String email);
-
     Page<ResourceDTO> mapModels(Page<ResourceModelWithRoles> models, String email);
 
     ResourceDTO mapModel(ResourceModelWithRoles model, String email);
