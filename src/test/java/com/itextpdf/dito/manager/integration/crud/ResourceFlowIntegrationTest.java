@@ -148,6 +148,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldThrowIncorrectResourceTYpe() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
+                .file(NAME_PART)
+                .file(IMAGE_TYPE_PART)
+                .file(REGULAR_FONT_FILE_PART)
+                .file(BOLD_FONT_FILE_PART)
+                .file(ITALIC_FONT_FILE_PART)
+                .file(BOLD_ITALIC_FILE_PART)
+                .file(IMAGE_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void shouldNotCreateNewVersionWithInvalidContent() throws Exception {
         //create resource
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
@@ -226,13 +240,20 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         }
         mockMvc.perform(get(ResourceController.BASE_NAME + ResourceController.RESOURCE_FILE_ENDPOINT_WITH_FILE_PATH_VARIABLE, "BAD UUID"))
                 .andExpect(status().isNotFound());
+
+        //should not create new versions of font resource
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.RESOURCE_VERSION_ENDPOINT)
+                .file(STYLESHEET_FILE_PART)
+                .file(NAME_PART)
+                .file(FONT_TYPE_PART)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isConflict());
     }
 
     @Test
     void shouldCreateNewFontsAndReturnThem() throws Exception {
-        final URI createFontURI = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME + FONTS_ENDPOINT).build().encode().toUri();
         //create resource
-        mockMvc.perform(MockMvcRequestBuilders.multipart(createFontURI)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
                 .file(NAME_PART)
                 .file(FONT_TYPE_PART)
                 .file(REGULAR_FONT_FILE_PART)
@@ -267,7 +288,7 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
         assertNotNull(resourceFileRepository.findFirstByResource_IdOrderByVersionDesc(createdResourceId));
         assertNotNull(resourceLogRepository.findFirstByResource_IdOrderByDateDesc(createdResourceId));
         //Create again and get conflict error
-        mockMvc.perform(MockMvcRequestBuilders.multipart(createFontURI)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
                 .file(NAME_PART)
                 .file(FONT_TYPE_PART)
                 .file(REGULAR_FONT_FILE_PART)

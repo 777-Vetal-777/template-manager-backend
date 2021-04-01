@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration.crud;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateFragmentType;
 import com.itextpdf.dito.manager.component.encoder.Encoder;
+import com.itextpdf.dito.manager.controller.datacollection.DataCollectionController;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.controller.user.UserController;
@@ -103,8 +104,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String WORKSPACE_ID = "c29tZS10ZW1wbGF0ZQ==";
-    public static final String CUSTOM_USER_EMAIL = "templatePermissionUser@email.com";
-    public static final String CUSTOM_USER_PASSWORD = "password2";
+    private static final String CUSTOM_USER_EMAIL = "templatePermissionUser@email.com";
+    private static final String CUSTOM_USER_PASSWORD = "password2";
+    private static final String userEmail = "admin@email.com";
 
     @Autowired
     private TemplateRepository templateRepository;
@@ -136,7 +138,6 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     @AfterEach
     void clearDb() {
         templateRepository.deleteAll();
-        templateFileRepository.deleteAll();
         resourceRepository.deleteAll();
         dataSampleRepository.deleteAll();
         dataCollectionRepository.deleteAll();
@@ -156,12 +157,44 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         user2.setPasswordUpdatedByAdmin(Boolean.FALSE);
 
         userRepository.save(user2);
+    }
 
+    @Test
+    void shouldSuccessfullyReturnDatacolletionDependencies() throws Exception{
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", userEmail);
+        dataSampleService.create(dataCollectionEntity, "ds1", "ds1.json", "{\"file\":\"file1.json\"}", "comment1", userEmail);
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-with-data-collection2.json"), TemplateCreateRequestDTO.class);
+
+        //create template
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        //get datacollection dependencies
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DEPENDENCIES_WITH_PATH_VARIABLE, encoder.encode(dataCollectionEntity.getName()))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].name").value(request.getName()))
+                .andExpect(jsonPath("$.[0].version").value(1))
+                .andExpect(jsonPath("$.[0].dependencyType").value("TEMPLATE"))
+                .andExpect(jsonPath("$.[0].stage").value("DEV"))
+                .andExpect(jsonPath("$.[0].directionType").value("HARD"));
+
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_TEMPLATE_NAME_PATH_VARIABLE, encoder.encode(dataCollectionEntity.getName()))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        final MvcResult mvcResult = mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.SEARCH_ENDPOINT, encoder.encode(dataCollectionEntity.getName()))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertEquals(1, templateRepository.findAll().size());
     }
 
     @Test
     void shouldSuccessfullyRenameNestedTemplate() throws Exception{
-        final String userEmail = "admin@email.com";
         final DataCollectionEntity dataCollectionEntity = dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", userEmail);
         dataSampleService.create(dataCollectionEntity, "ds1", "ds1.json", "{\"file\":\"file1.json\"}", "comment1", userEmail);
 
@@ -235,8 +268,8 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     void testCreateTemplateWithoutData() throws Exception {
         addStage();
 
-        mockMvc.perform(get(TemplateController.BASE_NAME).param("search", "name")).andExpect(status().isOk())
-
+        mockMvc.perform(get(TemplateController.BASE_NAME).param("search", "name"))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)));
 
         TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);

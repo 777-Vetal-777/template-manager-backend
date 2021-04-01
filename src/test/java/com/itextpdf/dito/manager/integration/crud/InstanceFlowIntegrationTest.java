@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
 import java.util.Base64;
@@ -18,6 +19,8 @@ import java.util.Date;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -91,7 +94,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     public void test_list() throws Exception {
         mockMvc.perform(get(InstanceController.BASE_NAME))
                 .andExpect(status().isOk());
-        assertTrue(!instanceRepository.findAll().isEmpty());
+        assertFalse(instanceRepository.findAll().isEmpty());
     }
 
     @Test
@@ -106,6 +109,31 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(request.getName())))
                 .andExpect(jsonPath("$.socket", is(request.getSocket())));
+
+        //should throw instance already exist by name
+        final String encodedNewName = encodeStringToBase64(request.getName());
+        mockMvc.perform(patch(InstanceController.BASE_NAME + InstanceController.INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE, encodedNewName).content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+
+        final InstanceEntity newInstance = new InstanceEntity();
+        newInstance.setName("new name");
+        newInstance.setSocket("localhost:9998");
+        newInstance.setCreatedBy(userRepository.findByEmail("admin@email.com").orElseThrow());
+        newInstance.setCreatedOn(new Date());
+        instanceRepository.save(newInstance);
+
+        //should throw instance exist by socket
+        request.setName("new name wow");
+        request.setSocket(newInstance.getSocket());
+        final MvcResult mvcResult = mockMvc.perform(patch(InstanceController.BASE_NAME + InstanceController.INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE, encodedNewName)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andReturn();
+        assertNotNull(mvcResult.getResponse());
     }
 
     private InstanceEntity createInstanceForTest(String name){

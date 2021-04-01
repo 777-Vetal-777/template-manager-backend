@@ -34,39 +34,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 
     RoleEntity findByNameAndMasterFalseAndTemplates(String name, TemplateEntity templateEntity);
 
-    @Query(value = "select role from RoleEntity role"
-            + " left join role.permissions permission"
-            + " left join role.resources resource"
-            + " where resource = :resourceEntity"
-            + " and role.master = false"
-            + " and (COALESCE(:types) is null or role.type in (:types))"
-            + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
-            + " group by (role.id)")
-    Page<RoleEntity> findAllByResourcesAndMasterFalse(Pageable pageable, ResourceEntity resourceEntity, @Param("name") @Nullable String name,
-                                                      @Param("types") @Nullable List<RoleTypeEnum> types);
-
-    @Query(value = "select role from RoleEntity role"
-            + " left join role.templates template"
-            + " left join role.permissions permissions"
-            + " where template = :templateEntity"
-            + " and role.master = false"
-            + " and (:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
-            + " group by (role.id)")
-    Page<RoleEntity> findAllByTemplatesAndMasterFalse(Pageable pageable, TemplateEntity templateEntity, @Param("name") @Nullable String name);
-
-    @Query(value = "select role from RoleEntity  role"
-            + " left join role.dataCollections dataCollection"
-            + " left join role.permissions permission"
-            + " where dataCollection = :dataCollection"
-            + " and role.master = false"
-            + " and(:name is null or LOWER(role.name) like CONCAT('%',:name,'%'))"
-            + " group by (role.id)")
-    Page<RoleEntity> findAllByDataCollectionsAndMasterFalse(Pageable pageable, @Param("dataCollection") DataCollectionEntity dataCollectionEntity,
-                                                            @Param("name") String name);
-
-
-    void deleteByNameAndMasterFalseAndResources(String name, ResourceEntity resourceEntity);
-
     @Query(value = "select count(r) from RoleEntity r "
             + "where r.name = :name and r.master = true ")
     Integer countByNameAndMasterTrue(String name);

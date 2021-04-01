@@ -58,12 +58,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
+class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
 
     private static final String NAME = "test-data-collection";
     private static final String TYPE = "JSON";
-    public static final String CUSTOM_USER_EMAIL = "dataCollectionPermissionUser@email.com";
-    public static final String CUSTOM_USER_PASSWORD = "password2";
+    private static final String CUSTOM_USER_EMAIL = "dataCollectionPermissionUser@email.com";
+    private static final String CUSTOM_USER_PASSWORD = "password2";
 
     @Autowired
     private DataCollectionRepository dataCollectionRepository;
@@ -81,14 +81,14 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
     private UserService userService;
 
     @AfterEach
-    public void clearDb() {
+    void clearDb() {
         templateRepository.deleteAll();
         dataCollectionRepository.deleteAll();
         userRepository.findByEmail(CUSTOM_USER_EMAIL).ifPresent(userRepository::delete);
     }
 
     @BeforeEach
-    public void initDb(){
+    void initDb() {
         final RoleEntity roleEntity = roleRepository.findByNameAndMasterTrue("TEMPLATE_DESIGNER").get();
         UserEntity user2 = new UserEntity();
         user2.setEmail(CUSTOM_USER_EMAIL);
@@ -100,11 +100,28 @@ public class DataCollectionFlowIntegrationTest extends AbstractIntegrationTest {
         user2.setPasswordUpdatedByAdmin(Boolean.FALSE);
 
         userRepository.save(user2);
-
     }
 
     @Test
-    public void shouldDropExceptionWhenTemplateUsesDataCollection() throws Exception {
+    void shouldThrowInvalidJsonWhenOnCreate() throws Exception{
+        final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain", "{bad_datacollection[[][][{{\"file\":\"data\"}".getBytes());
+        final MockMultipartFile name = new MockMultipartFile("name", "name", "text/plain", NAME.getBytes());
+        final MockMultipartFile type = new MockMultipartFile("type", "type", "text/plain", "JSON".getBytes());
+
+        final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(DataCollectionController.BASE_NAME)
+                .file(file)
+                .file(name)
+                .file(type)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message").value("Data collection is not valid."))
+                .andReturn();
+
+        assertNotNull(mvcResult.getResponse());
+    }
+
+    @Test
+    void shouldDropExceptionWhenTemplateUsesDataCollection() throws Exception {
         //CREATE DATA COLLECTION
         final MockMultipartFile file = new MockMultipartFile("attachment", "any-name.json", "text/plain",
                 "{\"file\":\"data\"}".getBytes());

@@ -54,8 +54,6 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataSampleRepository dataSampleRepository;
 
-	private DataSampleCreateRequestDTO request;
-
 	@AfterEach
 	public void clearDb() {
 		dataSampleRepository.deleteAll();
@@ -64,10 +62,6 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	@BeforeEach
 	public void init() throws IOException {
-		request = objectMapper.readValue(
-				new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"),
-				DataSampleCreateRequestDTO.class);
-
 		dataCollectionService.create(DATACOLLECTION_NAME, DataCollectionType.valueOf(TYPE),
 				"{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
 	}
@@ -142,6 +136,9 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void dataSampleGetById() throws Exception {
+		final  DataSampleCreateRequestDTO request = objectMapper.readValue(
+				new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"),
+				DataSampleCreateRequestDTO.class);
 		// Create Data Sample
 		mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
 						.content(objectMapper.writeValueAsString(request))
@@ -253,6 +250,17 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		assertNotNull(result.getResponse());
+	}
+
+	@Test
+	void shouldFindDataCollectionById() throws Exception {
+		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DATA_STRUCTURE_URL, DATACOLLECTION_BASE64_ENCODED_NAME)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andReturn();
 
 		assertNotNull(result.getResponse());

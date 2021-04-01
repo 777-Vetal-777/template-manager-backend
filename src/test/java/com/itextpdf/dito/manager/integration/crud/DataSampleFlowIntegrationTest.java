@@ -14,16 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
-import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.VERSIONS_ENDPOINT;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
-public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
+class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String DATACOLLECTION_NAME = "data-collection-test";
     private static final String DATASAMPLE_NAME = "name";
     private static final String DATASAMPLE_NAME2 = "name2";
@@ -48,32 +45,45 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     private DataCollectionRepository dataCollectionRepository;
     @Autowired
     private DataSampleRepository dataSampleRepository;
-    private DataSampleCreateRequestDTO request;
 
     @BeforeEach
-    public void init() throws IOException {
-        request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
-
+    void init() throws IOException {
         dataCollectionService.create(DATACOLLECTION_NAME, DataCollectionType.valueOf(TYPE), "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
     }
 
     @AfterEach
-    public void clearDb() {
+    void clearDb() {
         dataSampleRepository.deleteAll();
         dataCollectionRepository.deleteAll();
     }
 
     @Test
-    public void test_create() throws Exception {
+    void shouldThrowInvalidJson() throws Exception{
+        DataSampleCreateRequestDTO request = new DataSampleCreateRequestDTO();
+        request.setName("test");
+        request.setComment("comment");
+        request.setSample("{{}[}");
+        request.setFileName("bad.json");
+
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void test_create() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
 
         //Create dataSample
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -82,7 +92,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
         //Create new version
         request.setSample("{\"file\":\"data2\"}");
         request.setFileName("fileName2");
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + VERSIONS_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_SAMPLE_VERSIONS_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -90,7 +100,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("version").value("2"));
 
         //Get by name
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME, DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -100,7 +110,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
 
         request.setSample("{}");
         request.setName("data-sample1");
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -108,7 +118,7 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
 
         request.setName("data-sample2");
         request.setSample("{123A");
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -117,10 +127,11 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_setAsDefault() throws Exception {
+    void test_setAsDefault() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
 
         //Create dataSample
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -128,21 +139,21 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
 
         request.setName(DATASAMPLE_NAME2);
 
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
         //Set as default
-        mockMvc.perform(put(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE2_BASE64_ENCODED_NAME + "/setasdefault")
+        mockMvc.perform(put(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE_SET_AS_DEFAULT, DATACOLLECTION_BASE64_ENCODED_NAME,  DATASAMPLE2_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("isDefault").value("true"));
 
         //get
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME, DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -152,19 +163,19 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_update() throws Exception {
-
-        DataSampleUpdateRequestDTO updateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-update-request.json"), DataSampleUpdateRequestDTO.class);
+    void test_update() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
 
         //Create dataSample
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
+        final DataSampleUpdateRequestDTO updateRequestDTO = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-update-request.json"), DataSampleUpdateRequestDTO.class);
         //Update dataSample
-        mockMvc.perform(patch(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
+        mockMvc.perform(patch(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME, DATASAMPLE_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(updateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -176,16 +187,17 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     }
     
     @Test
-    public void test_delete_list() throws Exception {
+    void test_delete_list() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
 
         //Create dataSample
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
      
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME, DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -195,31 +207,30 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(dataSampleRepository.existsByName(DATASAMPLE_NAME));
         
         //delete by name
-        final URI deleteDataSampleUri = UriComponentsBuilder
-                .fromUriString(DataCollectionController.BASE_NAME +  "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DataCollectionController.DATA_SAMPLE_ENDPOINT).build().encode().toUri();
         List<String> requestToDelete = new ArrayList<>();
         requestToDelete.add(DATASAMPLE_NAME);
         mockMvc.perform(
-        		 delete(deleteDataSampleUri)
+        		 delete(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
         		.content(objectMapper.writeValueAsString(requestToDelete))
         		.contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertTrue(!dataSampleRepository.existsByName(DATASAMPLE_NAME));
+        assertFalse(dataSampleRepository.existsByName(DATASAMPLE_NAME));
 
     }
     
     @Test
-    public void test_delete_all() throws Exception {
+    void test_delete_all() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
 
         //Create dataSample
-        mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
      
-        mockMvc.perform(get(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT + "/" + DATASAMPLE_BASE64_ENCODED_NAME)
+        mockMvc.perform(get(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLE_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME, DATASAMPLE_BASE64_ENCODED_NAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -229,14 +240,12 @@ public class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(dataSampleRepository.existsByName(DATASAMPLE_NAME));
         
         //delete all samples of collection
-        final URI deleteDataSampleUri = UriComponentsBuilder
-                .fromUriString(DataCollectionController.BASE_NAME +  "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DataCollectionController.DATA_SAMPLE_ENDPOINT + "/all").build().encode().toUri();
         mockMvc.perform(
-        		 delete(deleteDataSampleUri)
+        		 delete(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_ALL_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
         		.contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertTrue(!dataSampleRepository.existsByName(DATASAMPLE_NAME));
+        assertFalse(dataSampleRepository.existsByName(DATASAMPLE_NAME));
 
     }
 }

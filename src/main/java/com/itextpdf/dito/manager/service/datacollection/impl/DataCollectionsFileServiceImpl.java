@@ -1,14 +1,12 @@
 package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
-import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionFileRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionFileService;
 import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
-import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -35,14 +33,11 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
 
     private final DataCollectionService dataCollectionService;
     private final DataCollectionFileRepository dataCollectionFileRepository;
-    private final TemplateService templateService;
 
     public DataCollectionsFileServiceImpl(final DataCollectionService dataCollectionService,
-                                          final DataCollectionFileRepository dataCollectionFileRepository,
-                                          final TemplateService templateService) {
+                                          final DataCollectionFileRepository dataCollectionFileRepository) {
         this.dataCollectionService = dataCollectionService;
         this.dataCollectionFileRepository = dataCollectionFileRepository;
-        this.templateService = templateService;
     }
 
     @Override
@@ -100,11 +95,6 @@ public class DataCollectionsFileServiceImpl extends AbstractService implements D
     @Override
     protected List<String> getSupportedSortFields() {
         return DataCollectionFileRepository.SUPPORTED_SORT_FIELDS;
-    }
-
-    @Override
-    public DataCollectionFileEntity getByTemplateName(final String name) {
-        return templateService.get(name).getLatestFile().getDataCollectionFile();
     }
 
 }

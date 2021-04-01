@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.manager.controller.feature.OptionController;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -10,12 +11,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ActuatorFlowIntegrationTest extends AbstractIntegrationTest {
+class ActuatorFlowIntegrationTest extends AbstractIntegrationTest {
 
     public static final String ACTUATOR_PATH = "/actuator";
     public static final String ACTUATOR_INFO_PATH = ACTUATOR_PATH + "/info";
     public static final String ACTUATOR_HEALTH_PATH = ACTUATOR_PATH + "/health";
     public static final String ACTUATOR_ENV_PATH = ACTUATOR_PATH + "/env";
+
+    @Test
+    void testOptionsEndPoint() throws Exception {
+        final MvcResult result = mockMvc.perform(get(OptionController.BASE_NAME)).andExpect(status().isOk())
+                .andExpect(jsonPath("emailDeliveryEnabled").value(false)).andReturn();
+        assertNotNull(result.getResponse());
+    }
 
     @Test
     void testInfoEndPoint() throws Exception {

@@ -172,7 +172,6 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		final MockMultipartFile fontTypePart = new MockMultipartFile("type", "type", "text/plain", ResourceTypeEnum.FONT.toString().getBytes());
 		final MockMultipartFile namePart = new MockMultipartFile("name", "name", "text/plain", "font".getBytes());
 
-
 		final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
 				.file(fontFilePartRegular)
 				.file(fontFilePartBold)
@@ -193,6 +192,11 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.ALL))
 				.andExpect(status().isOk())
 				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, "font/ttf"));
+
+		mockMvc.perform(get(ResourceManagementController.WORKSPACE_RESOURCES_URL, WORKSPACE_ID)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.ALL))
+				.andExpect(status().isOk());
 	}
 
 	@ParameterizedTest
