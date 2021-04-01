@@ -16,7 +16,6 @@ import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
-import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionLogRepository;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
@@ -34,8 +33,6 @@ import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
@@ -57,6 +54,7 @@ import static com.itextpdf.dito.manager.dto.dependency.DependencyDirectionType.H
 import static com.itextpdf.dito.manager.dto.dependency.DependencyType.TEMPLATE;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -148,17 +146,18 @@ class ResourceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldThrowIncorrectResourceTYpe() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
-                .file(NAME_PART)
-                .file(IMAGE_TYPE_PART)
-                .file(REGULAR_FONT_FILE_PART)
-                .file(BOLD_FONT_FILE_PART)
-                .file(ITALIC_FONT_FILE_PART)
-                .file(BOLD_ITALIC_FILE_PART)
-                .file(IMAGE_TYPE_PART)
-                .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isConflict());
+    void shouldReturnIncorrectResourceTypeError() throws Exception {
+        assertDoesNotThrow(() ->
+                mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME + ResourceController.FONTS_ENDPOINT)
+                        .file(NAME_PART)
+                        .file(IMAGE_TYPE_PART)
+                        .file(REGULAR_FONT_FILE_PART)
+                        .file(BOLD_FONT_FILE_PART)
+                        .file(ITALIC_FONT_FILE_PART)
+                        .file(BOLD_ITALIC_FILE_PART)
+                        .file(IMAGE_TYPE_PART)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                        .andExpect(status().isConflict()));
     }
 
     @Test

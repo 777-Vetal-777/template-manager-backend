@@ -217,13 +217,14 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         //rename user template
-        TemplateUpdateRequestDTO updateRequestDTO = new TemplateUpdateRequestDTO();
+        final TemplateUpdateRequestDTO updateRequestDTO = new TemplateUpdateRequestDTO();
         updateRequestDTO.setName("Name");
         mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(defaultTemplateCreateRequest.getName()))
                 .content(objectMapper.writeValueAsString(updateRequestDTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+        assertEquals(5, templateRepository.findAll().size());
     }
 
 

@@ -10,7 +10,7 @@ import static com.itextpdf.dito.manager.util.fontimport.FontTagConstants.FONT_RE
 
 @Service(FontPreprocessorService.BEAN_ID)
 public class FontPreprocessorService implements ProjectMutableItemProcessor<Element, StyleTagRenamingContext> {
-    public static final String BEAN_ID = "FontPreprocessorService";
+    public static final String BEAN_ID = "FontPreprocessorMutableItemService";
 
     @Override
     public MutableItemProcessingResult process(final Element element, final StyleTagRenamingContext context) {
