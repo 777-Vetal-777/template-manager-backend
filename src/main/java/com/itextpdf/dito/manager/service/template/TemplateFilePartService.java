@@ -12,8 +12,6 @@ public interface TemplateFilePartService {
 
     TemplateFilePartEntity updateComposition(TemplateFilePartEntity templateFilePartEntity, TemplateFileEntity composition);
 
-    TemplateFilePartEntity updatePart(TemplateFilePartEntity templateFilePartEntity, TemplateFileEntity part);
-
     TemplatePartModel mapFromEntity(TemplateFilePartEntity entity);
 
 }

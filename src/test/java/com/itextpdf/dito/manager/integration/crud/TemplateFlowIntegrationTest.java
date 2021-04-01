@@ -1,11 +1,14 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescriptor;
+import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateFragmentType;
 import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.controller.user.UserController;
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.dto.resource.update.ResourceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.user.create.UserCreateRequestDTO;
@@ -14,11 +17,13 @@ import com.itextpdf.dito.manager.entity.RoleEntity;
 import com.itextpdf.dito.manager.entity.StageEntity;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
+import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
@@ -81,6 +86,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -96,6 +102,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
+    private static final String WORKSPACE_ID = "c29tZS10ZW1wbGF0ZQ==";
     public static final String CUSTOM_USER_EMAIL = "templatePermissionUser@email.com";
     public static final String CUSTOM_USER_PASSWORD = "password2";
 
@@ -150,6 +157,78 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         userRepository.save(user2);
 
+    }
+
+    @Test
+    void shouldSuccessfullyRenameNestedTemplate() throws Exception{
+        final String userEmail = "admin@email.com";
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.create("new-data-collection", DataCollectionType.JSON, "{\"file\":\"data\"}".getBytes(), "datacollection.json", userEmail);
+        dataSampleService.create(dataCollectionEntity, "ds1", "ds1.json", "{\"file\":\"file1.json\"}", "comment1", userEmail);
+
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-header.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-footer.json");
+        performCreateTemplateRequest("src/test/resources/test-data/templates/template-create-request-with-data-collection2.json");
+        //template which will be renamed
+        final TemplateCreateRequestDTO defaultTemplateCreateRequest = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(defaultTemplateCreateRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        //Create composite template
+        final TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request-composition-for-export.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        //rename user template
+        TemplateUpdateRequestDTO updateRequestDTO = new TemplateUpdateRequestDTO();
+        updateRequestDTO.setName("Name");
+        mockMvc.perform(patch(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(defaultTemplateCreateRequest.getName()))
+                .content(objectMapper.writeValueAsString(updateRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    void shouldUpdateTemplateWithResource() throws Exception{
+        //Create resource
+        final String imageName = "picturename.png";
+        mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
+                .file(new MockMultipartFile("resource", imageName, "text/plain", readFileBytes("src/test/resources/test-data/resources/random.png")))
+                .file(new MockMultipartFile("type", "type", "text/plain", ResourceTypeEnum.IMAGE.toString().getBytes()))
+                .file(new MockMultipartFile("name", "name", "text/plain", imageName.getBytes()))
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated());
+        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(imageName, ResourceTypeEnum.IMAGE);
+        assertTrue(createdResource.isPresent());
+
+        // CREATE
+        final String templateName = "template-example";
+        final TemplateAddDescriptor templateAddDescriptor = new TemplateAddDescriptor(templateName, TemplateFragmentType.STANDARD);
+        final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json", objectMapper.writeValueAsString(templateAddDescriptor).getBytes());
+        final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", readFileBytes("src/test/resources/test-data/templates/template-create-request-with-picture.html"));
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.CREATE_TEMPLATE_URL, WORKSPACE_ID)
+                .file(descriptor)
+                .file(data)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+
+        //UPDATE by name
+        ResourceUpdateRequestDTO resourceUpdateRequestDTO = new ResourceUpdateRequestDTO();
+        resourceUpdateRequestDTO.setName("Name");
+        resourceUpdateRequestDTO.setType(ResourceTypeEnum.IMAGE);
+
+        mockMvc.perform(put(ResourceController.BASE_NAME + ResourceController.RESOURCE_ENDPOINT_WITH_PATH_VARIABLE, encoder.encode(imageName))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(resourceUpdateRequestDTO)))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -323,6 +402,34 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/updated-template-name"), hasItem("data/ds1.json")));
+
+        //export without dependencies
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName)
+                .param("exportDependencies", "false"))
+                .andExpect(status().isOk())
+                .andExpect(zipMatch(hasItem("templates/updated-template-name"), not(hasItem("data/ds1.json"))));
+    }
+
+    @Test
+    void createTemplate_WhenSearchNextStage_ThenResponseIsBadRequest() throws Exception {
+        TemplateCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/templates/template-create-request.json"), TemplateCreateRequestDTO.class);
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        final String encodedTemplateName = Base64.getEncoder().encodeToString(request.getName().getBytes());
+
+        mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_NEXT_STAGE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, 2))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("message").value("Template version with id 2 is not found."));
+
+        final MvcResult mvcResult = mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_NEXT_STAGE_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName, 1))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("message").value("No further stage on promotion path")).andReturn();
+
+        assertNotNull(mvcResult.getResponse());
     }
 
     @Test
@@ -750,7 +857,7 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(templateRepository.findByName(request.getName()).isPresent());
 
         final TemplateEntity templateEntity = templateRepository.findByName(request.getName()).get();
-        templateService.applyRole(templateEntity.getName(), "TEMPLATE_DESIGNER", Arrays.asList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD"), "admin@email.com");
+        templateService.applyRole(templateEntity.getName(), "TEMPLATE_DESIGNER", Collections.singletonList("E9_US75_EDIT_TEMPLATE_METADATA_STANDARD"), "admin@email.com");
 
 
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, Base64.getEncoder().encodeToString(request.getName().getBytes()))

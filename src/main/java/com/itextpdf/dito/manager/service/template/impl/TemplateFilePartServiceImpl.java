@@ -96,15 +96,6 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         return templateFilePartEntity;
     }
 
-    @Override
-    public TemplateFilePartEntity updatePart(final TemplateFilePartEntity example,
-                                             final TemplateFileEntity part) {
-        LOG.info("Update template part with templateFilePartEntity: {} and part: {} was started", example, part);
-        final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(example.getComposition(), part, example.getCondition(), example.getSettings());
-        LOG.info("Update template part with templateFilePartEntity: {} and part: {} was finished successfully", example, part);
-        return templateFilePartEntity;
-    }
-
     private TemplateFilePartEntity createTemplateFilePartEntity(final TemplateFileEntity compositionTemplateFileEntity,
                                                                 final TemplateFileEntity partTemplateFileEntity,
                                                                 final String condition,

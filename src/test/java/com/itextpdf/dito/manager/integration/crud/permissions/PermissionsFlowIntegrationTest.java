@@ -48,7 +48,7 @@ public class PermissionsFlowIntegrationTest extends AbstractIntegrationTest {
     private static final MockMultipartFile ITALIC_FONT_FILE_PART = new MockMultipartFile("italic", ITALIC_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
     private static final MockMultipartFile BOLD_ITALIC_FILE_PART = new MockMultipartFile("bold_italic", BOLD_ITALIC_FILE_NAME, "text/plain", readFileBytes("src/test/resources/test-data/resources/random-regular.ttf"));
     private static final MockMultipartFile NAME_PART = new MockMultipartFile("name", "name", "application/x-font-ttf", NAME.getBytes());
-    final String roleName = "role-for-resource-permissions-test";
+    private static final String roleName = "role-for-resource-permissions-test";
     @Autowired
     private PermissionMapper mapper;
 
