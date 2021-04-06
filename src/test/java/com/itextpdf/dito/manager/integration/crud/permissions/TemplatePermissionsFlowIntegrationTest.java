@@ -1,12 +1,15 @@
 package com.itextpdf.dito.manager.integration.crud.permissions;
 
+import com.itextpdf.dito.manager.controller.resource.ResourceController;
 import com.itextpdf.dito.manager.controller.role.RoleController;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.resource.update.ApplyRoleRequestDTO;
 import com.itextpdf.dito.manager.dto.role.create.RoleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
 import com.itextpdf.dito.manager.dto.template.update.TemplateUpdateRequestDTO;
 import com.itextpdf.dito.manager.entity.RoleEntity;
+import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
@@ -26,10 +29,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -90,12 +98,11 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
 
     @AfterEach
     void destroy() throws Exception {
-        templateRepository.delete(templateRepository.findByName(templateName).get());
+        templateRepository.findByName(templateName).ifPresent(templateRepository::delete);
 
-        userRepository.delete(userRepository.findByEmail(CUSTOM_USER_EMAIL).get());
+        userRepository.findByEmail(CUSTOM_USER_EMAIL).ifPresent(userRepository::delete);
 
-        mockMvc.perform(delete(RoleController.BASE_NAME + "/" + encodeStringToBase64(roleName)))
-                .andExpect(status().isOk());
+        roleRepository.findByNameAndMasterTrue(roleName).ifPresent(roleRepository::delete);
     }
 
     @Test
@@ -184,6 +191,70 @@ class TemplatePermissionsFlowIntegrationTest extends AbstractIntegrationTest {
                 encodeStringToBase64(templateName), encodeStringToBase64(roleName)))
                 .andExpect(status().isNotFound());
 
+    }
+
+    @Test
+    void testApplyRoleForComposition() throws Exception {
+        final String compositionTemplateName = "composition_template";
+        final String encodedCompositionTemplateName = encodeStringToBase64(compositionTemplateName);
+        final TemplateCreateRequestDTO templateCreateRequestDTO = new TemplateCreateRequestDTO();
+        templateCreateRequestDTO.setType(TemplateTypeEnum.COMPOSITION);
+        templateCreateRequestDTO.setName(compositionTemplateName);
+        final TemplatePartDTO templatePartDTO = new TemplatePartDTO();
+        templatePartDTO.setName(templateName);
+        templateCreateRequestDTO.setTemplateParts(Collections.singletonList(templatePartDTO));
+
+        mockMvc.perform(post(TemplateController.BASE_NAME)
+                .content(objectMapper.writeValueAsString(templateCreateRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+
+        //Get template metadata
+        mockMvc.perform(get(TemplateController.BASE_NAME).param("name", compositionTemplateName)
+                .with(user(CUSTOM_USER_EMAIL).authorities(Collections.singletonList(new SimpleGrantedAuthority("E9_US70_TEMPLATES_TABLE")))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content[0].permissions", hasSize(3)));
+
+        //Create permission
+        final ApplyRoleRequestDTO applyRoleRequestDTO = new ApplyRoleRequestDTO();
+        applyRoleRequestDTO.setRoleName(roleName);
+        applyRoleRequestDTO.setPermissions(Collections.emptyList());
+
+        mockMvc.perform(post(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encodedCompositionTemplateName)
+                .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        //Get template metadata
+        mockMvc.perform(get(TemplateController.BASE_NAME).param("name", compositionTemplateName)
+                .with(user(CUSTOM_USER_EMAIL).authorities(Collections.singletonList(new SimpleGrantedAuthority("E9_US70_TEMPLATES_TABLE")))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content[0].permissions", hasSize(0)));
+
+        //Update permission
+        final String[] permissionsArray = {"E9_US76_CREATE_NEW_VERSION_OF_TEMPLATE_STANDARD", "E9_US100_ROLL_BACK_OF_THE_COMPOSITION_TEMPLATE", "E9_US77_CREATE_NEW_VERSION_OF_TEMPLATE_COMPOSED"};
+        applyRoleRequestDTO.setPermissions(Arrays.asList(permissionsArray));
+        mockMvc.perform(post(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ROLES_ENDPOINT_WITH_PATH_VARIABLE, encodedCompositionTemplateName)
+                .content(objectMapper.writeValueAsString(applyRoleRequestDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        //Get resource metadata
+        mockMvc.perform(get(TemplateController.BASE_NAME).param("name", compositionTemplateName)
+                .with(user(CUSTOM_USER_EMAIL).authorities(Collections.singletonList(new SimpleGrantedAuthority("E9_US70_TEMPLATES_TABLE")))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content[0].permissions", hasSize(3)));
+
+        final MvcResult result = mockMvc.perform(delete(TemplateController.BASE_NAME + TemplateController.TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE, encodedCompositionTemplateName))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertNotNull(result.getResponse());
     }
 
 }

@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
 import com.itextpdf.dito.manager.component.client.instance.impl.InstanceClientImpl;
+import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterResponseDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.entity.PromotionPathEntity;
@@ -66,6 +67,8 @@ public abstract class AbstractIntegrationTest {
     private StageRepository stageRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private Encoder encoder;
 
     protected InstanceClient instanceClientMock;
     protected WorkspaceEntity defaultWorkspaceEntity;
@@ -106,8 +109,8 @@ public abstract class AbstractIntegrationTest {
 
     protected ResultActions performPostFilesInteraction(URI uri, MockMultipartFile... files) throws Exception {
         MockMultipartHttpServletRequestBuilder multipartRequestBuilder = multipart(uri);
-        for (int i = 0; i < files.length; i++) {
-            multipartRequestBuilder = multipartRequestBuilder.file(files[i]);
+        for (MockMultipartFile file : files) {
+            multipartRequestBuilder = multipartRequestBuilder.file(file);
         }
         return this.mockMvc.perform(multipartRequestBuilder);
     }
@@ -137,6 +140,6 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected String encodeStringToBase64(String value) {
-        return new String(Base64.encode(value.getBytes()));
+        return encoder.encode(value);
     }
 }
