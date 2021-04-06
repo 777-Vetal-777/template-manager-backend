@@ -151,12 +151,16 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         log.info("Update instance by name: {} and params: {} was started", name, instanceEntity);
         final InstanceEntity oldInstanceEntity = get(name);
 
-        if (instanceRepository.findByName(instanceEntity.getName()).isPresent()) {
+        if (!Objects.equals(instanceEntity.getName(), oldInstanceEntity.getName() )
+                && instanceRepository.findByName(instanceEntity.getName()).isPresent()) {
             throw new InstanceAlreadyExistsException(instanceEntity.getName());
         }
         if (!Objects.equals(instanceEntity.getSocket(), oldInstanceEntity.getSocket())
                 && instanceRepository.findBySocket(instanceEntity.getSocket()).isPresent()) {
             throw new InstanceAlreadyExistsException(instanceEntity.getSocket());
+        }
+        if (StringUtils.isEmpty(instanceEntity.getHeaderName()) ^ StringUtils.isEmpty(instanceEntity.getHeaderValue())) {
+            throw new InstanceCustomHeaderValidationException(oldInstanceEntity.getName());
         }
 
         final String instanceToken = instanceClient.register(instanceEntity.getSocket(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue()).getToken();
@@ -171,6 +175,8 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         oldInstanceEntity.setSocket(instanceEntity.getSocket());
 
         oldInstanceEntity.setRegisterToken(instanceToken);
+        oldInstanceEntity.setHeaderName(instanceEntity.getHeaderName());
+        oldInstanceEntity.setHeaderValue(instanceEntity.getHeaderValue());
 
         final InstanceEntity savedInstance = instanceRepository.save(oldInstanceEntity);
 

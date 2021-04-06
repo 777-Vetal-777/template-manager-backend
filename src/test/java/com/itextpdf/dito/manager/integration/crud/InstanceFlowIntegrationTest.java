@@ -110,12 +110,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.name", is(request.getName())))
                 .andExpect(jsonPath("$.socket", is(request.getSocket())));
 
-        //should throw instance already exist by name
-        final String encodedNewName = encodeStringToBase64(request.getName());
-        mockMvc.perform(patch(InstanceController.BASE_NAME + InstanceController.INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE, encodedNewName).content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict());
+
 
         final InstanceEntity newInstance = new InstanceEntity();
         newInstance.setName("new name");
@@ -123,6 +118,14 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
         newInstance.setCreatedBy(userRepository.findByEmail("admin@email.com").orElseThrow());
         newInstance.setCreatedOn(new Date());
         instanceRepository.save(newInstance);
+
+        //should throw instance already exist by name
+        final String encodedNewName = encodeStringToBase64(request.getName());
+        request.setName(newInstance.getName());
+        mockMvc.perform(patch(InstanceController.BASE_NAME + InstanceController.INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE, encodedNewName).content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
 
         //should throw instance exist by socket
         request.setName("new name wow");

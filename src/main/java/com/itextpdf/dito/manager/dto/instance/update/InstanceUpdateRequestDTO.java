@@ -7,6 +7,8 @@ public class InstanceUpdateRequestDTO {
     private String name;
     @NotBlank
     private String socket;
+    private String headerName;
+    private String headerValue;
 
     public String getName() {
         return name;
@@ -24,11 +26,29 @@ public class InstanceUpdateRequestDTO {
         this.socket = socket;
     }
 
+    public String getHeaderValue() {
+        return headerValue;
+    }
+
+    public void setHeaderName(String headerName) {
+        this.headerName = headerName;
+    }
+
+    public String getHeaderName() {
+        return headerName;
+    }
+
+    public void setHeaderValue(String headerValue) {
+        this.headerValue = headerValue;
+    }
+
     @Override
     public String toString() {
         return "InstanceUpdateRequestDTO{" +
                 "name='" + name + '\'' +
                 ", socket='" + socket + '\'' +
+                ", header name='" + headerName + '\'' +
+                ", header name='" + headerValue + '\'' +
                 '}';
     }
 }

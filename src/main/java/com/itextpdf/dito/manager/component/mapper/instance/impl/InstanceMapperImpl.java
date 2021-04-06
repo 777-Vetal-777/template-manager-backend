@@ -104,6 +104,8 @@ public class InstanceMapperImpl implements InstanceMapper {
         final InstanceEntity entity = new InstanceEntity();
         entity.setName(dto.getName());
         entity.setSocket(dto.getSocket());
+        entity.setHeaderName(dto.getHeaderName());
+        entity.setHeaderValue(dto.getHeaderValue());
         log.info("Convert {} to entity was finished successfully", dto);
         return entity;
     }
