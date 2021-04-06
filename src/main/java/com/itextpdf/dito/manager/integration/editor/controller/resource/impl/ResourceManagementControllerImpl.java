@@ -2,12 +2,12 @@ package com.itextpdf.dito.manager.integration.editor.controller.resource.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
+import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.component.resource.ResponseHeadersUpdater;
 import com.itextpdf.dito.manager.integration.editor.controller.resource.ResourceManagementController;
-import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
 import org.apache.logging.log4j.LogManager;
@@ -74,8 +74,7 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
         final ResourceTypeEnum type = resourceIdDTO.getType();
         final byte[] bytes = data;
         final String email = principal.getName();
-        final ResourceEntity resourceEntity = resourceManagementService
-                .createNewVersion(name, type, bytes, name, email);
+        final ResourceEntity resourceEntity = resourceManagementService.createNewVersion(name, type, bytes, name, email);
         log.info("Response to create or update resource by resource id {} processed.", resourceIdDTO);
         return resourceLeafDescriptorMapper.map(resourceEntity);
     }
@@ -84,8 +83,7 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     public List<ResourceLeafDescriptor> add(final Principal principal, final ResourceLeafDescriptor descriptor,
                                             final byte[] data) {
         log.info("Request to create resource with name {} received.", descriptor.getDisplayName());
-        final ResourceEntity resourceEntity = resourceManagementService
-                .create(descriptor, data, descriptor.getDisplayName(), principal.getName());
+        final ResourceEntity resourceEntity = resourceManagementService.create(descriptor, data, descriptor.getDisplayName(), principal.getName());
         log.info("Response to create resource with name {} processed. Resource created with id {}.", resourceEntity.getName(), resourceEntity.getId());
         return Collections.singletonList(resourceLeafDescriptorMapper.map(resourceEntity));
     }

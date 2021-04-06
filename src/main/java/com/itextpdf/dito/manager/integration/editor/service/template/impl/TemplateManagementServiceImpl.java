@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.integration.editor.service.template.impl;
 
 import com.itextpdf.dito.manager.component.encoder.Encoder;
+import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -9,12 +10,12 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.integration.InconsistencyException;
-import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
+import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
@@ -43,6 +44,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     private final TemplateRepository templateRepository;
     private final TemplateFileRepository templateFileRepository;
     private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
+    private final TemplateDeploymentService templateDeploymentService;
     private final ResourceService resourceService;
     private final TemplateLoader templateLoader;
     private final UserService userService;
@@ -56,6 +58,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
                                          final ResourceService resourceService,
                                          final TemplateLoader templateLoader,
                                          final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper,
+                                         final TemplateDeploymentService templateDeploymentService,
                                          final Encoder encoder,
                                          final UserService userService) {
         this.templateService = templateService;
@@ -68,6 +71,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
         this.encoder = encoder;
         this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
         this.userService = userService;
+        this.templateDeploymentService = templateDeploymentService;
     }
 
     @Override
@@ -89,8 +93,8 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
         final TemplateFileEntity firstFileOfTemplate = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(existingTemplate.getId());
         if (firstFileOfTemplate.getVersion() == 1 && Arrays.equals(firstFileOfTemplate.getData(), templateLoader.load())){
             templateEntity = provideFirstVersionTemplateCreation(existingTemplate, data, comment, email);
-        }
-        else {
+            templateDeploymentService.promoteOnDefaultStage(templateEntity.getLatestFile());
+        } else {
             templateEntity = templateService.createNewVersion(name, data, email, comment, newName, null);
         }
         templateEntity.getLatestFile().setResourceFiles(provideConsistency(templateEntity.getLatestFile().getData()));
@@ -117,13 +121,13 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
 	private TemplateEntity provideFirstVersionTemplateCreation(final TemplateEntity templateEntity, final byte[] data, final String comment, final String userEmail) {
         final UserEntity creatorEntity = userService.findActiveUserByEmail(userEmail);
         final TemplateFileEntity templateFileEntity = templateFileRepository.findFirstByTemplate_IdOrderByVersionDesc(templateEntity.getId());
-            templateFileEntity.setData(data);
-            templateFileEntity.setComment(comment);
-            templateFileEntity.setCreatedOn(new Date());
-            templateFileEntity.setModifiedOn(new Date());
-            templateFileEntity.setAuthor(creatorEntity);
-            templateEntity.setLatestFile(templateFileEntity);
-            return templateEntity;
+        templateFileEntity.setData(data);
+        templateFileEntity.setComment(comment);
+        templateFileEntity.setCreatedOn(new Date());
+        templateFileEntity.setModifiedOn(new Date());
+        templateFileEntity.setAuthor(creatorEntity);
+        templateEntity.setLatestFile(templateFileEntity);
+        return templateEntity;
     }
 
     private Set<ResourceFileEntity> provideConsistency(final byte[] data) {

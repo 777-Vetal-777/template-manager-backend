@@ -10,10 +10,10 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.Font
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontFileDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontStyle;
 import com.itextpdf.dito.manager.component.encoder.Encoder;
+import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
-import com.itextpdf.dito.manager.integration.editor.dto.ResourceIdDTO;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

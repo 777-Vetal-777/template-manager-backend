@@ -4,10 +4,10 @@ package com.itextpdf.dito.manager.dto.permission;
 public class ResourcePermissionDTO {
     private String name;
     private String type;
-    protected Boolean deleteResource;
-    protected Boolean createNewVersionResource;
-    protected Boolean editResourceMetadata;
-    protected Boolean rollBackResource;
+    private Boolean deleteResource;
+    private Boolean createNewVersionResource;
+    private Boolean editResourceMetadata;
+    private Boolean rollBackResource;
 
 
     public String getName() {

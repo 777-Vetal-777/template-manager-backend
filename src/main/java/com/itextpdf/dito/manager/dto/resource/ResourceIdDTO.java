@@ -28,5 +28,14 @@ public class ResourceIdDTO {
 	public void setSubName(String subName) {
 		this.subName = subName;
 	}
-    
+
+    @Override
+    public String toString() {
+        return "ResourceIdDTO{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", subName='" + subName + '\'' +
+                '}';
+    }
+
 }
