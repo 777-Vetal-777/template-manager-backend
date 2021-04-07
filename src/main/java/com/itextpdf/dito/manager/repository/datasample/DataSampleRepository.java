@@ -60,6 +60,8 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
 
     Boolean existsByName(String name);
 
+    Boolean existsByNameAndDataCollection(String name, DataCollectionEntity dataCollection);
+
     Boolean existsByDataCollection(DataCollectionEntity dataCollection);
 
     Optional<List<DataSampleEntity>> findByDataCollection(DataCollectionEntity dataCollection);

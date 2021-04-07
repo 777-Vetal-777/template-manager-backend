@@ -73,7 +73,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
         log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was started",
                 dataCollectionEntity, name, fileName, sample, comment, email);
         throwExceptionIfNameNotMatchesPattern(name, AliasConstants.DATA_SAMPLE);
-        if (Boolean.TRUE.equals(dataSampleRepository.existsByName(name))) {
+        if (Boolean.TRUE.equals(dataSampleRepository.existsByNameAndDataCollection(name, dataCollectionEntity))) {
             throw new DataSampleAlreadyExistsException(name);
         }
 
@@ -272,7 +272,7 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
                 .orElseThrow(() -> new DataSampleNotFoundException(name));
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
-        if (!name.equals(newName) && Boolean.TRUE.equals(dataSampleRepository.existsByName(newName))) {
+        if (!name.equals(newName) && Boolean.TRUE.equals(dataSampleRepository.existsByNameAndDataCollection(newName, existingEntity.getDataCollection()))) {
             throw new DataSampleAlreadyExistsException(newName);
         }
         existingEntity.setName(newName);

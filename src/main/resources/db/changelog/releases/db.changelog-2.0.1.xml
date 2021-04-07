@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="001-remove_data_sample_name_unique_constraint_from_data_sample_table" author="Sergey_Nemets">
+        <dropUniqueConstraint tableName="data_sample" constraintName="data_sample_name_unique_constraint"/>
+    </changeSet>
+
+    <changeSet id="002-add_data_sample_name_data_collection_id)unique_constraint_to_data_sample_table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="data_sample" columnNames="name, data_collection_id"/>
+    </changeSet>
+
+</databaseChangeLog>

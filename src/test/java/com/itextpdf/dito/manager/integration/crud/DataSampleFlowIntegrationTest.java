@@ -34,11 +34,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     private static final String DATACOLLECTION_NAME = "data-collection-test";
+    private static final String DATACOLLECTION_NAME2 = "data-collection-test2";
     private static final String DATASAMPLE_NAME = "name";
     private static final String DATASAMPLE_NAME2 = "name2";
     private static final String DATASAMPLE_BASE64_ENCODED_NAME = Base64.encode(DATASAMPLE_NAME);
     private static final String DATASAMPLE2_BASE64_ENCODED_NAME = Base64.encode(DATASAMPLE_NAME2);
     private static final String DATACOLLECTION_BASE64_ENCODED_NAME = Base64.encode(DATACOLLECTION_NAME);
+    private static final String DATACOLLECTION2_BASE64_ENCODED_NAME = Base64.encode(DATACOLLECTION_NAME2);
     private static final String TYPE = "JSON";
 
     @Autowired
@@ -51,6 +53,7 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     @BeforeEach
     void init() throws IOException {
         dataCollectionService.create(DATACOLLECTION_NAME, DataCollectionType.valueOf(TYPE), "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
+        dataCollectionService.create(DATACOLLECTION_NAME2, DataCollectionType.valueOf(TYPE), "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
     }
 
     @AfterEach
@@ -252,4 +255,25 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
         assertFalse(dataSampleRepository.existsByName(DATASAMPLE_NAME));
 
     }
+
+    @Test
+    void shouldAllowCreateDataSampleWithSameNameOnAnotherDataCollection() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
+
+        //Create dataSample
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        //Create dataSample on another data collection
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION2_BASE64_ENCODED_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+    }
+
 }
