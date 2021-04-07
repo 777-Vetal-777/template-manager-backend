@@ -31,6 +31,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -166,6 +167,15 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         final String instanceToken = instanceClient.register(instanceEntity.getSocket(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue()).getToken();
 
         try {
+            oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(oldInstanceEntity, templateFile, false));
+            if (Objects.equals(0, Optional.ofNullable(oldInstanceEntity.getStage()).map(StageEntity::getSequenceOrder).orElse(null))) {
+                oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(oldInstanceEntity, templateFile, true));
+            }
+        } catch (SdkInstanceException e) {
+            log.warn("Could not undeploy templates from instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
+        }
+
+        try {
             instanceClient.unregister(oldInstanceEntity.getSocket(), oldInstanceEntity.getRegisterToken());
         } catch (SdkInstanceException e) {
             log.warn("An error occurred during unregister instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
@@ -180,7 +190,10 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
 
         final InstanceEntity savedInstance = instanceRepository.save(oldInstanceEntity);
 
-        oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(savedInstance, templateFile, false));
+        savedInstance.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(savedInstance, templateFile, false));
+        if (Objects.equals(0, Optional.ofNullable(savedInstance.getStage()).map(StageEntity::getSequenceOrder).orElse(null))) {
+            savedInstance.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(savedInstance, templateFile, true));
+        }
 
         log.info("Update instance by name: {} and params: {} was finished successfully", name, instanceEntity);
         return savedInstance;
