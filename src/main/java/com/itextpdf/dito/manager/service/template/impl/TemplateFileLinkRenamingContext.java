@@ -14,7 +14,7 @@ public class TemplateFileLinkRenamingContext extends ReportLoggingContextImpl {
     }
 
     private final ProjectImmutableItemProcessor<String, TemplateFileLinkRenamingContext> renamingUrlProcessor = (item, renamingContext) -> {
-        if (getFrom().equals(item)) {
+        if (renamingContext.getFrom().equals(item)) {
             return ImmutableItemProcessingResult.modified(renamingContext.getTo()).build();
         }
         return ImmutableItemProcessingResult.unmodified(item).build();

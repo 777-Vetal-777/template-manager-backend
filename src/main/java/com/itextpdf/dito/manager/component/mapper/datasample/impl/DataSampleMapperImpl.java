@@ -37,8 +37,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
         dto.setModifiedBy(new StringBuilder(modifiedBy.getFirstName()).append(" ").append(modifiedBy.getLastName()).toString());
         dto.setModifiedOn(entity.getModifiedOn());
         dto.setCreatedOn(entity.getCreatedOn());
-        dto.setCreatedBy(new StringBuilder(entity.getAuthor().getFirstName()).append(" ")
-                .append(entity.getAuthor().getLastName()).toString());
+        dto.setCreatedBy(new StringBuilder(entity.getAuthor().getFirstName()).append(" ").append(entity.getAuthor().getLastName()).toString());
         dto.setDescription(entity.getDescription());
         dto.setFileName(entity.getLatestVersion().getFileName());
         dto.setIsDefault(entity.getIsDefault());

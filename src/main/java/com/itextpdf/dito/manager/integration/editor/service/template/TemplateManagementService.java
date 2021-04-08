@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface TemplateManagementService {
 
-    TemplateEntity get(String name);
+    TemplateEntity get(String uuid);
 
     List<TemplateEntity> getAll();
 
@@ -16,5 +16,5 @@ public interface TemplateManagementService {
 
     TemplateEntity create(String name, byte[] data, String dataCollectionName, String email);
 
-    TemplateEntity delete(String templateName);
+    TemplateEntity delete(String uuid);
 }

@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class DataSampleUuidModifier implements UuidModifier {
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public void updateEmptyUuid() {
         final List<DataSampleEntity> nullUuidDataSamples = dataSampleRepository.findByUuidNull();
 
@@ -35,6 +37,7 @@ public class DataSampleUuidModifier implements UuidModifier {
     }
 
     @PostConstruct
+    @Transactional(rollbackOn = Exception.class)
     public void onInit() {
         updateEmptyUuid();
     }

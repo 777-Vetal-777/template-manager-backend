@@ -5,6 +5,7 @@ import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.service.resource.ResourceManagementService;
+import com.itextpdf.dito.manager.service.resource.ResourceFileService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,9 +20,12 @@ import java.util.Optional;
 public class ResourceManagementServiceImpl implements ResourceManagementService {
     private static final Logger log = LogManager.getLogger(ResourceManagementServiceImpl.class);
     private final ResourceService resourceService;
+    private final ResourceFileService resourceFileService;
 
-    public ResourceManagementServiceImpl(final ResourceService resourceService) {
+    public ResourceManagementServiceImpl(final ResourceService resourceService,
+                                         final ResourceFileService resourceFileService) {
         this.resourceService = resourceService;
+        this.resourceFileService = resourceFileService;
     }
 
     @Override
@@ -38,6 +42,14 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 		}
         final ResourceFileEntity fileEntity = resourceFileEntity.orElseThrow();
         log.info("Get file by resource name: {} and type: {} and subName: {} was finished successfully", name, type, subName);
+        return fileEntity;
+    }
+
+    @Override
+    public ResourceFileEntity getByUuid(final String uuid) {
+        log.info("Get file by uuid: {} was started", uuid);
+        final ResourceFileEntity fileEntity = resourceFileService.getByUuid(uuid);
+        log.info("Get file by uuid: {} was finished successfully", uuid);
         return fileEntity;
     }
 
@@ -75,5 +87,11 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
     @Override
     public ResourceEntity delete(final String name, final ResourceTypeEnum type, final String mail) {
         return resourceService.delete(name, type, mail);
+    }
+
+    @Override
+    public ResourceEntity deleteByUuid(final String uuid, final String mail) {
+        final ResourceEntity resourceEntity = getByUuid(uuid).getResource();
+        return resourceService.delete(resourceEntity.getName(), resourceEntity.getType(), mail);
     }
 }

@@ -16,6 +16,7 @@ public class TemplateModelWithRoles {
     private Date createdOn;
     private String createdBy;
     private String comment;
+    private String uuid;
     private Set<RoleDTO> appliedRoles;
 
     public String getName() {
@@ -96,5 +97,13 @@ public class TemplateModelWithRoles {
 
     public void setAppliedRoles(Set<RoleDTO> appliedRoles) {
         this.appliedRoles = appliedRoles;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

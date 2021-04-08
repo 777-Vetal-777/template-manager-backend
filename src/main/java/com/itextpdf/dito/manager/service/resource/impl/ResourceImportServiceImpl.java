@@ -8,7 +8,7 @@ import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.exception.resource.ResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
-import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
+import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceIdMapper;
 import com.itextpdf.dito.manager.model.template.duplicates.DuplicatesList;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.service.resource.ResourceImportService;
@@ -29,18 +29,18 @@ public class ResourceImportServiceImpl implements ResourceImportService {
 
     private  static final String DITO_ASSET_UNKNOWN_RESOURCE = "dito-asset://unknown_resource";
     private final ResourceService resourceService;
-    private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
     private final ResourceRepository resourceRepository;
     private final ContentTypeDetector contentTypeDetector;
+    private final ResourceIdMapper resourceIdMapper;
 
     public ResourceImportServiceImpl(final ResourceService resourceService,
-                                     final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper,
                                      final ResourceRepository resourceRepository,
-                                     final ContentTypeDetector contentTypeDetector) {
+                                     final ContentTypeDetector contentTypeDetector,
+                                     final ResourceIdMapper resourceIdMapper) {
         this.resourceService = resourceService;
-        this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
         this.resourceRepository = resourceRepository;
         this.contentTypeDetector = contentTypeDetector;
+        this.resourceIdMapper = resourceIdMapper;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ResourceImportServiceImpl implements ResourceImportService {
                     final String additionalName = getAdditionalName(namePattern, resourceId);
                     final String name = Optional.ofNullable(resourceUriGeneratorContext.getOriginalPath()).map(Path::getFileName).map(Path::toString).orElse(additionalName);
                     ResourceEntity resourceEntity = importResource(data, type, name, additionalName, email, settings.get(SettingType.valueOf(type.toString())).get(name));
-                    resourceUri = DITO_ASSET_TAG.concat(resourceLeafDescriptorMapper.encodeId(resourceEntity.getName(), resourceEntity.getType(), null));
+                    resourceUri = DITO_ASSET_TAG.concat(resourceIdMapper.mapToId(resourceEntity));
                 }
             } catch (ResourceAlreadyExistsException e) {
                 if (type != null) {

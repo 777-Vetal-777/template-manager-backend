@@ -31,7 +31,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
     List<String> SUPPORTED_SORT_FIELDS = List.of("id", "name", "type", "dataCollection", "modifiedBy", "modifiedOn");
     List<String> SUPPORTED_DEPENDENCY_SORT_FIELDS = List.of("name", "version", "dependencyType", "stage", "directionType");
 
-    String TEMPLATE_TABLE_SELECT_CLAUSE = "select template.name as templateName, template.id as id, template.type as type, data.name as dataCollection, CONCAT(firstAuthorLog.firstName,' ',firstAuthorLog.lastName) as createdBy, "
+    String TEMPLATE_TABLE_SELECT_CLAUSE = "select template.name as templateName, template.id as id, template.type as type, template.uuid as uuid, data.name as dataCollection, CONCAT(firstAuthorLog.firstName,' ',firstAuthorLog.lastName) as createdBy, "
             + "template.firstLogRecord.date as createdOn, CONCAT(lastAuthorLog.firstName,' ',lastAuthorLog.lastName) as author, lastAuthorLog.firstName as authorFirstName, "
             + "template.latestFile.version as version, template.latestLogRecord.date as lastUpdate, template.latestFile.comment as comment from TemplateEntity template "
             + "join template.firstLogRecord.author firstAuthorLog "
@@ -260,4 +260,7 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, Long> 
             " left join {h-schema}permission p on p.id = rp.permission_id group by r.id) as rolesTable  where  templateId in (:listId)", nativeQuery = true)
     List<TemplateRoleModel> getRoles(@Param("listId") List<Long> listId);
 
+    List<TemplateEntity> findByUuidNull();
+
+    Optional<TemplateEntity> findByUuid(String uuid);
 }

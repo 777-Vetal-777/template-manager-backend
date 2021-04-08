@@ -9,10 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.dto.resource.ResourceDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -51,8 +54,6 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	private ResourceRepository resourceRepository;
 	@Autowired
 	private ObjectMapper objectMapper;
-	@Autowired
-	private ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
 
 	@AfterEach
 	public void clearDb() {
@@ -64,25 +65,24 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		// CREATE
 		final ResourceLeafDescriptor descriptor=  new ImageDescriptor(BASE64_RESOURCE_ID);
 		descriptor.setDisplayName(IMAGE_NAME);
-		final URI uri = UriComponentsBuilder.fromUriString(ResourceManagementController.CREATE_RESOURCE_URL).build()
-				.encode().toUri();
 
 		final MockMultipartFile descriptorFile = new MockMultipartFile("descriptor", "descriptor", "application/json",
 				objectMapper.writeValueAsString(descriptor).getBytes());
 		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json",
 				readFileBytes("src/test/resources/test-data/resources/random.png"));
 
-		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+		mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceManagementController.CREATE_RESOURCE_URL)
 				.file(descriptorFile)
 				.file(data)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
+		final ResourceEntity resourceEntity = resourceRepository.findByNameAndType(IMAGE_NAME, ResourceTypeEnum.IMAGE).orElseThrow();
+		assertNotNull(resourceEntity.getUuid());
+
 		// UPDATE
-		final URI uriUpdate = UriComponentsBuilder
-				.fromUriString(ResourceManagementController.CREATE_RESOURCE_URL + "/" + BASE64_RESOURCE_ID)
-				.build().encode().toUri();
+		final URI uriUpdate = UriComponentsBuilder.fromUriString(ResourceManagementController.RESOURCE_URL).build( resourceEntity.getUuid());
 
 		final MockMultipartFile newData = new MockMultipartFile("data", "data", MediaType.MULTIPART_FORM_DATA_VALUE,
 				readFileBytes("src/test/resources/test-data/resources/random.png"));
@@ -111,30 +111,27 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	
 	@Test
 	void test_success_createAndGet() throws Exception {
-		final URI uri = UriComponentsBuilder.fromUriString(ResourceController.BASE_NAME).build().encode().toUri();
 		// Create resource
-		mockMvc.perform(MockMvcRequestBuilders.multipart(uri)
+		mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
 				.file(IMAGE_FILE_PART)
 				.file(NAME_PART)
 				.file(IMAGE_TYPE_PART)
 				.contentType(MediaType.MULTIPART_FORM_DATA));
 
-		final URI integrationUri = UriComponentsBuilder.fromUriString(ResourceManagementController.CREATE_RESOURCE_URL)
-				.build().encode().toUri();
+		final ResourceEntity resourceEntity = resourceRepository.findByNameAndType(IMAGE_NAME, ResourceTypeEnum.IMAGE).orElseThrow();
+		assertNotNull(resourceEntity.getUuid());
 
 		// get integrated resource collection
-		mockMvc.perform(get(integrationUri)
+		mockMvc.perform(get(ResourceManagementController.CREATE_RESOURCE_URL)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(BASE64_RESOURCE_ID))
+				.andExpect(jsonPath("$[0].id").value(resourceEntity.getUuid()))
 				.andExpect(jsonPath("$[0].displayName").value("test-image"))
 				.andExpect(jsonPath("$[0].type").value("image"));
 
 		// Get Integrated Resource By Id
-		final URI integratedResourceUri = UriComponentsBuilder
-				.fromUriString(ResourceManagementController.CREATE_RESOURCE_URL + "/" + BASE64_RESOURCE_ID).build()
-				.encode().toUri();
+		final URI integratedResourceUri = UriComponentsBuilder.fromUriString(ResourceManagementController.RESOURCE_URL).build(resourceEntity.getUuid());
 		mockMvc.perform(get(integratedResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.ALL))
@@ -142,24 +139,20 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, "image/png"));
 
 		// Get Integrated Resource By workspace Id
-		final URI integratedWorkspaceResourceUri = UriComponentsBuilder
-				.fromUriString("/workspace/" + WORKSPACE_ID + "/" + ResourceManagementController.CREATE_RESOURCE_URL).build().encode()
-				.toUri();
+		final URI integratedWorkspaceResourceUri = UriComponentsBuilder.fromUriString(ResourceManagementController.WORKSPACE_RESOURCES_URL).build(WORKSPACE_ID);
 		mockMvc.perform(get(integratedWorkspaceResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(BASE64_RESOURCE_ID))
+				.andExpect(jsonPath("$[0].id").value(resourceEntity.getUuid()))
 				.andExpect(jsonPath("$[0].displayName").value("test-image"))
 				.andExpect(jsonPath("$[0].type").value("image"));
 
 		// Delete Integrated Resource By Id
-		final MvcResult result = mockMvc.perform(delete(integratedResourceUri)
+		mockMvc.perform(delete(integratedResourceUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andReturn();
-		assertNotNull(result.getResponse());
-		
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -183,15 +176,18 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
+
 		final ResourceDTO resourceDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ResourceDTO.class);
 		assertEquals(ResourceTypeEnum.FONT, resourceDTO.getType());
-		final String resourceId = resourceLeafDescriptorMapper.encodeId(resourceDTO.getName(), resourceDTO.getType(), "BOLD");
+		final ResourceEntity resourceEntity = resourceRepository.findByNameAndType(resourceDTO.getName(), resourceDTO.getType()).orElseThrow();
 
-		mockMvc.perform(get(ResourceManagementController.RESOURCE_URL, resourceId)
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.ALL))
-				.andExpect(status().isOk())
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, "font/ttf"));
+		for (ResourceFileEntity resourceFileEntity : resourceEntity.getLatestFile()) {
+			mockMvc.perform(get(ResourceManagementController.RESOURCE_URL, resourceFileEntity.getUuid())
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.ALL))
+					.andExpect(status().isOk())
+					.andExpect(header().string(HttpHeaders.CONTENT_TYPE, "font/ttf"));
+		}
 
 		mockMvc.perform(get(ResourceManagementController.WORKSPACE_RESOURCES_URL, WORKSPACE_ID)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -221,9 +217,9 @@ class ResourceManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 		final ResourceDTO resourceDTO = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ResourceDTO.class);
 		assertNotNull(resourceDTO.getType());
-		final String resourceId = resourceLeafDescriptorMapper.encodeId(resourceDTO.getName(), resourceDTO.getType(), null);
+		final ResourceEntity resourceEntity = resourceRepository.findByNameAndType(resourceDTO.getName(), resourceDTO.getType()).orElseThrow();
 
-		mockMvc.perform(get(ResourceManagementController.RESOURCE_URL, resourceId)
+		mockMvc.perform(get(ResourceManagementController.RESOURCE_URL, resourceEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.ALL))
 				.andExpect(status().isOk())

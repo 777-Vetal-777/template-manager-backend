@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.integration.editor.controller.resource.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceLeafDescriptor;
 import com.itextpdf.dito.manager.controller.AbstractController;
-import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
@@ -38,15 +37,14 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
 
     @Override
     public ResponseEntity<byte[]> getResourceDirectoryContentById(final String resourceId) {
-        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        log.info("Request to get resource file by resourceId id {}.", resourceIdDTO);
-        final ResourceFileEntity resourceFileEntity = resourceManagementService.get(resourceIdDTO.getName(), resourceIdDTO.getType(), resourceIdDTO.getSubName());
+        log.info("Request to get resource file by resourceId id {}.", resourceId);
+        final ResourceFileEntity resourceFileEntity = resourceManagementService.getByUuid(resourceId);
         final byte[] result = resourceFileEntity.getFile();
 
         final HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeadersUpdater.updateHeaders(resourceFileEntity, resourceIdDTO.getType(), responseHeaders);
+        responseHeadersUpdater.updateHeaders(resourceFileEntity, resourceFileEntity.getResource().getType(), responseHeaders);
 
-        log.info("Response to get resource file by resourceId id {} processed.", resourceIdDTO);
+        log.info("Response to get resource file by resourceId id {} processed.", resourceId);
         return new ResponseEntity<>(result, responseHeaders, HttpStatus.OK);
     }
 
@@ -68,14 +66,13 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
     public ResourceLeafDescriptor createOrUpdate(final Principal principal, final String resourceId,
                                                  final ResourceLeafDescriptor descriptor,
                                                  final byte[] data) {
-        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        log.info("Request to create or update resource by resource id {} received.", resourceIdDTO);
-        final String name = resourceIdDTO.getName();
-        final ResourceTypeEnum type = resourceIdDTO.getType();
-        final byte[] bytes = data;
+        log.info("Request to create or update resource by resource id {} received.", resourceId);
+        final ResourceEntity resource = resourceManagementService.getByUuid(resourceId).getResource();
+        final String name = resource.getName();
+        final ResourceTypeEnum type = resource.getType();
         final String email = principal.getName();
-        final ResourceEntity resourceEntity = resourceManagementService.createNewVersion(name, type, bytes, name, email);
-        log.info("Response to create or update resource by resource id {} processed.", resourceIdDTO);
+        final ResourceEntity resourceEntity = resourceManagementService.createNewVersion(name, type, data, name, email);
+        log.info("Response to create or update resource by resource id {} processed.", resourceId);
         return resourceLeafDescriptorMapper.map(resourceEntity);
     }
 
@@ -90,9 +87,8 @@ public class ResourceManagementControllerImpl extends AbstractController impleme
 
     @Override
     public void deleteResourceById(final Principal principal, final String resourceId) {
-        final ResourceIdDTO resourceIdDTO = resourceLeafDescriptorMapper.map(resourceId);
-        log.info("Request to delete resource with id {} received.", resourceIdDTO);
-        resourceManagementService.delete(resourceIdDTO.getName(), resourceIdDTO.getType(), principal.getName());
-        log.info("Response to delete resource with id {} processed.", resourceIdDTO);
+        log.info("Request to delete resource with id {} received.", resourceId);
+        resourceManagementService.deleteByUuid(resourceId, principal.getName());
+        log.info("Response to delete resource with id {} processed.", resourceId);
     }
 }

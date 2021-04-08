@@ -144,6 +144,16 @@ public class PermissionHandlerImpl implements PermissionHandler {
     @Override
     public boolean checkTemplateDeletePermissions(final Authentication authentication, final String templateName) {
         final TemplateEntity templateEntity = templateService.get(templateName);
+        return checkTemplateDeletePermissions(authentication, templateEntity);
+    }
+
+    @Override
+    public boolean checkTemplateUuidDeletePermissions(final Authentication authentication, final String uuid) {
+        final TemplateEntity templateEntity = templateService.getByUuid(uuid);
+        return checkTemplateDeletePermissions(authentication, templateEntity);
+    }
+
+    private boolean checkTemplateDeletePermissions(final Authentication authentication, final TemplateEntity templateEntity) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(TEMPLATE_DELETE_PERMISSIONS.get(templateEntity.getType()));

@@ -9,6 +9,8 @@ public interface TemplateModel {
 
     String getTemplateName();
 
+    String getUuid();
+
     String getDataCollection();
 
     String getAuthor();

@@ -79,7 +79,7 @@ public interface TemplateManagementController {
                               @Parameter(description = "commit descriptor", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TemplateCommitDescriptor.class))) @RequestPart(required = false) TemplateCommitDescriptor commit,
                               @RequestPart byte[] data);
 
-    @PreAuthorize("@permissionHandlerImpl.checkTemplateDeletePermissions(authentication, @permissionHandlerImpl.decodeBase64(#templateId))")
+    @PreAuthorize("@permissionHandlerImpl.checkTemplateUuidDeletePermissions(authentication, #templateId)")
     @DeleteMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "delete template", description = "deletes template, returns descriptor of deleted template",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))

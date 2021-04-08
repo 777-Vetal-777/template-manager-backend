@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.integration.editor.controller.data.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor;
-import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
@@ -27,18 +26,15 @@ public class DataManagementControllerImpl extends AbstractController implements 
     private final DataCollectionManagementService dataCollectionManagementService;
     private final DataSampleDescriptorMapper dataSampleDescriptorMapper;
     private final DataCollectionDescriptorMapper dataCollectionDescriptorMapper;
-    private final Encoder encoder;
 
     public DataManagementControllerImpl(final DataManagementService dataManagementService,
                                         final DataSampleDescriptorMapper dataSampleDescriptorMapper,
                                         final DataCollectionManagementService dataCollectionManagementService,
-                                        final DataCollectionDescriptorMapper dataCollectionDescriptorMapper,
-                                        final Encoder encoder) {
+                                        final DataCollectionDescriptorMapper dataCollectionDescriptorMapper) {
         this.dataManagementService = dataManagementService;
         this.dataSampleDescriptorMapper = dataSampleDescriptorMapper;
         this.dataCollectionManagementService = dataCollectionManagementService;
         this.dataCollectionDescriptorMapper = dataCollectionDescriptorMapper;
-        this.encoder = encoder;
     }
 
     @Override

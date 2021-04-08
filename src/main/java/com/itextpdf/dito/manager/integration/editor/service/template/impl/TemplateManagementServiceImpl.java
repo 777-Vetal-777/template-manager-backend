@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.integration.editor.service.template.impl;
 
-import com.itextpdf.dito.manager.component.encoder.Encoder;
-import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
@@ -10,7 +8,6 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.exception.integration.InconsistencyException;
-import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
 import com.itextpdf.dito.manager.integration.editor.service.template.TemplateManagementService;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
@@ -23,6 +20,7 @@ import com.itextpdf.dito.sdk.core.dependency.api.TemplateDependency;
 import com.itextpdf.dito.sdk.core.dependency.retriever.template.DefaultTemplateDependenciesRetriever;
 import com.itextpdf.dito.sdk.core.dependency.retriever.template.TemplateDependenciesRetriever;
 import com.itextpdf.dito.sdk.core.preprocess.asset.TemplateAssetRetriever;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -35,6 +33,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.itextpdf.dito.manager.util.TemplateUtils.DITO_ASSET_TAG;
+
 @Service
 public class TemplateManagementServiceImpl implements TemplateManagementService {
 
@@ -43,12 +43,10 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     private final TemplateAssetRetriever templateAssetRetriever;
     private final TemplateRepository templateRepository;
     private final TemplateFileRepository templateFileRepository;
-    private final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper;
     private final TemplateDeploymentService templateDeploymentService;
     private final ResourceService resourceService;
     private final TemplateLoader templateLoader;
     private final UserService userService;
-    private final Encoder encoder;
 
     public TemplateManagementServiceImpl(final TemplateService templateService,
                                          final TemplateAssetRetriever resourceAssetRetriever,
@@ -57,9 +55,7 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
                                          final TemplateFileRepository templateFileRepository,
                                          final ResourceService resourceService,
                                          final TemplateLoader templateLoader,
-                                         final ResourceLeafDescriptorMapper resourceLeafDescriptorMapper,
                                          final TemplateDeploymentService templateDeploymentService,
-                                         final Encoder encoder,
                                          final UserService userService) {
         this.templateService = templateService;
         this.resourceAssetRetriever = resourceAssetRetriever;
@@ -68,15 +64,13 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
         this.resourceService = resourceService;
         this.templateRepository = templateRepository;
         this.templateLoader = templateLoader;
-        this.encoder = encoder;
-        this.resourceLeafDescriptorMapper = resourceLeafDescriptorMapper;
         this.userService = userService;
         this.templateDeploymentService = templateDeploymentService;
     }
 
     @Override
-    public TemplateEntity get(final String name) {
-        return templateService.get(name);
+    public TemplateEntity get(final String uuid) {
+        return templateService.getByUuid(uuid);
     }
 
     @Override
@@ -114,8 +108,9 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     }
 
     @Override
-    public TemplateEntity delete(final String templateName) {
-        return templateService.delete(templateName);
+    public TemplateEntity delete(final String uuid) {
+        final TemplateEntity templateEntity = templateService.getByUuid(uuid);
+        return templateService.delete(templateEntity.getName());
     }
 
 	private TemplateEntity provideFirstVersionTemplateCreation(final TemplateEntity templateEntity, final byte[] data, final String comment, final String userEmail) {
@@ -131,16 +126,14 @@ public class TemplateManagementServiceImpl implements TemplateManagementService 
     }
 
     private Set<ResourceFileEntity> provideConsistency(final byte[] data) {
-        final TemplateDependenciesRetriever retriever = new DefaultTemplateDependenciesRetriever(templateAssetRetriever,
-                resourceAssetRetriever);
+        final TemplateDependenciesRetriever retriever = new DefaultTemplateDependenciesRetriever(templateAssetRetriever, resourceAssetRetriever);
         final Set<ResourceFileEntity> entitySet = new HashSet<>();
         try {
             final List<TemplateDependency> dependencies = retriever.getDependencies(new ByteArrayInputStream(data));
             for (final TemplateDependency td : dependencies) {
-                final String decodedUrl = encoder.decode(td.getUri().toString().replace("dito-asset://", ""));
-                final ResourceIdDTO dto = resourceLeafDescriptorMapper.deserialize(decodedUrl);
-                final ResourceEntity resourceEntity = resourceService.get(dto.getName(), dto.getType());
-                if (Objects.equals(ResourceTypeEnum.STYLESHEET, dto.getType())) {
+                final String decodedUrl = StringUtils.substringAfter(td.getUri().toString(), DITO_ASSET_TAG);
+                final ResourceEntity resourceEntity = resourceService.getByUuid(decodedUrl);
+                if (Objects.equals(ResourceTypeEnum.STYLESHEET, resourceEntity.getType())) {
                     final Set<ResourceFileEntity> styleSheetEntitySet = provideConsistency(resourceEntity.getLatestFile().get(0).getFile());
                     entitySet.addAll(styleSheetEntitySet);
                 }

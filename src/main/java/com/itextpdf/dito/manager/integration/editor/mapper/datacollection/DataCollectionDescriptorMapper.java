@@ -5,9 +5,5 @@ import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.integration.editor.dto.DataCollectionDescriptor;
 
 public interface DataCollectionDescriptorMapper {
-
     DataCollectionDescriptor map(DataCollectionEntity entity, DataSampleEntity defaultDataSampleEntity);
-
-    String mapToId(DataCollectionEntity entity);
-
 }

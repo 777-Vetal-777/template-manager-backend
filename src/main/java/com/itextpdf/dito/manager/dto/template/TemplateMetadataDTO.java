@@ -13,6 +13,7 @@ public class TemplateMetadataDTO{
     private String name;
     @JsonProperty("type")
     private TemplateTypeEnum type;
+    private String uuid;
     private String dataCollection;
     private String createdBy;
     private Date createdOn;
@@ -119,6 +120,14 @@ public class TemplateMetadataDTO{
 
     public void setDeployedVersions(List<TemplateDeployedVersionDTO> deployedVersions) {
         this.deployedVersions = deployedVersions;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getBlockedBy() {

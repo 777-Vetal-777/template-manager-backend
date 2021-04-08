@@ -10,6 +10,8 @@ import java.util.List;
 public interface ResourceManagementService {
     ResourceFileEntity get(String name, ResourceTypeEnum type, String subName);
 
+    ResourceFileEntity getByUuid(String uuid);
+
     List<ResourceEntity> list();
 
     ResourceEntity createNewVersion(String name, ResourceTypeEnum type, byte[] data, String fileName, String email);
@@ -17,4 +19,6 @@ public interface ResourceManagementService {
     ResourceEntity create(ResourceLeafDescriptor resourceLeafDescriptor, byte[] data, String fileName, String email);
 
     ResourceEntity delete(String name, ResourceTypeEnum type, String mail);
+
+    ResourceEntity deleteByUuid(String uuid, String mail);
 }

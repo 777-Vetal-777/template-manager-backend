@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class TemplateMapperImpl implements TemplateMapper {
     private final ObjectMapper objectMapper;
     private static final Logger log = LogManager.getLogger(TemplateMapperImpl.class);
-    private PermissionCheckHandler permissionHandler;
+    private final PermissionCheckHandler permissionHandler;
 
     public TemplateMapperImpl(final ObjectMapper objectMapper, final PermissionCheckHandler permissionHandler) {
         this.objectMapper = objectMapper;
@@ -60,6 +60,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         log.info("Fill templateDto with template: {} and templateDto: {} was started", entity.getId(), result);
         result.setName(entity.getName());
         result.setType(entity.getType());
+        result.setUuid(entity.getUuid());
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
         if (!CollectionUtils.isEmpty(templateLogs)) {
             final TemplateLogEntity lastTemplateLog = templateLogs.get(0);
@@ -115,6 +116,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateDTO result = new TemplateDTO();
         result.setName(model.getName());
         result.setType(model.getType());
+        result.setUuid(model.getUuid());
         result.setVersion(model.getVersion());
         result.setAuthor(model.getAuthor());
         result.setComment(model.getComment());
@@ -132,6 +134,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         final TemplateMetadataDTO result = new TemplateMetadataDTO();
         result.setName(entity.getName());
         result.setType(entity.getType());
+        result.setUuid(entity.getUuid());
         final List<TemplateFileEntity> templateFiles = entity.getFiles();
         final List<TemplateLogEntity> templateLogs = new ArrayList<>(entity.getTemplateLogs());
         final List<TemplateFileEntity> files = entity.getFiles();

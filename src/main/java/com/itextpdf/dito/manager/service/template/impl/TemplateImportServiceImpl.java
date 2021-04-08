@@ -22,6 +22,7 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionImportServ
 import com.itextpdf.dito.manager.service.resource.EmbeddedResourceImportService;
 import com.itextpdf.dito.manager.service.resource.ResourceImportService;
 import com.itextpdf.dito.manager.service.template.TemplateImportService;
+import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -42,16 +43,19 @@ public class TemplateImportServiceImpl implements TemplateImportService {
 
     private final TemplateRepository templateRepository;
     private final TemplateManagementService templateManagementService;
+    private final TemplateService templateService;
     private final DataCollectionImportService dataCollectionImportService;
     private final ResourceImportService resourceImportService;
     private final List<EmbeddedResourceImportService> embeddedResourceImportServices;
 
     public TemplateImportServiceImpl(final TemplateManagementService templateManagementService,
+                                     final TemplateService templateService,
                                      final DataCollectionImportService dataCollectionImportService,
                                      final ResourceImportService resourceImportService,
                                      final TemplateRepository templateRepository,
                                      final List<EmbeddedResourceImportService> embeddedResourceImportServices) {
         this.templateManagementService = templateManagementService;
+        this.templateService = templateService;
         this.dataCollectionImportService = dataCollectionImportService;
         this.resourceImportService = resourceImportService;
         this.templateRepository = templateRepository;
@@ -131,7 +135,7 @@ public class TemplateImportServiceImpl implements TemplateImportService {
 
         TemplateEntity templateEntity;
         try {
-            templateManagementService.get(templateElement.getTemplateName());
+            templateService.get(templateElement.getTemplateName());
 
             if (templateName == null) {
                 throw new TemplateAlreadyExistsException(templateElement.getTemplateName());

@@ -1,7 +1,5 @@
 package com.itextpdf.dito.manager.integration.editor.mapper.resource.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.ImageDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.StylesheetDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.AbstractResourceFileDescriptor.UnknownResource;
@@ -9,32 +7,25 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.resource.ResourceL
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontFileDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.resource.font.FontStyle;
-import com.itextpdf.dito.manager.component.encoder.Encoder;
-import com.itextpdf.dito.manager.dto.resource.ResourceIdDTO;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
+import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceIdMapper;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceLeafDescriptorMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorMapper {
-    private static final Logger log = LogManager.getLogger(ResourceLeafDescriptorMapperImpl.class);
 
-    private final ObjectMapper objectMapper;
-    private final Encoder encoder;
+    private final ResourceIdMapper resourceIdMapper;
 
-    public ResourceLeafDescriptorMapperImpl(ObjectMapper objectMapper, Encoder encoder) {
-        this.objectMapper = objectMapper;
-        this.encoder = encoder;
+    public ResourceLeafDescriptorMapperImpl(final ResourceIdMapper resourceIdMapper) {
+        this.resourceIdMapper = resourceIdMapper;
     }
 
     @Override
@@ -43,7 +34,7 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
 
         final String name = resourceEntity.getName();
         final ResourceTypeEnum type = resourceEntity.getType();
-        final String id = encodeId(name, type, null);
+        final String id = resourceIdMapper.mapToId(resourceEntity);
         switch (type) {
             case FONT:
                 final FontDescriptor fontDescriptor = new FontDescriptor(id);
@@ -60,7 +51,7 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
                 resourceLeafDescriptor = new UnknownResource(id);
                 break;
         }
-        resourceLeafDescriptor.setDisplayName(resourceEntity.getName());
+        resourceLeafDescriptor.setDisplayName(name);
 
         return resourceLeafDescriptor;
     }
@@ -70,30 +61,10 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         return resourceLeafDescriptors.stream().map(this::map).collect(Collectors.toList());
     }
 
-    @Override
-    public ResourceIdDTO map(final String id) {
-        return deserialize(encoder.decode(id));
-    }
-
-    @Override
-    public String encodeId(final String name, final ResourceTypeEnum resourceTypeEnum, final String subName) {
-        log.info("Encode resource with name: {} and type: {} and subName: {} was started", name, resourceTypeEnum, subName);
-
-        final ResourceIdDTO resourceIdDTO = new ResourceIdDTO();
-        resourceIdDTO.setName(name);
-        resourceIdDTO.setType(resourceTypeEnum);
-        resourceIdDTO.setSubName(subName);
-        final String json = serialize(resourceIdDTO);
-        final String result = Optional.ofNullable(json).map(encoder::encode).orElse("");
-
-        log.info("Encode resource with name: {} and type: {} and subName: {} was finished successfully", name, resourceTypeEnum, subName);
-        return result;
-    }
-
     private List<FontFileDescriptor> getFontFiles(final ResourceEntity resourceEntity) {
         final List<FontFileDescriptor> fontFilesList = new ArrayList<>();
         for (final ResourceFileEntity fileEntity : resourceEntity.getResourceFiles()) {
-            final String id = encodeId(resourceEntity.getName(), ResourceTypeEnum.FONT, fileEntity.getFontName());
+            final String id = fileEntity.getUuid();
             final FontFileDescriptor fileDescriptor = new FontFileDescriptor(id);
             fileDescriptor.setStyle(FontStyle.valueOf(fileEntity.getFontName()));
             fontFilesList.add(fileDescriptor);
@@ -101,28 +72,4 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
         return fontFilesList;
     }
 
-    @Override
-    public ResourceIdDTO deserialize(final String data) {
-        ResourceIdDTO result = null;
-
-        try {
-            result = objectMapper.readValue(data, ResourceIdDTO.class);
-        } catch (JsonProcessingException e) {
-            log.error(e);
-        }
-
-        return result;
-    }
-
-    private String serialize(final Object data) {
-        String result = null;
-
-        try {
-            result = objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            log.error(e);
-        }
-
-        return result;
-    }
 }

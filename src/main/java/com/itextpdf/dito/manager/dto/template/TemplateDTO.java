@@ -19,6 +19,7 @@ public class TemplateDTO {
     private Date createdOn;
     private String createdBy;
     private String comment;
+    private String uuid;
     private Set<String> permissions;
 
     public Set<String> getPermissions() {
@@ -101,6 +102,14 @@ public class TemplateDTO {
         this.dataCollection = dataCollection;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     @Override
     public String toString() {
         return "TemplateDTO{" +
@@ -113,6 +122,8 @@ public class TemplateDTO {
                 ", createdOn=" + createdOn +
                 ", createdBy='" + createdBy + '\'' +
                 ", comment='" + comment + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", permissions=" + permissions +
                 '}';
     }
 }

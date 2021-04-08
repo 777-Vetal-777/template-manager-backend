@@ -18,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -45,12 +44,8 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
         this.objectMapper = objectMapper;
     }
 
-    private String encodeToBase64(final String value) {
-        return new String(Base64.getUrlEncoder().encode(value.getBytes()));
-    }
-
     private Element addChildObject(final Element parent, final TemplateFilePartEntity templateFilePartEntity) {
-        final String encodedChildName = encodeToBase64(templateFilePartEntity.getPart().getTemplate().getName());
+        final String encodedChildName = templateFilePartEntity.getPart().getTemplate().getUuid();
 
         final Element child = new Element(Tag.valueOf("object"), parent.baseUri());
 

@@ -4,6 +4,7 @@ import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateAddDescrip
 import com.itextpdf.dito.editor.server.common.core.descriptor.TemplateFragmentType;
 import com.itextpdf.dito.manager.controller.template.TemplateController;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
+import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.integration.editor.controller.template.TemplateManagementController;
@@ -16,14 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
@@ -41,7 +39,6 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	
 	private static final String WORKSPACE_ID = "c29tZS10ZW1wbGF0ZQ==";
 	private static final String TEMPLATE_NAME = "some-template";
-	private static final String TEMPLATE_ID = Base64.getUrlEncoder().encodeToString(TEMPLATE_NAME.getBytes(StandardCharsets.UTF_8));
 
 	@Autowired
 	private TemplateRepository templateRepository;
@@ -79,8 +76,8 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk());
 
 		// UPDATE
-		final URI uriUpdate = UriComponentsBuilder.fromUriString("/templates/" + TEMPLATE_ID)
-				.build().encode().toUri();
+		final TemplateEntity templateEntity = templateRepository.findByName(TEMPLATE_NAME).orElseThrow();
+		final URI uriUpdate = UriComponentsBuilder.fromUriString(TemplateManagementController.TEMPLATE_URL).build(templateEntity.getUuid());
 
 		final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewData\"}".getBytes());
@@ -108,8 +105,7 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 		// CREATE
 		final TemplateAddDescriptor templateAddDescriptor = new TemplateAddDescriptor(TEMPLATE_NAME, TemplateFragmentType.STANDARD);
 		
-		final URI uri = UriComponentsBuilder.fromUriString("/workspace/" + WORKSPACE_ID + "/templates").build()
-				.encode().toUri();
+		final URI uri = UriComponentsBuilder.fromUriString(TemplateManagementController.CREATE_TEMPLATE_URL).build(WORKSPACE_ID);
 
 		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json",
 				objectMapper.writeValueAsString(templateAddDescriptor).getBytes());
@@ -124,8 +120,8 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk());
 
 		// UPDATE
-		final URI uriUpdate = UriComponentsBuilder.fromUriString("/templates/" + TEMPLATE_ID)
-				.build().encode().toUri();
+		final TemplateEntity templateEntity = templateRepository.findByName(TEMPLATE_NAME).orElseThrow();
+		final URI uriUpdate = UriComponentsBuilder.fromUriString(TemplateManagementController.TEMPLATE_URL).build(templateEntity.getUuid());
 
 		final MockMultipartFile newDataForFirstUpdate = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewDataFirst\"}".getBytes());
@@ -171,42 +167,36 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 
-		final URI integrationWorkspaceUri = UriComponentsBuilder.fromUriString("/workspace/" + WORKSPACE_ID + "/templates")
-				.build().encode().toUri();
+		final TemplateEntity templateEntity = templateRepository.findByName(TEMPLATE_NAME).orElseThrow();
+		assertNotNull(templateEntity.getUuid());
 
 		// get integrated templates collection
-		mockMvc.perform(get(integrationWorkspaceUri)
+		mockMvc.perform(get(TemplateManagementController.TEMPLATE_LIST_URL, WORKSPACE_ID)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(TEMPLATE_ID))
+				.andExpect(jsonPath("$[0].id").value(templateEntity.getUuid()))
 				.andExpect(jsonPath("$[0].displayName").value(TEMPLATE_NAME))
 				.andExpect(jsonPath("$[0].fragmentType").value("STANDARD"));
 		
-		final URI integrationTemplateUri = UriComponentsBuilder.fromUriString("/templates/" + TEMPLATE_ID)
-				.build().encode().toUri();
-		mockMvc.perform(get(integrationTemplateUri)
+		mockMvc.perform(get(TemplateManagementController.TEMPLATE_URL, templateEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("<body data-dito-element=\"subform\">")));
 	
-		final URI integrationTemplateDescriptorUri = UriComponentsBuilder.fromUriString("/templates/" + TEMPLATE_ID+"/descriptor")
-				.build().encode().toUri();
-		mockMvc.perform(get(integrationTemplateDescriptorUri)
+		mockMvc.perform(get(TemplateManagementController.TEMPLATE_DESCRIPTOR_URL, templateEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("id").value(TEMPLATE_ID))
+				.andExpect(jsonPath("id").value(templateEntity.getUuid()))
 				.andExpect(jsonPath("displayName").value(TEMPLATE_NAME))
 				.andExpect(jsonPath("fragmentType").value("STANDARD"));
 
-		final MvcResult result = mockMvc.perform(delete(integrationTemplateUri)
+		mockMvc.perform(delete(TemplateManagementController.TEMPLATE_URL, templateEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		assertNotNull(result.getResponse());
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -224,8 +214,10 @@ class TemplateManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
+		final TemplateEntity templateEntity = templateRepository.findByName(TEMPLATE_NAME).orElseThrow();
+
 		// UPDATE
-		mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, TEMPLATE_ID)
+		mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, templateEntity.getUuid())
 				.file(descriptor)
 				.file(data)
 				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -55,10 +55,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -227,7 +227,6 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(5, templateRepository.findAll().size());
     }
 
-
     @Test
     void shouldUpdateTemplateWithResource() throws Exception{
         //Create resource
@@ -238,21 +237,21 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .file(new MockMultipartFile("name", "name", "text/plain", imageName.getBytes()))
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated());
-        final Optional<ResourceEntity> createdResource = resourceRepository.findByNameAndType(imageName, ResourceTypeEnum.IMAGE);
-        assertTrue(createdResource.isPresent());
+        final ResourceEntity createdResource = resourceRepository.findByNameAndType(imageName, ResourceTypeEnum.IMAGE).orElseThrow();
+        assertNotNull(createdResource.getUuid());
+        final byte[] uploadData = Files.readString(Path.of("src/test/resources/test-data/templates/template-create-request-with-picture.html")).replace("replaceThis", createdResource.getUuid()).getBytes(StandardCharsets.UTF_8);
 
         // CREATE
         final String templateName = "template-example";
         final TemplateAddDescriptor templateAddDescriptor = new TemplateAddDescriptor(templateName, TemplateFragmentType.STANDARD);
         final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json", objectMapper.writeValueAsString(templateAddDescriptor).getBytes());
-        final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", readFileBytes("src/test/resources/test-data/templates/template-create-request-with-picture.html"));
+        final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", uploadData);
         mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.CREATE_TEMPLATE_URL, WORKSPACE_ID)
                 .file(descriptor)
                 .file(data)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
 
         //UPDATE by name
         ResourceUpdateRequestDTO resourceUpdateRequestDTO = new ResourceUpdateRequestDTO();
@@ -765,11 +764,15 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated());
 
-        final String encodeTemplatePartString = encodeStringToBase64("some-template");
+        final TemplateEntity partTemplateEntity = templateRepository.findByName("some-template").orElseThrow();
+
+        final ResourceEntity resourceEntity = resourceRepository.findByNameAndType(imageName, ResourceTypeEnum.IMAGE).orElseThrow();
+        assertNotNull(resourceEntity.getUuid());
+        final byte[] uploadData = Files.readString(Path.of("src/test/resources/test-data/templates/template-update-request-data.html")).replace("replaceThis", resourceEntity.getUuid()).getBytes(StandardCharsets.UTF_8);
 
         //Create new version
-        final MockMultipartFile file = new MockMultipartFile("data", "template.html", "text/plain", Files.readAllBytes(Path.of("src/test/resources/test-data/templates/template-update-request-data.html")));
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TEMPLATE_URL, encodeTemplatePartString)
+        final MockMultipartFile file = new MockMultipartFile("data", "template.html", "text/plain", uploadData);
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateManagementController.TEMPLATE_URL, partTemplateEntity.getUuid())
                 .file(file))
                 .andExpect(status().isOk());
 

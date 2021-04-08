@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.service.resource.impl;
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
 import com.itextpdf.dito.manager.exception.AliasConstants;
 import com.itextpdf.dito.manager.exception.resource.ResourceFontCannotBeRenamedException;
+import com.itextpdf.dito.manager.exception.resource.ResourceUuidNotFoundException;
 import com.itextpdf.dito.manager.model.resource.MetaInfoModel;
 import com.itextpdf.dito.manager.model.resource.ResourceModel;
 import com.itextpdf.dito.manager.model.resource.ResourceRoleModel;
@@ -32,7 +33,6 @@ import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.resource.ResourceService;
 import com.itextpdf.dito.manager.service.role.RoleService;
-import com.itextpdf.dito.manager.service.template.TemplateRefreshLinksService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -72,7 +72,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
     private final UserService userService;
     private final RoleService roleService;
     private final PermissionService permissionService;
-    private final TemplateRefreshLinksService templateRefreshLinksService;
     private final Map<ResourceTypeEnum, ContentValidator> contentValidators = new EnumMap<>(ResourceTypeEnum.class);
 
     public ResourceServiceImpl(
@@ -83,8 +82,7 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             final RoleService roleService,
             final PermissionService permissionService,
             final TemplateService templateService,
-            final List<ContentValidator> contentValidators,
-            final TemplateRefreshLinksService templateRefreshLinksService) {
+            final List<ContentValidator> contentValidators) {
         this.resourceRepository = resourceRepository;
         this.resourceFileRepository = resourceFileRepository;
         this.templateRepository = templateRepository;
@@ -92,7 +90,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         this.roleService = roleService;
         this.permissionService = permissionService;
         this.templateService = templateService;
-        this.templateRefreshLinksService = templateRefreshLinksService;
         this.contentValidators.putAll(contentValidators.stream().collect(Collectors.toMap(ContentValidator::getType, Function.identity())));
     }
 
@@ -233,7 +230,6 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
             throwExceptionIfResourceExists(entity.getName(), entity.getType());
         }
         existingResource.setDescription(entity.getDescription());
-        templateRefreshLinksService.updateResourceLinksInTemplates(existingResource, entity.getName());
         existingResource.setName(entity.getName());
 
         final ResourceLogEntity logEntity = createResourceLogEntry(existingResource, userEntity);
@@ -478,7 +474,10 @@ public class ResourceServiceImpl extends AbstractService implements ResourceServ
         return resourceRepository.findByNameAndType(name, type).orElseThrow(() -> new ResourceNotFoundException(name));
     }
 
-
+    @Override
+    public ResourceEntity getByUuid(final String uuid) {
+        return resourceRepository.findByUuid(uuid).orElseThrow(() -> new ResourceUuidNotFoundException(uuid));
+    }
 
     @Override
     public ResourceFileEntity getFile(final String uuid) {

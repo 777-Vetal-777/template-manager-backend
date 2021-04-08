@@ -26,6 +26,7 @@ import com.itextpdf.dito.manager.exception.template.TemplateCannotBeBlockedExcep
 import com.itextpdf.dito.manager.exception.template.TemplateCannotBePromotedException;
 import com.itextpdf.dito.manager.exception.template.TemplateDeleteException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
+import com.itextpdf.dito.manager.exception.template.TemplateUuidNotFoundException;
 import com.itextpdf.dito.manager.filter.template.TemplateFilter;
 import com.itextpdf.dito.manager.filter.template.TemplateListFilter;
 import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
@@ -41,7 +42,6 @@ import com.itextpdf.dito.manager.service.role.RoleService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateFilePartService;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
-import com.itextpdf.dito.manager.service.template.TemplateRefreshLinksService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
@@ -86,7 +86,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     private final TemplateDeploymentService templateDeploymentService;
     private final CompositeTemplateBuilder compositeTemplateConstructor;
     private final TemplateFilePartService templateFilePartService;
-    private final TemplateRefreshLinksService refreshLinksService;
 
     public TemplateServiceImpl(final TemplateFileRepository templateFileRepository,
                                final TemplateRepository templateRepository,
@@ -98,8 +97,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                final InstanceRepository instanceRepository,
                                final TemplateDeploymentService templateDeploymentService,
                                final CompositeTemplateBuilder compositeTemplateConstructor,
-                               final TemplateFilePartService templateFilePartService,
-                               final TemplateRefreshLinksService refreshLinksService) {
+                               final TemplateFilePartService templateFilePartService) {
         this.templateFileRepository = templateFileRepository;
         this.templateRepository = templateRepository;
         this.userService = userService;
@@ -111,7 +109,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         this.templateDeploymentService = templateDeploymentService;
         this.compositeTemplateConstructor = compositeTemplateConstructor;
         this.templateFilePartService = templateFilePartService;
-        this.refreshLinksService = refreshLinksService;
     }
 
     @Override
@@ -253,6 +250,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateModelWithRoles model = new TemplateModelWithRoles();
         model.setName(template.getTemplateName());
         model.setType(template.getType());
+        model.setUuid(template.getUuid());
         model.setVersion(template.getVersion());
         model.setAuthor(template.getAuthor());
         model.setComment(template.getComment());
@@ -352,6 +350,11 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
     }
 
     @Override
+    public TemplateEntity getByUuid(final String uuid) {
+        return templateRepository.findByUuid(uuid).orElseThrow(() -> new TemplateUuidNotFoundException(uuid));
+    }
+
+    @Override
     protected List<String> getSupportedSortFields() {
         return TemplateRepository.SUPPORTED_SORT_FIELDS;
     }
@@ -366,7 +369,6 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
             throwExceptionIfNameNotMatchesPattern(updatedTemplateEntity.getName(), AliasConstants.TEMPLATE);
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
-            refreshLinksService.updateTemplateLinksInTemplates(existingTemplate, updatedTemplateEntity.getName());
             existingTemplate.setName(updatedTemplateEntity.getName());
         }
         existingTemplate.setDescription(updatedTemplateEntity.getDescription());

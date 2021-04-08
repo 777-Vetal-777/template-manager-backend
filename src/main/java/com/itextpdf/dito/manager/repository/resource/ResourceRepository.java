@@ -169,4 +169,12 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
 
     @Query("select files.uuid as uuid, files.fileName as fileName, files.fontName as fontType, res.id as resourceId from ResourceEntity res join res.latestFile files where res.id in (:listId)")
     List<MetaInfoModel> getMetaInfo(@Param("listId") List<Long> listId);
+
+    @Query("select distinct resource from ResourceEntity resource "
+            + "join fetch resource.latestFile latestFile "
+            + "where resource.uuid is null")
+    List<ResourceEntity> findByUuidNull();
+
+    Optional<ResourceEntity> findByUuid(String uuid);
+
 }

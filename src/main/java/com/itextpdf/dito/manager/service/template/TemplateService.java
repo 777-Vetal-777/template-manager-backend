@@ -35,6 +35,8 @@ public interface TemplateService {
 
     TemplateEntity get(String name);
 
+    TemplateEntity getByUuid(String uuid);
+
     TemplateEntity update(String name, TemplateEntity updatedTemplateEntity, String userEmail);
 
     @PreAuthorize("@permissionHandlerImpl.checkTemplateCreateVersionPermission(authentication, #name)")

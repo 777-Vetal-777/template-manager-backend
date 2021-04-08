@@ -28,6 +28,8 @@ public interface PermissionHandler {
     //  Templates
     boolean checkTemplateDeletePermissions(Authentication authentication, String templateName);
 
+    boolean checkTemplateUuidDeletePermissions(Authentication authentication, String uuid);
+
     boolean checkTemplateCommonPermissionByType(Authentication authentication, TemplateCreateRequestDTO request);
 
     boolean checkTemplatePermissions(UserEntity userEntity, TemplateEntity templateEntity, String permission);
