@@ -4,6 +4,7 @@ import com.itextpdf.dito.manager.controller.datacollection.DataCollectionControl
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.dto.datasample.create.DataSampleCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.datasample.update.DataSampleUpdateRequestDTO;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.integration.AbstractIntegrationTest;
 import com.itextpdf.dito.manager.repository.datacollections.DataCollectionRepository;
 import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
@@ -113,7 +114,8 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("fileName").value("fileName2"))
                 .andExpect(jsonPath("isDefault").value("true"));
-        assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
+        final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(DATACOLLECTION_NAME).orElseThrow();
+        assertTrue(dataSampleRepository.findByNameAndDataCollection(DATASAMPLE_NAME, dataCollectionEntity).isPresent());
 
         request.setSample("{}");
         request.setName("data-sample1");
@@ -165,8 +167,9 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("isDefault").value("false"));
-        
-        assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
+
+        final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(DATACOLLECTION_NAME).orElseThrow();
+        assertTrue(dataSampleRepository.findByNameAndDataCollection(DATASAMPLE_NAME, dataCollectionEntity).isPresent());
     }
 
     @Test
@@ -188,8 +191,9 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("description").value("description2"));
-        
-        assertTrue(dataSampleRepository.findByName(DATASAMPLE_NAME).isPresent());
+
+        final DataCollectionEntity dataCollectionEntity = dataCollectionRepository.findByName(DATACOLLECTION_NAME).orElseThrow();
+        assertTrue(dataSampleRepository.findByNameAndDataCollection(DATASAMPLE_NAME, dataCollectionEntity).isPresent());
 
     }
     

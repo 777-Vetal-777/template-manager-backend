@@ -56,7 +56,9 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
                                   @Param("isDefault") @Nullable Boolean isDefault,
                                   @Param("search") @Nullable String search);
 
-    Optional<DataSampleEntity> findByName(String name);
+    Optional<DataSampleEntity> findByNameAndDataCollection(String name, DataCollectionEntity dataCollection);
+
+    Optional<DataSampleEntity> findByUuid(String uuid);
 
     Boolean existsByName(String name);
 
@@ -93,7 +95,19 @@ public interface DataSampleRepository extends JpaRepository<DataSampleEntity, Lo
             + "where template.name =:templateName")
     List<DataSampleEntity> findDataSamplesByTemplateName(@Param("templateName") String templateName);
 
+    @Query("select sample from DataSampleEntity sample "
+            + "join sample.latestVersion latestFile "
+            + "left join sample.dataCollection collection "
+            + "left join collection.latestVersion version "
+            + "left join version.templateFiles templates "
+            + "left join templates.template template "
+            + "where template.name = :templateName "
+            + "and sample.name = :dataSampleName")
+    Optional<DataSampleEntity> findDataSamplesByTemplateNameAndSampleName(@Param("templateName") String templateName, @Param("dataSampleName") String dataSampleName);
+
     @Query("select max(CAST(SUBSTR(name, LENGTH(:pattern) + 2, LENGTH(name) - LENGTH(:pattern) - 2 ) as int)) from DataSampleEntity where name like CONCAT(:pattern, '(%)')")
     Optional<Integer> findMaxIntegerByNamePattern(@Param("pattern") String pattern);
+
+    List<DataSampleEntity> findByUuidNull();
 
 }

@@ -1,6 +1,5 @@
 package com.itextpdf.dito.manager.integration.editor;
 
-import static com.itextpdf.dito.manager.controller.datacollection.DataCollectionController.DATA_SAMPLE_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,9 +10,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
+import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 import com.itextpdf.kernel.xmp.impl.Base64;
 
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +50,8 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private DataCollectionService dataCollectionService;
+	@Autowired
+	private DataSampleService dataSampleService;
     @Autowired
     private DataCollectionRepository dataCollectionRepository;
     @Autowired
@@ -68,12 +71,13 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void dataSampleAddUpdateTest() throws Exception {
+		final DataCollectionEntity entity = dataCollectionService.get(DATACOLLECTION_NAME);
+		assertNotNull(entity);
+
 		// CREATE
 		DataSampleDescriptor dataSampleDescriptor = new DataSampleDescriptor(Base64.encode(EXISTED_SAMPLE));
 		dataSampleDescriptor.setDisplayName(EXISTED_SAMPLE);
-		List<String> idList = new ArrayList<>();
-		idList.add(Base64.encode(DATACOLLECTION_NAME));
-		dataSampleDescriptor.setCollectionIdList(idList);
+		dataSampleDescriptor.setCollectionIdList(Collections.singletonList(entity.getUuid()));
 		final URI uri = UriComponentsBuilder.fromUriString(DataManagementController.CREATE_DATA_SAMPLE_URL).build()
 				.encode().toUri();
 
@@ -90,13 +94,11 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk());
 
 		// UPDATE
-		final URI uriUpdate = UriComponentsBuilder
-				.fromUriString(DataManagementController.CREATE_DATA_SAMPLE_URL + "/" + Base64.encode(EXISTED_SAMPLE))
-				.build().encode().toUri();
+		final DataSampleEntity dataSampleEntity = dataSampleService.get(entity.getName(), EXISTED_SAMPLE);
 
 		final MockMultipartFile newData = new MockMultipartFile("data", "data", "application/json",
 				"{\"file\":\"NewData\"}".getBytes());
-		MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(uriUpdate);
+		MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart(DataManagementController.DATA_SAMPLE_URL, dataSampleEntity.getUuid());
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
@@ -112,13 +114,11 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 		// CHECK UPDATE
-		final MvcResult result = mockMvc.perform(get(uriUpdate)
+		mockMvc.perform(get(DataManagementController.DATA_SAMPLE_URL, dataSampleEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("file").value("NewData"))
-				.andReturn();
-		assertNotNull(result.getResponse());
+				.andExpect(jsonPath("file").value("NewData"));
 	}
 
 	@Test
@@ -136,80 +136,74 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	public void dataSampleGetById() throws Exception {
-		final  DataSampleCreateRequestDTO request = objectMapper.readValue(
+		final DataSampleCreateRequestDTO request = objectMapper.readValue(
 				new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"),
 				DataSampleCreateRequestDTO.class);
+		assertNotNull(request);
 		// Create Data Sample
-		mockMvc.perform(post(DataCollectionController.BASE_NAME + "/" + DATACOLLECTION_BASE64_ENCODED_NAME + DATA_SAMPLE_ENDPOINT)
+		mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController. DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
 						.content(objectMapper.writeValueAsString(request))
 						.contentType(MediaType.APPLICATION_JSON)
 						.accept(MediaType.APPLICATION_JSON))
 						.andExpect(status().isCreated());
+		final DataCollectionEntity entity = dataCollectionService.get(DATACOLLECTION_NAME);
+		assertNotNull(entity);
+		final DataSampleEntity dataSampleEntity = dataSampleService.get(entity.getName(), EXISTED_SAMPLE);
 		// Get Data Sample By Id
-		final URI uri = UriComponentsBuilder
-				.fromUriString(DataManagementController.CREATE_DATA_SAMPLE_URL + "/" + Base64.encode(EXISTED_SAMPLE))
-				.build().encode().toUri();
-		mockMvc.perform(get(uri)
+		mockMvc.perform(get(DataManagementController.DATA_SAMPLE_URL, dataSampleEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_OCTET_STREAM))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("file").value("data"));
 
 		// Get Data Sample Descriptor
-		final URI uriDescriptor = UriComponentsBuilder.fromUriString(
-				DataManagementController.CREATE_DATA_SAMPLE_URL + "/" + Base64.encode(EXISTED_SAMPLE) + "/descriptor")
-				.build().encode().toUri();
-		mockMvc.perform(get(uriDescriptor)
+		mockMvc.perform(get(DataManagementController.DATA_SAMPLE_DESCRIPTOR_URL, dataSampleEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("id").value(Base64.encode(EXISTED_SAMPLE)))
+				.andExpect(jsonPath("id").value(dataSampleEntity.getUuid()))
 				.andExpect(jsonPath("displayName").value("name"))
-				.andExpect(jsonPath("collectionIdList[0]").value("ZGF0YS1jb2xsZWN0aW9uLXRlc3Q="));
+				.andExpect(jsonPath("collectionIdList[0]").value(entity.getUuid()));
 
 		// Get Data Sample By Data Collection
-		final URI uriForCollection = UriComponentsBuilder
-				.fromUriString("/collection/" + DATACOLLECTION_BASE64_ENCODED_NAME).build().encode().toUri();
-		mockMvc.perform(get(uriForCollection)
+		mockMvc.perform(get(DataManagementController.COLLECTION_DATA_SAMPLES_URL, entity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(Base64.encode(EXISTED_SAMPLE)))
+				.andExpect(jsonPath("$[0].id").value(dataSampleEntity.getUuid()))
 				.andExpect(jsonPath("$[0].displayName").value("name.json"))
-				.andExpect(jsonPath("$[0].collectionIdList[0]").value("ZGF0YS1jb2xsZWN0aW9uLXRlc3Q="));
+				.andExpect(jsonPath("$[0].collectionIdList[0]").value(entity.getUuid()));
 
 		// Delete Data Sample
-		final MvcResult result = mockMvc.perform(delete(uri)
+		mockMvc.perform(delete(DataManagementController.DATA_SAMPLE_URL, dataSampleEntity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("id").value(Base64.encode(EXISTED_SAMPLE)))
-				.andReturn();
-		assertNotNull(result.getResponse());
+				.andExpect(jsonPath("id").value(dataSampleEntity.getUuid()));
 	}
 
 	@Test
 	void shouldReturnDataCollectionDescriptor() throws Exception {
-		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, DATACOLLECTION_BASE64_ENCODED_NAME)
+		final DataCollectionEntity entity = dataCollectionService.get(DATACOLLECTION_NAME);
+		assertNotNull(entity);
+
+		mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, entity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("id").value(DATACOLLECTION_BASE64_ENCODED_NAME))
+				.andExpect(jsonPath("id").value(entity.getUuid()))
 				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
-				.andExpect(jsonPath("defaultSampleId").isEmpty())
-				.andReturn();
-
-		assertNotNull(result.getResponse());
+				.andExpect(jsonPath("defaultSampleId").isEmpty());
 	}
 
 	@Test
 	void shouldReturnDataCollectionDescriptorWithSampleId() throws Exception {
-		final String dataSampleId = Base64.encode(EXISTED_SAMPLE);
-		DataSampleDescriptor dataSampleDescriptor = new DataSampleDescriptor(dataSampleId);
+		final DataCollectionEntity entity = dataCollectionService.get(DATACOLLECTION_NAME);
+		assertNotNull(entity);
+
+		DataSampleDescriptor dataSampleDescriptor = new DataSampleDescriptor(null);
 		dataSampleDescriptor.setDisplayName(EXISTED_SAMPLE);
-		List<String> idList = new ArrayList<>();
-		idList.add(Base64.encode(DATACOLLECTION_NAME));
-		dataSampleDescriptor.setCollectionIdList(idList);
+		dataSampleDescriptor.setCollectionIdList(Collections.singletonList(entity.getUuid()));
 
 		final MockMultipartFile descriptor = new MockMultipartFile("descriptor", "descriptor", "application/json", objectMapper.writeValueAsString(dataSampleDescriptor).getBytes());
 		final MockMultipartFile data = new MockMultipartFile("data", "data", "application/json", "{\"file\":\"data\"}".getBytes());
@@ -221,16 +215,15 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, DATACOLLECTION_BASE64_ENCODED_NAME)
+		final DataSampleEntity dataSampleEntity = dataSampleService.get(entity.getName(), EXISTED_SAMPLE);
+		final String dataSampleId = dataSampleEntity.getUuid();
+		mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, entity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("id").value(DATACOLLECTION_BASE64_ENCODED_NAME))
+				.andExpect(jsonPath("id").value(entity.getUuid()))
 				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
-				.andExpect(jsonPath("defaultSampleId").value(dataSampleId))
-				.andReturn();
-
-		assertNotNull(result.getResponse());
+				.andExpect(jsonPath("defaultSampleId").value(dataSampleId));
 	}
 
 	@Test
@@ -245,11 +238,11 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 	}
 
 	@Test
-	void shouldReturnBadRequestForDataCollection() throws Exception {
+	void shouldReturnNotFoundForDataCollection() throws Exception {
 		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, "b")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
+				.andExpect(status().isNotFound())
 				.andReturn();
 
 		assertNotNull(result.getResponse());
@@ -257,13 +250,13 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	void shouldFindDataCollectionById() throws Exception {
-		final MvcResult result = mockMvc.perform(get(DataManagementController.COLLECTION_DATA_STRUCTURE_URL, DATACOLLECTION_BASE64_ENCODED_NAME)
+		final DataCollectionEntity entity = dataCollectionService.get(DATACOLLECTION_NAME);
+		assertNotNull(entity);
+
+		mockMvc.perform(get(DataManagementController.COLLECTION_DATA_STRUCTURE_URL, entity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-
-		assertNotNull(result.getResponse());
+				.andExpect(status().isOk());
 	}
 
 }

@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -19,6 +20,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
@@ -26,6 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "template")
@@ -42,6 +45,8 @@ public class TemplateEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_by")
     private UserEntity blockedBy;
+    @Column(name = "uuid")
+    private String uuid;
 
     @OneToMany(
             mappedBy = "template",
@@ -94,6 +99,19 @@ public class TemplateEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id"))
     private Set<RoleEntity> appliedRoles = new HashSet<>();
+
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Long getId() {
         return id;

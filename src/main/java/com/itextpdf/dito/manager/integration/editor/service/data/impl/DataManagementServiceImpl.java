@@ -7,8 +7,6 @@ import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.datasample.DataSampleService;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -23,35 +21,33 @@ public class DataManagementServiceImpl implements DataManagementService {
         this.dataCollectionService = dataCollectionService;
     }
 
-
     @Override
     public DataSampleEntity get(final String id) {
-        return dataSampleService.get(id);
+        return dataSampleService.getByUuid(id);
     }
 
     @Override
-    public DataSampleEntity createNewVersion(final String name, final String data, final String fileName,
+    public DataSampleEntity createNewVersion(final String uuid, final String data, final String fileName,
             final String email) {
-        return dataSampleService.createNewVersion(name, data, fileName, email, null);
+        final DataSampleEntity entity = dataSampleService.getByUuid(uuid);
+        return dataSampleService.createNewVersion(entity.getDataCollection().getName(), entity.getName(), data, fileName, email, null);
     }
 
     @Override
-    public DataSampleEntity create(final String dataCollectionId, final String name, final String fileName,
+    public DataSampleEntity create(final String dataCollectionUuid, final String name, final String fileName,
             final String sample, final String email) {
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(dataCollectionId);
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.getByUuid(dataCollectionUuid);
         return dataSampleService.create(dataCollectionEntity, name, fileName, sample, null, email);
     }
 
     @Override
     public DataSampleEntity delete(final String id) {
-        final List<DataSampleEntity> deletedDataSample = dataSampleService
-                .delete(Collections.singletonList(id));
-        return deletedDataSample.get(0);
+        return dataSampleService.deleteByUuid(id);
     }
 
     @Override
-    public Collection<DataSampleEntity> getDataSamplesByCollectionId(final String collectionId) {
-        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get(collectionId);
+    public Collection<DataSampleEntity> getDataSamplesByCollectionUuid(final String collectionId) {
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.getByUuid(collectionId);
         return dataCollectionEntity.getDataSamples();
     }
 

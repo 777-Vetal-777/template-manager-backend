@@ -13,4 +13,58 @@
         <addUniqueConstraint tableName="data_sample" columnNames="name, data_collection_id"/>
     </changeSet>
 
+    <changeSet id="003-add-uuid-column-to-template-file-table" author="Sergey_Nemets">
+        <addColumn tableName="template_file">
+            <column name="uuid" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="004-add-uuid-column-to-template-table" author="Sergey_Nemets">
+        <addColumn tableName="template">
+            <column name="uuid" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="005-add-uuid-column-to-resource-table" author="Sergey_Nemets">
+        <addColumn tableName="resource">
+            <column name="uuid" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="006-add-uuid-column-to-data-collection-table" author="Sergey_Nemets">
+        <addColumn tableName="data_collection">
+            <column name="uuid" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="007-add-uuid-column-to-data-sample-table" author="Sergey_Nemets">
+        <addColumn tableName="data_sample">
+            <column name="uuid" type="varchar(36)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="008-add-unique-constraint-to-uuid-column-at-template-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="template" columnNames="uuid" constraintName="template_uuid_unique_constraint"/>
+    </changeSet>
+
+    <changeSet id="009-add-unique-constraint-to-uuid-column-at-resource-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="resource" columnNames="uuid" constraintName="resource_uuid_unique_constraint"/>
+    </changeSet>
+
+    <changeSet id="010-add-unique-constraint-to-uuid-column-at-template-file-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="template_file" columnNames="uuid" constraintName="template_file_uuid_unique_constraint"/>
+    </changeSet>
+
+    <changeSet id="011-add-unique-constraint-to-uuid-column-at-resource-file-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="resource_file" columnNames="uuid" constraintName="resource_file_uuid_unique_constraint"/>
+    </changeSet>
+
+    <changeSet id="012-add-unique-constraint-to-uuid-column-at-data-collection-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="data_collection" columnNames="uuid" constraintName="data_collection_uuid_unique_constraint"/>
+    </changeSet>
+
+    <changeSet id="013-add-unique-constraint-to-uuid-column-at-data-sample-table" author="Sergey_Nemets">
+        <addUniqueConstraint tableName="data_sample" columnNames="uuid" constraintName="data_sample_uuid_unique_constraint"/>
+    </changeSet>
+
 </databaseChangeLog>

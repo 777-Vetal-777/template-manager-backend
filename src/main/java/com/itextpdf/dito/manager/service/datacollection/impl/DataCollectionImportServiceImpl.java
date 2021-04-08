@@ -47,7 +47,7 @@ public class DataCollectionImportServiceImpl implements DataCollectionImportServ
 
         DataSampleEntity dataSampleEntity;
         try {
-            dataSampleService.get(dataSampleName);
+            dataSampleService.get(entity.getName(), dataSampleName);
 
             int currentNumber = dataSampleRepository.findMaxIntegerByNamePattern(fileName).orElse(0) + 1;
             dataSampleEntity = dataSampleService.create(entity, new StringBuilder(fileName).append("(").append(currentNumber).append(")").toString(), dataSampleName, new String(json), "Import template", email);

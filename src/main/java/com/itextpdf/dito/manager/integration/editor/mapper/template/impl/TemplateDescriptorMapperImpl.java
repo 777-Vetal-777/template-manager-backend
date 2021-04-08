@@ -20,14 +20,13 @@ public class TemplateDescriptorMapperImpl implements TemplateDescriptorMapper {
     public ExternalTemplateDescriptor map(final TemplateEntity templateEntity) {
         final String templateName = templateEntity.getName();
         final TemplateFragmentType templateFragmentType = TemplateFragmentType.valueOf(templateEntity.getType().toString());
-        final String dataCollectionNameEncoded = Optional.ofNullable(templateEntity)
+        final String dataCollectionId = Optional.ofNullable(templateEntity)
                 .map(TemplateEntity::getLatestFile)
                 .map(TemplateFileEntity::getDataCollectionFile)
                 .map(DataCollectionFileEntity::getDataCollection)
-                .map(DataCollectionEntity::getName)
-                .map(this::encodeToBase64)
+                .map(DataCollectionEntity::getUuid)
                 .orElse(null);
-        return new ExternalTemplateDescriptor(encodeToBase64(templateName), templateName, dataCollectionNameEncoded, templateFragmentType);
+        return new ExternalTemplateDescriptor(encodeToBase64(templateName), templateName, dataCollectionId, templateFragmentType);
     }
 
     @Override

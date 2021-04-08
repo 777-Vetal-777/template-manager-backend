@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import org.hibernate.annotations.JoinFormula;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,6 +20,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "template_file")
@@ -46,6 +49,8 @@ public class TemplateFileEntity {
     private Date createdOn;
     private Date modifiedOn;
     private Boolean deployed;
+    @Column(name = "uuid")
+    private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "data_collection_file_id")
@@ -87,6 +92,19 @@ public class TemplateFileEntity {
             orphanRemoval = true
     )
     private List<TemplateFilePartEntity> compositions = new ArrayList<>();
+
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Long getId() {
         return id;

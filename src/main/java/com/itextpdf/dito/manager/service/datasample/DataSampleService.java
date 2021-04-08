@@ -16,21 +16,27 @@ public interface DataSampleService {
 
     List<DataSampleEntity> list(Long dataCollectionId);
 
-    DataSampleEntity get(String dataSampleName);
+    DataSampleEntity get(String dataCollectionName, String dataSampleName);
 
-    DataSampleEntity setAsDefault(String dataSampleName);
+    DataSampleEntity getByUuid(String uuid);
 
-    DataSampleEntity createNewVersion(String name, String data, String fileName, String email, String comment);
+    DataSampleEntity setAsDefault(String dataCollectionName, String dataSampleName);
 
-    List<DataSampleEntity> delete(List<String> dataSamplesList);
+    DataSampleEntity createNewVersion(String dataCollectionName, String name, String data, String fileName, String email, String comment);
+
+    List<DataSampleEntity> delete(String dataCollectionName, List<String> dataSamplesList);
+
+    DataSampleEntity deleteByUuid(String uuid);
 
     void delete(DataCollectionEntity dataCollectionEntity);
 
-    DataSampleEntity update(String name, DataSampleEntity entity, String userEmail);
+    DataSampleEntity update(String dataCollectionName, String name, DataSampleEntity entity, String userEmail);
 
     Optional<DataSampleEntity> findDataSampleByTemplateId(Long templateId);
 
     Optional<DataSampleEntity> findDataSampleByCollectionId(Long dataCollectionId);
+
+    DataSampleEntity getByNameAndTemplateName(String dataSampleName, String templateName);
 
     List<DataSampleEntity> getListByTemplateName(String templateName);
 }

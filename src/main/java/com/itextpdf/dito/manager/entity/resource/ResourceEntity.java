@@ -24,10 +24,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
+
 import org.hibernate.annotations.Where;
 
 @Entity
@@ -43,6 +46,8 @@ public class ResourceEntity {
     private ResourceTypeEnum type;
     @Column(insertable = false)
     private Date createdOn;
+    @Column(name = "uuid")
+    private String uuid;
     @ManyToOne()
     @JoinColumn(name = "author_id")
     private UserEntity createdBy;
@@ -82,6 +87,19 @@ public class ResourceEntity {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id"))
     private Set<RoleEntity> appliedRoles = new HashSet<>();
+
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Long getId() {
         return id;

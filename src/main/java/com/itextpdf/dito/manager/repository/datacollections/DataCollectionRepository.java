@@ -130,5 +130,8 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
             " left join {h-schema}permission p on p.id = rp.permission_id group by r.id) as rolesTable  where  dataCollectionId in (:listId)", nativeQuery = true)
     List<DataCollectionRoleModel> getListRoleWithPermissions(@Param("listId") List<Long> listId);
 
+    List<DataCollectionEntity> findByUuidNull();
+
+    Optional<DataCollectionEntity> findByUuid(String uuid);
 
 }

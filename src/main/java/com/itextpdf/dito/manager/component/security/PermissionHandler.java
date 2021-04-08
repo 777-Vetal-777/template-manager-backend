@@ -45,4 +45,6 @@ public interface PermissionHandler {
     //  Data Collections
 
     boolean checkDataCollectionPermissions(String email, String dataCollectionName, String checkingPermission);
+
+    boolean checkDataCollectionUuidPermissions(String email, String dataCollectionUuid, String checkingPermission);
 }

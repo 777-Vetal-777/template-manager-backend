@@ -2,7 +2,6 @@ package com.itextpdf.dito.manager.integration.editor.mapper.datasample.impl;
 
 import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor;
 import com.itextpdf.dito.editor.server.common.core.descriptor.DataSampleDescriptor.DataType;
-import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.integration.editor.mapper.datasample.DataSampleDescriptorMapper;
 
@@ -15,12 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataSampleDescriptorMapperImpl implements DataSampleDescriptorMapper {
 
-    private final Encoder encoder;
-
-    public DataSampleDescriptorMapperImpl(Encoder encoder) {
-        this.encoder = encoder;
-    }
-
     @Override
     public DataSampleDescriptor map(final DataSampleEntity entity) {
         final DataSampleDescriptor result;
@@ -29,14 +22,13 @@ public class DataSampleDescriptorMapperImpl implements DataSampleDescriptorMappe
         result = new DataSampleDescriptor(encodedName);
         result.setDisplayName(name);
         result.setDataType(DataType.JSON);
-        result.setCollectionIdList(Collections.singletonList(encoder.encode(entity.getDataCollection().getName())));
+        result.setCollectionIdList(Collections.singletonList(entity.getDataCollection().getUuid()));
         return result;
     }
 
     @Override
     public String mapToID(final DataSampleEntity entity) {
-        final String name = entity.getName();
-        return encoder.encode(name);
+        return entity.getUuid();
     }
 
     @Override

@@ -254,6 +254,15 @@ public class PermissionHandlerImpl implements PermissionHandler {
     }
 
     @Override
+    public boolean checkDataCollectionUuidPermissions(final String email, final String uuid, final String checkingPermission) {
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.getByUuid(uuid);
+        final UserEntity userEntity = userService.findActiveUserByEmail(email);
+
+        return checkUserPermissions(userEntity, dataCollectionEntity.getAppliedRoles(), checkingPermission);
+    }
+
+
+    @Override
     public boolean checkTemplatePermissions(final UserEntity userEntity, final TemplateEntity templateEntity, final String checkingPermission) {
         return checkUserPermissions(userEntity, templateEntity.getAppliedRoles(), checkingPermission);
     }

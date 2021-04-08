@@ -3,6 +3,7 @@ package com.itextpdf.dito.manager.handlers;
 import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.AbstractResourceAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.AbstractResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.AbstractResourceUuidNotFoundException;
 import com.itextpdf.dito.manager.exception.Base64DecodeException;
 import com.itextpdf.dito.manager.exception.datacollection.NoSuchDataCollectionTypeException;
 import com.itextpdf.dito.manager.exception.date.InvalidDateRangeException;
@@ -21,8 +22,12 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(AbstractResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> resourceNotFoundExceptionHandler(
-            final AbstractResourceNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDTO> resourceNotFoundExceptionHandler(final AbstractResourceNotFoundException ex) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AbstractResourceUuidNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> resourceUuidNotFoundExceptionHandler(final AbstractResourceUuidNotFoundException ex) {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND);
     }
 
@@ -37,8 +42,7 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDTO> methodArgumentNotValidExceptionHandler(
-            final MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponseDTO> methodArgumentNotValidExceptionHandler(final MethodArgumentNotValidException ex) {
         final String fieldErrors = ex.getBindingResult().getFieldErrors()
                 .stream()
                 .map(error -> new StringBuilder()

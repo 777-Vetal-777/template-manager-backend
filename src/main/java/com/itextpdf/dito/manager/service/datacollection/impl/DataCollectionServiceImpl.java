@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.service.datacollection.impl;
 
 import com.itextpdf.dito.manager.component.validator.json.JsonValidator;
 import com.itextpdf.dito.manager.exception.AliasConstants;
+import com.itextpdf.dito.manager.exception.datacollection.DataCollectionUuidNotFoundException;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionModelWithRoles;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionRoleModel;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionModel;
@@ -105,7 +106,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
     public DataCollectionEntity create(final String name, final DataCollectionType type, final byte[] data, final String fileName, final String email) {
         log.info("Create dataCollection with name: {} and type: {} and fileName: {} and email: {} was started", name, type, fileName, email);
         throwExceptionIfNameNotMatchesPattern(name, AliasConstants.DATA_COLLECTION);
-        if (dataCollectionRepository.existsByName(name)) {
+        if (Boolean.TRUE.equals(dataCollectionRepository.existsByName(name))) {
             throw new DataCollectionAlreadyExistsException(name);
         }
         checkJsonIsValid(data);
@@ -251,35 +252,35 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     private List<PermissionDTO> createListPermissions(final DataCollectionRoleModel role) {
         final List<PermissionDTO> list = new ArrayList<>();
-        if (role.getE6_US34_EDIT_DATA_COLLECTION_METADATA()) {
+        if (Boolean.TRUE.equals(role.getE6_US34_EDIT_DATA_COLLECTION_METADATA())) {
             final PermissionDTO permissionDTO = createPermission("E6_US34_EDIT_DATA_COLLECTION_METADATA");
             list.add(permissionDTO);
         }
-        if (role.getE6_US38_DELETE_DATA_COLLECTION()) {
+        if (Boolean.TRUE.equals(role.getE6_US38_DELETE_DATA_COLLECTION())) {
             final PermissionDTO permissionDTO = createPermission("E6_US38_DELETE_DATA_COLLECTION");
             list.add(permissionDTO);
         }
-        if (role.getE6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON()) {
+        if (Boolean.TRUE.equals(role.getE6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON())) {
             final PermissionDTO permissionDTO = createPermission("E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON");
             list.add(permissionDTO);
         }
-        if (role.getE6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION()) {
+        if (Boolean.TRUE.equals(role.getE6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION())) {
             final PermissionDTO permissionDTO = createPermission("E6_US37_ROLL_BACK_OF_THE_DATA_COLLECTION");
             list.add(permissionDTO);
         }
-        if (role.getE7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE()) {
+        if (Boolean.TRUE.equals(role.getE7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE())) {
             final PermissionDTO permissionDTO = createPermission("E7_US44_CREATE_NEW_DATA_SAMPLE_BASED_ON_JSON_FILE");
             list.add(permissionDTO);
         }
-        if (role.getE7_US47_EDIT_SAMPLE_METADATA()) {
+        if (Boolean.TRUE.equals(role.getE7_US47_EDIT_SAMPLE_METADATA())) {
             final PermissionDTO permissionDTO = createPermission("E7_US47_EDIT_SAMPLE_METADATA");
             list.add(permissionDTO);
         }
-        if (role.getE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE()) {
+        if (Boolean.TRUE.equals(role.getE7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE())) {
             final PermissionDTO permissionDTO = createPermission("E7_US48_CREATE_NEW_VERSION_OF_DATA_SAMPLE");
             list.add(permissionDTO);
         }
-        if (role.getE7_US50_DELETE_DATA_SAMPLE()) {
+        if (Boolean.TRUE.equals(role.getE7_US50_DELETE_DATA_SAMPLE())) {
             final PermissionDTO permissionDTO = createPermission("E7_US50_DELETE_DATA_SAMPLE");
             list.add(permissionDTO);
         }
@@ -354,7 +355,7 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
         final UserEntity currentUser = userService.findActiveUserByEmail(userEmail);
 
         existingEntity.setType(updatedEntity.getType());
-        if (!name.equals(newName) && dataCollectionRepository.existsByName(newName)) {
+        if (!name.equals(newName) && Boolean.TRUE.equals(dataCollectionRepository.existsByName(newName))) {
             throw new DataCollectionAlreadyExistsException(newName);
         }
         existingEntity.setName(newName);
@@ -417,6 +418,11 @@ public class DataCollectionServiceImpl extends AbstractService implements DataCo
 
     private DataCollectionEntity findByName(final String name) {
         return dataCollectionRepository.findByName(name).orElseThrow(() -> new DataCollectionNotFoundException(name));
+    }
+
+    @Override
+    public DataCollectionEntity getByUuid(final String uuid) {
+        return dataCollectionRepository.findByUuid(uuid).orElseThrow(() -> new DataCollectionUuidNotFoundException(uuid));
     }
 
     private DataCollectionLogEntity createDataCollectionLogEntry(final DataCollectionEntity collectionEntity, final UserEntity userEntity) {

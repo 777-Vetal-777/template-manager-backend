@@ -15,7 +15,7 @@ public class DataCollectionManagementServiceImpl implements DataCollectionManage
     }
 
     @Override
-    public DataCollectionEntity get(String id) {
-        return dataCollectionService.get(id);
+    public DataCollectionEntity getByUuid(String uuid) {
+        return dataCollectionService.getByUuid(uuid);
     }
 }

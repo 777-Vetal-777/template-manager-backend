@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,6 +25,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.JoinFormula;
@@ -47,6 +49,8 @@ public class DataCollectionEntity {
 
     @Column
     private Date createdOn;
+    @Column(name = "uuid")
+    private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = " author_id", referencedColumnName = "id")
@@ -96,6 +100,19 @@ public class DataCollectionEntity {
     @OneToMany(mappedBy = "dataCollection", cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Collection<DataSampleEntity> dataSamples;
+
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Collection<DataCollectionLogEntity> getDataCollectionLog() {
         return dataCollectionLog;

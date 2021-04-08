@@ -282,7 +282,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     @Override
     public ResponseEntity<DataSampleDTO> getDataSample(final String dataCollectionName, final String dataSampleName) {
         log.info("Get dataSample by dataCollectionName: {} and dataSampleName: {} was started", dataCollectionName, dataSampleName);
-        final DataSampleEntity dataSampleEntity = dataSampleService.get(encoder.decode(dataSampleName));
+        final DataSampleEntity dataSampleEntity = dataSampleService.get(encoder.decode(dataCollectionName), encoder.decode(dataSampleName));
         log.info("Get dataSample by dataCollectionName: {} and dataSampleName: {} was finished successfully", dataCollectionName, dataSampleName);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity),
                 HttpStatus.OK);
@@ -292,7 +292,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<Void> deleteDataSampleList(final String dataCollectionName,
                                                      final List<String> dataSampleNames, final Principal principal) {
         log.info("Delete list dataSamples by dataSamplesNames: {} was started", dataSampleNames);
-        dataSampleService.delete(dataSampleNames);
+        dataSampleService.delete(encoder.decode(dataCollectionName), dataSampleNames);
         log.info("Delete list dataSamples by dataSamplesNames: {} was finished successfully", dataSampleNames);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -309,7 +309,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataSampleDTO> setDataSampleAsDefault(final String dataCollectionName, final String dataSampleName,
                                                                 final Principal principal) {
         log.info("Set dataSample as default by dataCollectionName: {} and dataSampleName: {} was started", dataCollectionName, dataSampleName);
-        final DataSampleEntity dataSampleEntity = dataSampleService.setAsDefault(encoder.decode(dataSampleName));
+        final DataSampleEntity dataSampleEntity = dataSampleService.setAsDefault(encoder.decode(dataCollectionName), encoder.decode(dataSampleName));
         log.info("Set dataSample as default by dataCollectionName: {} and dataSampleName: {} was finished successfully", dataCollectionName, dataSampleName);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.OK);
     }
@@ -318,8 +318,7 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     public ResponseEntity<DataSampleDTO> updateDataSample(final String dataCollectionName, final String dataSampleName,
                                                           @Valid final DataSampleUpdateRequestDTO dataSampleUpdateRequestDTO, final Principal principal) {
         log.info("Update dataSample by dataSampleName: {} and dataSampleUpdateRequestDTO: {} was started", dataSampleName, dataSampleUpdateRequestDTO);
-        final DataSampleEntity entity = dataSampleService.update(encoder.decode(dataSampleName), dataSampleMapper.map(dataSampleUpdateRequestDTO),
-                principal.getName());
+        final DataSampleEntity entity = dataSampleService.update(encoder.decode(dataCollectionName), encoder.decode(dataSampleName), dataSampleMapper.map(dataSampleUpdateRequestDTO), principal.getName());
         log.info("Update dataSample by dataSampleName: {} and dataSampleUpdateRequestDTO: {} was finished successfully", dataSampleName, dataSampleUpdateRequestDTO);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(entity), HttpStatus.OK);
     }
@@ -327,13 +326,14 @@ public class DataCollectionControllerImpl extends AbstractController implements 
     @Override
     public ResponseEntity<DataSampleDTO> createDataSampleNewVersion(final String dataCollectionName,
                                                                     final @Valid DataSampleCreateRequestDTO dataSampleCreateRequestDTO, final Principal principal) {
+        final String decodedDataCollectionName = encoder.decode(dataCollectionName);
         log.info("Create new version of dataSample: {} was started", dataSampleCreateRequestDTO);
         final String dataSampleName = dataSampleCreateRequestDTO.getName();
         final String fileName = dataSampleCreateRequestDTO.getFileName();
         final String data = dataSampleCreateRequestDTO.getSample();
         final String comment = dataSampleCreateRequestDTO.getComment();
-        final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(dataSampleName, data, fileName,
-                principal.getName(), comment);
+        final DataSampleEntity dataSampleEntity = dataSampleService.createNewVersion(decodedDataCollectionName, dataSampleName, data,
+                fileName, principal.getName(), comment);
         log.info("Create new version of dataSample: {} was finished successfully", dataSampleCreateRequestDTO);
         return new ResponseEntity<>(dataSampleMapper.mapWithFile(dataSampleEntity), HttpStatus.CREATED);
     }

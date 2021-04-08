@@ -15,10 +15,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "data_sample")
@@ -42,9 +44,8 @@ public class DataSampleEntity {
     private Date createdOn;
     @Column(name="is_default")
     private Boolean isDefault;
-    public Date getModifiedOn() {
-		return modifiedOn;
-	}
+    @Column(name = "uuid")
+    private String uuid;
 
     @OneToMany(mappedBy = "dataSample",
             cascade = CascadeType.ALL,
@@ -78,11 +79,26 @@ public class DataSampleEntity {
     @OrderBy("date DESC")
     private Collection<DataSampleLogEntity> dataSampleLog;
 
+    @PrePersist
+    public void onPrePersist() {
+        uuid = UUID.randomUUID().toString();
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public void setModifiedOn(Date modifiedOn) {
 		this.modifiedOn = modifiedOn;
 	}
 
-	
+    public Date getModifiedOn() {
+        return modifiedOn;
+    }
 
 	public Long getId() {
         return id;

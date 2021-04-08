@@ -61,7 +61,7 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
             final Optional<DataSampleEntity> dataSampleByTemplateId = dataSampleService.findDataSampleByTemplateId(templateEntity.getId());
             sampleForPreview = dataSampleByTemplateId.orElse(null);
         } else {
-            sampleForPreview = dataSampleService.get(dataSampleName);
+            sampleForPreview = dataSampleService.getByNameAndTemplateName(dataSampleName, templateName);
         }
         final String dataSample = Objects.isNull(sampleForPreview) ? "{}" : new String(sampleForPreview.getLatestVersion().getData(), StandardCharsets.UTF_8);
 

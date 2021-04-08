@@ -7,13 +7,13 @@ import java.util.Collection;
 public interface DataManagementService {
     DataSampleEntity get(String id);
 
-    DataSampleEntity createNewVersion(String name, String data, String fileName, String email);
+    DataSampleEntity createNewVersion(String uuid, String data, String fileName, String email);
 
-    DataSampleEntity create(String dataCollectionId, String name, String fileName, String sample, String email);
+    DataSampleEntity create(String dataCollectionUuid, String name, String fileName, String sample, String email);
 
     DataSampleEntity delete(String id);
 
-    Collection<DataSampleEntity> getDataSamplesByCollectionId(String collectionId);
+    Collection<DataSampleEntity> getDataSamplesByCollectionUuid(String collectionId);
 
     DataSampleEntity getDefaultDataSampleByCollectionId(Long collectionId);
 }

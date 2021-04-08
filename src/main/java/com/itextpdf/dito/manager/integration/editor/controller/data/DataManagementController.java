@@ -27,8 +27,8 @@ import java.util.List;
 @Tag(name = "editor-data", description = "editor integration API")
 public interface DataManagementController {
     String CREATE_DATA_SAMPLE_URL = "/data";
-    String DATA_SAMPLE_URL = "data/{sample-id}";
-    String DATA_SAMPLE_DESCRIPTOR_URL = "data/{sample-id}/descriptor";
+    String DATA_SAMPLE_URL = "/data/{sample-id}";
+    String DATA_SAMPLE_DESCRIPTOR_URL = "/data/{sample-id}/descriptor";
     String COLLECTION_DATA_SAMPLES_URL = "/collection/{collection-id}";
     String COLLECTION_DESCRIPTOR_URL = "/collection/{collection-id}/descriptor";
     String COLLECTION_DATA_STRUCTURE_URL = "/collection/{collection-id}/data";
@@ -48,7 +48,7 @@ public interface DataManagementController {
     byte[] fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @PutMapping(value = DATA_SAMPLE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), @permissionHandlerImpl.decodeBase64(#descriptor.getCollectionIdList().get(0)), 'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionUuidPermissions(#principal.getName(), #descriptor.getCollectionIdList().get(0), 'E6_US35_CREATE_A_NEW_VERSION_OF_DATA_COLLECTION_USING_JSON')")
     @Operation(description = "Create a new version of data sample", summary = "updates existing data sample or creates new one, returns data sample descriptor", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DataSampleDescriptor.class)))
     @ApiResponse(responseCode = "404", description = "DataSample not found by id", content = @Content)
@@ -57,7 +57,7 @@ public interface DataManagementController {
                                                     @RequestPart(required = false) DataSampleDescriptor descriptor, @RequestPart String data);
 
     @PostMapping(value = CREATE_DATA_SAMPLE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionPermissions(#principal.getName(), @permissionHandlerImpl.decodeBase64(#descriptor.getCollectionIdList().get(0)), 'E7_US45_CREATE_DATA_SAMPLE_BASED_ON_DATA_COLLECTION_JSON_FILE')")
+    @PreAuthorize("@permissionHandlerImpl.checkDataCollectionUuidPermissions(#principal.getName(), #descriptor.getCollectionIdList().get(0), 'E7_US45_CREATE_DATA_SAMPLE_BASED_ON_DATA_COLLECTION_JSON_FILE')")
     @Operation(description = "create new datasample",summary = "Create a new sample date using the specified data. ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DataSampleDescriptor.class)))
     @ApiResponse(responseCode = "409", description = "DataSample already exist", content = @Content)

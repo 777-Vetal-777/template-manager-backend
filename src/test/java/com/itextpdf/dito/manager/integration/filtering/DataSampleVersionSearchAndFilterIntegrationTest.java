@@ -70,12 +70,12 @@ public class DataSampleVersionSearchAndFilterIntegrationTest extends AbstractInt
     public void init() {
         DataCollectionEntity dataCollectionEntity = dataCollectionService.create(DATACOLLECTION_NAME, DataCollectionType.valueOf(TYPE), "{\"file\":\"data\"}".getBytes(), "datacollection.json", "admin@email.com");
         DataSampleEntity dataSampleEntity = dataSampleService.create(dataCollectionEntity, "name", "fileName", "{\"file\":\"data2\"}", "comment", "admin@email.com");
-        dataSampleService.createNewVersion(dataSampleEntity.getName(), "{\"file\":\"data3\"}", "fileName3", "admin@email.com", "comment3");
-        dataSampleService.createNewVersion(dataSampleEntity.getName(), "{\"file\":\"data4\"}", "fileName4", "admin@email.com", "comment4");
-        dataSampleService.createNewVersion(dataSampleEntity.getName(), "{\"file\":\"data5\"}", "fileName5", "admin@email.com", "comment5");
-        dataSampleService.createNewVersion(dataSampleEntity.getName(), "{\"file\":\"data6\"}", "fileName6", "admin@email.com", "comment6");
-        dataSampleService.createNewVersion(dataSampleEntity.getName(), "{\"file\":\"data7\"}", "fileName7", "admin@email.com", "comment7");
-        dataSampleService.createNewVersion(dataSampleEntity.getName(), "{\"file\":\"data8\"}", "fileName8", "admin@email.com", "comment7");
+        dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleEntity.getName(), "{\"file\":\"data3\"}", "fileName3", "admin@email.com", "comment3");
+        dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleEntity.getName(), "{\"file\":\"data4\"}", "fileName4", "admin@email.com", "comment4");
+        dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleEntity.getName(), "{\"file\":\"data5\"}", "fileName5", "admin@email.com", "comment5");
+        dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleEntity.getName(), "{\"file\":\"data6\"}", "fileName6", "admin@email.com", "comment6");
+        dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleEntity.getName(), "{\"file\":\"data7\"}", "fileName7", "admin@email.com", "comment7");
+        dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleEntity.getName(), "{\"file\":\"data8\"}", "fileName8", "admin@email.com", "comment7");
 
         StageEntity stageEntity = stageRepository.findDefaultStage().get();
         DataCollectionEntity dataCollectionEntity2 = dataCollectionRepository.findByName("data-collection-search-test").get();
