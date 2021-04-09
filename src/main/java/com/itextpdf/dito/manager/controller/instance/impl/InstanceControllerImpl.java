@@ -6,6 +6,7 @@ import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.create.InstanceHeaderRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.entity.InstanceEntity;
@@ -14,6 +15,7 @@ import com.itextpdf.dito.manager.service.instance.InstanceService;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 
 import org.apache.logging.log4j.LogManager;
@@ -53,10 +55,12 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     }
 
     @Override
-    public ResponseEntity<Void> ping(final String socket) {
-        log.info("Get instance status by socket: {} was started", socket);
-        instanceClient.ping(encoder.decode(socket));
-        log.info("Get instance status by socket: {} was finished successfully", socket);
+    public ResponseEntity<Void> ping(final String socket, final InstanceHeaderRequestDTO headers) {
+        log.info("Get instance status by socket: {} and headers: {} was started", socket, headers);
+        final String customHeaderName = Optional.ofNullable(headers).map(InstanceHeaderRequestDTO::getHeaderName).orElse(null);
+        final String customHeaderValue = Optional.ofNullable(headers).map(InstanceHeaderRequestDTO::getHeaderValue).orElse(null);
+        instanceClient.ping(encoder.decode(socket), customHeaderName, customHeaderValue);
+        log.info("Get instance status by socket: {} and headers: {} was finished successfully", socket, headers);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

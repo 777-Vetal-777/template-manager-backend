@@ -142,7 +142,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         if (templateFileEntities != null && !templateFileEntities.isEmpty()) {
             throw new InstanceHasAttachedTemplateException();
         }
-        instanceClient.unregister(instanceEntity.getSocket(), instanceEntity.getRegisterToken());
+        instanceClient.unregister(instanceEntity.getSocket(), instanceEntity.getRegisterToken(), instanceEntity.getHeaderName(), instanceEntity.getHeaderValue());
         instanceRepository.deleteByName(name);
         log.info("Delete instance by name: {} was finished", name);
     }
@@ -164,7 +164,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
             throw new InstanceCustomHeaderValidationException(oldInstanceEntity.getName());
         }
 
-        final String instanceToken = instanceClient.register(instanceEntity.getSocket(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue()).getToken();
+        final String instanceToken = instanceClient.register(instanceEntity.getSocket(), instanceEntity.getHeaderName(), instanceEntity.getHeaderValue()).getToken();
 
         try {
             oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(oldInstanceEntity, templateFile, false));
@@ -176,7 +176,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         }
 
         try {
-            instanceClient.unregister(oldInstanceEntity.getSocket(), oldInstanceEntity.getRegisterToken());
+            instanceClient.unregister(oldInstanceEntity.getSocket(), oldInstanceEntity.getRegisterToken(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue());
         } catch (SdkInstanceException e) {
             log.warn("An error occurred during unregister instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
         }

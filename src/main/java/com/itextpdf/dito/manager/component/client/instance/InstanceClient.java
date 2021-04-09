@@ -7,11 +7,11 @@ import com.itextpdf.dito.manager.dto.template.deployment.TemplateDescriptorDTO;
 import java.io.File;
 
 public interface InstanceClient {
-    void ping(String socket);
+    void ping(String socket, String customHeaderName, String customHeaderValue);
 
     InstanceRegisterResponseDTO register(String instanceSocket, String customHeaderName, String customHeaderValue);
 
-    void unregister(String instanceSocket, String token);
+    void unregister(String instanceSocket, String token, String customHeaderName, String customHeaderValue);
 
     TemplateDeploymentDTO promoteTemplateToInstance(String instanceRegisterToken, String instanceSocket, TemplateDescriptorDTO descriptorDTO, File templateProject);
 

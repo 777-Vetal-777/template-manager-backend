@@ -179,7 +179,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         try{
             templateDeploymentService.promoteOnDefaultStage(templateFileEntity);
         } catch (SdkInstanceException exception){
-            throw new TemplateCannotBePromotedException(templateName);
+            throw new TemplateCannotBePromotedException(templateName, exception.getMessage());
         }
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was finished successfully",
                 templateName, templateTypeEnum, dataCollectionName, email, templateParts);

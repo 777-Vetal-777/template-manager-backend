@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.create.InstanceHeaderRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
@@ -53,8 +54,8 @@ public interface InstanceController {
             @ApiResponse(responseCode = "502", description = "No connection to the instance")
     })
     ResponseEntity<Void> ping(
-            @Parameter(description = "encoded with base64 socket, with which you can check the status of the instance")
-            @PathVariable(INSTANCE_SOCKET_PATH_VARIABLE) String socket);
+            @Parameter(description = "encoded with base64 socket, with which you can check the status of the instance") @PathVariable(INSTANCE_SOCKET_PATH_VARIABLE) String socket,
+            @Parameter(description = "custom header name and value") @ParameterObject InstanceHeaderRequestDTO headers);
 
     @PostMapping
     @PreAuthorize("hasAuthority('E5_US28_CONNECT_NEW_INSTANCE')")

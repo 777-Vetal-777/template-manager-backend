@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.component.client.instance.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceErrorResponseDTO;
 import com.itextpdf.dito.manager.dto.instance.register.InstanceRegisterRequestDTO;
@@ -39,31 +41,43 @@ public class InstanceClientImpl implements InstanceClient {
 
     private static final String WORKSPACE_ALIAS = "Template Manager";
 
-    private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 5L;
+    private static final Long INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS = 30L;
     private static final Duration READ_TIMEOUT = Duration.ofSeconds(INSTANCE_AVAILABILITY_TIMEOUT_IN_SECONDS);
 
     private final WebClient webClient;
+    private final ObjectMapper objectMapper;
 
-    public InstanceClientImpl(final WebClient webClient) {
+    public InstanceClientImpl(final WebClient webClient,
+                              final ObjectMapper objectMapper) {
         this.webClient = webClient;
+        this.objectMapper = objectMapper;
     }
 
     @Override
-    public void ping(final String socket) {
+    public void ping(final String socket, final String customHeaderName, final String customHeaderValue) {
         if (StringUtils.isEmpty(socket)) {
             throw new IllegalArgumentException("Instance's socket must be presented.");
         }
+        if (StringUtils.isEmpty(customHeaderName) ^ StringUtils.isEmpty(customHeaderValue)) {
+            throw new IllegalArgumentException("Instance's custom header name and value have to be filled both.");
+        }
+
         final String instanceStatusUrl = new StringBuilder(socket).append(INSTANCE_API_STATUS_URL).toString();
         try {
             webClient
                     .get()
                     .uri(instanceStatusUrl)
+                    .headers(h -> {
+                        if (!StringUtils.isEmpty(customHeaderName)) {
+                            h.add(customHeaderName, customHeaderValue);
+                        }
+                    })
                     .retrieve()
                     .bodyToMono(String.class)
                     .block(READ_TIMEOUT);
         } catch (Exception exception) {
             log.warn(exception);
-            throw new NotReachableInstanceException(socket);
+            throw new NotReachableInstanceException(socket, exception.getMessage());
         }
     }
 
@@ -90,14 +104,16 @@ public class InstanceClientImpl implements InstanceClient {
                     .bodyToMono(InstanceRegisterResponseDTO.class);
             return response.block();
         } catch (IllegalArgumentException e) {
-            throw new NotReachableInstanceException(instanceSocket);
+            throw new NotReachableInstanceException(instanceSocket, e.getMessage());
+        } catch (SdkInstanceException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
         }
     }
 
     @Override
-    public void unregister(final String instanceSocket, final String instanceToken) {
+    public void unregister(final String instanceSocket, final String instanceToken, String customHeaderName, String customHeaderValue) {
         final String instanceUnregisterUrl = new StringBuilder().append(instanceSocket).append(INSTANCE_UNREGISTER_ENDPOINT).toString();
         final InstanceRegisterRequestDTO instanceRegisterRequestDTO = new InstanceRegisterRequestDTO();
         instanceRegisterRequestDTO.setSubject(WORKSPACE_ALIAS);
@@ -106,6 +122,11 @@ public class InstanceClientImpl implements InstanceClient {
                     .post()
                     .uri(instanceUnregisterUrl)
                     .headers(h -> h.setBearerAuth(instanceToken))
+                    .headers(h -> {
+                        if (!StringUtils.isEmpty(customHeaderName)) {
+                            h.add(customHeaderName, customHeaderValue);
+                        }
+                    })
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(instanceRegisterRequestDTO)
                     .retrieve()
@@ -114,6 +135,8 @@ public class InstanceClientImpl implements InstanceClient {
                     )
                     .bodyToMono(Void.class);
             response.block(READ_TIMEOUT);
+        } catch (SdkInstanceException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
         }
@@ -140,6 +163,8 @@ public class InstanceClientImpl implements InstanceClient {
                     )
                     .bodyToMono(TemplateDeploymentDTO.class);
             return response.block(READ_TIMEOUT);
+        } catch (SdkInstanceException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
         }
@@ -165,6 +190,8 @@ public class InstanceClientImpl implements InstanceClient {
                     )
                     .bodyToMono(TemplateDeploymentDTO.class);
             return response.block(READ_TIMEOUT);
+        } catch (SdkInstanceException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
         }
@@ -173,10 +200,15 @@ public class InstanceClientImpl implements InstanceClient {
     Mono<Throwable> processInstanceError(final ClientResponse clientResponse,
                                          final String instanceSocket,
                                          final String errorText) {
-        final Mono<InstanceErrorResponseDTO> errorMessage = clientResponse.bodyToMono(InstanceErrorResponseDTO.class);
+        final Mono<String> errorMessage = clientResponse.bodyToMono(String.class);
         return errorMessage.flatMap(message -> {
-            log.warn(message.getMessage());
-            throw new SdkInstanceException(errorText, instanceSocket, message.getCode(), message.getMessage());
+            log.warn(message);
+            try {
+                final InstanceErrorResponseDTO errorResponseDTO = objectMapper.readValue(message, InstanceErrorResponseDTO.class);
+                throw new SdkInstanceException(errorText, instanceSocket, errorResponseDTO.getCode(), errorResponseDTO.getMessage());
+            } catch (JsonProcessingException e) {
+                throw new SdkInstanceException(errorText, instanceSocket, clientResponse.rawStatusCode(), message);
+            }
         });
     }
 

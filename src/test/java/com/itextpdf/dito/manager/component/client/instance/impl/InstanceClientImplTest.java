@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,22 +81,20 @@ public class InstanceClientImplTest {
         post.setToken("randToken");
         when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
         when(requestHeadersUriSpecMock.uri(anyString())).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.headers(any())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<InstanceRegisterResponseDTO>>notNull())).thenReturn(Mono.just(post));
 
         // when
-        assertDoesNotThrow(() -> {instanceClient.ping(SOCKET_EXAMPLE);});
+        assertDoesNotThrow(() -> {instanceClient.ping(SOCKET_EXAMPLE, null, null);});
 
         // then no errors occurred
     }
 
     @Test
     public void shouldThrowExceptionOnPingEmptySocket() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    instanceClient.ping("");
-                }
+        assertThrows(IllegalArgumentException.class,
+                () -> {instanceClient.ping("", null, null);}
         );
     }
 
@@ -122,6 +122,32 @@ public class InstanceClientImplTest {
         // then
         assertNotNull(responseDTO);
         assertEquals("randToken", responseDTO.getToken());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldNotPingSecuredInstance() {
+        // given
+        final InstanceRegisterResponseDTO post = new InstanceRegisterResponseDTO();
+        post.setToken("randToken");
+        when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
+        when(requestHeadersUriSpecMock.uri(anyString())).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.headers(any())).thenAnswer(invocation -> {
+            HttpHeaders h = new HttpHeaders();
+            ((Consumer<HttpHeaders>) invocation.getArgument(0)).accept(h);
+            if (!h.getOrEmpty("secureheader").contains("securevalue")) {
+                throw new IllegalArgumentException();
+            }
+            return requestHeadersSpecMock;
+        });
+                //.thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<InstanceRegisterResponseDTO>>notNull())).thenAnswer(mock -> Mono.just(post));
+        //thenReturn(Mono.just(post))
+
+        // when
+        assertThrows(NotReachableInstanceException.class, () -> {instanceClient.ping(SOCKET_EXAMPLE, "cheader", "cvalue");});
+        assertDoesNotThrow(() -> {instanceClient.ping(SOCKET_EXAMPLE, "secureheader", "securevalue");});
     }
 
     @Test
@@ -154,7 +180,7 @@ public class InstanceClientImplTest {
         when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<Void>>any())).thenReturn(Mono.empty());
 
         // when
-        assertDoesNotThrow(() -> instanceClient.unregister(SOCKET_EXAMPLE, "randToken"));
+        assertDoesNotThrow(() -> instanceClient.unregister(SOCKET_EXAMPLE, "randToken", null, null));
 
         // then no errors occurred
     }
@@ -228,12 +254,10 @@ public class InstanceClientImplTest {
     @Test
     void shouldProcessInstanceError() {
         // given
-        final InstanceErrorResponseDTO mockedResponseDto = new InstanceErrorResponseDTO();
-        mockedResponseDto.setCode(999);
-        mockedResponseDto.setMessage("error_message_example");
+        final String mockedResponseDto = "{\"code\":999, \"message\":\"error_message_example\"}";
 
         ClientResponse clientResponseMock = Mockito.mock(ClientResponse.class);
-        when(clientResponseMock.bodyToMono(ArgumentMatchers.<Class<InstanceErrorResponseDTO>>notNull()))
+        when(clientResponseMock.bodyToMono(ArgumentMatchers.<Class<String>>notNull()))
                 .thenReturn(Mono.just(mockedResponseDto));
 
         // expected
