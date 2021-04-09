@@ -39,3 +39,7 @@ logging:
       hibernate:
         show_sql: true
         format_sql: true
+management:
+  health:
+    mail:
+      enabled: false

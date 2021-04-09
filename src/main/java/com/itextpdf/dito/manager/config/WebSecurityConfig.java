@@ -64,7 +64,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
             UserController.BASE_NAME + UserController.RESET_PASSWORD,
             TokenController.BASE_NAME + TokenController.REFRESH_ENDPOINT,
             OptionController.BASE_NAME,
-            "/actuator/health"
+            "/actuator/health/ping"
     };
 
     @Override

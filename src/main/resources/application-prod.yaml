@@ -41,3 +41,7 @@ spring:
           auth: ${DITO_MANAGER_SMTP_AUTH:true}
           starttls:
             enable: ${DITO_MANAGER_SMTP_TLS_ENABLE:true}
+management:
+  health:
+    mail:
+      enabled: ${DITO_MANAGER_MAILING_ENABLE}

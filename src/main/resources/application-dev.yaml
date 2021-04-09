@@ -39,3 +39,8 @@ jpa:
     hibernate:
       show_sql: true
       format_sql: true
+
+management:
+  health:
+    mail:
+      enabled: ${DITO_MANAGER_MAILING_ENABLE}
