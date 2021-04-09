@@ -19,4 +19,13 @@ file name: kotlinx-serialization-core-jvm-1.1.0.jar
         <!-- False positive. This suppression will have to been removed once it fixed.
         Issue: https://github.com/jeremylong/DependencyCheck/issues/2748 -->
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: nio-stream-storage-1.1.3.jar
+   ]]></notes>
+        <vulnerabilityName>CVE-2021-20291</vulnerabilityName>
+        <!-- False positive. This suppression will have to been removed once it fixed.
+        Issue:  https://jira.itextsupport.com/browse/DTM-2753
+                https://github.com/jeremylong/DependencyCheck/issues/3273 -->
+    </suppress>
 </suppressions>
