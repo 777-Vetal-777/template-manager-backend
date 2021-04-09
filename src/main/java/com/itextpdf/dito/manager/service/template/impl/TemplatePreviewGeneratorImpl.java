@@ -12,6 +12,7 @@ import com.itextpdf.dito.sdk.core.data.IExplicitTemplateData;
 import com.itextpdf.dito.sdk.core.data.JsonData;
 import com.itextpdf.dito.sdk.output.PdfProducer;
 import com.itextpdf.dito.sdk.output.PdfProducerProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
 
         //get data sample file by template id to transfer it to SDK
         final DataSampleEntity sampleForPreview;
-        if (Objects.isNull(dataSampleName)) {
+        if (StringUtils.isBlank(dataSampleName)) {
             //specially made for case, when template without data collection
             final Optional<DataSampleEntity> dataSampleByTemplateId = dataSampleService.findDataSampleByTemplateId(templateEntity.getId());
             sampleForPreview = dataSampleByTemplateId.orElse(null);
