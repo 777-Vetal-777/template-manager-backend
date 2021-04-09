@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -263,7 +264,7 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldAllowCreateDataSampleWithSameNameOnAnotherDataCollection() throws Exception {
         final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request.json"), DataSampleCreateRequestDTO.class);
-
+        assertEquals("{\"file\":\"data\"}", request.getSample());
         //Create dataSample
         mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
                 .content(objectMapper.writeValueAsString(request))
@@ -278,6 +279,18 @@ class DataSampleFlowIntegrationTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
+    }
+
+    @Test
+    void shouldCreateDataSampleWithNullValue() throws Exception {
+        final DataSampleCreateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/datasamples/data-sample-create-request-with-null.json"), DataSampleCreateRequestDTO.class);
+        assertEquals("{\"file\":null}", request.getSample());
+        //Create dataSample
+        mockMvc.perform(post(DataCollectionController.BASE_NAME + DataCollectionController.DATA_COLLECTION_DATA_SAMPLES_WITH_PATH_VARIABLE, DATACOLLECTION_BASE64_ENCODED_NAME)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
     }
 
 }

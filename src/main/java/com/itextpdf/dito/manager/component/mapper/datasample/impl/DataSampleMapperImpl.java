@@ -108,7 +108,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 
 	private Set<String> findKeys(final String prefix, final Map<Object, Object> treeMap, final Set<String> keys) {
 		treeMap.forEach((key, value) -> {
-			if (isClassMap(value.getClass())) {
+			if (value instanceof Map) {
 				final Map<Object, Object> map = (Map<Object, Object>) value;
 				final StringBuilder additionalPrefix = new StringBuilder(prefix);
 				additionalPrefix.append(key);
@@ -122,8 +122,4 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 		return keys;
 	}
 	
-	private boolean isClassMap(Class<?> c) {
-		return Map.class.isAssignableFrom(c);
-	}
-
 }
