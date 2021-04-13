@@ -1,5 +1,6 @@
 package com.itextpdf.dito.manager.integration.crud;
 
+import com.itextpdf.dito.manager.component.client.instance.InstanceHealthChecker;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
@@ -19,6 +20,7 @@ import java.util.Date;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,12 +31,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
+class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private InstanceRepository instanceRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private InstanceHealthChecker instanceHealthChecker;
 
     @AfterEach
     public void tearDown() {
@@ -42,7 +46,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_ping() throws Exception {
+    void test_ping() throws Exception {
         final String encodedSocketName = new String(Base64.getEncoder().encode("localhost:9999".getBytes()));
         mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.INSTANCE_STATUS_ENDPOINT, encodedSocketName))
                 .andExpect(status().isGatewayTimeout());
@@ -50,7 +54,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void shouldThrowInstanceAlreadyExist() throws Exception {
+    void shouldThrowInstanceAlreadyExist() throws Exception {
         final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
         createInstanceForTest(request.getInstances().get(0).getName());
 
@@ -62,7 +66,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_remember_success() throws Exception {
+    void test_remember_success() throws Exception {
         final InstancesRememberRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instances-remember-request.json"), InstancesRememberRequestDTO.class);
 
         mockMvc.perform(post(InstanceController.BASE_NAME)
@@ -82,7 +86,7 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_forget() throws Exception {
+    void test_forget() throws Exception {
         InstanceEntity instanceEntity = createInstanceForTest("instance-to-forget");
         final String encodedSocketName = new String(Base64.getEncoder().encode(instanceEntity.getName().getBytes()));
 
@@ -91,14 +95,14 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void test_list() throws Exception {
+    void test_list() throws Exception {
         mockMvc.perform(get(InstanceController.BASE_NAME))
                 .andExpect(status().isOk());
         assertFalse(instanceRepository.findAll().isEmpty());
     }
 
     @Test
-    public void update() throws Exception{
+    void update() throws Exception{
         InstanceEntity instanceEntity = createInstanceForTest("instance-to-update");
         final String encodedSocketName = new String(Base64.getEncoder().encode(instanceEntity.getName().getBytes()));
         final InstanceUpdateRequestDTO request = objectMapper.readValue(new File("src/test/resources/test-data/instances/instance-update-request.json"), InstanceUpdateRequestDTO.class);
@@ -109,8 +113,6 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(request.getName())))
                 .andExpect(jsonPath("$.socket", is(request.getSocket())));
-
-
 
         final InstanceEntity newInstance = new InstanceEntity();
         newInstance.setName("new name");
@@ -137,6 +139,18 @@ public class InstanceFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isConflict())
                 .andReturn();
         assertNotNull(mvcResult.getResponse());
+    }
+
+    @Test
+    void testUpdateActiveProperty() throws Exception {
+        assertDoesNotThrow(() -> instanceHealthChecker.check());
+
+        mockMvc.perform(get(InstanceController.BASE_NAME + InstanceController.STATUS_ENDPOINT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("count").value(1))
+                .andExpect(jsonPath("need_attention").value(1));
     }
 
     private InstanceEntity createInstanceForTest(String name){

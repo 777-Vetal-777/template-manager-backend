@@ -30,6 +30,7 @@ import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.role.RoleRepository;
+import com.itextpdf.dito.manager.repository.stage.StageRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateFileRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.repository.user.UserRepository;
@@ -134,6 +135,8 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     private TemplateLoader templateLoader;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private StageRepository stageRepository;
 
     @AfterEach
     void clearDb() {
@@ -739,9 +742,10 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         instanceEntity.setName("instance");
         instanceEntity.setSocket("socket");
         instanceEntity.setStage(stageEntity);
+        instanceEntity.setActive(true);
         stageEntity.setInstances(Collections.singletonList(instanceEntity));
         instanceRepository.save(instanceEntity);
-        return stageEntity;
+        return stageRepository.save(stageEntity);
     }
 
     @Test

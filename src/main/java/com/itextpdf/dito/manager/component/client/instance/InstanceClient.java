@@ -17,4 +17,5 @@ public interface InstanceClient {
 
     TemplateDeploymentDTO removeTemplateFromInstance(String instanceRegisterToken, String instanceSocket, String templateAlias);
 
+    Boolean checkIsInstanceAlreadyRegistered(String instanceSocket, String customHeaderName, String customHeaderValue, String instanceToken);
 }

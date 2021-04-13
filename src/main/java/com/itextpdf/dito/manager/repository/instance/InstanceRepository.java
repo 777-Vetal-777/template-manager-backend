@@ -65,4 +65,6 @@ public interface InstanceRepository extends JpaRepository<InstanceEntity, Long> 
             + " left join i.stage stage "
             + " where stage.sequenceOrder is not null and stage.sequenceOrder = 0")
     List<InstanceEntity> getInstancesOnDevStage();
+
+    Long countByActiveFalse();
 }

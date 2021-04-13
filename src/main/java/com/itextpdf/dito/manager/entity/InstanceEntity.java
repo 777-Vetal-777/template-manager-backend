@@ -41,6 +41,8 @@ public class InstanceEntity {
     private String headerName;
     @Column(name = "header_value")
     private String headerValue;
+    @Column(insertable = false)
+    private Boolean active;
 
     @PrePersist
     public void onPrePersist() {
@@ -127,6 +129,14 @@ public class InstanceEntity {
 		this.headerValue = headerValue;
 	}
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
 	@Override
     public String toString() {
         return "InstanceEntity{" +
@@ -137,6 +147,7 @@ public class InstanceEntity {
                 ", headerName='" + headerName + '\'' +
                 ", headerValue='" + headerValue + '\'' +
                 ", registerToken='" + registerToken + '\'' +
+                ", active='" + active + '\'' +
                 '}';
     }
 }
