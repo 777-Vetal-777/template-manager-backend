@@ -192,8 +192,7 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("id").value(entity.getUuid()))
-				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
-				.andExpect(jsonPath("defaultSampleId").isEmpty());
+				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME));
 	}
 
 	@Test
@@ -216,14 +215,13 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isOk());
 
 		final DataSampleEntity dataSampleEntity = dataSampleService.get(entity.getName(), EXISTED_SAMPLE);
-		final String dataSampleId = dataSampleEntity.getUuid();
+
 		mockMvc.perform(get(DataManagementController.COLLECTION_DESCRIPTOR_URL, entity.getUuid())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("id").value(entity.getUuid()))
-				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME))
-				.andExpect(jsonPath("defaultSampleId").value(dataSampleId));
+				.andExpect(jsonPath("displayName").value(DATACOLLECTION_NAME));
 	}
 
 	@Test

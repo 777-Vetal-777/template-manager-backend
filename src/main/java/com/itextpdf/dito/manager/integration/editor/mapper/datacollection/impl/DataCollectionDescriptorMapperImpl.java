@@ -24,7 +24,6 @@ public class DataCollectionDescriptorMapperImpl implements DataCollectionDescrip
         descriptor.setDisplayName(entity.getName());
         descriptor.setType(entity.getType().toString());
         descriptor.setId(mapToId(entity));
-        Optional.ofNullable(defaultDataSampleEntity).map(dataSampleDescriptorMapper::mapToID).ifPresent(descriptor::setDefaultSampleId);
         return descriptor;
     }
 
