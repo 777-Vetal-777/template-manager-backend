@@ -3,9 +3,11 @@ package com.itextpdf.dito.manager.controller.instance.impl;
 import com.itextpdf.dito.manager.component.client.instance.InstanceClient;
 import com.itextpdf.dito.manager.component.encoder.Encoder;
 import com.itextpdf.dito.manager.component.mapper.instance.InstanceMapper;
+import com.itextpdf.dito.manager.component.mapper.instance.InstanceStatusMapper;
 import com.itextpdf.dito.manager.controller.AbstractController;
 import com.itextpdf.dito.manager.controller.instance.InstanceController;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.InstanceSummaryStatusDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceHeaderRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
@@ -32,13 +34,18 @@ public class InstanceControllerImpl extends AbstractController implements Instan
     private final InstanceService instanceService;
     private final InstanceMapper instanceMapper;
     private final InstanceClient instanceClient;
+    private final InstanceStatusMapper instanceStatusMapper;
     private final Encoder encoder;
 
-    public InstanceControllerImpl(final InstanceService instanceService, final InstanceClient instanceClient,
-                                  final InstanceMapper instanceMapper, final Encoder encoder) {
+    public InstanceControllerImpl(final InstanceService instanceService,
+                                  final InstanceClient instanceClient,
+                                  final InstanceMapper instanceMapper,
+                                  final InstanceStatusMapper instanceStatusMapper,
+                                  final Encoder encoder) {
         this.instanceService = instanceService;
         this.instanceMapper = instanceMapper;
         this.instanceClient = instanceClient;
+        this.instanceStatusMapper = instanceStatusMapper;
         this.encoder = encoder;
     }
 
@@ -97,5 +104,13 @@ public class InstanceControllerImpl extends AbstractController implements Instan
                 .update(encoder.decode(name), instanceMapper.map(instanceUpdateRequestDTO));
         log.info("Update instance by name: {} and instanceUpdateRequestDTO: {} was finished successfully", name, instanceUpdateRequestDTO);
         return new ResponseEntity<>(instanceMapper.map(instanceEntity), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<InstanceSummaryStatusDTO> getSummary() {
+        log.info("Get instances summary was started");
+        final InstanceSummaryStatusDTO result = instanceStatusMapper.map(instanceService.getSummary());
+        log.info("Get instances summary was finished successfully");
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

@@ -27,7 +27,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class InstanceClientImpl implements InstanceClient {
@@ -36,6 +40,7 @@ public class InstanceClientImpl implements InstanceClient {
     private static final String INSTANCE_REGISTER_ENDPOINT = "/api/admin/register";
     private static final String INSTANCE_UNREGISTER_ENDPOINT = "/api/admin/unregister";
     private static final String INSTANCE_DEPLOYMENT_ENDPOINT = "/api/deployments";
+    private static final String INSTANCE_ADMIN_STATUS = "/api/admin/status";
 
     private static final Logger log = LogManager.getLogger(InstanceClientImpl.class);
 
@@ -148,7 +153,7 @@ public class InstanceClientImpl implements InstanceClient {
                                                            final TemplateDescriptorDTO descriptorDTO,
                                                            final File templateProject) {
         final String forceDeployParam = "?forceReplace=true";
-        final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
+        final String instanceDeploymentUrl = new StringBuilder(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT).append(forceDeployParam).toString();
         try {
             final Mono<TemplateDeploymentDTO> response = webClient
@@ -195,6 +200,39 @@ public class InstanceClientImpl implements InstanceClient {
         } catch (RuntimeException e) {
             throw new SdkInstanceException(null, instanceSocket, null, e.getMessage());
         }
+    }
+
+    @Override
+    public Boolean checkIsInstanceAlreadyRegistered(final String instanceSocket, final String customHeaderName, final String customHeaderValue, final String instanceToken) {
+        Boolean isInstanceRegistered;
+        final String instanceStatusUrl = new StringBuilder(instanceSocket).append(INSTANCE_ADMIN_STATUS).toString();
+        try {
+            final String token = webClient
+                    .get()
+                    .uri(instanceStatusUrl)
+                    .headers(h -> {
+                        if (!StringUtils.isEmpty(customHeaderName)) {
+                            h.add(customHeaderName, customHeaderValue);
+                        }
+                    })
+                    .headers(h -> h.setBearerAuth(instanceToken))
+                    .retrieve()
+                    .onStatus(HttpStatus::is4xxClientError, response -> {
+                        final Mono<InstanceErrorResponseDTO> errorMessage = response.bodyToMono(InstanceErrorResponseDTO.class);
+                        return errorMessage.flatMap(message -> {
+                            log.warn(message.getMessage());
+                            throw new SdkInstanceException("Instance is not registered", instanceSocket, message.getCode(), message.getMessage());
+                        });
+                    })
+                    .bodyToMono(String.class)
+                    .block();
+            final Map<String, String> receivedToken = objectMapper.readValue(token.getBytes(StandardCharsets.UTF_8), objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, String.class));
+            isInstanceRegistered = Objects.equals(receivedToken.get("token"), instanceToken);
+        } catch (Exception ex) {
+            log.warn(ex);
+            isInstanceRegistered = false;
+        }
+        return isInstanceRegistered;
     }
 
     Mono<Throwable> processInstanceError(final ClientResponse clientResponse,

@@ -73,4 +73,12 @@
         </update>
     </changeSet>
 
+    <changeSet id="015-add-active-column-to-instance-table" author="Sergey_Nemets">
+        <addColumn tableName="instance">
+            <column name="active" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false" notNullConstraintName="instance_active_not_null_constraint"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
