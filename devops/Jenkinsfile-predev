@@ -102,7 +102,7 @@ pipeline {
                 script{
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
-                            withCredentials([file(credentialsId: ENV_FILE, variable: 'FILE')]){
+                            configFileProvider([configFile(fileId: 'itext-predev-backend-env-config', targetLocation: '.env', variable: 'FILE')]) {
                                 sh '''
                                 cat ${FILE}
                                 docker-compose --env-file ${FILE} --file ${WORKSPACE}/devops/docker-compose-dev.yml up --force-recreate -d
