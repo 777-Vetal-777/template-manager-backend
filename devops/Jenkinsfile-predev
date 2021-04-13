@@ -103,7 +103,10 @@ pipeline {
                     docker.withServer("tcp://${hostIP}:2376",dockerCredentials){
                         docker.withRegistry(registryHost,registryCredentials){
                             withCredentials([file(credentialsId: ENV_FILE, variable: 'FILE')]){
-                                sh "docker-compose --env-file ${FILE} --file ${WORKSPACE}/devops/docker-compose-dev.yml up --force-recreate -d"
+                                sh '''
+                                cat ${FILE}
+                                docker-compose --env-file ${FILE} --file ${WORKSPACE}/devops/docker-compose-dev.yml up --force-recreate -d
+                                '''
                             }
                         }
                     }
