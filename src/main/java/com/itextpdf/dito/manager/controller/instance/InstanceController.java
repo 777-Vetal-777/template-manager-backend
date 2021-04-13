@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.controller.instance;
 
 import com.itextpdf.dito.manager.config.OpenApiConfig;
 import com.itextpdf.dito.manager.dto.instance.InstanceDTO;
+import com.itextpdf.dito.manager.dto.instance.InstanceSummaryStatusDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstanceHeaderRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.create.InstancesRememberRequestDTO;
 import com.itextpdf.dito.manager.dto.instance.update.InstanceUpdateRequestDTO;
@@ -37,13 +38,14 @@ public interface InstanceController {
     String BASE_NAME = MAJOR_VERSION + "/instances";
 
     String PAGEABLE_ENDPOINT = "/pageable";
+    String STATUS_ENDPOINT = "/status";
 
     String INSTANCE_NAME_PATH_VARIABLE = "name";
     String INSTANCE_NAME_ENDPOINT_WITH_PATH_VARIABLE = "/{" + INSTANCE_NAME_PATH_VARIABLE + "}";
 
     String INSTANCE_SOCKET_PATH_VARIABLE = "socket";
     String INSTANCE_SOCKET_ENDPOINT_WITH_PATH_VARIABLE = "/{" + INSTANCE_SOCKET_PATH_VARIABLE + "}";
-    String INSTANCE_STATUS_ENDPOINT = INSTANCE_SOCKET_ENDPOINT_WITH_PATH_VARIABLE + "/status";
+    String INSTANCE_STATUS_ENDPOINT = INSTANCE_SOCKET_ENDPOINT_WITH_PATH_VARIABLE + STATUS_ENDPOINT;
 
     @GetMapping(INSTANCE_STATUS_ENDPOINT)
     @Operation(summary = "Get instance status",
@@ -107,6 +109,13 @@ public interface InstanceController {
     @ApiResponse(responseCode = "200", description = "Instance updated successfully.")
     ResponseEntity<InstanceDTO> update(@Parameter(description = "Encoded with base64 instance name") @PathVariable(INSTANCE_NAME_PATH_VARIABLE) final String name,
             @RequestBody InstanceUpdateRequestDTO instanceUpdateRequestDTO);
+
+    @PreAuthorize("hasAnyAuthority('E4_US27_SEE_THE_TABLE_OF_INSTANCES', 'E2_US6_SETTINGS_PANEL')")
+    @GetMapping(STATUS_ENDPOINT)
+    @Operation(summary = "Get instances status", description = "Get count of instances need attention",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponse(responseCode = "200", description = "Instance status retrieved succesfully")
+    ResponseEntity<InstanceSummaryStatusDTO> getSummary();
 
 }
 

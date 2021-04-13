@@ -13,6 +13,7 @@ import com.itextpdf.dito.manager.exception.instance.InstanceNotFoundException;
 import com.itextpdf.dito.manager.exception.instance.InstanceUsedInPromotionPathException;
 import com.itextpdf.dito.manager.exception.instance.deployment.SdkInstanceException;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
+import com.itextpdf.dito.manager.model.instance.InstanceSummaryStatusModel;
 import com.itextpdf.dito.manager.repository.instance.InstanceRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.instance.InstanceService;
@@ -204,6 +205,14 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
 
         log.info("Update instance by name: {} and params: {} was finished successfully", name, instanceEntity);
         return savedInstance;
+    }
+
+    @Override
+    public InstanceSummaryStatusModel getSummary() {
+        final InstanceSummaryStatusModel model = new InstanceSummaryStatusModel();
+        model.setCount((int) instanceRepository.count());
+        model.setNeedAttention(instanceRepository.countByActiveFalse().intValue());
+        return model;
     }
 
     @Override

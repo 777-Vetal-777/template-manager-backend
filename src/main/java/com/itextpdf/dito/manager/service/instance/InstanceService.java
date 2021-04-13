@@ -4,6 +4,8 @@ import com.itextpdf.dito.manager.entity.InstanceEntity;
 import com.itextpdf.dito.manager.filter.instance.InstanceFilter;
 
 import java.util.List;
+
+import com.itextpdf.dito.manager.model.instance.InstanceSummaryStatusModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +17,8 @@ public interface InstanceService {
     InstanceEntity get(String name);
 
     List<InstanceEntity> getAll();
+
+    InstanceSummaryStatusModel getSummary();
 
     Page<InstanceEntity> getAll(InstanceFilter instanceFilter, Pageable pageable, String searchParam);
 
