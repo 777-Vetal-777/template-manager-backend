@@ -2,65 +2,37 @@ package com.itextpdf.dito.manager.component.validator.resource.impl;
 
 import com.itextpdf.dito.manager.component.validator.resource.ContentValidator;
 import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
-import com.steadystate.css.parser.CSSOMParser;
-import com.steadystate.css.parser.SACParserCSS3;
+import io.bit3.jsass.CompilationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
-import org.w3c.css.sac.CSSException;
-import org.w3c.css.sac.CSSParseException;
-import org.w3c.css.sac.ErrorHandler;
-import org.w3c.css.sac.InputSource;
+import io.bit3.jsass.Compiler;
+import io.bit3.jsass.Options;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class ResourceStyleSheetContentValidatorImpl implements ContentValidator {
     private static final Logger log = LogManager.getLogger(ResourceStyleSheetContentValidatorImpl.class);
 
-    private final CSSOMParser parser = new CSSOMParser(new SACParserCSS3());
-
-    public ResourceStyleSheetContentValidatorImpl() {
-        parser.setErrorHandler(new CSSExceptionErrorHandler());
-    }
-
-    @Override
-    public boolean isValid(final byte[] content) {
-        boolean contentValid;
-        try (final InputStreamReader inputStream = new InputStreamReader(new ByteArrayInputStream(content))) {
-            final InputSource source = new InputSource(inputStream);
-            parser.parseStyleSheet(source, null, null);
-            contentValid = true;
-        } catch (IOException | CSSException e) {
-            log.info("Exception during validation stylesheet content: {}", e.getMessage());
-            contentValid = false;
-        }
-        return contentValid;
-    }
+    private final Compiler compiler = new Compiler();
+    private final Options options = new Options();
 
     @Override
     public ResourceTypeEnum getType() {
         return ResourceTypeEnum.STYLESHEET;
     }
 
-    private static class CSSExceptionErrorHandler implements ErrorHandler {
-
-        @Override
-        public void warning(CSSParseException exception) {
-            //we should not stop parsing on warning messages
+    @Override
+    public boolean isValid(final byte[] content) {
+        boolean contentValid;
+        try {
+            compiler.compileString(new String(content, StandardCharsets.UTF_8), options);
+            contentValid = true;
+        } catch (CompilationException e) {
+            log.info("Exception during validation stylesheet content: {}", e.getMessage());
+            contentValid = false;
         }
-
-        @Override
-        public void error(CSSParseException exception) {
-            throw new CSSException(exception);
-        }
-
-        @Override
-        public void fatalError(CSSParseException exception) {
-            throw new CSSException(exception);
-        }
+        return contentValid;
     }
-
 }

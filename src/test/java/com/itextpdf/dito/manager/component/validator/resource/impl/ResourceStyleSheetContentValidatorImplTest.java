@@ -15,10 +15,12 @@ class ResourceStyleSheetContentValidatorImplTest {
     private final ContentValidator validator = new ResourceStyleSheetContentValidatorImpl();
 
     @ParameterizedTest
-    @CsvSource({".h1 { background-color: #333333; }, true",
+    @CsvSource(value = {".h1 { background-color: #333333; }, true",
             "body {    invalid--rule: %%; }, false",
             ".h1 { background-color: #333333; }}, false",
-            "body, false",})
+            "body, false",
+            "@page { @top-center { content: element(page_header2) }}, true",
+            "@page { content: element(page_header2) }, true"})
     void isValid(String content, Boolean expected) {
         assertEquals(expected, validator.isValid(content.getBytes()));
     }
