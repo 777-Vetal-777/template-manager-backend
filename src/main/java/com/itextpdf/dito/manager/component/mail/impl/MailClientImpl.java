@@ -38,9 +38,9 @@ public class MailClientImpl implements MailClient {
 
     private JavaMailSender client;
 
-    private static final String MAIL_SUBJECT = "DITO registration";
-    private static final String MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT = "DITO password was updated by admin";
-    private static final String MAIL_RESET_PASSWORD_SUBJECT = "DITO reset password";
+    private static final String MAIL_SUBJECT = "iText DITO registration";
+    private static final String MAIL_PASSWORD_WAS_UPDATED_BY_ADMIN_SUBJECT = "iText DITO password was updated by admin";
+    private static final String MAIL_RESET_PASSWORD_SUBJECT = "iText DITO reset password";
     private final String privacyInformationUrl;
     private final String mailFrom;
 
@@ -141,7 +141,7 @@ public class MailClientImpl implements MailClient {
         final List<String> list = readFile("templates/registrationEmail.html");
         list.set(26, String.format(list.get(26), userEntity.getFirstName() + " " + userEntity.getLastName()));
         list.set(29, String.format(list.get(29), currentUser.getFirstName() + " " + currentUser.getLastName()));
-        list.set(41, String.format(list.get(41), userEntity.getFirstName()));
+        list.set(41, String.format(list.get(41), userEntity.getEmail()));
         list.set(45, String.format(list.get(45), password));
         list.set(49, String.format(list.get(49), frontURL.concat("/login")));
         list.set(65, String.format(list.get(65), privacyInformationUrl));
