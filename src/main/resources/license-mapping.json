@@ -250,19 +250,23 @@
         },
         {
             "license": "glassfish-cddl-1.1.txt",
-            "name": "javax.activation:activation:1.1"
+            "name": "javax.activation:activation:1.1",
+            "info": "Source code available at: https://repo1.maven.org/maven2/javax/activation/activation/1.1/"
         },
         {
             "license": "oracle-cddl-1.1.txt",
-            "name": "javax.activation:javax.activation-api:1.2.0"
+            "name": "javax.activation:javax.activation-api:1.2.0",
+            "info": "Source code available at: https://repo1.maven.org/maven2/javax/activation/javax.activation-api/1.2.0/"
         },
         {
             "license": "glassfish-cddl-1.1.txt",
-            "name": "javax.mail:mail:1.4.7"
+            "name": "javax.mail:mail:1.4.7",
+            "info": "Source code available at: https://repo1.maven.org/maven2/javax/mail/mail/1.4.7/"
         },
         {
             "license": "oracle-cddl-1.1.txt",
-            "name": "javax.xml.bind:jaxb-api:2.3.1"
+            "name": "javax.xml.bind:jaxb-api:2.3.1",
+            "info": "Source code available at: https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.1/"
         },
         {
             "license": "apache-2.0.txt",
