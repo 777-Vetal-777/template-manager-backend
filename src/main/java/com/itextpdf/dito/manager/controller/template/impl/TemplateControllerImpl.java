@@ -19,6 +19,7 @@ import com.itextpdf.dito.manager.dto.template.TemplatePermissionDTO;
 import com.itextpdf.dito.manager.dto.template.TemplateWithSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplateCreateRequestDTO;
 import com.itextpdf.dito.manager.dto.template.create.TemplatePartDTO;
+import com.itextpdf.dito.manager.dto.template.export.TemplateExportSettingsDTO;
 import com.itextpdf.dito.manager.dto.template.setting.SettingType;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportSettingDTO;
@@ -35,6 +36,7 @@ import com.itextpdf.dito.manager.filter.template.TemplatePermissionFilter;
 import com.itextpdf.dito.manager.filter.version.VersionFilter;
 import com.itextpdf.dito.manager.model.dependency.DependencyModel;
 import com.itextpdf.dito.manager.model.file.FileVersionModel;
+import com.itextpdf.dito.manager.model.template.TemplateExportVersion;
 import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
@@ -327,9 +329,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     }
 
     @Override
-    public ResponseEntity<byte[]> export(final String templateName, final Boolean dependenciesFlag) {
-        log.info("Export template by templateName: {} and dependenciesFlag: {} was started", templateName, dependenciesFlag);
-        final boolean exportDependencies = Optional.ofNullable(dependenciesFlag).orElse(true);
+    public ResponseEntity<byte[]> export(final String templateName, final TemplateExportSettingsDTO exportSettingsDTO) {
+        log.info("Export template by templateName: {} and dependenciesFlag: {} was started", templateName, exportSettingsDTO);
+        final boolean exportDependencies = Optional.ofNullable(exportSettingsDTO).map(TemplateExportSettingsDTO::getExportDependencies).orElse(true);
+        final TemplateExportVersion exportVersion = Optional.ofNullable(exportSettingsDTO).map(TemplateExportSettingsDTO::getVersions).orElse(TemplateExportVersion.LATEST);
         final String decodedTemplateName = encoder.decode(templateName);
         final byte[] zippedProject = templateExportService.export(decodedTemplateName, exportDependencies);
 
@@ -337,7 +340,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final String filename = decodedTemplateName.concat(TEMPLATE_PACKAGE_EXTENSION);
         headers.setContentDispositionFormData("attachment", filename);
-        log.info("Export template by templateName: {} and dependenciesFlag: {} was finished successfully", templateName, dependenciesFlag);
+        log.info("Export template by templateName: {} and dependenciesFlag: {} was finished successfully", templateName, exportSettingsDTO);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }
 
