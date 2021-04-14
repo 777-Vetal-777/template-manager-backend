@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
+import com.itextpdf.dito.manager.model.template.part.VisibleOnSettings;
 import com.itextpdf.dito.manager.service.template.TemplateLoader;
 import com.itextpdf.styledxmlparser.jsoup.Jsoup;
 import com.itextpdf.styledxmlparser.jsoup.nodes.Document;
@@ -20,17 +21,25 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 @Component
 public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
     private static final String DATA_DITO_ELEMENT = "data-dito-element";
     private static final String DATA_DITO_VERTICAL_ALIGN = "data-dito-page-margin-vertical-align";
+    private static final String DATA_DITO_PAGE_SELECTOR = "data-dito-header-footer-page-selector";
 
     private static final Logger LOG = LogManager.getLogger(CompositeTemplateBuilderImpl.class);
 
     private final TemplateLoader templateLoader;
     private final ObjectMapper objectMapper;
+
+    private static final Map<VisibleOnSettings, Consumer<Element>> VISIBLE_ON_ACTIONS = Map.of(
+            VisibleOnSettings.DEFAULT, element -> {},
+            VisibleOnSettings.FIRST_PAGE, element -> element.attr(DATA_DITO_PAGE_SELECTOR, "first")
+    );
 
     private final Map<TemplateTypeEnum, BiFunction<Element, TemplateFilePartEntity, Element>> methods = Map.of(
             TemplateTypeEnum.FOOTER, this::addFooter,
@@ -61,6 +70,9 @@ public class CompositeTemplateBuilderImpl implements CompositeTemplateBuilder {
         if (settings != null && Boolean.TRUE.equals(settings.getStartOnNewPage())) {
                 child.attr("style", "page-break-before:always");
         }
+
+        final VisibleOnSettings visibleOn = Optional.ofNullable(settings).map(PartSettings::getVisibleOn).orElse(VisibleOnSettings.DEFAULT);
+        VISIBLE_ON_ACTIONS.get(visibleOn).accept(child);
     }
 
     private Element addHeader(final Element parent, final TemplateFilePartEntity templateFilePartEntity) {

@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.dto.template.create;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.itextpdf.dito.manager.model.template.part.VisibleOnSettings;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.validation.constraints.NotBlank;
@@ -14,6 +15,8 @@ public class TemplatePartDTO {
     //settings
     @JsonProperty("newPage")
     private Boolean startOnNewPage;
+    @JsonProperty("visible_on")
+    private VisibleOnSettings visibleOn;
 
     public String getName() {
         return name;
@@ -39,12 +42,21 @@ public class TemplatePartDTO {
         this.startOnNewPage = startOnNewPage;
     }
 
+    public VisibleOnSettings getVisibleOn() {
+        return visibleOn;
+    }
+
+    public void setVisibleOn(VisibleOnSettings visibleOn) {
+        this.visibleOn = visibleOn;
+    }
+
     @Override
     public String toString() {
         return "TemplatePartDTO{" +
                 "name='" + name + '\'' +
                 ", condition='" + condition + '\'' +
                 ", startOnNewPage=" + startOnNewPage +
+                ", visibleOn=" + visibleOn +
                 '}';
     }
 }

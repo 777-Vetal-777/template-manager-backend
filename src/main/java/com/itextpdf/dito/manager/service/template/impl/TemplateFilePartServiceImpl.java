@@ -13,12 +13,14 @@ import com.itextpdf.dito.manager.exception.template.TemplateHasWrongStructureExc
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.model.template.part.PartSettings;
 import com.itextpdf.dito.manager.model.template.part.TemplatePartModel;
+import com.itextpdf.dito.manager.model.template.part.VisibleOnSettings;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import com.itextpdf.dito.manager.service.template.TemplateFilePartService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,8 +60,11 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         //checks that all templates has the same (or absent dataCollection)
         throwExceptionIfTemplatesHaveAnotherDataCollections(templatePartList, dataCollectionName);
 
-        //checks that exists at most one HEADER and FOOTER
+        //checks that exists at least two HEADERS and FOOTERS
         throwExceptionIfPartsSizeAreIncorrect(templateParts, templateFilePartMap);
+
+        //checks that exists at most one HEADER and FOOTER with different settings
+        throwExceptionIfPartsSizeHaveIncorrectSettings(templateParts, templateFilePartMap);
 
         List<TemplateFilePartEntity> templateFilePartEntities = templateParts.stream().map(templatePart -> {
             final TemplateFileEntity partTemplateFileEntity = templateFilePartMap.get(templatePart.getTemplateName());
@@ -118,9 +123,23 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
         throwExceptionIfTooFewForType(mapOfPartsCount, TemplateTypeEnum.STANDARD);
     }
 
+    private void throwExceptionIfPartsSizeHaveIncorrectSettings(final List<TemplatePartModel> templateParts, final Map<String, TemplateFileEntity> templatePartMap) {
+        final Map<TemplateTypeEnum, List<TemplatePartModel>> mapOfParts = templateParts.stream().collect(Collectors.groupingBy(part -> templatePartMap.get(part.getTemplateName()).getTemplate().getType()));
+        for (final VisibleOnSettings visible : VisibleOnSettings.values()) {
+            throwExceptionIfTooManyForVisibleOnSetting(mapOfParts, TemplateTypeEnum.HEADER, visible);
+            throwExceptionIfTooManyForVisibleOnSetting(mapOfParts, TemplateTypeEnum.FOOTER, visible);
+        }
+    }
+
+    private void throwExceptionIfTooManyForVisibleOnSetting(final Map<TemplateTypeEnum, List<TemplatePartModel>> mapOfParts, final TemplateTypeEnum checkedType, final VisibleOnSettings visibleOn) {
+        if (mapOfParts.getOrDefault(checkedType, Collections.emptyList()).stream().filter(templatePartModel -> Objects.equals(visibleOn, Optional.ofNullable(templatePartModel.getPartSettings().getVisibleOn()).orElse(VisibleOnSettings.DEFAULT))).count() > 1) {
+            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than one ").append(checkedType).append(" having selected option ").append(visibleOn).toString());
+        }
+    }
+
     private void throwExceptionIfTooManyForType(final Map<TemplateTypeEnum, Integer> mapOfPartsCount, final TemplateTypeEnum checkedType) {
-        if (mapOfPartsCount.getOrDefault(checkedType, 0) > 1) {
-            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than one ").append(checkedType).toString());
+        if (mapOfPartsCount.getOrDefault(checkedType, 0) > 2) {
+            throw new TemplateHasWrongStructureException(new StringBuilder("Template parts have more than two ").append(checkedType).toString());
         }
     }
 

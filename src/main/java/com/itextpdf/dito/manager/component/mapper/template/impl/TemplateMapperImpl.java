@@ -290,6 +290,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         model.setCondition(dto.getCondition());
         final PartSettings partSettings = new PartSettings();
         Optional.ofNullable(dto.getStartOnNewPage()).ifPresent(partSettings::setStartOnNewPage);
+        Optional.ofNullable(dto.getVisibleOn()).ifPresent(partSettings::setVisibleOn);
         model.setPartSettings(partSettings);
         log.info("Convert {} to templatePartModel was finished successfully", dto);
         return model;
