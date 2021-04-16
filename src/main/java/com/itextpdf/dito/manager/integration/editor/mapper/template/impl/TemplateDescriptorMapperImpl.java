@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.integration.editor.mapper.datacollection.DataCollectionIdMapper;
 import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateDescriptorMapper;
+import com.itextpdf.dito.manager.integration.editor.mapper.template.TemplateIdMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,9 +18,12 @@ import java.util.stream.Collectors;
 public class TemplateDescriptorMapperImpl implements TemplateDescriptorMapper {
 
     private final DataCollectionIdMapper dataCollectionIdMapper;
+    private final TemplateIdMapper templateIdMapper;
 
-    public TemplateDescriptorMapperImpl(final DataCollectionIdMapper dataCollectionIdMapper) {
+    public TemplateDescriptorMapperImpl(final DataCollectionIdMapper dataCollectionIdMapper,
+                                        final TemplateIdMapper templateIdMapper) {
         this.dataCollectionIdMapper = dataCollectionIdMapper;
+        this.templateIdMapper = templateIdMapper;
     }
 
     @Override
@@ -32,7 +36,7 @@ public class TemplateDescriptorMapperImpl implements TemplateDescriptorMapper {
                 .map(DataCollectionFileEntity::getDataCollection)
                 .map(dataCollectionIdMapper::mapToId)
                 .orElse(null);
-        return new ExternalTemplateDescriptor(templateEntity.getUuid(), templateName, dataCollectionId, templateFragmentType);
+        return new ExternalTemplateDescriptor(templateIdMapper.mapToId(templateEntity), templateName, dataCollectionId, templateFragmentType);
     }
 
     @Override

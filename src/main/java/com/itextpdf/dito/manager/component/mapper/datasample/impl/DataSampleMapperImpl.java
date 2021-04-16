@@ -105,6 +105,7 @@ public class DataSampleMapperImpl implements DataSampleMapper {
 		return findKeys("", treeMap, keys);
 	}
 
+	@SuppressWarnings("unchecked")
 	private Set<String> findKeys(final String prefix, final Map<Object, Object> treeMap, final Set<String> keys) {
 		treeMap.forEach((key, value) -> {
 			if (value instanceof Map) {
