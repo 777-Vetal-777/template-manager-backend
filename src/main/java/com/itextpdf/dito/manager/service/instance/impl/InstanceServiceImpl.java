@@ -152,7 +152,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
         log.info("Update instance by name: {} and params: {} was started", name, instanceEntity);
         final InstanceEntity oldInstanceEntity = get(name);
 
-        if (!Objects.equals(instanceEntity.getName(), oldInstanceEntity.getName() )
+        if (!Objects.equals(instanceEntity.getName(), oldInstanceEntity.getName())
                 && instanceRepository.findByName(instanceEntity.getName()).isPresent()) {
             throw new InstanceAlreadyExistsException(instanceEntity.getName());
         }
@@ -164,7 +164,20 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
             throw new InstanceCustomHeaderValidationException(oldInstanceEntity.getName());
         }
 
-        final String instanceToken = instanceClient.register(instanceEntity.getSocket(), instanceEntity.getHeaderName(), instanceEntity.getHeaderValue()).getToken();
+        final String instanceToken;
+        if (!Objects.equals(instanceEntity.getSocket(), oldInstanceEntity.getSocket())) {
+            instanceToken = instanceClient.register(instanceEntity.getSocket(), instanceEntity.getHeaderName(), instanceEntity.getHeaderValue()).getToken();
+
+            try {
+                instanceClient.unregister(oldInstanceEntity.getSocket(), oldInstanceEntity.getRegisterToken(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue());
+            } catch (SdkInstanceException e) {
+                log.warn("An error occurred during unregister instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
+            }
+        } else {
+            log.info("No changes for socket detected, check availability with new parameters");
+            instanceClient.ping(instanceEntity.getSocket(), instanceEntity.getHeaderName(), instanceEntity.getHeaderValue());
+            instanceToken = oldInstanceEntity.getRegisterToken();
+        }
 
         try {
             oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(oldInstanceEntity, templateFile, false));
@@ -172,13 +185,7 @@ public class InstanceServiceImpl extends AbstractService implements InstanceServ
                 oldInstanceEntity.getTemplateFile().forEach(templateFile -> templateDeploymentService.promoteTemplateToInstance(oldInstanceEntity, templateFile, true));
             }
         } catch (SdkInstanceException e) {
-            log.warn("Could not undeploy templates from instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
-        }
-
-        try {
-            instanceClient.unregister(oldInstanceEntity.getSocket(), oldInstanceEntity.getRegisterToken(), oldInstanceEntity.getHeaderName(), oldInstanceEntity.getHeaderValue());
-        } catch (SdkInstanceException e) {
-            log.warn("An error occurred during unregister instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
+            log.warn("Could not deploy templates to instance {}: {}", oldInstanceEntity.getSocket(), e.getMessage());
         }
 
         oldInstanceEntity.setName(instanceEntity.getName());

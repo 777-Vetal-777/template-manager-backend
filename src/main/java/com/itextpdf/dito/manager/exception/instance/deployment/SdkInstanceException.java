@@ -16,6 +16,7 @@ public class SdkInstanceException extends RuntimeException {
 
     private String buildMessage(final String errorMessage, final String instanceSocket, final Integer responseCode, final String responseMessage){
         final StringBuilder messageBuilder = new StringBuilder(errorMessage);
+        messageBuilder.append(" Socket: ");
         messageBuilder.append(instanceSocket);
         messageBuilder.append(". Response code: ");
         messageBuilder.append(responseCode);

@@ -20,7 +20,7 @@ public class InstanceExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(NotReachableInstanceException.class)
     public ResponseEntity<ErrorResponseDTO> notReachableInstanceExceptionHandler(
             final NotReachableInstanceException ex) {
-        return buildErrorResponse(ex, "Not reachable instance.", HttpStatus.GATEWAY_TIMEOUT);
+        return buildErrorResponse(ex, ex.getMessage(), HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @ExceptionHandler(InstanceAlreadyExistsException.class)

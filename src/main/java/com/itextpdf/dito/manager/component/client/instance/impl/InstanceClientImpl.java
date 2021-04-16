@@ -174,7 +174,7 @@ public class InstanceClientImpl implements InstanceClient {
     public TemplateDeploymentDTO removeTemplateFromInstance(final String instanceRegisterToken,
                                                             final String instanceSocket,
                                                             final String templateAlias) {
-        final String instanceDeploymentUrl = new StringBuilder().append(instanceSocket)
+        final String instanceDeploymentUrl = new StringBuilder(instanceSocket)
                 .append(INSTANCE_DEPLOYMENT_ENDPOINT)
                 .append("/")
                 .append(templateAlias)
@@ -193,7 +193,7 @@ public class InstanceClientImpl implements InstanceClient {
         } catch (SdkInstanceException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new SdkInstanceException(e.getMessage(), instanceSocket, null, e.getMessage());
+            throw new SdkInstanceException(null, instanceSocket, null, e.getMessage());
         }
     }
 
