@@ -8,6 +8,7 @@ import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import javax.persistence.CascadeType;

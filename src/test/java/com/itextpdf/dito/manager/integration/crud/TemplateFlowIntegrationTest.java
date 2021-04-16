@@ -74,7 +74,8 @@ import java.util.zip.ZipInputStream;
 
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_DEPENDENCIES_PAGEABLE_ENDPOINT_WITH_PATH_VARIABLE;
-import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE;
+import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PARTS_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_PROMOTE_ENDPOINT_WITH_PATH_VARIABLE;
 import static com.itextpdf.dito.manager.controller.template.TemplateController.TEMPLATE_ROLLBACK_ENDPOINT_WITH_PATH_VARIABLE;
@@ -231,7 +232,7 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldUpdateTemplateWithResource() throws Exception{
+    void shouldUpdateTemplateWithResource() throws Exception {
         //Create resource
         final String imageName = "picturename.png";
         mockMvc.perform(MockMvcRequestBuilders.multipart(ResourceController.BASE_NAME)
@@ -361,7 +362,7 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("modifiedBy").isNotEmpty());
 
         //Export
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/some-template")));
     }
@@ -435,12 +436,12 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
 
         //check export
         final String encodedUpdatedTemplateName = Base64.getEncoder().encodeToString(updateRequestDTO.getName().getBytes());
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/updated-template-name"), hasItem("data/ds1.json")));
 
         //export without dependencies
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName)
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE, encodedUpdatedTemplateName)
                 .param("exportDependencies", "false"))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/updated-template-name"), not(hasItem("data/ds1.json"))));
@@ -582,7 +583,7 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[*].name", containsInAnyOrder("some-template", "some-header-template", "another-footer-template")));
 
         //check export
-        final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+        final MvcResult result = mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/composite-template")))
                 .andReturn();
@@ -791,7 +792,7 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         final String encodedTemplateName = encodeStringToBase64(request.getName());
 
         //check export
-        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
+        mockMvc.perform(get(TemplateController.BASE_NAME + TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE, encodedTemplateName))
                 .andExpect(status().isOk())
                 .andExpect(zipMatch(hasItem("templates/composite-template"), hasItem("data/ds1.json")));
     }

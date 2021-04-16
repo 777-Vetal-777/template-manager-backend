@@ -41,6 +41,7 @@ import com.itextpdf.dito.manager.model.template.TemplateModelWithRoles;
 import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
+import com.itextpdf.dito.manager.service.template.TemplateDtmExportService;
 import com.itextpdf.dito.manager.service.template.TemplateExportService;
 import com.itextpdf.dito.manager.service.template.TemplateImportService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
@@ -89,6 +90,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateDeploymentService templateDeploymentService;
     private final TemplatePreviewGenerator templatePreviewGenerator;
     private final TemplateExportService templateExportService;
+    private final TemplateDtmExportService templateDtmExportService;
     private final WorkspaceMapper workspaceMapper;
     private final TemplateImportService templateImportService;
     private final Encoder encoder;
@@ -105,6 +107,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplateDeploymentService templateDeploymentService,
                                   final TemplatePreviewGenerator templatePreviewGenerator,
                                   final TemplateExportService templateExportService,
+                                  final TemplateDtmExportService templateDtmExportService,
                                   final WorkspaceMapper workspaceMapper,
                                   final TemplateImportService templateImportService,
                                   final Encoder encoder) {
@@ -120,6 +123,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateDeploymentService = templateDeploymentService;
         this.templatePreviewGenerator = templatePreviewGenerator;
         this.templateExportService = templateExportService;
+        this.templateDtmExportService = templateDtmExportService;
         this.workspaceMapper = workspaceMapper;
         this.templateImportService = templateImportService;
         this.encoder = encoder;
@@ -330,9 +334,25 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<byte[]> export(final String templateName, final TemplateExportSettingsDTO exportSettingsDTO) {
-        log.info("Export template by templateName: {} and dependenciesFlag: {} was started", templateName, exportSettingsDTO);
+        log.info("Export template by templateName: {} and settings: {} was started", templateName, exportSettingsDTO);
         final boolean exportDependencies = Optional.ofNullable(exportSettingsDTO).map(TemplateExportSettingsDTO::getExportDependencies).orElse(true);
         final TemplateExportVersion exportVersion = Optional.ofNullable(exportSettingsDTO).map(TemplateExportSettingsDTO::getVersions).orElse(TemplateExportVersion.LATEST);
+        final String decodedTemplateName = encoder.decode(templateName);
+        final byte[] zippedProject = templateDtmExportService.export(decodedTemplateName, exportDependencies, exportVersion);
+                //templateExportService.export(decodedTemplateName, exportDependencies);
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        final String filename = decodedTemplateName.concat(TEMPLATE_PACKAGE_EXTENSION);
+        headers.setContentDispositionFormData("attachment", filename);
+        log.info("Export template by templateName: {} and settings: {} was finished successfully", templateName, exportSettingsDTO);
+        return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> exportDito(final String templateName, final Boolean exportDependenciesDto) {
+        log.info("Export template by templateName: {} and settings: {} was started", templateName, exportDependenciesDto);
+        final boolean exportDependencies = Optional.ofNullable(exportDependenciesDto).orElse(true);
         final String decodedTemplateName = encoder.decode(templateName);
         final byte[] zippedProject = templateExportService.export(decodedTemplateName, exportDependencies);
 
@@ -340,7 +360,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final String filename = decodedTemplateName.concat(TEMPLATE_PACKAGE_EXTENSION);
         headers.setContentDispositionFormData("attachment", filename);
-        log.info("Export template by templateName: {} and dependenciesFlag: {} was finished successfully", templateName, exportSettingsDTO);
+        log.info("Export template by templateName: {} and settings: {} was finished successfully", templateName, exportDependenciesDto);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }
 
