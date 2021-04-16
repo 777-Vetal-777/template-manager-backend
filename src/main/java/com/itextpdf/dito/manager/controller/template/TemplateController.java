@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.ws.rs.QueryParam;
 import java.security.Principal;
 import java.util.List;
 
@@ -72,10 +73,12 @@ public interface TemplateController {
     String ROLLBACK_ENDPOINT = "/rollback";
     String NEXT_STAGE_ENDPOINT = "/next-stage";
     String EXPORT_ENDPOINT = "/export";
+    String DITO_ENDPOINT = "/dito";
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String TEMPLATE_IMPORT_ENDPOINT = "/import";
     String TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + EXPORT_ENDPOINT;
+    String TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + DITO_ENDPOINT + EXPORT_ENDPOINT;
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
     String TEMPLATE_BLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_BLOCK_ENDPOINT;
     String TEMPLATE_UNBLOCK_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + TEMPLATE_UNBLOCK_ENDPOINT;
@@ -317,6 +320,19 @@ public interface TemplateController {
     })
     ResponseEntity<byte[]> export(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
                                   @Parameter(description = "Export settings exportDependencies, export versions") @ParameterObject TemplateExportSettingsDTO exportSettingsDTO);
+
+    @GetMapping(value = TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE, produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionHandlerImpl.checkTemplatePermissions(authentication, @permissionHandlerImpl.decodeBase64(#templateName), 'E9_US24_EXPORT_TEMPLATE_DATA')")
+    @Operation(summary = "Export template", description = "Export template as zipped DITO project",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Exported template is in response."),
+            @ApiResponse(responseCode = "404", description = "Template not found"),
+            @ApiResponse(responseCode = "422", description = "Could not proceed with template export.")
+    })
+    ResponseEntity<byte[]> exportDito(@Parameter(description = "Encoded with base64 template name", required = true) @PathVariable(TEMPLATE_PATH_VARIABLE) String templateName,
+                                      @Parameter(description = "Export hard dependencies setting") @RequestParam(required = false, name = "exportDependencies") Boolean exportDependenciesDto);
+
 
     @PostMapping(value = TEMPLATE_IMPORT_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('E9_US25_IMPORT_TEMPLATE_DATA')")

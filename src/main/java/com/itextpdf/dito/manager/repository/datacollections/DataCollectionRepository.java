@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.repository.datacollections;
 
 import com.itextpdf.dito.manager.dto.datacollection.DataCollectionType;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
+import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionModel;
 import com.itextpdf.dito.manager.model.datacollection.DataCollectionRoleModel;
 import org.springframework.data.domain.Page;
@@ -134,4 +135,10 @@ public interface DataCollectionRepository extends JpaRepository<DataCollectionEn
 
     Optional<DataCollectionEntity> findByUuid(String uuid);
 
+    @Query("select collection from DataCollectionEntity collection "
+            + "join collection.latestVersion version "
+            + "left join version.templateFiles templates "
+            + "left join templates.template template "
+            + "where template.id in (:listId)")
+    List<DataCollectionEntity> findDataCollectionsByTemplateId(@Param("listId") List<Long> listId);
 }

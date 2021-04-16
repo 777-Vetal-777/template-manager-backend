@@ -26,7 +26,7 @@ public abstract class JwtTokenBuilder implements TokenBuilder {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + getTimeToLive() * 1000))
+                .setExpiration(new Date((new Date()).getTime() + getTimeToLive() * 1000L))
                 .signWith(SignatureAlgorithm.HS512, privateKey)
                 .compact();
     }
