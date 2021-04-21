@@ -22,6 +22,7 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +61,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<UserDTO> create(@Valid final UserCreateRequestDTO userCreateRequestDTO, final HttpServletRequest request, final Principal principal) {
         log.info("Create user with params: {} was started", userCreateRequestDTO);
+        userCreateRequestDTO.setEmail(userCreateRequestDTO.getEmail().toLowerCase());
         final String frontURL = getOriginHeaderOrDefault(request);
         final UserEntity currentUser = userService.findActiveUserByEmail(principal.getName());
         final UserEntity user = userService
@@ -70,8 +72,9 @@ public class UserControllerImpl extends AbstractController implements UserContro
 
     @Override
     public ResponseEntity<UserDTO> update(final String userName, @Valid final UserUpdateRequestDTO userUpdateRequestDTO) {
-        log.info("Update user by name: {} and  with params: {} was started", userName, userUpdateRequestDTO);
-        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), encoder.decode(userName)));
+        final String lowerDecodedUserName = encoder.decode(userName).toLowerCase();
+        log.info("Update user by name: {} and  with params: {} was started", lowerDecodedUserName, userUpdateRequestDTO);
+        final UserDTO user = userMapper.map(userService.updateUser(userMapper.map(userUpdateRequestDTO), lowerDecodedUserName));
         log.info("Update user by name: {} and  with params: {} was finished successfully", userName, userUpdateRequestDTO);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -80,8 +83,9 @@ public class UserControllerImpl extends AbstractController implements UserContro
     public ResponseEntity<UserDTO> updatePassword(final String userName, final UpdatePasswordRequestDTO requestDTO, final HttpServletRequest request, final Principal principal) {
         log.info("Update password by userName: {} was started", userName);
         final String frontURL = getOriginHeaderOrDefault(request);
+        final String decodedLowerName = encoder.decode(userName).toLowerCase();
         final UserEntity adminEntity = userService.findByEmail(principal.getName());
-        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), encoder.decode(userName), adminEntity, frontURL);
+        final UserEntity userEntity = userService.updatePassword(requestDTO.getPassword(), decodedLowerName, adminEntity, frontURL);
         log.info("Update password by userName: {} was finished successfully", userName);
         return new ResponseEntity<>(userMapper.map(userEntity), HttpStatus.OK);
     }
@@ -89,7 +93,8 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<UserDTO> get(final String userName, final Principal principal) {
         log.info("Get info about user by email: {} was started", userName);
-        final UserDTO user = userMapper.map(userService.findByEmail(encoder.decode(userName)));
+        final String lowerCaseName = encoder.decode(userName).toLowerCase();
+        final UserDTO user = userMapper.map(userService.findByEmail(lowerCaseName));
         log.info("Get info about user by email: {} was finished successfully", userName);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -105,6 +110,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
     @Override
     public ResponseEntity<Void> updateActivationStatus(final @Valid UsersActivateRequestDTO usersActivateRequestDTO) {
         log.info("Activate(deactivate) users in batch by params: {} was started", usersActivateRequestDTO);
+        usersActivateRequestDTO.setEmails(usersActivateRequestDTO.getEmails().stream().map(String::toLowerCase).collect(Collectors.toList()));
         userService.updateActivationStatus(usersActivateRequestDTO.getEmails(), usersActivateRequestDTO.isActivate());
         log.info("Activate(deactivate) users in batch by params: {} was finished successfully", usersActivateRequestDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -129,6 +135,7 @@ public class UserControllerImpl extends AbstractController implements UserContro
         log.info("Unblock users with params: {} was started", usersUnblockRequestDTO);
         final List<UserDTO> unblockedUsers = usersUnblockRequestDTO.getUserEmails()
                 .stream()
+                .map(String::toLowerCase)
                 .map(email -> userMapper.map(userService.unblock(email)))
                 .collect(Collectors.toList());
         log.info("Unblock users with params: {} was finished successfully", usersUnblockRequestDTO);

@@ -27,8 +27,9 @@ public class AuthenticationControllerImpl extends AbstractController implements 
     public ResponseEntity<AuthenticationDTO> login(
             final @Valid AuthenticationRequestDTO authenticationRequestDTO) {
         log.info("Login using userName: {} and password was started", authenticationRequestDTO.getLogin());
-        AuthenticationDTO authentication = authenticationService.authenticate(authenticationRequestDTO.getLogin(), authenticationRequestDTO.getPassword());
-        log.info("Login using userName: {} and password was finished successfully", authenticationRequestDTO.getLogin());
+        final String lowerName = authenticationRequestDTO.getLogin().toLowerCase();
+        final AuthenticationDTO authentication = authenticationService.authenticate(lowerName, authenticationRequestDTO.getPassword());
+        log.info("Login using userName: {} and password was finished successfully", lowerName);
         return new ResponseEntity<>(authentication, HttpStatus.OK);
     }
 }

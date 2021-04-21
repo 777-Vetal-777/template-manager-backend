@@ -21,18 +21,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private static final Logger LOG = LogManager.getLogger(UserDetailsServiceImpl.class);
 
-    @Value("${security.credentials.admin-email:#{null}}")
-    private String defaultAdminEmail;
-    @Value("${security.credentials.admin-password:#{null}}")
-    private String defaultAdminPassword;
+    private final String defaultAdminEmail;
+    private final String defaultAdminPassword;
 
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
 
     public UserDetailsServiceImpl(final UserRepository userRepository,
-                                  final PasswordEncoder encoder) {
+                                  final PasswordEncoder encoder,
+                                  final @Value("${security.credentials.admin-email:#{null}}") String defaultAdminEmail,
+                                  final @Value("${security.credentials.admin-password:#{null}}") String defaultAdminPassword) {
         this.userRepository = userRepository;
         this.encoder = encoder;
+        this.defaultAdminEmail = defaultAdminEmail;
+        this.defaultAdminPassword = defaultAdminPassword;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final Long defaultAdminId = 1L;
         if (!StringUtils.isEmpty(defaultAdminEmail) && !StringUtils.isEmpty(defaultAdminPassword)) {
             final UserEntity userEntity = userRepository.findById(defaultAdminId).orElseThrow(() -> new UserNotFoundException("Admin user not found"));
-            userEntity.setEmail(defaultAdminEmail);
+            userEntity.setEmail(defaultAdminEmail.toLowerCase());
             userEntity.setPassword(encoder.encode(defaultAdminPassword));
             userRepository.save(userEntity);
         } else {

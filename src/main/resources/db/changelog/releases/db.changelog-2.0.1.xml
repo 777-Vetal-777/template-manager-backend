@@ -67,4 +67,10 @@
         <addUniqueConstraint tableName="data_sample" columnNames="uuid" constraintName="data_sample_uuid_unique_constraint"/>
     </changeSet>
 
+    <changeSet id="014-update-email-to-lower-case-at-user-table" author="Sergey_Nemets" dbms="postgresql">
+        <update tableName="user">
+            <column name="email" valueComputed="LOWER(email)"/>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
