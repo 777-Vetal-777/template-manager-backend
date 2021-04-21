@@ -17,7 +17,7 @@
         <jjwt.version>0.9.1</jjwt.version>
         <jacoco.plugin.version>0.8.6</jacoco.plugin.version>
         <h2.version>1.4.200</h2.version>
-        <owasp.dependency.check.version>6.0.3</owasp.dependency.check.version>
+        <owasp.dependency.check.version>6.1.5</owasp.dependency.check.version>
         <mojo.license.plugin.version>2.0.0</mojo.license.plugin.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <javax.mail.version>1.4.7</javax.mail.version>
