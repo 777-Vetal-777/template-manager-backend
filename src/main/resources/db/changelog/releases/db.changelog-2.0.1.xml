@@ -81,4 +81,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="015-update-email-to-lower-case-at-user-table" author="Sergey_Nemets" dbms="postgresql">
+        <update tableName="user">
+            <column name="email" valueComputed="LOWER(email)"/>
+        </update>
+    </changeSet>
 </databaseChangeLog>
