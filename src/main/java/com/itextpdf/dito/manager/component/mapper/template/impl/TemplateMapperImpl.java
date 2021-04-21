@@ -203,6 +203,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         fillTemplateDTO(entity, templateWithSettingsDTO, email);
         final PartSettings partSettings = mapPartSettings(entity.getLatestFile().getCompositions().get(0));
         templateWithSettingsDTO.setStartOnNewPage(partSettings.getStartOnNewPage());
+        templateWithSettingsDTO.setVisibleOn(partSettings.getVisibleOn());
         log.info("Convert template: {} to dto with part was finished successfully", entity.getId());
         return templateWithSettingsDTO;
     }
