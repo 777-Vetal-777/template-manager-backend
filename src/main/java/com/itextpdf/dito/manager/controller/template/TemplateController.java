@@ -77,6 +77,7 @@ public interface TemplateController {
 
     String TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_PATH_VARIABLE + "}";
     String TEMPLATE_IMPORT_ENDPOINT = "/import";
+    String TEMPLATE_IMPORT_DITO_ENDPOINT = DITO_ENDPOINT + TEMPLATE_IMPORT_ENDPOINT;
     String TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + EXPORT_ENDPOINT;
     String TEMPLATE_EXPORT_DITO_ENDPOINT_WITH_PATH_VARIABLE = TEMPLATE_ENDPOINT_WITH_PATH_VARIABLE + DITO_ENDPOINT + EXPORT_ENDPOINT;
     String VERSION_ENDPOINT_WITH_PATH_VARIABLE = "/{" + TEMPLATE_VERSION_PATH_VARIABLE + "}";
@@ -345,5 +346,18 @@ public interface TemplateController {
     ResponseEntity<TemplateDTO> importData(Principal principal,
                                            @Parameter(name = "template", description = "Template dito file", required = true, style = ParameterStyle.FORM) @RequestPart(value = "template") MultipartFile templateFile,
                                            @Parameter(name = "settings", description = "Name of data collections and renaming files", required = true, style = ParameterStyle.FORM) @RequestPart(value = "settings", required = false) List<TemplateImportSettingDTO> templateImportSettings);
+
+    @PostMapping(value = TEMPLATE_IMPORT_DITO_ENDPOINT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('E9_US25_IMPORT_TEMPLATE_DATA')")
+    @Operation(summary = "Import template data", description = "Import template data from 1.x version format. Creates new template or new version of existing template",
+            security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)})
+    ResponseEntity<TemplateDTO> importDito(Principal principal,
+                                           @Parameter(name = "template", description = "Template dito file", required = true, style = ParameterStyle.FORM) @RequestPart(value = "template") MultipartFile templateFile,
+                                           @Parameter(name = "settings", description = "Name of data collections and renaming files", required = true, style = ParameterStyle.FORM) @RequestPart(value = "settings", required = false) List<TemplateImportSettingDTO> templateImportSettings);
+
 
 }
