@@ -22,10 +22,10 @@
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <javax.mail.version>1.4.7</javax.mail.version>
         <projectreactor.reactor-spring>1.0.1.RELEASE</projectreactor.reactor-spring>
-        <itext.sdk-java.version>2.0.1</itext.sdk-java.version>
+        <itext.sdk-java.version>${project.version}</itext.sdk-java.version>
         <kotlin-stdlib.version>1.4.30</kotlin-stdlib.version>
         <kotlinx-serialization-core-jvm.version>1.1.0</kotlinx-serialization-core-jvm.version>
-        <itext.editor-api.version>2.0.1</itext.editor-api.version>
+        <itext.editor-api.version>${project.version}</itext.editor-api.version>
         <sentry.version>1.7.30</sentry.version>
         <jsass.version>5.10.4</jsass.version>
         <io.netty.version>4.1.61.Final</io.netty.version>
