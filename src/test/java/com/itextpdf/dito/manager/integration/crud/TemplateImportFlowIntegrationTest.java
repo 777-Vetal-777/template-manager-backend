@@ -52,7 +52,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     void shouldImportTemplateWithDataCollectionAndResources() throws Exception {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-data-collection.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-data-collection.dito"));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     void shouldImportTemplateWithoutDataCollectionAndResources() throws Exception {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-without-data-collection.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-without-data-collection.dito"));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
@@ -89,7 +89,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-data-collection.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-data-collection.dito"));
         final MockMultipartFile settings = new MockMultipartFile("settings", "settings.json", "application/json", "[ {\"name\": \"datasample.json\",\"type\": \"DATA_COLLECTION\",\"new_version\": false}, {\"name\": \"sample-json-file.json\",\"type\": \"DATA_COLLECTION\",\"new_version\": false} ]".getBytes());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
@@ -102,7 +102,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(2, dataSampleRepository.findAll().size());
         assertEquals(4, resourceRepository.findAll().size());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isUnprocessableEntity())
@@ -110,7 +110,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.duplicates[*].type", containsInAnyOrder("DATA_COLLECTION", "TEMPLATE", "IMAGE", "IMAGE", "STYLESHEET")))
                 .andExpect(jsonPath("$.duplicates[*].name", hasItems("Standard", "dito_asset_725fcd2b-fefd-47f1-a0d1-d278c4066251", "dito_asset_d088bac7-c994-4b3d-88a2-e092a5a6d339")));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .file(settings)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -131,7 +131,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-data-collection.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-data-collection.dito"));
         final MockMultipartFile settings = new MockMultipartFile("settings", "settings.json", "application/json", readFileBytes("src/test/resources/test-data/templates/import/settings-create-new-version.json"));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
@@ -144,7 +144,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(2, dataSampleRepository.findAll().size());
         assertEquals(4, resourceRepository.findAll().size());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .file(settings)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -168,7 +168,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         templateImportSettings.forEach(setting -> setting.setAllowedNewVersion(false));
         final MockMultipartFile settings = new MockMultipartFile("settings", "settings.json", "application/json", objectMapper.writeValueAsBytes(templateImportSettings));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
@@ -181,7 +181,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         assertEquals(2, dataSampleRepository.findAll().size());
         assertEquals(4, resourceRepository.findAll().size());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .file(settings)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -201,7 +201,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
         });
         final MockMultipartFile anotherSettings = new MockMultipartFile("settings", "settings.json", "application/json", objectMapper.writeValueAsBytes(templateImportSettings));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .file(anotherSettings)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -220,7 +220,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     void shouldImportTemplateWithDifferentTypesOfResources() throws Exception {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-different-resource-types.dito", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-different-resource-types.dito"));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
@@ -238,7 +238,7 @@ public class TemplateImportFlowIntegrationTest extends AbstractIntegrationTest {
     void shouldThrowExtensionIsNotSupportedException() throws Exception {
         final MockMultipartFile ditoFile = new MockMultipartFile("template", "template-with-different-resource-types.doti", "text/plain", readFileBytes("src/test/resources/test-data/templates/import/template-with-different-resource-types.dito"));
 
-        final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_ENDPOINT)
+        final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.multipart(TemplateController.BASE_NAME + TemplateController.TEMPLATE_IMPORT_DITO_ENDPOINT)
                 .file(ditoFile)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isUnprocessableEntity())

@@ -339,7 +339,6 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final TemplateExportVersion exportVersion = Optional.ofNullable(exportSettingsDTO).map(TemplateExportSettingsDTO::getVersions).orElse(TemplateExportVersion.LATEST);
         final String decodedTemplateName = encoder.decode(templateName);
         final byte[] zippedProject = templateDtmExportService.export(decodedTemplateName, exportDependencies, exportVersion);
-                //templateExportService.export(decodedTemplateName, exportDependencies);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -366,6 +365,11 @@ public class TemplateControllerImpl extends AbstractController implements Templa
 
     @Override
     public ResponseEntity<TemplateDTO> importData(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
+        return importDito(principal, templateFile, templateImportSettings);
+    }
+
+    @Override
+    public ResponseEntity<TemplateDTO> importDito(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
         log.info("Import template by fileName: {} was started", templateFile.getOriginalFilename());
         checkFileExtensionIsSupported(templateFile);
         final byte[] data = getFileBytes(templateFile);
