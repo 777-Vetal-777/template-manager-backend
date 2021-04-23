@@ -27,7 +27,7 @@ import static com.itextpdf.dito.manager.util.TemplateUtils.readStreamable;
 @Service
 public class ResourceImportServiceImpl implements ResourceImportService {
 
-    private  static final String DITO_ASSET_UNKNOWN_RESOURCE = "dito-asset://unknown_resource";
+    private static final String DITO_ASSET_UNKNOWN_RESOURCE = "dito-asset://unknown_resource";
     private final ResourceService resourceService;
     private final ResourceRepository resourceRepository;
     private final ContentTypeDetector contentTypeDetector;
@@ -84,7 +84,7 @@ public class ResourceImportServiceImpl implements ResourceImportService {
                     resourceUri = DITO_ASSET_UNKNOWN_RESOURCE;
                 } else {
                     final String additionalName = getAdditionalName(namePattern, resourceId);
-                    final String name = Optional.ofNullable(resourceUriGeneratorContext.getOriginalPath()).map(Path::getFileName).map(Path::toString).orElse(additionalName);
+                    final String name = Optional.ofNullable(resourceUriGeneratorContext.getOriginalPath()).map(Path::getFileName).map(Path::toString).filter(s -> !s.isBlank()).orElse(additionalName);
                     ResourceEntity resourceEntity = importResource(data, type, name, additionalName, email, settings.get(SettingType.valueOf(type.toString())).get(name));
                     resourceUri = DITO_ASSET_TAG.concat(resourceIdMapper.mapToId(resourceEntity));
                 }
