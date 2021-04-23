@@ -1,5 +1,7 @@
 package com.itextpdf.dito.manager.model.template.dtm;
 
+import java.util.Objects;
+
 public class DtmUsedInDescriptorModel {
     private String type;
     private Long id;
@@ -36,5 +38,18 @@ public class DtmUsedInDescriptorModel {
                 ", id='" + id + '\'' +
                 ", version=" + version +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DtmUsedInDescriptorModel that = (DtmUsedInDescriptorModel) o;
+        return Objects.equals(getType(), that.getType()) && Objects.equals(getId(), that.getId()) && Objects.equals(getVersion(), that.getVersion());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getType(), getId(), getVersion());
     }
 }

@@ -104,4 +104,6 @@ public interface DataCollectionFileRepository extends JpaRepository<DataCollecti
     List<DependencyModel> searchDependencyOfDataCollection(@Param("id") Long dataCollectionId);
   
     Optional<DataCollectionFileEntity> findByVersionAndDataCollection(Long version, DataCollectionEntity dataCollectionEntity);
+
+    Optional<DataCollectionFileEntity> findByVersionAndDataCollection_Id(Long version, Long id);
 }

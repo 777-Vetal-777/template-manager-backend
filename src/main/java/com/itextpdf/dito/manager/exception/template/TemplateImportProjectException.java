@@ -9,4 +9,8 @@ public class TemplateImportProjectException extends RuntimeException {
         super(MESSAGE.concat(cause.getMessage()), cause);
     }
 
+    public TemplateImportProjectException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

@@ -127,4 +127,7 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
     List<DependencyModel> searchDependencies(@Param("id") Long resourceId);
 
     Optional<ResourceFileEntity> findByVersionAndResource(Long version, ResourceEntity resourceEntity);
+
+    Optional<ResourceFileEntity> findByVersionAndResource_Id(Long version, Long id);
+
 }
