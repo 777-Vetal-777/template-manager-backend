@@ -12,8 +12,8 @@ import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedTo
 import com.itextpdf.dito.manager.exception.permission.PermissionNotFoundException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
 import com.itextpdf.dito.manager.exception.role.RoleAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.role.RoleHasConnectedUsersException;
 import com.itextpdf.dito.manager.exception.role.RoleNotFoundException;
-import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
 import com.itextpdf.dito.manager.filter.role.RoleFilter;
 import com.itextpdf.dito.manager.filter.role.RoleUserFilter;
@@ -105,7 +105,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
 
         return StringUtils.isEmpty(searchParam)
                 ? roleRepository.getRolesFilter(pageable, email, firstName, lastName, searchRoleName, active)
-                : roleRepository.getRolesSearch(pageable,email, firstName, lastName, active, searchRoleName, searchParam);
+                : roleRepository.getRolesSearch(pageable, email, firstName, lastName, active, searchRoleName, searchParam);
     }
 
     @Override
@@ -193,8 +193,8 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         if (masterRole.getType() == RoleTypeEnum.SYSTEM) {
             throw new AttemptToDeleteSystemRoleException();
         }
-        if (userService.calculateCountOfUsersWithOnlyOneRole(name) > 0) {
-            throw new UnableToDeleteSingularRoleException();
+        if (!masterRole.getUsers().isEmpty()) {
+            throw new RoleHasConnectedUsersException(name);
         }
 
         final List<RoleEntity> slaveRoles = roleRepository.findByNameAndMasterFalse(name);
@@ -219,7 +219,7 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
         return RoleRepository.SUPPORTED_SORT_FIELDS;
     }
 
-    private RoleEntity setPermissions(final RoleEntity role, List<String> permissionsName) {
+    private RoleEntity setPermissions(final RoleEntity role, final List<String> permissionsName) {
         role.getPermissions().clear();
         for (final String permissionName : permissionsName) {
             final PermissionEntity permissionEntity = permissionService.get(permissionName);
