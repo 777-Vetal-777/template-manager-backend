@@ -335,11 +335,11 @@
         },
         {
             "license": "bouncycastle.txt",
-            "name": "org.bouncycastle:bcpkix-jdk15on:1.67"
+            "name": "org.bouncycastle:bcpkix-jdk15on:1.68"
         },
         {
             "license": "bouncycastle.txt",
-            "name": "org.bouncycastle:bcprov-jdk15on:1.67"
+            "name": "org.bouncycastle:bcprov-jdk15on:1.68"
         },
         {
             "license": "org.checkerframework-checker-qual-3.5.0-mit.txt",
