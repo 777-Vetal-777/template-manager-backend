@@ -76,8 +76,8 @@ public class DtmDataCollectionModelExtractorImpl implements DtmItemModelExtracto
                     final DtmDataCollectionVersionDescriptorModel versionModel = new DtmDataCollectionVersionDescriptorModel();
                     versionModel.setVersion(currentVersion.getAndIncrement());
                     context.map(version, currentVersion.get());
-                    versionModel.setComment(versionModel.getComment());
-                    versionModel.setFileName(versionModel.getFileName());
+                    versionModel.setComment(version.getComment());
+                    versionModel.setFileName(version.getFileName());
                     versionModel.setLocalPath(generateDataCollectionLocalPath(version));
                     final List<DtmDataCollectionUsedInDescriptorModel> versionUsedIn = version.getTemplateFiles().stream().flatMap(templateFileEntity -> {
                         final Stream<DtmDataCollectionUsedInDescriptorModel> result;
