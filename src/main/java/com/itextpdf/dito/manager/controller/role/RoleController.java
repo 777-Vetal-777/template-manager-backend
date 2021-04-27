@@ -82,7 +82,8 @@ public interface RoleController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
                     @Content(schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "404", description = "Role not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Role not found", content = @Content),
+            @ApiResponse(responseCode = "422", description = "Role has connected users", content = @Content)
     })
     ResponseEntity<Void> delete(@Parameter(description = "Encoded with base64role name, to be deleted") @PathVariable String name);
 

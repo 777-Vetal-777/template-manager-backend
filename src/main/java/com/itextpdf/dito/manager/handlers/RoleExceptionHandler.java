@@ -4,10 +4,10 @@ import com.itextpdf.dito.manager.dto.error.ErrorResponseDTO;
 import com.itextpdf.dito.manager.exception.permission.PermissionCantBeAttachedToCustomRoleException;
 import com.itextpdf.dito.manager.exception.role.AttemptToAttachGlobalAdministratorRoleException;
 import com.itextpdf.dito.manager.exception.role.AttemptToDeleteSystemRoleException;
+import com.itextpdf.dito.manager.exception.role.RoleHasConnectedUsersException;
 import com.itextpdf.dito.manager.exception.role.UnableToDeleteSingularRoleException;
 import com.itextpdf.dito.manager.exception.role.UnableToSetPermissionsException;
 import com.itextpdf.dito.manager.exception.role.UnableToUpdateSystemRoleException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -48,5 +48,9 @@ public class RoleExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> unableToSetPermissionsExceptionHandler(
             final UnableToSetPermissionsException ex) {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(RoleHasConnectedUsersException.class)
+    public ResponseEntity<ErrorResponseDTO> roleHasConnectedUsersExceptionHandler(final RoleHasConnectedUsersException ex) {
+        return buildErrorResponse(ex, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }
