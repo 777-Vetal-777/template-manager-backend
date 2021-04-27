@@ -47,7 +47,7 @@ public interface TemplateManagementController {
     @GetMapping(value = TEMPLATE_URL, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Operation(summary = "Get template content", description = "retrieve template content",
             security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
+    @ApiResponse(responseCode = "200", content = @Content)
     @ApiResponse(responseCode = "404", description = "Template not found by id", content = @Content)
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     byte[] get(@PathVariable("template-id") String templateId);

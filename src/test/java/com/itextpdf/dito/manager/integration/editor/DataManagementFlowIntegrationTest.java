@@ -127,8 +127,7 @@ public class DataManagementFlowIntegrationTest extends AbstractIntegrationTest {
 				.fromUriString(DataManagementController.CREATE_DATA_SAMPLE_URL + "/" + NOT_EXISTED_SAMPLE).build()
 				.encode().toUri();
 		final MvcResult result = mockMvc.perform(get(uri)
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
+				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound())
 				.andReturn();
 		assertNotNull(result.getResponse());

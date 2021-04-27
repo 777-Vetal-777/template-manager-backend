@@ -41,10 +41,10 @@ public interface DataManagementController {
     @ApiResponse(responseCode = "400", description = "Bad request, for example, null id is passed", content = @Content)
     DataSampleDescriptor getDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
-    @GetMapping(DATA_SAMPLE_URL)
+    @GetMapping(value = DATA_SAMPLE_URL, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Operation(description = "retrieve data sample content", summary = "Get the contents of a data sample using its personal identifier ", security = @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SECURITY_SCHEME_NAME))
-    @ApiResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
-    @ApiResponse(responseCode = "404", description = "DataSample not found by id", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @ApiResponse(responseCode = "200", content = @Content)
+    @ApiResponse(responseCode = "404", description = "DataSample not found by id", content = @Content)
     byte[] fetchDataSampleById(@PathVariable("sample-id") String dataSampleId);
 
     @PutMapping(value = DATA_SAMPLE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
