@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractService {
     protected static final String RESOURCE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()-]{0,199}";
+    protected static final String TEMPLATE_NAME_REGEX = "[a-zA-Z0-9_][a-zA-Z0-9._()\\s-]{0,199}";
 
     protected abstract List<String> getSupportedSortFields();
 
@@ -36,10 +37,18 @@ public abstract class AbstractService {
         }
     }
 
-    protected void throwExceptionIfNameNotMatchesPattern(final String name, final String abstractResourceType) {
-        if (!Pattern.matches(RESOURCE_NAME_REGEX, name)) {
+    private void throwExceptionIfNameNotMatchesPattern(final String name, final String pattern, final String abstractResourceType) {
+        if (!Pattern.matches(pattern, name)) {
             throw new AbstractResourceInvalidNameException(name, abstractResourceType);
         }
+    }
+
+    protected void throwExceptionIfNameNotMatchesPattern(final String name, final String abstractResourceType) {
+        throwExceptionIfNameNotMatchesPattern(name, RESOURCE_NAME_REGEX, abstractResourceType);
+    }
+
+    protected void throwExceptionIfTemplateNameNotMatchesPattern(final String name, final String abstractResourceType) {
+        throwExceptionIfNameNotMatchesPattern(name, TEMPLATE_NAME_REGEX, abstractResourceType);
     }
 
 }

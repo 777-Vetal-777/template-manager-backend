@@ -70,7 +70,7 @@ public class TemplatePreviewGeneratorImpl implements TemplatePreviewGenerator {
         try (final ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream()) {
             try {
                 //Temporary folder where SDK will record the result
-                final File generatedTemplate = new File(new StringBuilder(temporaryPreviewFolder.getAbsolutePath()).append("/templates/").append(templateName).toString());
+                final File generatedTemplate = new File(new StringBuilder(temporaryPreviewFolder.getAbsolutePath()).append("/templates/").append(templateName.replace(' ', '_')).toString());
                 generatePdfPreview(temporaryPreviewFolder, pdfOutputStream, dataSample, generatedTemplate);
                 return pdfOutputStream;
             } finally {

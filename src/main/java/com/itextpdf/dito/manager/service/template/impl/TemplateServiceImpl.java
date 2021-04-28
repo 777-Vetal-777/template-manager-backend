@@ -135,7 +135,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
                                  final String dataCollectionName, final String email, final byte[] data, final List<TemplatePartModel> templateParts) {
         log.info("Create template with templateName: {} and type: {} and dataCollectionName: {}  and email: {} and parts: {} was started",
                 templateName, templateTypeEnum, dataCollectionName, email, templateParts);
-        throwExceptionIfNameNotMatchesPattern(templateName, AliasConstants.TEMPLATE);
+        throwExceptionIfTemplateNameNotMatchesPattern(templateName, AliasConstants.TEMPLATE);
         throwExceptionIfTemplateNameAlreadyIsRegistered(templateName);
 
         final TemplateEntity templateEntity = new TemplateEntity();
@@ -367,7 +367,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final UserEntity userEntity = userService.findActiveUserByEmail(userEmail);
 
         if (!existingTemplate.getName().equals(updatedTemplateEntity.getName())) {
-            throwExceptionIfNameNotMatchesPattern(updatedTemplateEntity.getName(), AliasConstants.TEMPLATE);
+            throwExceptionIfTemplateNameNotMatchesPattern(updatedTemplateEntity.getName(), AliasConstants.TEMPLATE);
             throwExceptionIfTemplateNameAlreadyIsRegistered(updatedTemplateEntity.getName());
             existingTemplate.setName(updatedTemplateEntity.getName());
         }
