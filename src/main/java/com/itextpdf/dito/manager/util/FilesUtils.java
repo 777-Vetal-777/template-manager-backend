@@ -2,6 +2,7 @@ package com.itextpdf.dito.manager.util;
 
 import com.itextpdf.dito.manager.exception.resource.UnreadableResourceException;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,11 +14,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import static java.nio.file.Files.createTempDirectory;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public final class FilesUtils {
     public static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
@@ -87,6 +90,42 @@ public final class FilesUtils {
 			}
 		}
         return zipFile;
+    }
+
+    public static void unZip(final Path templateFolder, final byte[] ditoData) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(ditoData))) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                File newFile = newFile(templateFolder.toFile(), zipEntry);
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory ".concat(newFile.toString()));
+                    }
+                } else {
+                    File parent = newFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory ".concat(parent.toString()));
+                    }
+
+                    // write file content
+                    final byte[] fileContent = zis.readAllBytes();
+                    Files.write(newFile.toPath(), fileContent, CREATE);
+                }
+            }
+            zis.closeEntry();
+        }
+    }
+
+    private static File newFile(final File destinationDir, final ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+
+        if (!destFilePath.startsWith(destDirPath.concat(File.separator))) {
+            throw new IOException("Entry is outside of the target dir: ".concat(zipEntry.getName()));
+        }
+        return destFile;
     }
 
     private FilesUtils() {

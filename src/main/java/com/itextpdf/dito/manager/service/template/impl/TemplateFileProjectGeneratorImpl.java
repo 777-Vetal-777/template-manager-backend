@@ -87,7 +87,7 @@ public class TemplateFileProjectGeneratorImpl implements TemplateFileProjectGene
     private File generateProjectFolderByTemplate(final TemplateFileEntity templateFileEntity, final List<DataSampleFileEntity> dataSampleFileEntities, final boolean exportDependencies) {
         final File projectFolder;
         try {
-            projectFolder = Files.createTempDirectory(FilesUtils.TEMP_DIRECTORY.toPath(), "preview_".concat(templateFileEntity.getTemplate().getName())).toFile();
+            projectFolder = Files.createTempDirectory(FilesUtils.TEMP_DIRECTORY.toPath(), "preview_".concat(templateFileEntity.getTemplate().getUuid())).toFile();
         } catch (IOException e) {
             throw new TemplateProjectGenerationException(e.getMessage());
         }
@@ -127,7 +127,7 @@ public class TemplateFileProjectGeneratorImpl implements TemplateFileProjectGene
      */
     private File generateZipByTemplate(final TemplateFileEntity templateFileEntity, final List<DataSampleFileEntity> dataSampleFileEntities) {
         try {
-            final String templateName = templateFileEntity.getTemplate().getName();
+            final String templateName = templateFileEntity.getTemplate().getName().replace(' ', '_');
             final Map<String, Path> directories = createTemplateDirectoryForPreview(templateName);
             createFile(TEMPLATES_FOLDER, templateName, templateFileEntity.getData(), directories);
             //write all data samples to root of tmp folder

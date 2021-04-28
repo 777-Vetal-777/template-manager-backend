@@ -230,7 +230,7 @@ public class TemplateMapperImpl implements TemplateMapper {
         final String templateAlias = versionAliasRequired
                 ? TemplateDeploymentUtils.getTemplateAliasForDefaultInstance(templateFileEntity)
                 : templateName;
-        result.setTemplateName(templateName);
+        result.setTemplateName(templateName.replace(' ', '_'));
         result.setAlias(templateAlias);
         result.setVersion(templateFileEntity.getVersion().toString());
         log.info("Convert templateFile: {} and {} to templateDescriptor was finished successfully", templateFileEntity.getId(), versionAliasRequired);

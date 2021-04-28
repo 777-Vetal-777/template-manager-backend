@@ -88,7 +88,9 @@ public class TemplateImportServiceImpl implements TemplateImportService {
 
             return templateEntityList.get(0);
 
-        } catch (IOException e) {
+        } catch (TemplateImportHasDuplicateNamesException e) {
+            throw e;
+        } catch (Exception e) {
             throw new TemplateImportProjectException(e);
         }
     }

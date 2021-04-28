@@ -81,4 +81,6 @@ public interface TemplateFileRepository extends JpaRepository<TemplateFileEntity
     Optional<TemplateFileEntity> findFirstByTemplate_IdAndDeployedOrderByVersionDesc(Long id, Boolean isDeployed);
 
     List<TemplateFileEntity> findByUuidNull();
+
+    Optional<TemplateFileEntity> findByVersionAndTemplate_Id(Long version, Long id);
 }

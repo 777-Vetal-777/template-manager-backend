@@ -42,6 +42,7 @@ import com.itextpdf.dito.manager.model.template.TemplatePermissionsModel;
 import com.itextpdf.dito.manager.service.template.TemplateDependencyService;
 import com.itextpdf.dito.manager.service.template.TemplateDeploymentService;
 import com.itextpdf.dito.manager.service.template.TemplateDtmExportService;
+import com.itextpdf.dito.manager.service.template.TemplateDtmImportService;
 import com.itextpdf.dito.manager.service.template.TemplateExportService;
 import com.itextpdf.dito.manager.service.template.TemplateImportService;
 import com.itextpdf.dito.manager.service.template.TemplatePermissionService;
@@ -93,6 +94,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
     private final TemplateDtmExportService templateDtmExportService;
     private final WorkspaceMapper workspaceMapper;
     private final TemplateImportService templateImportService;
+    private final TemplateDtmImportService templateDtmImportService;
     private final Encoder encoder;
 
     public TemplateControllerImpl(@Value("${template.extensions.supported}") final List<String> supportedExtensions,
@@ -110,6 +112,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
                                   final TemplateDtmExportService templateDtmExportService,
                                   final WorkspaceMapper workspaceMapper,
                                   final TemplateImportService templateImportService,
+                                  final TemplateDtmImportService templateDtmImportService,
                                   final Encoder encoder) {
         this.supportedExtensions = supportedExtensions;
         this.templateService = templateService;
@@ -126,6 +129,7 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         this.templateDtmExportService = templateDtmExportService;
         this.workspaceMapper = workspaceMapper;
         this.templateImportService = templateImportService;
+        this.templateDtmImportService = templateDtmImportService;
         this.encoder = encoder;
     }
 
@@ -226,9 +230,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final ByteArrayOutputStream pdfStream = templatePreviewGenerator.generatePreview(decodedTemplateName, dataSampleName);
 
         final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
         final String filename = new StringBuilder().append(decodedTemplateName).append(".pdf").toString();
-        headers.setContentDispositionFormData("attachment", filename);
+        addAttachment(headers, MediaType.APPLICATION_PDF, filename);
         log.info("Get template preview by templateName: {} and dataSampleName: {} was finished successfully", templateName, dataSampleName);
         return new ResponseEntity<>(pdfStream.toByteArray(), headers, HttpStatus.OK);
     }
@@ -341,9 +344,8 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final byte[] zippedProject = templateDtmExportService.export(decodedTemplateName, exportDependencies, exportVersion);
 
         final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final String filename = decodedTemplateName.concat(TEMPLATE_PACKAGE_EXTENSION);
-        headers.setContentDispositionFormData("attachment", filename);
+        addAttachment(headers, MediaType.MULTIPART_FORM_DATA, filename);
         log.info("Export template by templateName: {} and settings: {} was finished successfully", templateName, exportSettingsDTO);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }
@@ -355,17 +357,27 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         final String decodedTemplateName = encoder.decode(templateName);
         final byte[] zippedProject = templateExportService.export(decodedTemplateName, exportDependencies);
 
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         final String filename = decodedTemplateName.concat(TEMPLATE_PACKAGE_EXTENSION);
-        headers.setContentDispositionFormData("attachment", filename);
+        final HttpHeaders headers = new HttpHeaders();
+        addAttachment(headers, MediaType.MULTIPART_FORM_DATA, filename);
         log.info("Export template by templateName: {} and settings: {} was finished successfully", templateName, exportDependenciesDto);
         return new ResponseEntity<>(zippedProject, headers, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<TemplateDTO> importData(final Principal principal, final MultipartFile templateFile, final List<TemplateImportSettingDTO> templateImportSettings) {
-        return importDito(principal, templateFile, templateImportSettings);
+        log.info("Import template by fileName: {} was started", templateFile.getOriginalFilename());
+        checkFileExtensionIsSupported(templateFile);
+        final byte[] data = getFileBytes(templateFile);
+        final Map<SettingType, Map<String, TemplateImportNameModel>> models = (templateImportSettings == null
+                ? new EnumMap<>(SettingType.class)
+                : templateImportSettings.stream().collect(Collectors.groupingBy(TemplateImportSettingDTO::getType, Collectors.mapping(a -> a, Collectors.toMap(TemplateImportNameModel::getName, a -> a)))));
+        Arrays.stream(SettingType.values()).forEach(type -> models.putIfAbsent(type, Collections.emptyMap()));
+
+        final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).map(file -> file.replace(' ', '_')).orElse("unknown").concat("-import");
+        final TemplateEntity templateEntity = templateDtmImportService.importTemplate(fileName, data, principal.getName(), models).get(0);
+        log.info("Import template by fileName: {} was finished successfully", templateFile.getOriginalFilename());
+        return new ResponseEntity<>(templateMapper.map(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     @Override
@@ -379,8 +391,9 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         Arrays.stream(SettingType.values()).forEach(type -> models.putIfAbsent(type, Collections.emptyMap()));
 
         final String fileName = Optional.ofNullable(FilenameUtils.removeExtension(templateFile.getOriginalFilename())).map(file -> file.replace(' ', '_')).orElse("unknown").concat("-import");
+        final TemplateEntity templateEntity = templateImportService.importTemplate(fileName, data, principal.getName(), models);
         log.info("Import template by fileName: {} was finished successfully", templateFile.getOriginalFilename());
-        return new ResponseEntity<>(templateMapper.map(templateImportService.importTemplate(fileName, data, principal.getName(), models), principal.getName()), HttpStatus.OK);
+        return new ResponseEntity<>(templateMapper.map(templateEntity, principal.getName()), HttpStatus.OK);
     }
 
     private void checkFileExtensionIsSupported(final MultipartFile resource) {
@@ -388,5 +401,10 @@ public class TemplateControllerImpl extends AbstractController implements Templa
         if (!this.supportedExtensions.contains(templateExtension)) {
             throw new TemplateExtensionNotSupportedException(templateExtension);
         }
+    }
+
+    private void addAttachment(final HttpHeaders headers, final MediaType mediaType, final String filename) {
+        headers.setContentType(mediaType);
+        headers.setContentDispositionFormData("attachment", filename);
     }
 }
