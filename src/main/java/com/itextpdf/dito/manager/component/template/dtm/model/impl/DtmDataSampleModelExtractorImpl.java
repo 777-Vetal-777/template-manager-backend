@@ -56,7 +56,7 @@ public class DtmDataSampleModelExtractorImpl implements DtmItemModelExtractor {
             collectedSamples.forEach((sampleEntity, sampleFiles) -> {
                         context.map(sampleEntity, currentId.getAndIncrement());
                         final DtmDataSampleDescriptorModel descriptorModel = new DtmDataSampleDescriptorModel();
-                        descriptorModel.setId(context.getMapping(sampleEntity));
+                        descriptorModel.setId(context.getMapping(sampleEntity).toString());
                         descriptorModel.setName(sampleEntity.getName());
                         descriptorModel.setDescription(sampleEntity.getDescription());
                         descriptorModel.setVersions(mapVersionDescriptors(sampleFiles, context));
@@ -74,7 +74,7 @@ public class DtmDataSampleModelExtractorImpl implements DtmItemModelExtractor {
         final List<DtmDataSampleVersionDescriptorModel> versionDescriptors = new ArrayList<>();
         final AtomicLong currentVersion = new AtomicLong(1L);
         sampleVersions.stream().sorted(Comparator.comparing(DataSampleFileEntity::getVersion)).forEachOrdered(
-                (sampleFileEntities) -> {
+                sampleFileEntities -> {
                     final DtmDataSampleVersionDescriptorModel sampleVersionModel = new DtmDataSampleVersionDescriptorModel();
                     context.map(sampleFileEntities, currentVersion.getAndIncrement());
                     sampleVersionModel.setVersion(context.getMapping(sampleFileEntities));

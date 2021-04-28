@@ -52,7 +52,7 @@ public class DtmDataCollectionModelExtractorImpl implements DtmItemModelExtracto
             final List<DtmDataCollectionDescriptorModel> descriptors = new ArrayList<>();
             dataCollections.forEach((entity, set) -> {
                         final DtmDataCollectionDescriptorModel descriptorModel = new DtmDataCollectionDescriptorModel();
-                        descriptorModel.setId(Long.valueOf(currentId.getAndIncrement()).toString());
+                        descriptorModel.setId(Long.toString(currentId.getAndIncrement()));
                         context.map(entity, currentId.get());
                         descriptorModel.setName(entity.getName());
                         descriptorModel.setType(entity.getType());

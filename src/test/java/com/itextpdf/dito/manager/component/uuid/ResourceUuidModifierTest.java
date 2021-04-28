@@ -39,10 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ResourceUuidModifierTest extends AbstractIntegrationTest {
 
-    private static final String IMAGES = ResourceTypeEnum.IMAGE.pluralName;
-    private static final String FONTS = ResourceTypeEnum.FONT.pluralName;
-    private static final String STYLESHEETS = ResourceTypeEnum.STYLESHEET.pluralName;
-
     private static final String IMAGE_NAME = "test-image";
     private static final String IMAGE_TYPE = "IMAGE";
     private static final String IMAGE_FILE_NAME = "any-name.png";

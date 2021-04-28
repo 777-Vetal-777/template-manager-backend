@@ -23,11 +23,4 @@ public class DtmTemplateDescriptorModel extends AbstractDtmItemDescriptorModel<D
         this.alias = alias;
     }
 
-    @Override
-    public String toString() {
-        return "DtmTemplateDescriptorModel{" +
-                ", type=" + type +
-                ", alias='" + alias + '\'' +
-                "} " + super.toString();
-    }
 }

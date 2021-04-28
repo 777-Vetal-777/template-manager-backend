@@ -22,9 +22,7 @@ public class DtmModelExtractorImpl implements DtmModelExtractor {
     @Override
     public void extract(final DtmFileExportContext context, final DtmFileDescriptorModel model) {
         itemModelExtractors.forEach(
-                (integer, dtmItemModelExtractors) -> {
-                    dtmItemModelExtractors.forEach(dtmItemModelExtractor -> dtmItemModelExtractor.extract(context, model));
-                }
+                (integer, dtmItemModelExtractors) -> dtmItemModelExtractors.forEach(dtmItemModelExtractor -> dtmItemModelExtractor.extract(context, model))
         );
     }
 }

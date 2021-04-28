@@ -29,12 +29,4 @@ public abstract class AbstractDtmItemVersionDescriptorModel {
         this.localPath = localPath;
     }
 
-    @Override
-    public String toString() {
-        return "AbstractDtmItemVersionDescriptorModel{" +
-                "version=" + version +
-                ", comment='" + comment + '\'' +
-                ", localPath='" + localPath + '\'' +
-                '}';
-    }
 }

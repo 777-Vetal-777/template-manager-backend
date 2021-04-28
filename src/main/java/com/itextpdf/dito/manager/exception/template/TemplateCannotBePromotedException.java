@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.exception.template;
 
 import com.itextpdf.dito.manager.exception.AliasConstants;
-import liquibase.pro.packaged.er;
 
 public class TemplateCannotBePromotedException extends RuntimeException {
     private static final long serialVersionUID = 1L;

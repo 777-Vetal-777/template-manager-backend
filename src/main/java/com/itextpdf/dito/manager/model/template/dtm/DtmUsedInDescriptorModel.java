@@ -32,15 +32,6 @@ public class DtmUsedInDescriptorModel {
     }
 
     @Override
-    public String toString() {
-        return "DtmUsedInDescriptorModel{" +
-                "type=" + type +
-                ", id='" + id + '\'' +
-                ", version=" + version +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

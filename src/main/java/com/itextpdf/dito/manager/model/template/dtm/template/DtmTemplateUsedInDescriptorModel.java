@@ -22,11 +22,4 @@ public class DtmTemplateUsedInDescriptorModel extends DtmUsedInDescriptorModel {
         this.settings = settings;
     }
 
-    @Override
-    public String toString() {
-        return "DtmTemplateUsedInDescriptorModel{" +
-                "conditions='" + conditions + '\'' +
-                ", settings='" + settings + '\'' +
-                "} " + super.toString();
-    }
 }

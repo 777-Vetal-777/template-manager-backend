@@ -1,7 +1,6 @@
 package com.itextpdf.dito.manager.model.template.dtm.template;
 
 import com.itextpdf.dito.manager.model.template.dtm.AbstractDtmItemVersionDescriptorModel;
-import com.itextpdf.dito.manager.model.template.dtm.template.DtmTemplateUsedInDescriptorModel;
 
 import java.util.List;
 
@@ -25,11 +24,4 @@ public class DtmTemplateVersionDescriptorModel extends AbstractDtmItemVersionDes
         this.usedIn = usedIn;
     }
 
-    @Override
-    public String toString() {
-        return "DtmTemplateVersionDescriptorModel{" +
-                "alias='" + alias + '\'' +
-                ", usedIn=" + usedIn +
-                "} " + super.toString();
-    }
 }

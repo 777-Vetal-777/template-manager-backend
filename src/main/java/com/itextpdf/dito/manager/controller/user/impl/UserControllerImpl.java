@@ -22,7 +22,6 @@ import com.itextpdf.dito.manager.service.user.UserService;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
