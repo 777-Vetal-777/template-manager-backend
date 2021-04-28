@@ -33,8 +33,8 @@ public class DtmFileImportContext {
     private final Map<String, Map<Long, Long>> resourceVersionMappingContext = new TreeMap<>();
     private final Map<String, Long> dataCollectionIdMappingContext = new TreeMap<>();
     private final Map<String, Map<Long, Long>> dataCollectionVersionMappingContext = new TreeMap<>();
-    private final Map<Long, Long> dataSampleIdMappingContext = new TreeMap<>();
-    private final Map<Long, Map<Long, Long>> dataSampleVersionMappingContext = new TreeMap<>();
+    private final Map<String, Long> dataSampleIdMappingContext = new TreeMap<>();
+    private final Map<String, Map<Long, Long>> dataSampleVersionMappingContext = new TreeMap<>();
 
     public DtmFileImportContext(final Map<SettingType, Map<String, TemplateImportNameModel>> settings,
                                 final String email,
@@ -97,20 +97,20 @@ public class DtmFileImportContext {
         return Optional.ofNullable(dataCollectionVersionMappingContext.get(id)).map(map -> map.get(version)).orElse(null);
     }
 
-    public void map(final Long id, final DataSampleEntity entity) {
+    public void map(final String id, final DataSampleEntity entity) {
         dataSampleIdMappingContext.put(id, entity.getId());
     }
 
-    public void map(final Long id, final Long version, final DataSampleFileEntity collectionFileEntity) {
+    public void map(final String id, final Long version, final DataSampleFileEntity collectionFileEntity) {
         final Map<Long, Long> versionMapping = dataSampleVersionMappingContext.computeIfAbsent(id, aLong -> new TreeMap<>());
         versionMapping.put(version, collectionFileEntity.getVersion());
     }
 
-    public Long getSampleMapping(final Long id) {
+    public Long getSampleMapping(final String id) {
         return dataSampleIdMappingContext.get(id);
     }
 
-    public Long getSampleMapping(final Long id, final Long version) {
+    public Long getSampleMapping(final String id, final Long version) {
         return Optional.ofNullable(dataSampleVersionMappingContext.get(id)).map(map -> map.get(version)).orElse(null);
     }
 
