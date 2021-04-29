@@ -1,12 +1,15 @@
 package com.itextpdf.dito.manager.component.template.dtm;
 
 import com.itextpdf.dito.manager.controller.template.TemplateController;
+import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
+import com.itextpdf.dito.manager.service.datacollection.DataCollectionService;
 import com.itextpdf.dito.manager.service.template.TemplateService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,6 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DtmTemplateExportServiceTest extends AbstractDtmExtractorTest {
     @Autowired
     private TemplateService templateService;
+    @Autowired
+    private DataCollectionService dataCollectionService;
 
     @Test
     void shouldExportStandardTemplate() throws Exception {
@@ -41,10 +46,11 @@ class DtmTemplateExportServiceTest extends AbstractDtmExtractorTest {
         final String templateName = "composition_template2";
         final TemplateEntity templateEntity = templateService.get(templateName);
         assertNotNull(templateEntity.getUuid());
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get("new-data-collection");
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
                 .queryParam("versions", "ALL"))
                 .andExpect(status().isOk())
-                .andExpect(zipMatch(hasItem("meta.json"), hasItem("templates/" + templateEntity.getLatestFile().getUuid() + ".html")));
+                .andExpect(zipMatch(hasItem("meta.json"), hasItem("templates/" + templateEntity.getLatestFile().getUuid() + ".html"), hasItem("data_collections/" + dataCollectionEntity.getUuid() + "-1.json")));
     }
 
     @Test
@@ -52,11 +58,12 @@ class DtmTemplateExportServiceTest extends AbstractDtmExtractorTest {
         final String templateName = "composition_template2";
         final TemplateEntity templateEntity = templateService.get(templateName);
         assertNotNull(templateEntity.getUuid());
+        final DataCollectionEntity dataCollectionEntity = dataCollectionService.get("new-data-collection");
         mockMvc.perform(get(TemplateController.BASE_NAME + TemplateController.TEMPLATE_EXPORT_ENDPOINT_WITH_PATH_VARIABLE, encodeStringToBase64(templateName))
                 .queryParam("versions", "LATEST")
                 .queryParam("exportDependencies", "false"))
                 .andExpect(status().isOk())
-                .andExpect(zipMatch(hasItem("meta.json"), hasItem("templates/" + templateEntity.getLatestFile().getUuid() + ".html")));
+                .andExpect(zipMatch(hasItem("meta.json"), hasItem("templates/" + templateEntity.getLatestFile().getUuid() + ".html"), not(hasItem("data_collections/" + dataCollectionEntity.getUuid() + "-1.json"))));
     }
 
 }

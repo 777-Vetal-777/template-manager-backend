@@ -79,10 +79,10 @@ public class DtmDataCollectionReaderImpl implements DtmFileItemReader {
             try {
                 if (dataCollectionEntity == null) {
                     dataCollectionEntity = dataCollectionService.create(dataCollectionName, DataCollectionType.valueOf(dataCollectionModel.getType().toString()), Files.readAllBytes(basePath.resolve(version.getLocalPath())), version.getFileName(), context.getEmail());
-                    context.map(dataCollectionModel.getId(), dataCollectionEntity);
                 } else {
                     dataCollectionEntity = dataCollectionService.createNewVersion(dataCollectionEntity.getName(), dataCollectionEntity.getType(), Files.readAllBytes(basePath.resolve(version.getLocalPath())), version.getFileName(), context.getEmail(), version.getComment());
                 }
+                context.map(dataCollectionModel.getId(), dataCollectionEntity);
                 context.map(dataCollectionModel.getId(), version.getVersion(), dataCollectionEntity.getLatestVersion());
             } catch (IOException ioException) {
                 throw new TemplateImportProjectException("Importing archive is broken or corrupted, could not load file " + version.getLocalPath() + " for data collection", ioException);

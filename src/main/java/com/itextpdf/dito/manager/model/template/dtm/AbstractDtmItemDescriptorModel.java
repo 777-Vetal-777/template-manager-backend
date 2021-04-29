@@ -2,8 +2,8 @@ package com.itextpdf.dito.manager.model.template.dtm;
 
 import java.util.List;
 
-public abstract class AbstractDtmItemDescriptorModel<VersionDescriptorModel> {
-    private List<VersionDescriptorModel> versions;
+public abstract class AbstractDtmItemDescriptorModel<V> {
+    private List<V> versions;
     private String id;
     private String name;
     private String description;
@@ -32,11 +32,11 @@ public abstract class AbstractDtmItemDescriptorModel<VersionDescriptorModel> {
         this.description = description;
     }
 
-    public List<VersionDescriptorModel> getVersions() {
+    public List<V> getVersions() {
         return versions;
     }
 
-    public void setVersions(List<VersionDescriptorModel> versions) {
+    public void setVersions(List<V> versions) {
         this.versions = versions;
     }
 

@@ -127,7 +127,6 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
                 if (templateEntity == null) {
                     final String dataCollectionName = Optional.ofNullable(dataCollectionFileEntity).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
                     templateEntity = templateService.create(templateName, templateModel.getType(), dataCollectionName, context.getEmail(), Collections.emptyList());
-                    context.map(templateModel.getId(), templateEntity);
                 } else {
                     final UserEntity userEntity = userService.findByEmail(context.getEmail());
                     templateEntity = templateService.createNewVersionAsCopy(templateEntity.getLatestFile(), userEntity, version.getComment());
@@ -141,7 +140,7 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
                         Files.readAllBytes(basePath.resolve(version.getLocalPath())),
                         templateModel.getId(),
                         version.getVersion());
-
+                context.map(templateModel.getId(), templateEntity);
                 context.map(templateModel.getId(), version.getVersion(), savedEntity);
             } catch (IOException ioException) {
                 throw new TemplateImportProjectException("Importing archive is broken or corrupted, could not load file " + version.getLocalPath() + " for template", ioException);
@@ -191,7 +190,6 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
                             context.getResourceMapping(resource.getId()));
                     dataString = updateResourceMapping(dataString, resource, resourceVersion, resourceFileEntities);
                     resourceFiles.add(resourceFileEntities.get(0));
-
                 }
             }
         }
