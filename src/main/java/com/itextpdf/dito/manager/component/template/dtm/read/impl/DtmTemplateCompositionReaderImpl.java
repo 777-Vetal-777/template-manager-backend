@@ -125,7 +125,6 @@ public class DtmTemplateCompositionReaderImpl implements DtmFileItemReader {
                 if (templateEntity == null) {
                     final String dataCollectionName = Optional.ofNullable(dataCollectionFileEntity).map(DataCollectionFileEntity::getDataCollection).map(DataCollectionEntity::getName).orElse(null);
                     templateEntity = templateService.create(templateName, templateModel.getType(), dataCollectionName, context.getEmail(), templateParts);
-                    context.map(templateModel.getId(), templateEntity);
                 } else {
                     templateEntity = templateService.createNewVersion(templateName, templateEntity.getLatestFile().getData(), context.getEmail(), version.getComment(), null, templateParts);
                 }
@@ -137,7 +136,7 @@ public class DtmTemplateCompositionReaderImpl implements DtmFileItemReader {
                         context,
                         templateModel.getId(),
                         version.getVersion());
-
+                context.map(templateModel.getId(), templateEntity);
                 context.map(templateModel.getId(), version.getVersion(), savedEntity);
             } catch (IOException ioException) {
                 throw new TemplateImportProjectException("Importing archive is broken or corrupted, could not load file " + version.getLocalPath() + " for template", ioException);

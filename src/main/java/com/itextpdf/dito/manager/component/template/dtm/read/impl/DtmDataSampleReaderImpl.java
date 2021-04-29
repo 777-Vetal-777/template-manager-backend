@@ -7,6 +7,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
 import com.itextpdf.dito.manager.exception.datasample.DataSampleAlreadyExistsException;
+import com.itextpdf.dito.manager.exception.datasample.DataSampleNotFoundException;
 import com.itextpdf.dito.manager.exception.template.TemplateImportProjectException;
 import com.itextpdf.dito.manager.model.template.dtm.DtmFileDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.ItemType;
@@ -55,7 +56,7 @@ public class DtmDataSampleReaderImpl implements DtmFileItemReader {
                     dtmDataSampleDescriptorModels.forEach(dataSampleModel -> {
                                 DataSampleEntity dataSampleEntity;
                                 try {
-                                    dataSampleEntity = dataSampleService.get(dataSampleModel.getName(), dataCollectionEntity.getName());
+                                    dataSampleEntity = dataSampleService.get(dataCollectionEntity.getName(), dataSampleModel.getName());
 
                                     final TemplateImportNameModel nameModel = Optional.ofNullable(context.getSettings(SettingType.DATA_SAMPLE))
                                             .map(setting -> setting.get(dataSampleModel.getName()))
@@ -68,7 +69,7 @@ public class DtmDataSampleReaderImpl implements DtmFileItemReader {
                                         dataSampleEntity = makeImportVersions(context, dataCollectionEntity, basePath, new StringBuilder(context.getFileName()).append("(").append(currentNumber).append(")").toString(), dataSampleModel, null);
                                     }
 
-                                } catch (DataCollectionNotFoundException e) {
+                                } catch (DataSampleNotFoundException e) {
                                     dataSampleEntity = makeImportVersions(context, dataCollectionEntity, basePath, dataSampleModel.getName(), dataSampleModel, null);
                                 } catch (DataSampleAlreadyExistsException e) {
                                     context.putToDuplicates(SettingType.DATA_SAMPLE, dataSampleModel.getName());
@@ -110,10 +111,10 @@ public class DtmDataSampleReaderImpl implements DtmFileItemReader {
             try {
                 if (dataSampleEntity == null) {
                     dataSampleEntity = dataSampleService.create(dataCollectionEntity, dataSampleName, version.getFileName(), Files.readString(basePath.resolve(version.getLocalPath())), version.getComment(), context.getEmail());
-                    context.map(dataSampleModel.getId(), dataSampleEntity);
                 } else {
                     dataSampleEntity = dataSampleService.createNewVersion(dataCollectionEntity.getName(), dataSampleName, Files.readString(basePath.resolve(version.getLocalPath())), version.getFileName(), context.getEmail(), version.getComment());
                 }
+                context.map(dataSampleModel.getId(), dataSampleEntity);
                 context.map(dataSampleModel.getId(), version.getVersion(), dataSampleEntity.getLatestVersion());
             } catch (IOException ioException) {
                 throw new TemplateImportProjectException("Importing archive is broken or corrupted, could not load file " + version.getLocalPath() + " for data sample", ioException);

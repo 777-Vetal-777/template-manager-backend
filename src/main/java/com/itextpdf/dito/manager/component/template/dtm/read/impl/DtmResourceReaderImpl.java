@@ -101,10 +101,10 @@ public class DtmResourceReaderImpl implements DtmFileItemReader {
                     } else {
                         resourceEntity = resourceService.create(resourceName, resourceModel.getType(), Files.readAllBytes(basePath.resolve(version.getLocalPath())), version.getFileName(), context.getEmail());
                     }
-                    context.map(resourceModel.getId(), resourceEntity);
                 } else {
-                    resourceEntity = resourceService.createNewVersion(resourceEntity.getName(), resourceEntity.getType(), Files.readAllBytes(basePath.resolve(version.getLocalPath())), version.getFileName(), context.getEmail(), version.getComment());
+                    resourceEntity = ResourceTypeEnum.FONT.equals(resourceModel.getType()) ? resourceEntity : resourceService.createNewVersion(resourceEntity.getName(), resourceEntity.getType(), Files.readAllBytes(basePath.resolve(version.getLocalPath())), version.getFileName(), context.getEmail(), version.getComment());
                 }
+                context.map(resourceModel.getId(), resourceEntity);
                 context.map(resourceModel.getId(), version.getVersion(), resourceEntity.getLatestFile().get(0));
             } catch (IOException ioException) {
                 throw new TemplateImportProjectException("Importing archive is broken or corrupted, could not load file " + version.getLocalPath() + " for resource", ioException);
