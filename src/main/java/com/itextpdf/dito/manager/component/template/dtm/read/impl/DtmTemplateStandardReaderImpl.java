@@ -1,6 +1,7 @@
 package com.itextpdf.dito.manager.component.template.dtm.read.impl;
 
 import com.itextpdf.dito.manager.component.template.dtm.read.DtmFileItemReader;
+import com.itextpdf.dito.manager.dto.resource.ResourceTypeEnum;
 import com.itextpdf.dito.manager.dto.template.setting.SettingType;
 import com.itextpdf.dito.manager.dto.template.setting.TemplateImportNameModel;
 import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
@@ -10,17 +11,18 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
-import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
-import com.itextpdf.dito.manager.exception.resource.ResourceNotFoundException;
+import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateImportProjectException;
+import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.integration.editor.mapper.resource.ResourceIdMapper;
 import com.itextpdf.dito.manager.model.template.dtm.DtmFileDescriptorModel;
+import com.itextpdf.dito.manager.model.template.dtm.DtmUsedInDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.ItemType;
 import com.itextpdf.dito.manager.model.template.dtm.context.DtmFileImportContext;
 import com.itextpdf.dito.manager.model.template.dtm.datacollection.DtmDataCollectionDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.datacollection.DtmDataCollectionUsedInDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.datacollection.DtmDataCollectionVersionDescriptorModel;
+import com.itextpdf.dito.manager.model.template.dtm.resource.DtmFontFaceDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.resource.DtmResourceDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.resource.DtmResourceVersionDescriptorModel;
 import com.itextpdf.dito.manager.model.template.dtm.template.DtmTemplateDescriptorModel;
@@ -90,7 +92,7 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
 
                                 final TemplateImportNameModel nameModel = Optional.ofNullable(context.getSettings(SettingType.TEMPLATE))
                                         .map(setting -> setting.get(templateModel.getName()))
-                                        .orElseThrow(() -> new DataCollectionAlreadyExistsException(templateModel.getName()));
+                                        .orElseThrow(() -> new TemplateAlreadyExistsException(templateModel.getName()));
 
                                 if (Boolean.TRUE.equals(nameModel.getAllowedNewVersion())) {
                                     templateEntity = makeImportVersions(context, basePath, templateEntity.getName(), templateModel, model, templateEntity);
@@ -99,9 +101,9 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
                                     templateEntity = makeImportVersions(context, basePath, new StringBuilder(context.getFileName()).append("(").append(currentNumber).append(")").toString(), templateModel, model, null);
                                 }
 
-                            } catch (DataCollectionNotFoundException e) {
+                            } catch (TemplateNotFoundException e) {
                                 templateEntity = makeImportVersions(context, basePath, templateModel.getName(), templateModel, model, null);
-                            } catch (DataCollectionAlreadyExistsException e) {
+                            } catch (TemplateAlreadyExistsException e) {
                                 context.putToDuplicates(SettingType.TEMPLATE, templateModel.getName());
                             }
                         }
@@ -175,7 +177,7 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
                                                           final String templateId,
                                                           final Long version) {
         String dataString = new String(data, StandardCharsets.UTF_8);
-        final DtmDataCollectionUsedInDescriptorModel search = new DtmDataCollectionUsedInDescriptorModel();
+        final DtmUsedInDescriptorModel search = new DtmUsedInDescriptorModel();
         search.setId(Long.valueOf(templateId));
         search.setType(ItemType.TEMPLATE.getPluralName());
         search.setVersion(version);
@@ -184,12 +186,12 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
         for (DtmResourceDescriptorModel resource : model.getResources()) {
             for (DtmResourceVersionDescriptorModel resourceVersion : resource.getVersions()) {
                 if (resourceVersion.getUsedIn().contains(search)) {
-                    final ResourceFileEntity resourceFileEntity = resourceFileRepository.findByVersionAndResource_Id(
+                    final List<ResourceFileEntity> resourceFileEntities = resourceFileRepository.findByVersionAndResource_Id(
                             context.getResourceMapping(resource.getId(), resourceVersion.getVersion()),
-                            context.getResourceMapping(resource.getId()))
-                            .orElseThrow(() -> new TemplateImportProjectException(new ResourceNotFoundException("Could not find resource " + resource.getName())));
-                    dataString = dataString.replace(resource.getAlias(), TemplateUtils.DITO_ASSET_TAG.concat(resourceIdMapper.mapToId(resourceFileEntity.getResource())));
-                    resourceFiles.add(resourceFileEntity);
+                            context.getResourceMapping(resource.getId()));
+                    dataString = updateResourceMapping(dataString, resource, resourceVersion, resourceFileEntities);
+                    resourceFiles.add(resourceFileEntities.get(0));
+
                 }
             }
         }
@@ -197,6 +199,25 @@ public class DtmTemplateStandardReaderImpl implements DtmFileItemReader {
         final TemplateFileEntity fileEntity = templateFileRepository.save(templateFileEntity);
         templateDeploymentService.promoteOnDefaultStage(fileEntity);
         return fileEntity;
+    }
+
+    private String updateResourceMapping(final String data,
+                                         final DtmResourceDescriptorModel resource,
+                                         final DtmResourceVersionDescriptorModel resourceVersion,
+                                         final List<ResourceFileEntity> resourceFileEntities) {
+        String dataString = data;
+        for (final ResourceFileEntity resourceEntity : resourceFileEntities) {
+            dataString = dataString.replace(resource.getAlias(), TemplateUtils.DITO_ASSET_TAG.concat(resourceIdMapper.mapToId(resourceEntity.getResource())));
+            if (Objects.equals(resource.getType(), ResourceTypeEnum.FONT)) {
+                final Optional<String> fontFaceAlias = Optional.ofNullable(resourceVersion.getFontFaces())
+                        .map(fontFaces -> fontFaces.get(resourceEntity.getFontName()))
+                        .map(DtmFontFaceDescriptorModel::getAlias);
+                if (fontFaceAlias.isPresent()) {
+                    dataString = dataString.replace(fontFaceAlias.get(), TemplateUtils.DITO_ASSET_TAG.concat(resourceIdMapper.mapToId(resourceEntity)));
+                }
+            }
+        }
+        return dataString;
     }
 
     @Override

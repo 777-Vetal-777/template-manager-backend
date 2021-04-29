@@ -163,8 +163,10 @@ public class DtmResourceReaderImpl implements DtmFileItemReader {
         }
 
         @Override
-        public void transferTo(File dest) throws IOException, IllegalStateException {
-            new FileOutputStream(dest).write(content);
+        public void transferTo(File dest) throws IOException {
+            try (FileOutputStream outputStream = new FileOutputStream(dest)) {
+                outputStream.write(content);
+            }
         }
     }
 }

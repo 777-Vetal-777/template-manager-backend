@@ -128,6 +128,6 @@ public interface ResourceFileRepository extends JpaRepository<ResourceFileEntity
 
     Optional<ResourceFileEntity> findByVersionAndResource(Long version, ResourceEntity resourceEntity);
 
-    Optional<ResourceFileEntity> findByVersionAndResource_Id(Long version, Long id);
+    List<ResourceFileEntity> findByVersionAndResource_Id(Long version, Long id);
 
 }

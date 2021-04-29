@@ -135,7 +135,7 @@ public class DtmFileImportContext {
     }
 
     public Map<String, TemplateImportNameModel> getSettings(final SettingType type) {
-        return Optional.ofNullable(settings).map(settings -> settings.get(type)).orElse(Collections.emptyMap());
+        return Optional.ofNullable(settings).map(setting -> setting.get(type)).orElse(Collections.emptyMap());
     }
 
     public String getEmail() {
