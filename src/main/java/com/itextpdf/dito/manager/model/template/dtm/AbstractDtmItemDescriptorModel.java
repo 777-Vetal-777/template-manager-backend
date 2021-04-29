@@ -40,13 +40,4 @@ public abstract class AbstractDtmItemDescriptorModel<VersionDescriptorModel> {
         this.versions = versions;
     }
 
-    @Override
-    public String toString() {
-        return "AbstractDtmItemDescriptorModel{" +
-                "versions=" + versions +
-                ", id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                '}';
-    }
 }

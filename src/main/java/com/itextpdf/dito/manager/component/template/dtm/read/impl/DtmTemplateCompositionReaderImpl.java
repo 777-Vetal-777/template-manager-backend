@@ -11,8 +11,7 @@ import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFilePartEntity;
-import com.itextpdf.dito.manager.exception.datacollection.DataCollectionAlreadyExistsException;
-import com.itextpdf.dito.manager.exception.datacollection.DataCollectionNotFoundException;
+import com.itextpdf.dito.manager.exception.template.TemplateAlreadyExistsException;
 import com.itextpdf.dito.manager.exception.template.TemplateImportProjectException;
 import com.itextpdf.dito.manager.exception.template.TemplateNotFoundException;
 import com.itextpdf.dito.manager.model.template.dtm.DtmFileDescriptorModel;
@@ -85,7 +84,7 @@ public class DtmTemplateCompositionReaderImpl implements DtmFileItemReader {
 
                                 final TemplateImportNameModel nameModel = Optional.ofNullable(context.getSettings(SettingType.TEMPLATE))
                                         .map(setting -> setting.get(templateModel.getName()))
-                                        .orElseThrow(() -> new DataCollectionAlreadyExistsException(templateModel.getName()));
+                                        .orElseThrow(() -> new TemplateAlreadyExistsException(templateModel.getName()));
 
                                 if (Boolean.TRUE.equals(nameModel.getAllowedNewVersion())) {
                                     templateEntity = makeImportVersions(context, basePath, templateEntity.getName(), templateModel, model, templateEntity);
@@ -94,9 +93,9 @@ public class DtmTemplateCompositionReaderImpl implements DtmFileItemReader {
                                     templateEntity = makeImportVersions(context, basePath, new StringBuilder(context.getFileName()).append("(").append(currentNumber).append(")").toString(), templateModel, model, null);
                                 }
 
-                            } catch (DataCollectionNotFoundException e) {
+                            } catch (TemplateNotFoundException e) {
                                 templateEntity = makeImportVersions(context, basePath, templateModel.getName(), templateModel, model, null);
-                            } catch (DataCollectionAlreadyExistsException e) {
+                            } catch (TemplateAlreadyExistsException e) {
                                 context.putToDuplicates(SettingType.TEMPLATE, templateModel.getName());
                             }
                         }

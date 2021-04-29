@@ -74,15 +74,4 @@ public class DtmFileDescriptorModel {
                 .collect(Collectors.toMap(DtmResourceDescriptorModel::getId, Function.identity()));
     }
 
-    @Override
-    public String toString() {
-        return "DtmFileDescriptorModel{" +
-                "format='" + format + '\'' +
-                ", templateManagerVersion='" + templateManagerVersion + '\'' +
-                ", dataCollections=" + dataCollections +
-                ", dataSamples=" + dataSamples +
-                ", templates=" + templates +
-                ", resources=" + resources +
-                '}';
-    }
 }

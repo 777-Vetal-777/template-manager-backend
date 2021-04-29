@@ -64,7 +64,7 @@ public class ResourceLeafDescriptorMapperImpl implements ResourceLeafDescriptorM
     private List<FontFileDescriptor> getFontFiles(final ResourceEntity resourceEntity) {
         final List<FontFileDescriptor> fontFilesList = new ArrayList<>();
         for (final ResourceFileEntity fileEntity : resourceEntity.getResourceFiles()) {
-            final String id = fileEntity.getUuid();
+            final String id = resourceIdMapper.mapToId(fileEntity);
             final FontFileDescriptor fileDescriptor = new FontFileDescriptor(id);
             fileDescriptor.setStyle(FontStyle.valueOf(fileEntity.getFontName()));
             fontFilesList.add(fileDescriptor);

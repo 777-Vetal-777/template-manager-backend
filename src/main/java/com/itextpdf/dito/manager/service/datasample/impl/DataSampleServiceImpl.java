@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselectFromFilter;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
@@ -110,10 +111,10 @@ public class DataSampleServiceImpl extends AbstractService implements DataSample
         dataSampleFileEntity.setComment(comment);
         dataSampleFileEntity.setVersion(1L);
         dataSampleFileEntity.setDataSample(dataSampleEntity);
-        dataSampleEntity.setVersions(singleton(dataSampleFileEntity));
+        dataSampleEntity.setVersions(Stream.of(dataSampleFileEntity).collect(Collectors.toList()));
         dataSampleEntity.setLatestVersion(dataSampleFileEntity);
         final DataSampleLogEntity logEntity = createDataSampleLogEntry(dataSampleEntity, userEntity);
-        dataSampleEntity.setDataSampleLog(Collections.singletonList(logEntity));
+        dataSampleEntity.setDataSampleLog(Stream.of(logEntity).collect(Collectors.toList()));
 
         log.info("Create dataSample by dataCollectionEntity: {} and dataSampleName: {} and fileName: {} and json: {} and comment: {} and email: {} was finished successfully",
                 dataCollectionEntity, name, fileName, sample, comment, email);

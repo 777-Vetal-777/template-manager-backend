@@ -8,7 +8,6 @@ import com.itextpdf.dito.manager.entity.datasample.DataSampleEntity;
 import com.itextpdf.dito.manager.entity.datasample.DataSampleFileEntity;
 import com.itextpdf.dito.manager.model.template.dtm.ItemType;
 import com.itextpdf.dito.manager.model.template.dtm.context.DtmFileExportContext;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

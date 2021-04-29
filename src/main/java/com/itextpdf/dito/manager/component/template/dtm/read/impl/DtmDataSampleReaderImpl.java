@@ -88,7 +88,7 @@ public class DtmDataSampleReaderImpl implements DtmFileItemReader {
             if (key != null) {
                 result.put(key,
                         model.getDataSamples().stream()
-                                .filter(dtmDataSampleDescriptorModel -> dataCollection.getSamples().contains(dtmDataSampleDescriptorModel.getId().toString()))
+                                .filter(dtmDataSampleDescriptorModel -> dataCollection.getSamples().contains(dtmDataSampleDescriptorModel.getId()))
                                 .collect(Collectors.toList()));
             }
         }

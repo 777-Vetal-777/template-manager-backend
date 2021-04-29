@@ -25,7 +25,6 @@ import com.itextpdf.dito.manager.repository.role.RoleRepository;
 import com.itextpdf.dito.manager.service.AbstractService;
 import com.itextpdf.dito.manager.service.permission.PermissionService;
 import com.itextpdf.dito.manager.service.role.RoleService;
-import com.itextpdf.dito.manager.service.user.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
@@ -49,14 +48,11 @@ public class RoleServiceImpl extends AbstractService implements RoleService {
     // Repositories
     private final RoleRepository roleRepository;
     // Services
-    private final UserService userService;
     private final PermissionService permissionService;
 
     public RoleServiceImpl(final RoleRepository roleRepository,
-                           final UserService userService,
                            final PermissionService permissionService) {
         this.roleRepository = roleRepository;
-        this.userService = userService;
         this.permissionService = permissionService;
     }
 

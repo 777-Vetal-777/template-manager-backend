@@ -934,21 +934,4 @@ class TemplateFlowIntegrationTest extends AbstractIntegrationTest {
         return request;
     }
 
-    @SafeVarargs
-    private ResultMatcher zipMatch(Matcher<Iterable<? super String>>... entries) {
-        return mvcResult -> {
-            final List<String> zipEntries = new LinkedList<>();
-            try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
-                ZipEntry ze;
-                while ((ze = zipStream.getNextEntry()) != null) {
-                    //replace used for Windows machines
-                    zipEntries.add(ze.getName().replace('\\', '/'));
-                }
-            }
-            for (Matcher<Iterable<? super String>> entry : entries) {
-                assertThat(zipEntries, entry);
-            }
-        };
-    }
-
 }

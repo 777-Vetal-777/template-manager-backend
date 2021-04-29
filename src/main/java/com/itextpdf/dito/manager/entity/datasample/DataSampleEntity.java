@@ -124,8 +124,6 @@ public class DataSampleEntity {
 		this.description = description;
 	}
 
-
-
 	public UserEntity getAuthor() {
         return author;
     }
