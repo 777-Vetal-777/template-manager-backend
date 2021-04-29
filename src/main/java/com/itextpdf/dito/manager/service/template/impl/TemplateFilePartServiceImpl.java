@@ -96,7 +96,7 @@ public class TemplateFilePartServiceImpl implements TemplateFilePartService {
     public TemplateFilePartEntity updateComposition(final TemplateFilePartEntity example,
                                                     final TemplateFileEntity composition) {
         LOG.info("Update composition with templateFilePartEntity: {} and composition: {} was started", example, composition);
-        final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(composition, example.getPart(), example.getCondition(), example.getSettings());
+        final TemplateFilePartEntity templateFilePartEntity = createTemplateFilePartEntity(composition, example.getPart().getTemplate().getLatestFile(), example.getCondition(), example.getSettings());
         LOG.info("Update composition with templateFilePartEntity: {} and composition: {} was finished successfully", example, composition);
         return templateFilePartEntity;
     }

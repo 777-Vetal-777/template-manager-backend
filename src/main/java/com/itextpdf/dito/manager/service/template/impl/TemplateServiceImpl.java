@@ -10,6 +10,7 @@ import com.itextpdf.dito.manager.entity.TemplateTypeEnum;
 import com.itextpdf.dito.manager.entity.UserEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionEntity;
 import com.itextpdf.dito.manager.entity.datacollection.DataCollectionFileEntity;
+import com.itextpdf.dito.manager.entity.resource.ResourceEntity;
 import com.itextpdf.dito.manager.entity.resource.ResourceFileEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateEntity;
 import com.itextpdf.dito.manager.entity.template.TemplateFileEntity;
@@ -428,7 +429,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         final TemplateFileEntity currentTemplateFile = existingTemplateEntity.getLatestFile();
         final String comment = new StringBuilder().append("Rollback to version: ").append(templateVersionToBeRevertedTo.getVersion()).toString();
 
-        final TemplateEntity templateEntity = createVersionForTemplateEntity(existingTemplateEntity, currentTemplateFile, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
+        final TemplateEntity templateEntity = createVersionForTemplateEntity(existingTemplateEntity, templateVersionToBeRevertedTo, userEntity, templateVersionToBeRevertedTo.getData(), templateVersionToBeRevertedTo.getParts(), comment, currentTemplateFile.getVersion() + 1);
         log.info("Rollback template with exist template: {} and templateVersionToBeRevertedTo: {} and user: {} was finished successfully", existingTemplateEntity, templateVersionToBeRevertedTo, userEntity);
         return templateEntity;
     }
@@ -528,8 +529,8 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
         fileEntity.setDeployed(false);
         fileEntity.setModifiedOn(new Date());
         fileEntity.setDataCollectionFile(dataCollectionFileEntity);
-        fileEntity.getResourceFiles().addAll(resourceFileEntities);
-        Optional.ofNullable(templateFilePartEntities).ifPresent(filePartEntities -> fileEntity.getParts().addAll(filePartEntities.stream().map(part -> templateFilePartService.updateComposition(part, fileEntity)).collect(Collectors.toList())));
+        fileEntity.getResourceFiles().addAll(resourceFileEntities.stream().map(ResourceFileEntity::getResource).map(ResourceEntity::getLatestFile).flatMap(Collection::stream).collect(Collectors.toList())); //update dependent resources to latest versions
+        Optional.ofNullable(templateFilePartEntities).ifPresent(filePartEntities -> fileEntity.getParts().addAll(filePartEntities.stream().map(part -> templateFilePartService.updateComposition(part, fileEntity)).collect(Collectors.toList()))); //update dependent template parts to latest versions
         fileEntity.setData(Optional.ofNullable(data).orElseGet(templateLoader::load));
         final List<InstanceEntity> developerStageInstances = instanceRepository.getInstancesOnDevStage();
         fileEntity.getInstance().addAll(developerStageInstances);
