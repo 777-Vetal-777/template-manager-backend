@@ -30,9 +30,8 @@ public class DtmFileReaderImpl implements DtmFileReader {
     public List<TemplateEntity> read(final DtmFileImportContext context,
                                      final DtmFileDescriptorModel model,
                                      final Path basePath) {
-        fileItemReaders.forEach((priority, dtmFileItemReaders) -> {
-                    dtmFileItemReaders.forEach(dtmFileItemReader -> dtmFileItemReader.read(context, model, basePath));
-                }
+        fileItemReaders.forEach((priority, dtmFileItemReaders) ->
+                    dtmFileItemReaders.forEach(dtmFileItemReader -> dtmFileItemReader.read(context, model, basePath))
         );
         final List<Long> templateIds = model.getTemplates().stream().map(DtmTemplateDescriptorModel::getId).map(context::getTemplateMapping).collect(Collectors.toList());
 

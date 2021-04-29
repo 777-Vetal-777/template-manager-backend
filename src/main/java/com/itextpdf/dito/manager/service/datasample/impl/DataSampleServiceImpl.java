@@ -34,7 +34,6 @@ import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +44,6 @@ import static com.itextpdf.dito.manager.filter.FilterUtils.getBooleanMultiselect
 import static com.itextpdf.dito.manager.filter.FilterUtils.getEndDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStartDateFromRange;
 import static com.itextpdf.dito.manager.filter.FilterUtils.getStringFromFilter;
-import static java.util.Collections.singleton;
 
 @Service
 public class DataSampleServiceImpl extends AbstractService implements DataSampleService {

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "new-data-collection",
+    "type": "DATA_COLLECTION",
+    "new_version": true
+  },
+  {
+    "name": "composition_template2",
+    "type": "TEMPLATE",
+    "new_version": true
+  },
+  {
+    "name": "some-footer-template",
+    "type": "TEMPLATE",
+    "new_version": true
+  },
+  {
+    "name": "some-template",
+    "type": "TEMPLATE",
+    "new_version": true
+  },
+  {
+    "name": "some-template-with-data-collection",
+    "type": "TEMPLATE",
+    "new_version": true
+  },
+  {
+    "name": "some-header-template",
+    "type": "TEMPLATE",
+    "new_version": true
+  },
+  {
+    "name": "new-template",
+    "type": "TEMPLATE",
+    "new_version": true
+  },
+  {
+    "name":"name",
+    "type":"DATA_SAMPLE",
+    "new_version": true
+  },
+  {
+    "name":"b02.jpg",
+    "type":"IMAGE",
+    "new_version": true
+  },
+  {
+    "name":"test-image",
+    "type":"IMAGE",
+    "new_version": true
+  },
+  {
+    "name":"test-stylesheet",
+    "type":"STYLESHEET",
+    "new_version": true
+  },
+  {
+    "name":"test-font",
+    "type":"FONT",
+    "new_version": true
+  }
+]

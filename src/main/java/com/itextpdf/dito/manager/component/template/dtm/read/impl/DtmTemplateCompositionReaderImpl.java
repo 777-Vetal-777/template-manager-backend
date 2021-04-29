@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class DtmTemplateCompositionReaderImpl implements DtmFileItemReader {
-    private final static Logger log = LogManager.getLogger(DtmTemplateCompositionReaderImpl.class);
+    private static final Logger log = LogManager.getLogger(DtmTemplateCompositionReaderImpl.class);
     private final TemplateService templateService;
     private final TemplateFileRepository templateFileRepository;
     private final TemplateRepository templateRepository;

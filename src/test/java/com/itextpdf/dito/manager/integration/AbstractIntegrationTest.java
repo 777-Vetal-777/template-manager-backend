@@ -152,9 +152,9 @@ public abstract class AbstractIntegrationTest {
     }
 
     @SafeVarargs
-    protected final ResultMatcher zipMatch(Matcher<Iterable<? super String>>... entries) {
+    protected final ResultMatcher zipMatch(Matcher<Iterable<? super Object>>... entries) {
         return mvcResult -> {
-            final List<String> zipEntries = new LinkedList<>();
+            final List<Object> zipEntries = new LinkedList<>();
             try (final ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(mvcResult.getResponse().getContentAsByteArray()))) {
                 ZipEntry ze;
                 while ((ze = zipStream.getNextEntry()) != null) {
@@ -162,7 +162,7 @@ public abstract class AbstractIntegrationTest {
                     zipEntries.add(ze.getName().replace('\\', '/'));
                 }
             }
-            for (Matcher<Iterable<? super String>> entry : entries) {
+            for (Matcher<Iterable<? super Object>> entry : entries) {
                 assertThat(zipEntries, entry);
             }
         };

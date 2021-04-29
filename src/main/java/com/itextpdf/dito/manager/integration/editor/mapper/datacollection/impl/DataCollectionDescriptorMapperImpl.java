@@ -8,8 +8,6 @@ import com.itextpdf.dito.manager.integration.editor.mapper.datacollection.DataCo
 import com.itextpdf.dito.manager.integration.editor.mapper.datasample.DataSampleIdMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class DataCollectionDescriptorMapperImpl implements DataCollectionDescriptorMapper {
 
