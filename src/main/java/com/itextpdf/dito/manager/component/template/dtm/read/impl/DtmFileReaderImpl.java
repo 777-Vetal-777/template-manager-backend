@@ -10,19 +10,18 @@ import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Component
 public class DtmFileReaderImpl implements DtmFileReader {
-    private final Map<Integer, List<DtmFileItemReader>> fileItemReaders;
+    private final List<DtmFileItemReader> fileItemReaders;
     private final TemplateRepository templateRepository;
 
     public DtmFileReaderImpl(final List<DtmFileItemReader> fileItemReaders,
                              final TemplateRepository templateRepository) {
-        this.fileItemReaders = fileItemReaders.stream().collect(Collectors.groupingBy(DtmFileItemReader::getPriority, TreeMap::new, Collectors.toList()));
+        this.fileItemReaders = fileItemReaders;
         this.templateRepository = templateRepository;
     }
 
@@ -30,8 +29,8 @@ public class DtmFileReaderImpl implements DtmFileReader {
     public List<TemplateEntity> read(final DtmFileImportContext context,
                                      final DtmFileDescriptorModel model,
                                      final Path basePath) {
-        fileItemReaders.forEach((priority, dtmFileItemReaders) ->
-                    dtmFileItemReaders.forEach(dtmFileItemReader -> dtmFileItemReader.read(context, model, basePath))
+        this.fileItemReaders.stream().sorted(Comparator.comparingInt(DtmFileItemReader::getPriority)).forEachOrdered(
+                dtmFileItemReader -> dtmFileItemReader.read(context, model, basePath)
         );
         final List<Long> templateIds = model.getTemplates().stream().map(DtmTemplateDescriptorModel::getId).map(context::getTemplateMapping).collect(Collectors.toList());
 

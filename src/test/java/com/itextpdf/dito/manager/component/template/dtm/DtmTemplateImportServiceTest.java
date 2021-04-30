@@ -9,6 +9,7 @@ import com.itextpdf.dito.manager.repository.datasample.DataSampleRepository;
 import com.itextpdf.dito.manager.repository.resource.ResourceRepository;
 import com.itextpdf.dito.manager.repository.template.TemplateRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -42,6 +43,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportStandardTemplate() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -60,6 +62,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportCompositionTemplate() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -78,6 +81,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldNotImportTemplateTwice() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -102,6 +106,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportTemplateAsNewVersion() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -134,6 +139,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportOnlyTemplateAsNewVersion() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -170,6 +176,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportTemplateAsNewCopies() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -203,6 +210,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldNotImportCompositionTemplateTwice() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -227,6 +235,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportCompositionTemplateAsNewVersion() throws Exception {
         assertEquals(0, templateRepository.count());
 
@@ -258,6 +267,7 @@ public class DtmTemplateImportServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldImportCompositionTemplateAsNewCopies() throws Exception {
         assertEquals(0, templateRepository.count());
 
