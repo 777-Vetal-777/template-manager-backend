@@ -30,17 +30,21 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.itextpdf.dito.manager.util.TemplateUtils.readStreamable;
 
 @Service
 public class TemplateImportServiceImpl implements TemplateImportService {
     private static final Logger log = LogManager.getLogger(TemplateImportServiceImpl.class);
-
+    private static final Set<String> MANDATORY_FOLDERS = Set.of("templates", "resources");
     private final TemplateRepository templateRepository;
     private final TemplateManagementService templateManagementService;
     private final TemplateService templateService;
@@ -69,6 +73,8 @@ public class TemplateImportServiceImpl implements TemplateImportService {
                                          final String email,
                                          final Map<SettingType, Map<String, TemplateImportNameModel>> settings) {
         try {
+            throwExceptionIfMissedMandatoryFolders(ditoData);
+
             final DuplicatesList duplicatesList = new DuplicatesListImpl();
             final ResourceUriGenerator resourcesUriGenerator = resourceImportService.getResourceUriGenerator(fileName, email, settings, duplicatesList);
 
@@ -88,10 +94,29 @@ public class TemplateImportServiceImpl implements TemplateImportService {
 
             return templateEntityList.get(0);
 
-        } catch (TemplateImportHasDuplicateNamesException e) {
+        } catch (TemplateImportHasDuplicateNamesException | TemplateImportProjectException e) {
             throw e;
         } catch (Exception e) {
             throw new TemplateImportProjectException(e);
+        }
+    }
+
+    private void throwExceptionIfMissedMandatoryFolders(final byte[] ditoData) {
+        final Set<String> absentMandatoryFolders = new HashSet<>(MANDATORY_FOLDERS);
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(ditoData))) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                final String zipEntryName = zipEntry.getName().replace('\\', '/');
+                if (zipEntryName.indexOf('/') >= 0) {
+                    absentMandatoryFolders.remove(zipEntryName.substring(0, zipEntryName.indexOf('/')));
+                }
+            }
+            zis.closeEntry();
+        } catch (IOException e) {
+            throw new TemplateImportProjectException(e);
+        }
+        if (!absentMandatoryFolders.isEmpty()) {
+            throw new TemplateImportProjectException(new IllegalArgumentException(" missing folders ".concat(absentMandatoryFolders.toString())));
         }
     }
 
